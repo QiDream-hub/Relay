@@ -1,0 +1,10 @@
+{
+  "item.relay.computing_core": "Computing Core",
+  "item.relay.spell_disk": "Spell Disk",
+  "item.relay.energy_module": "Energy Module",
+  "block.relay.shell_block": "Shell",
+  "block.relay.shell_block.initialized": "Shell (Initialized)",
+  "block.relay.shell_block.active": "Shell (Active)",
+  "itemGroup.relay.creative_tab": "Relay",
+  "container.relay.shell": "Shell"
+}

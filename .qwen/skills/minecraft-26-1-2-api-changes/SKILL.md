@@ -2,7 +2,7 @@
 name: minecraft-26-1-2-api-changes
 description: Minecraft 26.1.2 (1.21+) 版本 API 变更对照表，用于修复模组代码
 source: auto-skill
-extracted_at: '2026-05-30T06:04:03.805Z'
+extracted_at: '2026-05-30T09:52:48.181Z'
 ---
 
 # Minecraft 26.1.2 (1.21+) API 变更对照表
