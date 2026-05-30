@@ -6,7 +6,7 @@ package qdream.relay.networking;
  */
 public class RelayServerNetworking {
 
-    public static void init() {
+    public static void register() {
         // 暂时不注册任何 payload
         // 26.1.2 版本的 Fabric API 网络系统有重大变化
     }

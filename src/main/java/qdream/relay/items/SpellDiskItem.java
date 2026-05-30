@@ -1,13 +1,15 @@
 package qdream.relay.items;
 
-import net.minecraft.world.item.Item;
+import net.fabricmc.api.ModInitializer;
 
 /**
  * 法术磁盘物品
  * 存储栈图程序（Iota 列表）
  */
-public class SpellDiskItem extends Item {
-    public SpellDiskItem() {
-        super(new Properties().stacksTo(1));
-    }
+public class SpellDiskItem implements ModInitializer{
+
+	@Override
+	public void onInitialize() {
+		RelayItems.register();
+	}
 }

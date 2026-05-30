@@ -22,5 +22,5 @@ public class RelayBlockEntities {
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id, SHELL_BLOCK_ENTITY);
     }
 
-    public static void init() {}
+    public static void register() {}
 }

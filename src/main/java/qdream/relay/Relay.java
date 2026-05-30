@@ -28,17 +28,17 @@ public class Relay implements ModInitializer {
 		LOGGER.info("Initializing Relay Mod");
 
 		// 注册方块和方块实体
-		RelayBlocks.init();
-		RelayBlockEntities.init();
+		RelayBlocks.register();
+		RelayBlockEntities.register();
 
 		// 注册物品
-		RelayItems.init();
+		RelayItems.register();
 
 		// 注册操作
-		OperationsInit.init();
+		OperationsInit.register();
 
 		// 注册网络
-		RelayServerNetworking.init();
+		RelayServerNetworking.register();
 
 		LOGGER.info("Relay Mod initialized!");
 	}

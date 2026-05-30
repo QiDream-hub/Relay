@@ -15,7 +15,7 @@ import qdream.relay.operations.communication.*;
  */
 public class OperationsInit {
 
-    public static void init() {
+    public static void register() {
         // 基础栈操作
         OperationRegistry.register("push", new PushOp())
                 .requiresWorldInteractor(false)
