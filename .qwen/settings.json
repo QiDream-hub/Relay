@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir *)",
+      "Bash(find *)",
+      "Bash(jar *)",
+      "Bash(unzip *)",
+      "Bash(strings)",
+      "Bash(./gradlew *)",
+      "Bash(javap *)",
+      "Bash(grep *)"
+    ]
+  },
+  "$version": 4
+}
