@@ -1,6 +1,7 @@
 package qdream.relay;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,9 +9,11 @@ import org.slf4j.LoggerFactory;
 import qdream.relay.blocks.RelayBlocks;
 import qdream.relay.blocks.RelayBlockEntities;
 import qdream.relay.items.RelayItems;
+import qdream.relay.items.RelayDataComponents;
 import qdream.relay.operations.OperationsInit;
 import qdream.relay.networking.RelayServerNetworking;
 import qdream.relay.entities.RelayEntityTypes;
+import qdream.relay.commands.RelayCommands;
 
 public class Relay implements ModInitializer {
 	public static final String MOD_ID = "relay";
@@ -35,6 +38,9 @@ public class Relay implements ModInitializer {
 		// 注册物品
 		RelayItems.register();
 
+		// 注册 DataComponent
+		RelayDataComponents.register();
+
 		// 注册实体
 		RelayEntityTypes.register();
 
@@ -43,6 +49,11 @@ public class Relay implements ModInitializer {
 
 		// 注册网络
 		RelayServerNetworking.register();
+
+		// 注册命令
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+			RelayCommands.register(dispatcher);
+		});
 
 		LOGGER.info("Relay Mod initialized!");
 	}

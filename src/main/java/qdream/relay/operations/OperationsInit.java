@@ -17,10 +17,6 @@ public class OperationsInit {
 
     public static void register() {
         // 基础栈操作
-        OperationRegistry.register("push", new PushOp())
-                .requiresWorldInteractor(false)
-                .register();
-
         OperationRegistry.register("pop", new PopOp())
                 .requiresWorldInteractor(false)
                 .register();

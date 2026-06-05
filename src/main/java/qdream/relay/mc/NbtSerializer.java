@@ -19,6 +19,20 @@ public class NbtSerializer {
 
     private NbtSerializer() {}
 
+    /**
+     * 静态序列化方法
+     */
+    public static CompoundTag serializeStatic(McIota iota) {
+        return INSTANCE.serialize(iota);
+    }
+
+    /**
+     * 静态反序列化方法
+     */
+    public static McIota deserializeStatic(CompoundTag tag) {
+        return INSTANCE.deserialize(tag);
+    }
+
     public CompoundTag serialize(McIota iota) {
         CompoundTag tag = new CompoundTag();
         tag.putString("type", iota.getType());

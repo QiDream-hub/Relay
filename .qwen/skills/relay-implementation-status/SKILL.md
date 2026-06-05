@@ -13,6 +13,7 @@ extracted_at: '2026-06-06T00:00:00.000Z'
 
 | 设计文档要求 | 当前实现状态 | 文件位置 | 备注 |
 |------------|------------|----------|------|
+| **命令系统** | ✅ 完成 | `commands/RelayCommands.java` | `/relay write_spell`, `/relay read`, `/relay clear` 命令 |
 | **Iota 类型系统** | ✅ 完成 | `mc/McIota.java`, `mc/McIotaType.java` | 支持 NUMBER, BOOLEAN, VECTOR, STRING, ENTITY, LIST, NULL |
 | **双栈执行模型** | ✅ 完成 | `engine/StateMachine.java` | 维护 `programStack` 和 `dataStack` |
 | **操作注册表** | ✅ 完成 | `engine/OperationRegistry.java` | 支持链式 API 注册 |
@@ -28,12 +29,12 @@ extracted_at: '2026-06-06T00:00:00.000Z'
 | **核心合并逻辑** | ✅ 完成 | `core/CoreGroup.java` | 相邻核心扫描合并 |
 | **外壳容器抽象** | ✅ 完成 | `core/ShellContainer.java` | 统一三种外壳接口 |
 | **Engine/MC 分层** | ✅ 完成 | `engine/` + `mc/` | 纯 Java 引擎零 MC 依赖 |
+| **法术磁盘持久化** | ✅ 完成 | `items/SpellDiskItem.java`, `items/RelayDataComponents.java` | 使用 26.1.2 DataComponent 系统 |
 
 ## 二、待完成/简化的功能
 
 | 设计文档要求 | 当前实现状态 | 问题描述 | 优先级 |
 |------------|------------|----------|--------|
-| **法术磁盘持久化** | ❌ 未实现 | `SpellDiskItem.java` 使用 TODO 占位，需要 DataComponent 系统 | P0 |
 | **能量管理** | ⚠️ 简化 | `EnergySystem.java` 只提取紫水晶，未集成到状态机执行流程 | P0 |
 | **世界交互器检查** | ⚠️ 部分实现 | `requiresWorldInteractor` 已注册，但世界操作需要实际检查 | P1 |
 | **interval 可调** | ⚠️ 简化 | `ShellTickHandler.updateCoreState()` 硬编码 interval=1，未从核心读取 | P1 |
@@ -126,17 +127,12 @@ if (!(channelData instanceof McIota channel)) return;
 
 ### P0 - 影响核心功能（必须修复）
 
-1. **法术磁盘 DataComponent 持久化**
-   - 文件：`items/SpellDiskItem.java`
-   - 任务：实现 `getProgram()`, `setProgram()`, `saveFromStateMachine()`, `loadToStateMachine()`
-   - 依赖：26.1.2 DataComponent API
-
-2. **能量系统集成到 tick 流程**
+1. **能量系统集成到 tick 流程**
    - 文件：`core/ShellTickHandler.java`, `engine/StateMachine.java`
    - 任务：执行前检查能量，不足时跳过 batch
    - 设计：参考文档"能量预检"规则
 
-3. **BlockEntity NBT 持久化**
+2. **BlockEntity NBT 持久化**
    - 文件：`blocks/entity/ShellBlockEntity.java`
    - 任务：实现 `saveAdditional(CompoundTag, HolderLookup.Provider)` 和 `loadAdditional()`
    - 依赖：26.1.2 ValueInput/ValueOutput API
