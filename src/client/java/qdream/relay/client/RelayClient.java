@@ -13,7 +13,7 @@ import qdream.relay.screen.RelayScreenHandlers;
 public class RelayClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        // 注册 Screen 工厂
+        // 注册 Screen 工厂 - 26.1.2 使用带 Inventory 的构造函数
         MenuScreens.register(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, SpellEditorScreen::new);
 
         // 注册实体渲染器

@@ -303,6 +303,47 @@ public class MyScreen extends AbstractContainerScreen<MyMenuType> { ... }
 **原因**: `ScreenConstructor` 要求 `U extends Screen, MenuAccess<T>`
 **解决**: 确保 `AbstractContainerScreen` 继承时指定正确的泛型参数，它已实现 `MenuAccess<T>`
 
+### 错误 8: `无法为 final 变量 imageWidth 分配值`
+**原因**: 26.1.2 中 `AbstractContainerScreen` 的 `imageWidth` 和 `imageHeight` 是 final 字段
+**解决**: 使用带尺寸参数的构造函数：
+```java
+public MyScreen(MyMenuHandler handler, Inventory inventory, Component title) {
+    super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
+}
+```
+
+### 错误 9: GUI 背景不显示，面板内容为空白
+**原因**: `AbstractContainerScreen` 不会自动渲染背景纹理，需要手动绘制
+**解决**: 在 `extractRenderState()` 中手动绘制背景和边框：
+```java
+@Override
+public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+    // 1. 绘制深色背景
+    graphics.fill(this.leftPos, this.topPos, 
+                  this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 
+                  0xFF101010);
+    
+    // 2. 绘制边框
+    graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0xFF404040);
+    
+    // 3. 调用父类渲染 Slot 等
+    super.extractRenderState(graphics, mouseX, mouseY, delta);
+    
+    // 4. 绘制分隔线（可选）
+    graphics.verticalLine(left + PANEL_WIDTH, top, top + this.imageHeight, 0xFF404040);
+    
+    // 5. 绘制自定义内容
+    graphics.text(this.font, "标题", left + 5, top + 5, 0x00FF00);
+}
+```
+
+**常用渲染方法**:
+- `graphics.fill(x0, y0, x1, y1, color)` - 填充矩形
+- `graphics.outline(x, y, width, height, color)` - 绘制边框
+- `graphics.verticalLine(x, y0, y1, color)` - 垂直线
+- `graphics.horizontalLine(x0, x1, y, color)` - 水平线
+- `graphics.text(font, text, x, y, color)` - 渲染文本
+
 ## 接口关系图
 
 ```
