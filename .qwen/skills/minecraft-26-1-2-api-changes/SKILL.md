@@ -178,6 +178,60 @@ Tag.DOUBLE        // 6 (不存在，直接用数字)
 | `BlockEntity.toTag()` | (移除) | 使用 `saveWithFullMetadata()` |
 | `BlockEntity.fromTag()` | (移除) | 使用 `loadWithComponents()` |
 
+### Entity 类新增抽象方法 (26.1.2)
+
+26.1.2 版本中 `Entity` 类新增了多个抽象方法，子类必须实现：
+
+| 方法签名 | 说明 |
+|---------|------|
+| `protected void addAdditionalSaveData(ValueOutput output)` | 保存额外数据，`ValueOutput` 在 `net.minecraft.world.level.storage` 包 |
+| `protected void readAdditionalSaveData(ValueInput input)` | 读取额外数据，`ValueInput` 在 `net.minecraft.world.level.storage` 包 |
+| `public boolean hurtServer(ServerLevel level, DamageSource source, float amount)` | 服务端伤害处理 |
+| `protected void defineSynchedData(SynchedEntityData.Builder builder)` | 定义同步数据，`SynchedEntityData` 在 `net.minecraft.network.syncher` 包 |
+
+### Entity 注册相关
+
+```java
+// EntityDimensions 使用 fixed 方法
+import net.minecraft.world.entity.EntityDimensions;
+EntityDimensions.fixed(0.5f, 0.5f)
+
+// FabricEntityTypeBuilder.build() 需要 ResourceKey
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
+
+ResourceKey<EntityType<?>> key = ResourceKey.create(
+    Registries.ENTITY_TYPE, 
+    Identifier.fromNamespaceAndPath(MOD_ID, "entity_name")
+);
+SIMPLE_ENTITY_SHELL = FabricEntityTypeBuilder.<SimpleEntityShell>create(MobCategory.MISC, SimpleEntityShell::new)
+        .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
+        .trackRangeBlocks(64)
+        .trackedUpdateRate(1)
+        .build(key); // 必须传入 key
+
+// ClientboundAddEntityPacket 构造函数
+// 旧写法：new ClientboundAddEntityPacket(entity)
+// 新写法：new ClientboundAddEntityPacket(entity, serverEntity, id)
+public Packet<ClientGamePacketListener> getAddEntityPacket() {
+    return new ClientboundAddEntityPacket(this, null, 0);
+}
+```
+
+### 客户端渲染器变更
+
+```java
+// EntityRenderer 类签名变化
+// 旧写法：extends EntityRenderer<T>
+// 新写法：extends EntityRenderer<T, S> (T=实体类型，S=渲染状态类型)
+
+// getTextureLocation 方法
+// 旧写法：@Override public ResourceLocation getTextureLocation(T entity)
+// 新写法：可能签名变化，需要检查具体版本
+
+// 简化方案：暂时不实现复杂渲染，使用粒子效果替代
+```
+
 ## 代码示例
 
 ### 物品注册

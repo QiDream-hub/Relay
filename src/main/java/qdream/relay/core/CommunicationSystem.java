@@ -5,6 +5,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import qdream.relay.engine.Iota;
+
 /**
  * 通信系统
  * 管理跨外壳、跨维度的消息传递

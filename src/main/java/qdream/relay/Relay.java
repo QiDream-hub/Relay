@@ -10,6 +10,7 @@ import qdream.relay.blocks.RelayBlockEntities;
 import qdream.relay.items.RelayItems;
 import qdream.relay.operations.OperationsInit;
 import qdream.relay.networking.RelayServerNetworking;
+import qdream.relay.entities.RelayEntityTypes;
 
 public class Relay implements ModInitializer {
 	public static final String MOD_ID = "relay";
@@ -33,6 +34,9 @@ public class Relay implements ModInitializer {
 
 		// 注册物品
 		RelayItems.register();
+
+		// 注册实体
+		RelayEntityTypes.register();
 
 		// 注册操作
 		OperationsInit.register();

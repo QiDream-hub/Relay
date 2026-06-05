@@ -1,4 +1,4 @@
-package qdream.relay.core;
+package qdream.relay.engine;
 
 /**
  * 操作接口
@@ -23,12 +23,5 @@ public interface StackOperation {
      */
     default int getCost() {
         return 1;
-    }
-
-    /**
-     * 是否需要世界交互器（默认不需要）
-     */
-    default boolean requiresWorldInteractor() {
-        return false;
     }
 }

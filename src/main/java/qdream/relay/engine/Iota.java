@@ -1,13 +1,8 @@
-package qdream.relay.core;
+package qdream.relay.engine;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 
 /**
  * Iota - 类型系统中的基本值类型
@@ -40,7 +35,7 @@ public class Iota {
         return new Iota(IotaType.BOOLEAN, value);
     }
 
-    public static Iota ofVector(Vec3 value) {
+    public static Iota ofVector(Vector3 value) {
         return new Iota(IotaType.VECTOR, value);
     }
 
@@ -131,11 +126,11 @@ public class Iota {
         return (Boolean) value;
     }
 
-    public Vec3 asVector() {
+    public Vector3 asVector() {
         if (type != IotaType.VECTOR) {
             throw new IllegalStateException("Cannot convert " + type + " to Vector");
         }
-        return (Vec3) value;
+        return (Vector3) value;
     }
 
     public String asString() {
@@ -157,74 +152,6 @@ public class Iota {
             throw new IllegalStateException("Cannot convert " + type + " to List");
         }
         return (List<Iota>) value;
-    }
-
-    // ========== NBT 序列化 ==========
-
-    public CompoundTag toNbt() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("type", type.name());
-
-        switch (type) {
-            case NUMBER -> {
-                if (value instanceof Double) {
-                    tag.putDouble("value", (Double) value);
-                } else {
-                    tag.putInt("value", ((Number) value).intValue());
-                }
-            }
-            case BOOLEAN -> tag.putBoolean("value", (Boolean) value);
-            case VECTOR -> {
-                Vec3 v = (Vec3) value;
-                tag.putDouble("x", v.x);
-                tag.putDouble("y", v.y);
-                tag.putDouble("z", v.z);
-            }
-            case STRING -> tag.putString("value", (String) value);
-            case ENTITY -> tag.putString("value", ((UUID) value).toString());
-            case LIST -> {
-                ListTag list = new ListTag();
-                for (Iota iota : (List<Iota>) value) {
-                    list.add(iota.toNbt());
-                }
-                tag.put("value", list);
-            }
-            case NULL -> {
-            }
-        }
-
-        return tag;
-    }
-
-    public static Iota fromNbt(CompoundTag tag) {
-        String typeName = tag.getString("type").orElse("unknown");
-        IotaType type = IotaType.valueOf(typeName);
-
-        return switch (type) {
-            case NUMBER -> {
-                if (tag.contains("value")) {
-                    yield Iota.ofDouble(tag.getDouble("value").orElse(0.0));
-                } else {
-                    yield Iota.ofInt(tag.getInt("value").orElse(0));
-                }
-            }
-            case BOOLEAN -> Iota.ofBoolean(tag.getBoolean("value").orElse(false));
-            case VECTOR -> Iota.ofVector(new Vec3(
-                    tag.getDouble("x").orElse(0.0),
-                    tag.getDouble("y").orElse(0.0),
-                    tag.getDouble("z").orElse(0.0)));
-            case STRING -> Iota.ofString(tag.getString("value").orElse(null));
-            case ENTITY -> Iota.ofEntity(UUID.fromString(tag.getString("value").orElse("00000000-0000-0000-0000-000000000000")));
-            case LIST -> {
-                ListTag list = tag.getList("value").orElse(new ListTag());
-                List<Iota> iotaList = new ArrayList<>();
-                for (Tag element : list) {
-                    iotaList.add(Iota.fromNbt((CompoundTag) element));
-                }
-                yield Iota.ofList(iotaList);
-            }
-            case NULL, ANY -> Iota.ofNull();
-        };
     }
 
     // ========== 重写 equals 和 hashCode ==========
@@ -251,7 +178,7 @@ public class Iota {
     public String toString() {
         return switch (type) {
             case NUMBER, BOOLEAN, STRING -> String.valueOf(value);
-            case VECTOR -> ((Vec3) value).toString();
+            case VECTOR -> ((Vector3) value).toString();
             case ENTITY -> "Entity[" + ((UUID) value).toString().substring(0, 8) + "]";
             case LIST -> "List[" + ((List<Iota>) value).size() + "]";
             case NULL, ANY -> "null";

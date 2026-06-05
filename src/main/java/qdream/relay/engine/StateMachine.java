@@ -1,4 +1,4 @@
-package qdream.relay.core;
+package qdream.relay.engine;
 
 import java.util.Deque;
 import java.util.ArrayDeque;
@@ -6,29 +6,27 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-
 /**
  * 状态机执行器
- * 维护双栈，执行操作，处理持久化
+ * 维护双栈，执行操作
+ * 
+ * 纯 Java 实现，不依赖 Minecraft
  */
 public class StateMachine {
     private final Deque<Iota> programStack = new ArrayDeque<>();
     private final Deque<Iota> dataStack = new ArrayDeque<>();
-    
+
     private int remainingOps;
     private boolean hasWorldInteractor;
     private int maxStackSize;
-    
+
     /**
      * 事故回调
      */
     public interface MishapHandler {
         void onMishap(String reason);
     }
-    
+
     private MishapHandler mishapHandler;
 
     public StateMachine() {
@@ -44,7 +42,7 @@ public class StateMachine {
     // ========== 程序加载 ==========
 
     /**
-     * 从磁盘加载程序
+     * 从列表加载程序
      * 程序列表需要反转后压入程序栈，保证从左到右的执行顺序
      */
     public void loadProgram(List<Iota> program) {
@@ -64,10 +62,10 @@ public class StateMachine {
      */
     public void tick(int ops) {
         remainingOps = ops;
-        
+
         while (remainingOps > 0 && !programStack.isEmpty()) {
             Iota top = programStack.pop();
-            
+
             if (top.isString()) {
                 // 操作 ID
                 String opId = top.asString();
@@ -81,7 +79,7 @@ public class StateMachine {
                     programStack.push(iota);
                 }
                 remainingOps--;
-            } else if (top.isNull() || top.isNumber() || top.isBoolean() || 
+            } else if (top.isNull() || top.isNumber() || top.isBoolean() ||
                        top.isVector() || top.isString() || top.isEntity()) {
                 // 数据 - 自动压入数据栈（宽容规则）
                 dataStack.push(top);
@@ -128,7 +126,7 @@ public class StateMachine {
         programStack.clear();
         dataStack.clear();
         remainingOps = 0;
-        
+
         if (mishapHandler != null) {
             mishapHandler.onMishap(reason);
         }
@@ -228,47 +226,6 @@ public class StateMachine {
 
     public int getMaxStackSize() {
         return maxStackSize;
-    }
-
-    // ========== NBT 持久化 ==========
-
-    public CompoundTag toNbt() {
-        CompoundTag tag = new CompoundTag();
-
-        ListTag programList = new ListTag();
-        for (Iota iota : programStack) {
-            programList.add(iota.toNbt());
-        }
-        tag.put("programStack", programList);
-
-        ListTag dataList = new ListTag();
-        for (Iota iota : dataStack) {
-            dataList.add(iota.toNbt());
-        }
-        tag.put("dataStack", dataList);
-
-        tag.putBoolean("hasWorldInteractor", hasWorldInteractor);
-        tag.putInt("maxStackSize", maxStackSize);
-
-        return tag;
-    }
-
-    public void fromNbt(CompoundTag tag) {
-        programStack.clear();
-        dataStack.clear();
-
-        ListTag programList = tag.getList("programStack").orElse(new ListTag());
-        for (Tag element : programList) {
-            programStack.push(Iota.fromNbt((CompoundTag) element));
-        }
-
-        ListTag dataList = tag.getList("dataStack").orElse(new ListTag());
-        for (Tag element : dataList) {
-            dataStack.push(Iota.fromNbt((CompoundTag) element));
-        }
-
-        hasWorldInteractor = tag.getBoolean("hasWorldInteractor").orElse(false);
-        maxStackSize = tag.getInt("maxStackSize").orElse(1024);
     }
 
     // ========== 调试 ==========

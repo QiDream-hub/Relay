@@ -1,13 +1,15 @@
 package qdream.relay.operations;
 
-import qdream.relay.core.Iota;
-import qdream.relay.core.OperationRegistry;
-import qdream.relay.core.IotaType;
+import qdream.relay.engine.Iota;
+import qdream.relay.engine.OperationRegistry;
+import qdream.relay.engine.IotaType;
 import qdream.relay.operations.base.*;
 import qdream.relay.operations.arithmetic.*;
 import qdream.relay.operations.logic.*;
 import qdream.relay.operations.control.*;
 import qdream.relay.operations.communication.*;
+import qdream.relay.operations.list.*;
+import qdream.relay.operations.world.*;
 
 /**
  * 操作初始化器
@@ -96,5 +98,16 @@ public class OperationsInit {
         OperationRegistry.register("peek", new PeekOp())
                 .requiresWorldInteractor(false)
                 .register();
+
+        // 控制流 - stop
+        OperationRegistry.register("stop", new StopOp())
+                .requiresWorldInteractor(false)
+                .register();
+
+        // 列表操作
+        ListOperationsInit.register();
+
+        // 世界交互操作
+        WorldOperationsInit.register();
     }
 }

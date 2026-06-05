@@ -1,4 +1,4 @@
-package qdream.relay.client;
+package qdream.relay.screen;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;

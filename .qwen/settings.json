@@ -8,7 +8,9 @@
       "Bash(strings)",
       "Bash(./gradlew *)",
       "Bash(javap *)",
-      "Bash(grep *)"
+      "Bash(grep *)",
+      "Bash(xargs *)",
+      "Bash(mv *)"
     ]
   },
   "$version": 4

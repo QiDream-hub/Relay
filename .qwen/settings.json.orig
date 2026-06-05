@@ -7,7 +7,9 @@
       "Bash(unzip *)",
       "Bash(strings)",
       "Bash(./gradlew *)",
-      "Bash(javap *)"
+      "Bash(javap *)",
+      "Bash(grep *)",
+      "Bash(xargs *)"
     ]
   },
   "$version": 4

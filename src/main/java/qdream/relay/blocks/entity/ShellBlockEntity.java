@@ -12,80 +12,56 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 import qdream.relay.blocks.RelayBlockEntities;
+import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Iota;
+import qdream.relay.core.ShellContainer;
+import qdream.relay.core.ShellTickHandler;
+import qdream.relay.screen.ShellScreenHandler;
 
 /**
  * 外壳方块实体
  * 维护状态机，执行 tick，处理持久化
+ * 注意：26.1.2 的 NBT 系统有重大变化，暂时简化实现
  */
-public class ShellBlockEntity extends BlockEntity implements MenuProvider {
+public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer {
 
     private final ItemStack[] inventory = new ItemStack[4];
+    private final StateMachine stateMachine;
+    private final ShellTickHandler tickHandler;
 
-    private int coreCount;
-    private int interval;
-    private int tickCounter;
-    private boolean initialized;
-
-    // 插槽索引
-    public static final int CORE_SLOT = 0;
-    public static final int DISK_SLOT = 1;
-    public static final int ENERGY_SLOT = 2;
-    public static final int INTERACTOR_SLOT = 3;
+    private int energy;
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
         for (int i = 0; i < inventory.length; i++) {
             inventory[i] = ItemStack.EMPTY;
         }
-        this.coreCount = 0;
-        this.interval = 1;
-        this.tickCounter = 0;
-        this.initialized = false;
+        this.stateMachine = new StateMachine(1024);
+        this.tickHandler = new ShellTickHandler();
+        this.energy = 0;
+
+        // 设置事故回调
+        this.stateMachine.setMishapHandler(reason -> {
+            if (level != null && !level.isClientSide()) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        });
     }
 
     /**
      * Tick 方法
      */
     public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
-        if (world.isClientSide()) {
-            return;
-        }
-
-        entity.updateCoreState();
-
-        if (!entity.initialized) {
-            entity.tryInitialize();
-        }
-
-        if (entity.initialized && entity.coreCount > 0) {
-            entity.tickCounter++;
-            if (entity.tickCounter >= entity.interval) {
-                entity.tickCounter = 0;
-            }
-        }
+        entity.tickHandler.tick(entity);
     }
 
     /**
-     * 更新核心状态（数量和 interval）
+     * 保存程序到磁盘
      */
-    private void updateCoreState() {
-        ItemStack coreStack = inventory[CORE_SLOT];
-        if (!coreStack.isEmpty()) {
-            coreCount = 1;
-            interval = 1;
-        } else {
-            coreCount = 0;
-            interval = 1;
-        }
-    }
-
-    /**
-     * 尝试初始化
-     */
-    private void tryInitialize() {
+    public void saveProgramToDisk() {
         ItemStack diskStack = inventory[DISK_SLOT];
         if (!diskStack.isEmpty()) {
-            initialized = true;
+            // TODO: 将当前状态机状态保存到磁盘
         }
     }
 
@@ -98,21 +74,79 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider {
 
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-        // TODO: 实现 GUI
-        return null;
+        return new ShellScreenHandler(syncId, inv, this);
     }
 
-    // ========== 状态访问 ==========
+    // ========== ShellContainer 接口 ==========
 
+    @Override
+    public ItemStack getInventorySlot(int slot) {
+        if (slot >= 0 && slot < inventory.length) {
+            return inventory[slot];
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void setInventorySlot(int slot, ItemStack stack) {
+        if (slot >= 0 && slot < inventory.length) {
+            inventory[slot] = stack;
+            setChanged();
+        }
+    }
+
+    @Override
+    public StateMachine getStateMachine() {
+        return stateMachine;
+    }
+
+    @Override
     public int getCoreCount() {
-        return coreCount;
+        return tickHandler.getCoreCount();
     }
 
+    @Override
     public int getInterval() {
-        return interval;
+        return tickHandler.getInterval();
     }
 
+    @Override
     public boolean isInitialized() {
-        return initialized;
+        return tickHandler.isInitialized();
+    }
+
+    @Override
+    public void setInitialized(boolean initialized) {
+        tickHandler.setInitialized(initialized);
+    }
+
+    @Override
+    public int getEnergy() {
+        return energy;
+    }
+
+    @Override
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
+    @Override
+    public void setChanged() {
+        super.setChanged();
+    }
+
+    @Override
+    public boolean isClientSide() {
+        return level != null && level.isClientSide();
+    }
+
+    // ========== 状态访问（兼容旧代码） ==========
+
+    public int getTickCounter() {
+        return tickHandler.getTickCounter();
+    }
+
+    public void setTickCounter(int tickCounter) {
+        tickHandler.setTickCounter(tickCounter);
     }
 }
