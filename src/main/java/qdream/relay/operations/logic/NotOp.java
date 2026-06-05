@@ -1,10 +1,11 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 /**
  * Not 操作 - 逻辑非
@@ -12,7 +13,8 @@ import qdream.relay.engine.StateMachine;
 public class NotOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota a = executor.popData();
+        IData aData = executor.popData();
+        if (!(aData instanceof McIota a)) return;
         
         if (a == null) {
             return;
@@ -23,14 +25,14 @@ public class NotOp implements StackOperation {
         }
         
         boolean result = !a.asBoolean();
-        executor.pushData(Iota.ofBoolean(result));
+        executor.pushData(McIota.ofBoolean(result));
     }
 
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.BOOLEAN)
-                .output(IotaType.BOOLEAN)
+                .input("boolean")
+                .output("boolean")
                 .build();
     }
 

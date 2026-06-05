@@ -1,10 +1,11 @@
 package qdream.relay.operations.control;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.engine.IExecutable;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +18,8 @@ import java.util.List;
 public class EvalOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota listIota = executor.popData();
+        IData listData = executor.popData();
+        if (!(listData instanceof McIota listIota)) return;
         
         if (listIota == null) {
             return;
@@ -27,11 +29,11 @@ public class EvalOp implements StackOperation {
             throw new IllegalArgumentException("Eval 需要一个列表参数");
         }
         
-        List<Iota> list = listIota.asList();
-        List<Iota> reversed = new ArrayList<>(list);
+        List<IExecutable> list = listIota.asList();
+        List<IExecutable> reversed = new ArrayList<>(list);
         Collections.reverse(reversed);
-        
-        for (Iota iota : reversed) {
+
+        for (IExecutable iota : reversed) {
             executor.pushProgram(iota);
         }
     }
@@ -39,7 +41,7 @@ public class EvalOp implements StackOperation {
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.LIST)
+                .input("list")
                 .build();
     }
 

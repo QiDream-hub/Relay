@@ -1,10 +1,11 @@
 package qdream.relay.operations.world;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 import qdream.relay.mc.McVec3Adapter;
 
 import net.minecraft.core.BlockPos;
@@ -19,8 +20,10 @@ import net.minecraft.world.phys.Vec3;
 public class PlaceBlockOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota blockIdIota = executor.popData();
-        Iota posIota = executor.popData();
+        IData blockIdData = executor.popData();
+        if (!(blockIdData instanceof McIota blockIdIota)) return;
+        IData posData = executor.popData();
+        if (!(posData instanceof McIota posIota)) return;
 
         if (blockIdIota == null || posIota == null) {
             throw new IllegalArgumentException("place_block 需要坐标和方块 ID 参数");
@@ -42,18 +45,18 @@ public class PlaceBlockOp implements StackOperation {
         // Level level = executor.getWorld();
         // Block block = BuiltInRegistries.BLOCK.get(Identifier.tryBySeparator(':', blockId).orElseThrow());
         // boolean success = level.setBlock(blockPos, block.defaultBlockState(), 3);
-        // executor.pushData(Iota.ofBoolean(success));
+        // executor.pushData(McIota.ofBoolean(success));
 
         // 临时实现：返回 false
-        executor.pushData(Iota.ofBoolean(false));
+        executor.pushData(McIota.ofBoolean(false));
     }
 
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.VECTOR)
-                .input(IotaType.STRING)
-                .output(IotaType.BOOLEAN)
+                .input("vector")
+                .input("string")
+                .output("boolean")
                 .build();
     }
 

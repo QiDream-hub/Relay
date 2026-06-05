@@ -5,7 +5,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 
 /**
  * 通信系统
@@ -16,8 +16,8 @@ public class CommunicationSystem {
      * 全局频道 Map - 所有维度共享
      * 频道号 -> 消息队列
      */
-    private static final Map<Integer, Queue<Iota>> CHANNELS = new ConcurrentHashMap<>();
-    
+    private static final Map<Integer, Queue<McIota>> CHANNELS = new ConcurrentHashMap<>();
+
     /**
      * 频道队列最大容量
      */
@@ -31,13 +31,13 @@ public class CommunicationSystem {
      * @param data 数据
      * @return 成功返回 true，队列已满返回 false
      */
-    public static boolean send(int channel, Iota data) {
-        Queue<Iota> queue = CHANNELS.computeIfAbsent(channel, k -> new ConcurrentLinkedQueue<>());
-        
+    public static boolean send(int channel, McIota data) {
+        Queue<McIota> queue = CHANNELS.computeIfAbsent(channel, k -> new ConcurrentLinkedQueue<>());
+
         if (queue.size() >= MAX_QUEUE_SIZE) {
             return false;
         }
-        
+
         return queue.offer(data);
     }
 
@@ -46,10 +46,10 @@ public class CommunicationSystem {
      * @param channel 频道号
      * @return 数据或 null
      */
-    public static Iota recv(int channel) {
-        Queue<Iota> queue = CHANNELS.get(channel);
+    public static McIota recv(int channel) {
+        Queue<McIota> queue = CHANNELS.get(channel);
         if (queue == null || queue.isEmpty()) {
-            return Iota.ofNull();
+            return McIota.ofNull();
         }
         return queue.poll();
     }
@@ -59,10 +59,10 @@ public class CommunicationSystem {
      * @param channel 频道号
      * @return 数据或 null
      */
-    public static Iota peek(int channel) {
-        Queue<Iota> queue = CHANNELS.get(channel);
+    public static McIota peek(int channel) {
+        Queue<McIota> queue = CHANNELS.get(channel);
         if (queue == null || queue.isEmpty()) {
-            return Iota.ofNull();
+            return McIota.ofNull();
         }
         return queue.peek();
     }
@@ -71,7 +71,7 @@ public class CommunicationSystem {
      * 获取频道队列长度
      */
     public static int getQueueSize(int channel) {
-        Queue<Iota> queue = CHANNELS.get(channel);
+        Queue<McIota> queue = CHANNELS.get(channel);
         return queue != null ? queue.size() : 0;
     }
 

@@ -1,10 +1,11 @@
 package qdream.relay.operations.base;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 /**
  * Dup 操作 - 复制数据栈顶部
@@ -12,7 +13,8 @@ import qdream.relay.engine.StateMachine;
 public class DupOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota top = executor.popData();
+        IData topData = executor.popData();
+        if (!(topData instanceof McIota top)) return;
         if (top != null) {
             executor.pushData(top);
             executor.pushData(top);
@@ -22,9 +24,9 @@ public class DupOp implements StackOperation {
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.ANY)
-                .output(IotaType.ANY)
-                .output(IotaType.ANY)
+                .input("any")
+                .output("any")
+                .output("any")
                 .build();
     }
 

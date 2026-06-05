@@ -1,10 +1,11 @@
 package qdream.relay.operations.control;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.engine.IExecutable;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,9 +19,12 @@ import java.util.List;
 public class IfOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota falseBranch = executor.popData();
-        Iota trueBranch = executor.popData();
-        Iota condition = executor.popData();
+        IData falseBranchData = executor.popData();
+        if (!(falseBranchData instanceof McIota falseBranch)) return;
+        IData trueBranchData = executor.popData();
+        if (!(trueBranchData instanceof McIota trueBranch)) return;
+        IData conditionData = executor.popData();
+        if (!(conditionData instanceof McIota condition)) return;
         
         if (falseBranch == null || trueBranch == null || condition == null) {
             return;
@@ -39,15 +43,15 @@ public class IfOp implements StackOperation {
         }
         
         // 根据条件选择分支
-        List<Iota> selected = condition.asBoolean() 
+        List<IExecutable> selected = condition.asBoolean() 
                 ? trueBranch.asList() 
                 : falseBranch.asList();
         
         // 反转后压入程序栈
-        List<Iota> reversed = new ArrayList<>(selected);
+        List<IExecutable> reversed = new ArrayList<>(selected);
         Collections.reverse(reversed);
-        
-        for (Iota iota : reversed) {
+
+        for (IExecutable iota : reversed) {
             executor.pushProgram(iota);
         }
     }
@@ -55,9 +59,9 @@ public class IfOp implements StackOperation {
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.BOOLEAN)
-                .input(IotaType.LIST)
-                .input(IotaType.LIST)
+                .input("boolean")
+                .input("list")
+                .input("list")
                 .build();
     }
 

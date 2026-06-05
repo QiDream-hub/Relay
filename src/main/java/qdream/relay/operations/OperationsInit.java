@@ -1,8 +1,6 @@
 package qdream.relay.operations;
 
-import qdream.relay.engine.Iota;
 import qdream.relay.engine.OperationRegistry;
-import qdream.relay.engine.IotaType;
 import qdream.relay.operations.base.*;
 import qdream.relay.operations.arithmetic.*;
 import qdream.relay.operations.logic.*;

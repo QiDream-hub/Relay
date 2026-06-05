@@ -3,6 +3,7 @@ package qdream.relay.operations.control;
 import qdream.relay.engine.OperationSignature;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 /**
  * Stop 操作 - 强制终止程序

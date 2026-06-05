@@ -1,10 +1,11 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -14,8 +15,10 @@ import qdream.relay.core.CommunicationSystem;
 public class SendOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota data = executor.popData();
-        Iota channel = executor.popData();
+        IData dataData = executor.popData();
+        if (!(dataData instanceof McIota data)) return;
+        IData channelData = executor.popData();
+        if (!(channelData instanceof McIota channel)) return;
         
         if (data == null || channel == null) {
             return;
@@ -32,15 +35,15 @@ public class SendOp implements StackOperation {
             throw new IllegalStateException("频道 " + ch + " 队列已满");
         }
         
-        executor.pushData(Iota.ofBoolean(true));
+        executor.pushData(McIota.ofBoolean(true));
     }
 
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.NUMBER)
-                .input(IotaType.ANY)
-                .output(IotaType.BOOLEAN)
+                .input("number")
+                .input("any")
+                .output("boolean")
                 .build();
     }
 

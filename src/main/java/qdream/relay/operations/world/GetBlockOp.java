@@ -1,10 +1,11 @@
 package qdream.relay.operations.world;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 import qdream.relay.mc.McVec3Adapter;
 
 import net.minecraft.core.BlockPos;
@@ -20,7 +21,8 @@ import net.minecraft.world.phys.Vec3;
 public class GetBlockOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota posIota = executor.popData();
+        IData posData = executor.popData();
+        if (!(posData instanceof McIota posIota)) return;
 
         if (posIota == null) {
             throw new IllegalArgumentException("get_block 需要向量参数");
@@ -37,17 +39,17 @@ public class GetBlockOp implements StackOperation {
         // Level level = executor.getWorld();
         // BlockState state = level.getBlockState(blockPos);
         // String blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
-        // executor.pushData(Iota.ofString(blockId));
+        // executor.pushData(McIota.ofString(blockId));
 
         // 临时实现：返回 null
-        executor.pushData(Iota.ofNull());
+        executor.pushData(McIota.ofNull());
     }
 
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.VECTOR)
-                .output(IotaType.STRING)
+                .input("vector")
+                .output("string")
                 .build();
     }
 

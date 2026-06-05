@@ -1,10 +1,11 @@
 package qdream.relay.operations.base;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 /**
  * Swap 操作 - 交换数据栈顶部两个元素
@@ -12,8 +13,10 @@ import qdream.relay.engine.StateMachine;
 public class SwapOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota top = executor.popData();
-        Iota second = executor.popData();
+        IData topData = executor.popData();
+        if (!(topData instanceof McIota top)) return;
+        IData secondData = executor.popData();
+        if (!(secondData instanceof McIota second)) return;
         if (top != null && second != null) {
             executor.pushData(top);
             executor.pushData(second);
@@ -23,10 +26,10 @@ public class SwapOp implements StackOperation {
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.ANY)
-                .input(IotaType.ANY)
-                .output(IotaType.ANY)
-                .output(IotaType.ANY)
+                .input("any")
+                .input("any")
+                .output("any")
+                .output("any")
                 .build();
     }
 

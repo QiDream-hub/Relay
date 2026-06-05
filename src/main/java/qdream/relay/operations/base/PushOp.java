@@ -1,10 +1,9 @@
 package qdream.relay.operations.base;
 
-import qdream.relay.engine.Iota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 /**
  * Push 操作 - 从程序栈弹出一个数据值，然后压入数据栈
@@ -12,9 +11,9 @@ import qdream.relay.engine.StateMachine;
  * 此操作仅用于签名和编辑器提示
  */
 public class PushOp implements StackOperation {
-    private final IotaType targetType;
+    private final String targetType;
 
-    public PushOp(IotaType targetType) {
+    public PushOp(String targetType) {
         this.targetType = targetType;
     }
 
@@ -22,7 +21,7 @@ public class PushOp implements StackOperation {
      * 默认构造函数，用于注册表
      */
     public PushOp() {
-        this.targetType = IotaType.ANY;
+        this.targetType = "any";
     }
 
     @Override

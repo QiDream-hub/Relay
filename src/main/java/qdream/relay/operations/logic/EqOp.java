@@ -1,10 +1,11 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 /**
  * Eq 操作 - 等于比较
@@ -12,23 +13,25 @@ import qdream.relay.engine.StateMachine;
 public class EqOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota b = executor.popData();
-        Iota a = executor.popData();
+        IData bData = executor.popData();
+        if (!(bData instanceof McIota b)) return;
+        IData aData = executor.popData();
+        if (!(aData instanceof McIota a)) return;
         
         if (b == null || a == null) {
             return;
         }
         
         boolean result = a.equals(b);
-        executor.pushData(Iota.ofBoolean(result));
+        executor.pushData(McIota.ofBoolean(result));
     }
 
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.ANY)
-                .input(IotaType.ANY)
-                .output(IotaType.BOOLEAN)
+                .input("any")
+                .input("any")
+                .output("boolean")
                 .build();
     }
 

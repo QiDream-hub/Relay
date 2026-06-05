@@ -9,12 +9,12 @@ import java.util.Collections;
 /**
  * 状态机执行器
  * 维护双栈，执行操作
- * 
+ *
  * 纯 Java 实现，不依赖 Minecraft
  */
 public class StateMachine {
-    private final Deque<Iota> programStack = new ArrayDeque<>();
-    private final Deque<Iota> dataStack = new ArrayDeque<>();
+    private final Deque<IExecutable> programStack = new ArrayDeque<>();
+    private final Deque<IData> dataStack = new ArrayDeque<>();
 
     private int remainingOps;
     private boolean hasWorldInteractor;
@@ -45,11 +45,11 @@ public class StateMachine {
      * 从列表加载程序
      * 程序列表需要反转后压入程序栈，保证从左到右的执行顺序
      */
-    public void loadProgram(List<Iota> program) {
-        List<Iota> reversed = new ArrayList<>(program);
+    public void loadProgram(List<IExecutable> program) {
+        List<IExecutable> reversed = new ArrayList<>(program);
         Collections.reverse(reversed);
         programStack.clear();
-        for (Iota iota : reversed) {
+        for (IExecutable iota : reversed) {
             programStack.push(iota);
         }
     }
@@ -64,23 +64,26 @@ public class StateMachine {
         remainingOps = ops;
 
         while (remainingOps > 0 && !programStack.isEmpty()) {
-            Iota top = programStack.pop();
+            IExecutable top = programStack.pop();
 
-            if (top.isString()) {
+            // 检查是否是操作 ID 字符串
+            if ("string".equals(top.getType())) {
                 // 操作 ID
-                String opId = top.asString();
+                String opId = (String) top.getValue();
                 executeOperation(opId);
-            } else if (top.isList()) {
+            } else if ("list".equals(top.getType())) {
                 // 列表 - 反转后压入程序栈
-                List<Iota> list = top.asList();
-                List<Iota> reversed = new ArrayList<>(list);
+                @SuppressWarnings("unchecked")
+                List<IExecutable> list = (List<IExecutable>) top.getValue();
+                List<IExecutable> reversed = new ArrayList<>(list);
                 Collections.reverse(reversed);
-                for (Iota iota : reversed) {
+                for (IExecutable iota : reversed) {
                     programStack.push(iota);
                 }
                 remainingOps--;
-            } else if (top.isNull() || top.isNumber() || top.isBoolean() ||
-                       top.isVector() || top.isString() || top.isEntity()) {
+            } else if ("null".equals(top.getType()) || "number".equals(top.getType()) ||
+                       "boolean".equals(top.getType()) || "vector".equals(top.getType()) ||
+                       "string".equals(top.getType()) || "entity".equals(top.getType())) {
                 // 数据 - 自动压入数据栈（宽容规则）
                 dataStack.push(top);
                 remainingOps--;
@@ -141,14 +144,14 @@ public class StateMachine {
     /**
      * 从程序栈弹出
      */
-    public Iota popProgram() {
+    public IExecutable popProgram() {
         return programStack.pollFirst();
     }
 
     /**
      * 压入程序栈
      */
-    public void pushProgram(Iota iota) {
+    public void pushProgram(IExecutable iota) {
         if (programStack.size() >= maxStackSize) {
             triggerMishap("程序栈超出大小限制 (" + maxStackSize + ")");
             return;
@@ -159,7 +162,7 @@ public class StateMachine {
     /**
      * 从数据栈弹出
      */
-    public Iota popData() {
+    public IData popData() {
         if (dataStack.isEmpty()) {
             triggerMishap("数据栈为空，无法弹出");
             return null;
@@ -170,7 +173,7 @@ public class StateMachine {
     /**
      * 查看数据栈顶部
      */
-    public Iota peekData() {
+    public IData peekData() {
         if (dataStack.isEmpty()) {
             return null;
         }
@@ -180,7 +183,7 @@ public class StateMachine {
     /**
      * 压入数据栈
      */
-    public void pushData(Iota iota) {
+    public void pushData(IData iota) {
         if (dataStack.size() >= maxStackSize) {
             triggerMishap("数据栈超出大小限制 (" + maxStackSize + ")");
             return;
@@ -233,14 +236,14 @@ public class StateMachine {
     /**
      * 获取数据栈快照（用于调试）
      */
-    public List<Iota> getDataStackSnapshot() {
+    public List<IData> getDataStackSnapshot() {
         return new ArrayList<>(dataStack);
     }
 
     /**
      * 获取程序栈快照（用于调试）
      */
-    public List<Iota> getProgramStackSnapshot() {
+    public List<IExecutable> getProgramStackSnapshot() {
         return new ArrayList<>(programStack);
     }
 }

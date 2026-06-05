@@ -1,10 +1,11 @@
 package qdream.relay.operations.arithmetic;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 
 /**
  * Mul 操作 - 乘法
@@ -12,8 +13,10 @@ import qdream.relay.engine.StateMachine;
 public class MulOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota b = executor.popData();
-        Iota a = executor.popData();
+        IData bData = executor.popData();
+        if (!(bData instanceof McIota b)) return;
+        IData aData = executor.popData();
+        if (!(aData instanceof McIota a)) return;
         
         if (b == null || a == null) {
             return;
@@ -24,15 +27,15 @@ public class MulOp implements StackOperation {
         }
         
         double result = a.asDouble() * b.asDouble();
-        executor.pushData(Iota.ofDouble(result));
+        executor.pushData(McIota.ofDouble(result));
     }
 
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.NUMBER)
-                .input(IotaType.NUMBER)
-                .output(IotaType.NUMBER)
+                .input("number")
+                .input("number")
+                .output("number")
                 .build();
     }
 

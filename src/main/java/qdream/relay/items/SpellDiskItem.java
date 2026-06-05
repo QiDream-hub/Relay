@@ -6,7 +6,8 @@ import java.util.List;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.engine.IExecutable;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.StateMachine;
 
 /**
@@ -24,7 +25,7 @@ public class SpellDiskItem extends Item {
      * 从磁盘读取程序
      * TODO: 使用 DataComponent 系统实现
      */
-    public static List<Iota> getProgram(ItemStack stack) {
+    public static List<IExecutable> getProgram(ItemStack stack) {
         // 临时实现：返回空列表
         return List.of();
     }
@@ -33,7 +34,7 @@ public class SpellDiskItem extends Item {
      * 保存程序到磁盘
      * TODO: 使用 DataComponent 系统实现
      */
-    public static void setProgram(ItemStack stack, List<Iota> program) {
+    public static void setProgram(ItemStack stack, List<IExecutable> program) {
         // 临时实现：不保存
     }
 

@@ -1,10 +1,11 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.engine.Iota;
+import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.IotaType;
+import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.IData;
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -15,7 +16,8 @@ import qdream.relay.core.CommunicationSystem;
 public class PeekOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        Iota channel = executor.popData();
+        IData channelData = executor.popData();
+        if (!(channelData instanceof McIota channel)) return;
         
         if (channel == null) {
             return;
@@ -26,15 +28,15 @@ public class PeekOp implements StackOperation {
         }
         
         int ch = channel.asInt();
-        Iota data = CommunicationSystem.peek(ch);
+        McIota data = CommunicationSystem.peek(ch);
         executor.pushData(data);
     }
 
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
-                .input(IotaType.NUMBER)
-                .output(IotaType.ANY)
+                .input("number")
+                .output("any")
                 .build();
     }
 

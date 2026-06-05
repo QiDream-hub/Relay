@@ -1,8 +1,6 @@
 package qdream.relay.mc;
 
-import qdream.relay.engine.Iota;
-import qdream.relay.engine.IotaType;
-import qdream.relay.engine.Vector3;
+import qdream.relay.engine.IExecutable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -21,69 +19,73 @@ public class NbtSerializer {
 
     private NbtSerializer() {}
 
-    public CompoundTag serialize(Iota iota) {
+    public CompoundTag serialize(McIota iota) {
         CompoundTag tag = new CompoundTag();
-        tag.putString("type", iota.getType().name());
+        tag.putString("type", iota.getType());
 
         switch (iota.getType()) {
-            case NUMBER -> {
+            case "number" -> {
                 if (iota.getValue() instanceof Double) {
                     tag.putDouble("value", iota.asDouble());
                 } else {
                     tag.putInt("value", iota.asInt());
                 }
             }
-            case BOOLEAN -> tag.putBoolean("value", iota.asBoolean());
-            case VECTOR -> {
-                Vector3 v = iota.asVector();
-                tag.putDouble("x", v.x());
-                tag.putDouble("y", v.y());
-                tag.putDouble("z", v.z());
+            case "boolean" -> tag.putBoolean("value", iota.asBoolean());
+            case "vector" -> {
+                Object vec = iota.asVector();
+                if (vec instanceof McVec3Adapter) {
+                    Vec3 v = ((McVec3Adapter) vec).getVec3();
+                    tag.putDouble("x", v.x);
+                    tag.putDouble("y", v.y);
+                    tag.putDouble("z", v.z);
+                }
             }
-            case STRING -> tag.putString("value", iota.asString());
-            case ENTITY -> tag.putString("value", iota.asEntity().toString());
-            case LIST -> tag.put("value", serializeList(iota.asList()));
-            case NULL -> {}
-            case ANY -> {}
+            case "string" -> tag.putString("value", iota.asString());
+            case "entity" -> tag.putString("value", iota.asEntity().toString());
+            case "list" -> tag.put("value", serializeList(iota.asList()));
+            case "null", "any" -> {}
         }
 
         return tag;
     }
 
-    public Iota deserialize(CompoundTag tag) {
+    public McIota deserialize(CompoundTag tag) {
         String typeName = tag.getString("type").orElse("unknown");
-        IotaType type = IotaType.valueOf(typeName);
 
-        return switch (type) {
-            case NUMBER -> {
+        return switch (typeName) {
+            case "number" -> {
                 if (tag.contains("value")) {
-                    yield Iota.ofDouble(tag.getDouble("value").orElse(0.0));
+                    yield McIota.ofDouble(tag.getDouble("value").orElse(0.0));
                 } else {
-                    yield Iota.ofInt(tag.getInt("value").orElse(0));
+                    yield McIota.ofInt(tag.getInt("value").orElse(0));
                 }
             }
-            case BOOLEAN -> Iota.ofBoolean(tag.getBoolean("value").orElse(false));
-            case VECTOR -> Iota.ofVector(new McVec3Adapter(new Vec3(
+            case "boolean" -> McIota.ofBoolean(tag.getBoolean("value").orElse(false));
+            case "vector" -> McIota.ofVector(new McVec3Adapter(new Vec3(
                     tag.getDouble("x").orElse(0.0),
                     tag.getDouble("y").orElse(0.0),
                     tag.getDouble("z").orElse(0.0))));
-            case STRING -> Iota.ofString(tag.getString("value").orElse(null));
-            case ENTITY -> Iota.ofEntity(UUID.fromString(tag.getString("value").orElse("00000000-0000-0000-0000-000000000000")));
-            case LIST -> Iota.ofList(deserializeList(tag.getList("value").orElse(new ListTag())));
-            case NULL, ANY -> Iota.ofNull();
+            case "string" -> McIota.ofString(tag.getString("value").orElse(null));
+            case "entity" -> McIota.ofEntity(UUID.fromString(tag.getString("value").orElse("00000000-0000-0000-0000-000000000000")));
+            case "list" -> McIota.ofList(deserializeList(tag.getList("value").orElse(new ListTag())));
+            case "null", "any" -> McIota.ofNull();
+            default -> McIota.ofNull();
         };
     }
 
-    public ListTag serializeList(List<Iota> list) {
+    public ListTag serializeList(List<IExecutable> list) {
         ListTag listTag = new ListTag();
-        for (Iota iota : list) {
-            listTag.add(serialize(iota));
+        for (IExecutable iota : list) {
+            if (iota instanceof McIota) {
+                listTag.add(serialize((McIota) iota));
+            }
         }
         return listTag;
     }
 
-    public List<Iota> deserializeList(ListTag listTag) {
-        List<Iota> list = new ArrayList<>();
+    public List<IExecutable> deserializeList(ListTag listTag) {
+        List<IExecutable> list = new ArrayList<>();
         for (Tag element : listTag) {
             list.add(deserialize((CompoundTag) element));
         }
