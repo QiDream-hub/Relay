@@ -22,6 +22,8 @@ public class RelayBlocks {
 
     public static final Block SHELL_BLOCK = register("shell_block", ShellBlock::new,
             BlockBehaviour.Properties.of().sound(SoundType.STONE), true);
+    public static final Block SPELL_EDITOR_BLOCK = register("spell_editor_block", SpellEditorBlock::new,
+            BlockBehaviour.Properties.of(), true);
 
     private static Block register(String name, Function<BlockBehaviour.Properties, Block> blockFactory,
             BlockBehaviour.Properties settings, boolean shouldRegisterItem) {

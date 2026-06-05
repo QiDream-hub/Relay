@@ -1,13 +1,38 @@
 ---
 name: minecraft-26-1-2-gui-container-pattern
-description: Minecraft 26.1.2 GUI 系统架构模式 - Container 接口适配与共享包结构
+description: Minecraft 26.1.2 GUI 系统架构模式 - Container 接口适配、MenuScreens 注册与泛型
 source: auto-skill
-extracted_at: '2026-05-31T05:30:00.000Z'
+extracted_at: '2026-06-06T03:30:00.000Z'
 ---
 
 # Minecraft 26.1.2 GUI 系统架构模式
 
 在 26.1.2 版本中，GUI 系统的架构需要遵循特定的包结构和接口实现模式。本文档记录了实现自定义容器 GUI 的最佳实践。
+
+## 完整 GUI 标准链路
+
+```
+玩家右键方块
+    ↓
+Block.useWithoutItem()
+    ↓
+world.getBlockEntity(pos) 获取 BlockEntity
+    ↓
+player.openMenu((MenuProvider) blockEntity)
+    ↓
+BlockEntity.createMenu() → 返回 AbstractContainerMenu
+    ↓
+客户端通过 MenuScreens 获取 Screen 工厂
+    ↓
+创建 AbstractContainerScreen<T>
+```
+
+**核心要点**：
+- 方块不需要直接声明 GUI
+- `BlockEntity` 实现 `MenuProvider` 接口
+- 右键时调用 `player.openMenu()` 触发 GUI 打开
+- 客户端必须通过 `MenuScreens.register()` 注册 Screen 工厂
+- `AbstractContainerScreen` 是泛型类，必须指定类型参数
 
 ## 核心问题
 
@@ -210,6 +235,38 @@ public class RelayClient implements ClientModInitializer {
 }
 ```
 
+### 7. MenuScreens 注册（关键！）
+
+**必须**在客户端注册 Screen 工厂，否则打开 GUI 时会报错 `Failed to create screen for menu type`：
+
+```java
+public class RelayClient implements ClientModInitializer {
+    @Override
+    public void onInitializeClient() {
+        // 注册 Screen 工厂 - 必须在客户端初始化
+        MenuScreens.register(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, SpellEditorScreen::new);
+    }
+}
+```
+
+### 8. AbstractContainerScreen 泛型参数
+
+26.1.2 的 `AbstractContainerScreen` 是泛型类，**必须**指定类型参数：
+
+```java
+// 错误：缺少泛型参数
+public class SpellEditorScreen extends AbstractContainerScreen {
+    // ...
+}
+
+// 正确：指定 Menu 类型
+public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreenHandler> {
+    // ...
+}
+```
+
+`AbstractContainerScreen<T extends AbstractContainerMenu>` 的泛型参数 `T` 必须与 `MenuType<T>` 的类型一致。
+
 ## 常见错误及解决方案
 
 ### 错误 1: `找不到符号 - ShellScreenHandler`
@@ -225,8 +282,26 @@ public class RelayClient implements ClientModInitializer {
 **解决**: 添加 `clearContent()` 方法实现
 
 ### 错误 4: `MenuType 构造函数需要两个参数`
-**原因**: 26.1.2 的 `MenuType` 需要 `(MenuSupplier, FeatureFlagSet)`  
+**原因**: 26.1.2 的 `MenuType` 需要 `(MenuSupplier, FeatureFlagSet)`
 **解决**: 使用 `new MenuType<>(factory, FeatureFlags.VANILLA_SET)`
+
+### 错误 5: `Failed to create screen for menu type: modid:menu_id`
+**原因**: 客户端没有通过 `MenuScreens.register()` 注册 Screen 工厂
+**解决**: 在 `ClientModInitializer.onInitializeClient()` 中注册：
+```java
+MenuScreens.register(RelayScreenHandlers.MENU_TYPE, MyScreen::new);
+```
+
+### 错误 6: `不兼容的类型：无法推断 ScreenConstructor 的函数接口描述符`
+**原因**: `AbstractContainerScreen` 缺少泛型参数类型
+**解决**: 继承时指定类型参数：
+```java
+public class MyScreen extends AbstractContainerScreen<MyMenuType> { ... }
+```
+
+### 错误 7: `类型参数 X 不在类型变量 U 的范围内`
+**原因**: `ScreenConstructor` 要求 `U extends Screen, MenuAccess<T>`
+**解决**: 确保 `AbstractContainerScreen` 继承时指定正确的泛型参数，它已实现 `MenuAccess<T>`
 
 ## 接口关系图
 
