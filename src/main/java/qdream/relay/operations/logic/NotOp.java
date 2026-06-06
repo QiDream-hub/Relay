@@ -1,11 +1,10 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.mc.McIota;
+import qdream.relay.types.BooleanIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
+import qdream.relay.engine.Executable;
 
 /**
  * Not 操作 - 逻辑非
@@ -13,19 +12,15 @@ import qdream.relay.engine.IData;
 public class NotOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData aData = executor.popData();
-        if (!(aData instanceof McIota a)) return;
-        
-        if (a == null) {
+        Executable aData = executor.popData();
+        if (aData == null) return;
+        if (!(aData instanceof BooleanIota a)) {
+            executor.triggerMishap("操作 relay:not 期望 boolean 类型，实际为：" + aData.getType());
             return;
         }
-        
-        if (!a.isBoolean()) {
-            throw new IllegalArgumentException("Not 需要一个布尔参数");
-        }
-        
+
         boolean result = !a.asBoolean();
-        executor.pushData(McIota.ofBoolean(result));
+        executor.pushData(new BooleanIota(result));
     }
 
     @Override

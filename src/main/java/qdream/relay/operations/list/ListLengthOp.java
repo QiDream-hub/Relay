@@ -1,14 +1,15 @@
 package qdream.relay.operations.list;
-import qdream.relay.mc.McIota;
+
+import qdream.relay.types.ProgramBlock;
+import qdream.relay.types.NumberIota;
 import qdream.relay.engine.OperationSignature;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
-import qdream.relay.engine.IExecutable;
+import qdream.relay.engine.Executable;
+import qdream.relay.engine.Executable;
 
 import java.util.List;
-import java.util.ArrayList;
-import java.util.List;
+
 /**
  * List Length 操作 - 获取列表长度
  * 输入：列表
@@ -17,17 +18,17 @@ import java.util.List;
 public class ListLengthOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData listData = executor.popData();
-        if (!(listData instanceof McIota listIota)) return;
-        if (listIota == null) {
-            throw new IllegalArgumentException("list_length 需要列表参数");
+        Executable listData = executor.popData();
+        if (listData == null) return;
+        if (!(listData instanceof ProgramBlock listBlock)) {
+            executor.triggerMishap("操作 relay:list_length 期望 list 类型，实际为：" + listData.getType());
+            return;
         }
-        if (!listIota.isList()) {
-            throw new IllegalArgumentException("list_length 需要列表参数，得到：" + listIota.getType());
-        }
-        List<IExecutable> list = listIota.asList();
-        executor.pushData(McIota.ofInt(list.size()));
+
+        List<Executable> list = listBlock.getItems();
+        executor.pushData(new NumberIota(list.size()));
     }
+
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
@@ -35,6 +36,7 @@ public class ListLengthOp implements StackOperation {
                 .output("number")
                 .build();
     }
+
     @Override
     public int getCost() {
         return 1;

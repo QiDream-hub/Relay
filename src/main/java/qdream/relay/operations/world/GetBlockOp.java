@@ -1,15 +1,13 @@
 package qdream.relay.operations.world;
 
-import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
-import qdream.relay.mc.McVec3Adapter;
+import qdream.relay.engine.Executable;
+import qdream.relay.types.VectorIota;
+import qdream.relay.types.NullIota;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -21,28 +19,24 @@ import net.minecraft.world.phys.Vec3;
 public class GetBlockOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData posData = executor.popData();
-        if (!(posData instanceof McIota posIota)) return;
-
-        if (posIota == null) {
-            throw new IllegalArgumentException("get_block 需要向量参数");
+        Executable posData = executor.popData();
+        if (posData == null) return;
+        if (!(posData instanceof VectorIota pos)) {
+            executor.triggerMishap("操作 relay:get_block 期望 vector 类型，实际为：" + posData.getType());
+            return;
         }
 
-        if (!posIota.isVector()) {
-            throw new IllegalArgumentException("get_block 需要向量参数，得到：" + posIota.getType());
-        }
-
-        Vec3 pos = ((McVec3Adapter) posIota.asVector()).getVec3();
-        BlockPos blockPos = BlockPos.containing(pos);
+        Vec3 vec = pos.getVec3();
+        BlockPos blockPos = BlockPos.containing(vec);
 
         // TODO: 获取世界中的方块
         // Level level = executor.getWorld();
         // BlockState state = level.getBlockState(blockPos);
         // String blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
-        // executor.pushData(McIota.ofString(blockId));
+        // executor.pushData(new StringIota(blockId));
 
         // 临时实现：返回 null
-        executor.pushData(McIota.ofNull());
+        executor.pushData(NullIota.INSTANCE);
     }
 
     @Override

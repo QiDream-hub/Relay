@@ -1,11 +1,12 @@
 package qdream.relay.operations.control;
 
-import qdream.relay.engine.IExecutable;
-import qdream.relay.mc.McIota;
+import qdream.relay.types.BooleanIota;
+import qdream.relay.engine.Executable;
+import qdream.relay.types.ProgramBlock;
 import qdream.relay.engine.OperationSignature;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
+import qdream.relay.engine.Executable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,39 +20,35 @@ import java.util.List;
 public class IfOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData falseBranchData = executor.popData();
-        if (!(falseBranchData instanceof McIota falseBranch)) return;
-        IData trueBranchData = executor.popData();
-        if (!(trueBranchData instanceof McIota trueBranch)) return;
-        IData conditionData = executor.popData();
-        if (!(conditionData instanceof McIota condition)) return;
-        
-        if (falseBranch == null || trueBranch == null || condition == null) {
+        Executable falseBranchData = executor.popData();
+        if (falseBranchData == null) return;
+        if (!(falseBranchData instanceof ProgramBlock falseBranch)) {
+            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + falseBranchData.getType());
             return;
         }
-        
-        if (!condition.isBoolean()) {
-            throw new IllegalArgumentException("If 需要一个布尔条件");
+        Executable trueBranchData = executor.popData();
+        if (trueBranchData == null) return;
+        if (!(trueBranchData instanceof ProgramBlock trueBranch)) {
+            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + trueBranchData.getType());
+            return;
         }
-        
-        if (!trueBranch.isList()) {
-            throw new IllegalArgumentException("If 的真分支必须是列表");
+        Executable conditionData = executor.popData();
+        if (conditionData == null) return;
+        if (!(conditionData instanceof BooleanIota condition)) {
+            executor.triggerMishap("操作 relay:if 期望 boolean 类型，实际为：" + conditionData.getType());
+            return;
         }
-        
-        if (!falseBranch.isList()) {
-            throw new IllegalArgumentException("If 的假分支必须是列表");
-        }
-        
+
         // 根据条件选择分支
-        List<IExecutable> selected = condition.asBoolean() 
-                ? trueBranch.asList() 
-                : falseBranch.asList();
-        
+        List<Executable> selected = condition.asBoolean()
+                ? trueBranch.getItems()
+                : falseBranch.getItems();
+
         // 反转后压入程序栈
-        List<IExecutable> reversed = new ArrayList<>(selected);
+        List<Executable> reversed = new ArrayList<>(selected);
         Collections.reverse(reversed);
 
-        for (IExecutable iota : reversed) {
+        for (Executable iota : reversed) {
             executor.pushProgram(iota);
         }
     }

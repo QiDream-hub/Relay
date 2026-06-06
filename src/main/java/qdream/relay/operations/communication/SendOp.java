@@ -1,11 +1,11 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.mc.McIota;
+import qdream.relay.engine.Executable;
+import qdream.relay.types.NumberIota;
+import qdream.relay.types.BooleanIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -15,27 +15,24 @@ import qdream.relay.core.CommunicationSystem;
 public class SendOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData dataData = executor.popData();
-        if (!(dataData instanceof McIota data)) return;
-        IData channelData = executor.popData();
-        if (!(channelData instanceof McIota channel)) return;
-        
-        if (data == null || channel == null) {
+        Executable dataData = executor.popData();
+        if (dataData == null) return;
+        Executable channelData = executor.popData();
+        if (channelData == null) return;
+        if (!(channelData instanceof NumberIota channel)) {
+            executor.triggerMishap("操作 relay:send 期望 number 类型，实际为：" + channelData.getType());
             return;
         }
-        
-        if (!channel.isNumber()) {
-            throw new IllegalArgumentException("Send 需要数值型频道号");
-        }
-        
+
         int ch = channel.asInt();
-        boolean success = CommunicationSystem.send(ch, data);
-        
+        boolean success = CommunicationSystem.send(ch, dataData);
+
         if (!success) {
-            throw new IllegalStateException("频道 " + ch + " 队列已满");
+            executor.triggerMishap("操作 relay:send 频道 " + ch + " 队列已满");
+            return;
         }
-        
-        executor.pushData(McIota.ofBoolean(true));
+
+        executor.pushData(new BooleanIota(true));
     }
 
     @Override

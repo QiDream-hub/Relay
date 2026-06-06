@@ -13,7 +13,6 @@ import net.minecraft.world.level.Level;
 
 import qdream.relay.blocks.RelayBlockEntities;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.McIota;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.screen.ShellScreenHandler;

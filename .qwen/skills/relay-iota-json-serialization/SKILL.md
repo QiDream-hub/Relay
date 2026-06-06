@@ -1,35 +1,34 @@
 ---
 name: relay-iota-json-serialization
-description: Relay 模组中 IData 的 JSON 序列化/反序列化设计模式，支持可扩展的自定义类型
+description: Relay 模组中 IData/IExecutable 的 JSON 序列化/反序列化设计模式，支持可扩展的自定义类型
 source: auto-skill
-extracted_at: '2026-06-06T06:16:42.393Z'
+extracted_at: '2026-06-06T08:32:07.281Z'
 ---
 
 # Relay Iota JSON 序列化设计
 
 ## 设计目标
 
-1. **统一序列化接口** - 所有 `IData` 实现都必须支持 JSON 序列化
+1. **统一序列化接口** - 所有 `IExecutable` 实现都必须支持 JSON 序列化
 2. **支持自定义类型** - 其他 mod 可注册自己的数据类型
 3. **完全限定名避免冲突** - 使用 `modid:type` 格式
 4. **类型与序列化分离** - 通过注册表管理序列化器
 
-## 核心架构
+## 核心架构（2026-06-06 重构后）
 
-### IData 接口定义
+### IData/IExecutable 接口定义
 
 ```java
+// engine 包 - 纯 Java 接口
 public interface IData {
     String getType();
     Object getValue();
-    
-    // JSON 序列化（所有实现必须提供）
     JsonElement toJson();
 
     // 类型注册表接口（嵌套在 IData 中）
     interface TypeRegistry {
-        static void register(String typeId, 
-                            JsonElementSerializer serializer, 
+        static void register(String typeId,
+                            JsonElementSerializer serializer,
                             JsonElementDeserializer deserializer) {
             IotaTypeRegistry.register(typeId, serializer, deserializer);
         }
@@ -49,14 +48,10 @@ public interface IData {
         IData deserialize(JsonObject json);
     }
 }
-```
 
-### IExecutable 继承 IData
-
-```java
 public interface IExecutable extends IData {
     void execute(StateMachine executor);
-    // 继承 toJson() 方法
+    // 继承 getType(), getValue(), toJson()
 }
 ```
 
@@ -67,14 +62,13 @@ public class IotaTypeRegistry {
     public static class SerDePair {
         final IData.JsonElementSerializer serializer;
         final IData.JsonElementDeserializer deserializer;
-
         public SerDePair(...) { ... }
     }
 
     private static final Map<String, SerDePair> TYPES = new HashMap<>();
 
-    public static void register(String typeId, 
-                               IData.JsonElementSerializer serializer, 
+    public static void register(String typeId,
+                               IData.JsonElementSerializer serializer,
                                IData.JsonElementDeserializer deserializer) {
         TYPES.put(typeId, new SerDePair(serializer, deserializer));
     }
@@ -100,115 +94,233 @@ public class IotaTypeRegistry {
 }
 ```
 
-## 内置类型实现（McIotaTypes）
+## 内置类型实现（IotaSerializers）
+
+**2026-06-06 重构**：每个类型类自己实现 `toJson()`，`IotaSerializers` 只负责注册反序列化器。
 
 ```java
-public class McIotaTypes {
+public class IotaSerializers {
     public static void register() {
         // 数字类型
         IData.TypeRegistry.register("relay:number",
-            // 序列化
-            data -> {
-                McIota iota = (McIota) data;
-                JsonObject json = new JsonObject();
-                json.addProperty("type", "relay:number");
-                if (iota.getValue() instanceof Double) {
-                    json.addProperty("value", iota.asDouble());
-                } else {
-                    json.addProperty("value", iota.asInt());
-                }
-                return json;
-            },
+            // 序列化 - 委托给 NumberIota.toJson()
+            data -> ((NumberIota) data).toJson(),
             // 反序列化
             json -> {
                 JsonElement valueElem = json.get("value");
+                if (valueElem.isJsonPrimitive() && valueElem.getAsJsonPrimitive().isNumber()) {
+                    // 检查是否真的是整数（没有小数部分）
+                    if (valueElem.getAsString().contains(".")) {
+                        return new NumberIota(valueElem.getAsDouble());
+                    } else {
+                        return new NumberIota(valueElem.getAsInt());
+                    }
+                }
+                // 兼容旧格式：value 是字符串
                 String valueStr = valueElem.getAsString();
                 if (valueStr.contains(".")) {
-                    return McIota.ofDouble(valueElem.getAsDouble());
+                    return new NumberIota(Double.parseDouble(valueStr));
                 } else {
-                    return McIota.ofInt(valueElem.getAsInt());
+                    return new NumberIota(Integer.parseInt(valueStr));
                 }
             }
         );
 
         // 布尔类型
         IData.TypeRegistry.register("relay:boolean",
-            data -> {
-                JsonObject json = new JsonObject();
-                json.addProperty("type", "relay:boolean");
-                json.addProperty("value", ((McIota) data).asBoolean());
-                return json;
-            },
-            json -> McIota.ofBoolean(json.get("value").getAsBoolean())
+            data -> ((BooleanIota) data).toJson(),
+            json -> new BooleanIota(json.get("value").getAsBoolean())
         );
 
         // 字符串类型
         IData.TypeRegistry.register("relay:string",
-            data -> {
-                JsonObject json = new JsonObject();
-                json.addProperty("type", "relay:string");
-                json.addProperty("value", ((McIota) data).asString());
-                return json;
-            },
-            json -> McIota.ofString(json.get("value").getAsString())
+            data -> ((StringIota) data).toJson(),
+            json -> new StringIota(json.get("value").getAsString())
         );
 
-        // 操作类型（特殊的字符串）
+        // 操作类型（可执行单元）
         IData.TypeRegistry.register("relay:operation",
-            data -> {
-                JsonObject json = new JsonObject();
-                json.addProperty("type", "relay:operation");
-                json.addProperty("op", ((McIota) data).asString());
-                return json;
-            },
-            json -> McIota.ofString(json.get("op").getAsString())
+            data -> ((Operation) data).toJson(),
+            json -> new Operation(json.get("op").getAsString())
         );
 
         // 列表类型（嵌套序列化）
         IData.TypeRegistry.register("relay:list",
-            data -> {
-                JsonObject json = new JsonObject();
-                json.addProperty("type", "relay:list");
-                JsonArray array = new JsonArray();
-                for (IExecutable item : ((McIota) data).asList()) {
-                    array.add(item.toJson());  // 递归调用
-                }
-                json.add("value", array);
-                return json;
-            },
+            data -> ((ProgramBlock) data).toJson(),
             json -> {
                 JsonArray array = json.get("value").getAsJsonArray();
                 List<IExecutable> list = new ArrayList<>();
                 for (JsonElement elem : array) {
                     list.add((IExecutable) IData.TypeRegistry.fromJson(elem));
                 }
-                return McIota.ofList(list);
+                return new ProgramBlock(list);
             }
         );
 
-        // ... 其他类型：vector, entity, null
+        // ... 其他类型：relay:vector, relay:entity, relay:null
     }
 }
 ```
 
-## McIota 实现
+## 独立类型类实现
+
+**2026-06-06 重构**：删除 `McIota`，每个类型使用独立类。
 
 ```java
-public class McIota implements IExecutable {
-    private final McIotaType type;
-    private final Object value;
+// 数字类型
+public class NumberIota implements IExecutable {
+    private final double value;
+
+    public NumberIota(double value) { this.value = value; }
+    public NumberIota(int value) { this.value = value; }
 
     @Override
-    public String getType() {
-        return "relay:" + type.toLowerCase();
-    }
+    public String getType() { return "relay:number"; }
+
+    @Override
+    public Object getValue() { return value; }
 
     @Override
     public JsonElement toJson() {
-        return IotaTypeRegistry.toJson(this);
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:number");
+        if (value == (int) value) {
+            json.addProperty("value", (int) value);
+        } else {
+            json.addProperty("value", value);
+        }
+        return json;
     }
 
-    // ... 工厂方法和类型转换
+    @Override
+    public void execute(StateMachine executor) {
+        executor.pushData(this);  // 数据压栈
+    }
+
+    // 类型转换
+    public double asDouble() { return value; }
+    public int asInt() { return (int) value; }
+    public boolean isInteger() { return value == (int) value; }
+}
+
+// 字符串类型
+public class StringIota implements IExecutable {
+    private final String value;
+
+    public StringIota(String value) { this.value = value; }
+
+    @Override
+    public String getType() { return "relay:string"; }
+
+    @Override
+    public Object getValue() { return value; }
+
+    @Override
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:string");
+        json.addProperty("value", value);
+        return json;
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        executor.pushData(this);  // 数据压栈
+    }
+
+    public String asString() { return value; }
+}
+
+// 操作引用（可执行）
+public class Operation implements IExecutable {
+    private final String opId;
+
+    public Operation(String opId) { this.opId = opId; }
+
+    @Override
+    public String getType() { return "relay:operation"; }
+
+    @Override
+    public Object getValue() { return opId; }
+
+    @Override
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:operation");
+        json.addProperty("op", opId);
+        return json;
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        executor.executeOperation(opId);  // 执行操作
+    }
+
+    public String getOpId() { return opId; }
+}
+
+// 程序块（列表，可执行）
+public class ProgramBlock implements IExecutable {
+    private final List<IExecutable> items;
+
+    public ProgramBlock(List<IExecutable> items) {
+        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
+    }
+
+    @Override
+    public String getType() { return "relay:list"; }
+
+    @Override
+    public Object getValue() { return items; }
+
+    @Override
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:list");
+        JsonArray array = new JsonArray();
+        for (IExecutable item : items) {
+            array.add(item.toJson());
+        }
+        json.add("value", array);
+        return json;
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        // 列表反转后压入程序栈，保证从左到右的执行顺序
+        List<IExecutable> reversed = new ArrayList<>(items);
+        Collections.reverse(reversed);
+        for (IExecutable item : reversed) {
+            executor.pushProgram(item);
+        }
+    }
+
+    public List<IExecutable> getItems() { return new ArrayList<>(items); }
+}
+```
+
+## 工厂类（Iotas）
+
+```java
+public final class Iotas {
+    private Iotas() {}
+
+    public static NumberIota number(double value) { return new NumberIota(value); }
+    public static NumberIota number(int value) { return new NumberIota(value); }
+    public static BooleanIota booleanIota(boolean value) { return new BooleanIota(value); }
+    public static StringIota string(String value) { return new StringIota(value); }
+    public static VectorIota vector(McVec3Adapter value) { return new VectorIota(value); }
+    public static EntityIota entity(UUID value) { return new EntityIota(value); }
+    public static NullIota nullIota() { return NullIota.INSTANCE; }
+    public static ProgramBlock list(List<IExecutable> items) { return new ProgramBlock(items); }
+    public static Operation operation(String opId) { return new Operation(opId); }
+
+    // 类型转换辅助
+    public static NumberIota asNumber(IData data) {
+        if (data instanceof NumberIota n) return n;
+        throw new IllegalArgumentException("期望 number 类型，实际为：" + data.getType());
+    }
+    // ... 其他 asXxx() 方法
 }
 ```
 

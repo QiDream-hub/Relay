@@ -9,8 +9,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import qdream.relay.engine.IExecutable;
-import qdream.relay.mc.McIota;
+import qdream.relay.engine.Executable;
 import qdream.relay.mc.NbtSerializer;
 import qdream.relay.engine.StateMachine;
 
@@ -29,7 +28,7 @@ public class SpellDiskItem extends Item {
      * 从磁盘读取程序
      * @return 程序列表，如果没有程序则返回空列表
      */
-    public static List<IExecutable> getProgram(ItemStack stack) {
+    public static List<Executable> getProgram(ItemStack stack) {
         CompoundTag programTag = stack.get(RelayDataComponents.SPELL_PROGRAM);
         if (programTag == null) {
             return List.of();
@@ -39,7 +38,7 @@ public class SpellDiskItem extends Item {
             return List.of();
         }
         ListTag listTag = listOpt.get();
-        List<IExecutable> result = new ArrayList<>();
+        List<Executable> result = new ArrayList<>();
         for (int i = 0; i < listTag.size(); i++) {
             Optional<CompoundTag> elementOpt = listTag.getCompound(i);
             elementOpt.ifPresent(tag -> result.add(NbtSerializer.deserializeStatic(tag)));
@@ -52,15 +51,11 @@ public class SpellDiskItem extends Item {
      * @param stack 物品堆
      * @param program 程序列表
      */
-    public static void setProgram(ItemStack stack, List<IExecutable> program) {
+    public static void setProgram(ItemStack stack, List<Executable> program) {
         CompoundTag programTag = new CompoundTag();
         ListTag listTag = new ListTag();
-        for (IExecutable iota : program) {
-            if (iota instanceof McIota mcIota) {
-                listTag.add(NbtSerializer.serializeStatic(mcIota));
-            } else {
-                throw new RuntimeException("不支持的 IExecutable 类型：" + iota.getClass());
-            }
+        for (Executable iota : program) {
+            listTag.add(NbtSerializer.serializeStatic(iota));
         }
         programTag.put("program", listTag);
         stack.set(RelayDataComponents.SPELL_PROGRAM, programTag);
@@ -74,9 +69,9 @@ public class SpellDiskItem extends Item {
      */
     public static void saveFromStateMachine(ItemStack stack, StateMachine machine) {
         // 获取程序栈快照
-        List<IExecutable> programStack = machine.getProgramStackSnapshot();
+        List<Executable> programStack = machine.getProgramStackSnapshot();
         // 反转回原始顺序（快照是栈顺序，需要转为列表顺序）
-        List<IExecutable> program = new ArrayList<>(programStack);
+        List<Executable> program = new ArrayList<>(programStack);
         java.util.Collections.reverse(program);
 
         // 保存程序
@@ -90,7 +85,7 @@ public class SpellDiskItem extends Item {
      * @param machine 状态机
      */
     public static void loadToStateMachine(ItemStack stack, StateMachine machine) {
-        List<IExecutable> program = getProgram(stack);
+        List<Executable> program = getProgram(stack);
         if (!program.isEmpty()) {
             machine.loadProgram(program);
         }

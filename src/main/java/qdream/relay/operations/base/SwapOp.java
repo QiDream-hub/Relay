@@ -1,11 +1,9 @@
 package qdream.relay.operations.base;
 
-import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
+import qdream.relay.engine.Executable;
 
 /**
  * Swap 操作 - 交换数据栈顶部两个元素
@@ -13,14 +11,13 @@ import qdream.relay.engine.IData;
 public class SwapOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData topData = executor.popData();
-        if (!(topData instanceof McIota top)) return;
-        IData secondData = executor.popData();
-        if (!(secondData instanceof McIota second)) return;
-        if (top != null && second != null) {
-            executor.pushData(top);
-            executor.pushData(second);
-        }
+        Executable topData = executor.popData();
+        if (topData == null) return;
+        Executable secondData = executor.popData();
+        if (secondData == null) return;
+        
+        executor.pushData(topData);
+        executor.pushData(secondData);
     }
 
     @Override

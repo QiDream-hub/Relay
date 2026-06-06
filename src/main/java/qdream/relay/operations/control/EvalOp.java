@@ -1,11 +1,11 @@
 package qdream.relay.operations.control;
 
-import qdream.relay.engine.IExecutable;
-import qdream.relay.mc.McIota;
+import qdream.relay.engine.Executable;
+import qdream.relay.types.ProgramBlock;
 import qdream.relay.engine.OperationSignature;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
+import qdream.relay.engine.Executable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,22 +18,18 @@ import java.util.List;
 public class EvalOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData listData = executor.popData();
-        if (!(listData instanceof McIota listIota)) return;
-        
-        if (listIota == null) {
+        Executable listData = executor.popData();
+        if (listData == null) return;
+        if (!(listData instanceof ProgramBlock listBlock)) {
+            executor.triggerMishap("操作 relay:eval 期望 list 类型，实际为：" + listData.getType());
             return;
         }
-        
-        if (!listIota.isList()) {
-            throw new IllegalArgumentException("Eval 需要一个列表参数");
-        }
-        
-        List<IExecutable> list = listIota.asList();
-        List<IExecutable> reversed = new ArrayList<>(list);
+
+        List<Executable> list = listBlock.getItems();
+        List<Executable> reversed = new ArrayList<>(list);
         Collections.reverse(reversed);
 
-        for (IExecutable iota : reversed) {
+        for (Executable iota : reversed) {
             executor.pushProgram(iota);
         }
     }

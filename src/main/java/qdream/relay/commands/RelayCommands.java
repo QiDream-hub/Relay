@@ -14,14 +14,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import qdream.relay.blocks.entity.ShellBlockEntity;
 import qdream.relay.core.ShellContainer;
-import qdream.relay.engine.IData;
-import qdream.relay.engine.IExecutable;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.types.NumberIota;
+import qdream.relay.types.StringIota;
+import qdream.relay.types.BooleanIota;
+import qdream.relay.types.ProgramBlock;
+import qdream.relay.types.Operation;
 import qdream.relay.items.SpellDiskItem;
-import qdream.relay.mc.McIota;
-import qdream.relay.mc.McIotaTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,7 +148,7 @@ public class RelayCommands {
         }
 
         String programStr = StringArgumentType.getString(context, "program");
-        List<IExecutable> program;
+        List<Executable> program;
         try {
             program = parseProgram(programStr);
         } catch (RuntimeException e) {
@@ -181,7 +182,7 @@ public class RelayCommands {
             throw NO_DISK.create();
         }
 
-        List<IExecutable> program;
+        List<Executable> program;
         try {
             program = parseProgram(programStr);
         } catch (RuntimeException e) {
@@ -249,7 +250,7 @@ public class RelayCommands {
             throw NO_DISK.create();
         }
 
-        List<IExecutable> program = SpellDiskItem.getProgram(stack);
+        List<Executable> program = SpellDiskItem.getProgram(stack);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -273,7 +274,7 @@ public class RelayCommands {
 
         int ops = IntegerArgumentType.getInteger(context, "ops");
 
-        List<IExecutable> program = SpellDiskItem.getProgram(stack);
+        List<Executable> program = SpellDiskItem.getProgram(stack);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空，无法运行"), true);
             return 0;
@@ -291,7 +292,7 @@ public class RelayCommands {
         machine.loadProgram(program);
         machine.tick(ops);
 
-        List<IData> dataStack = machine.getDataStackSnapshot();
+        List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();
         result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
         if (!dataStack.isEmpty()) {
@@ -322,7 +323,7 @@ public class RelayCommands {
             throw NO_DISK.create();
         }
 
-        List<IExecutable> program = SpellDiskItem.getProgram(disk);
+        List<Executable> program = SpellDiskItem.getProgram(disk);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空，无法运行"), true);
             return 0;
@@ -340,7 +341,7 @@ public class RelayCommands {
         machine.loadProgram(program);
         machine.tick(ops);
 
-        List<IData> dataStack = machine.getDataStackSnapshot();
+        List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();
         result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
         if (!dataStack.isEmpty()) {
@@ -370,7 +371,7 @@ public class RelayCommands {
             throw NO_DISK.create();
         }
 
-        List<IExecutable> program = SpellDiskItem.getProgram(disk);
+        List<Executable> program = SpellDiskItem.getProgram(disk);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -387,8 +388,8 @@ public class RelayCommands {
      * 操作：{"type":"relay:operation","op":"relay:add"}
      * 示例：{"type":"relay:number","value":1};{"type":"relay:number","value":1};{"type":"relay:operation","op":"relay:add"}
      */
-    private static List<IExecutable> parseProgram(String programStr) {
-        List<IExecutable> program = new ArrayList<>();
+    private static List<Executable> parseProgram(String programStr) {
+        List<Executable> program = new ArrayList<>();
         
         // 去除首尾的单引号（Minecraft 命令中单引号不会被自动解析）
         programStr = programStr.trim();
@@ -409,7 +410,7 @@ public class RelayCommands {
             try {
                 com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
                 com.google.gson.JsonElement jsonElem = parser.parse(instr);
-                IExecutable iota = (IExecutable) IData.TypeRegistry.fromJson(jsonElem);
+                Executable iota = Executable.TypeRegistry.fromJson(jsonElem);
                 program.add(iota);
             } catch (Exception e) {
                 throw new RuntimeException("解析 JSON 失败：" + instr, e);
@@ -420,36 +421,31 @@ public class RelayCommands {
     }
 
     /**
-     * 创建操作 iota
-     */
-    private static McIota createOperation(String opId) {
-        return McIota.ofString(opId);
-    }
-
-    /**
      * 将程序转换为可读字符串
      */
-    private static String programToString(List<IExecutable> program) {
+    private static String programToString(List<Executable> program) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < program.size(); i++) {
-            IExecutable exec = program.get(i);
+            Executable exec = program.get(i);
             if (i > 0) sb.append("; ");
 
-            if (exec instanceof McIota iota) {
-                if (iota.isString()) {
-                    String str = iota.asString();
-                    if (str.startsWith("relay:")) {
-                        sb.append(str.substring(6));
-                    } else {
-                        sb.append("\"").append(str).append("\"");
-                    }
-                } else if (iota.isNumber()) {
-                    sb.append(iota.getValue());
-                } else if (iota.isBoolean()) {
-                    sb.append(iota.asBoolean());
+            if (exec instanceof Operation op) {
+                String str = op.getOpId();
+                if (str.startsWith("relay:")) {
+                    sb.append(str.substring(6));
                 } else {
-                    sb.append(iota.getType());
+                    sb.append("\"").append(str).append("\"");
                 }
+            } else if (exec instanceof StringIota s) {
+                sb.append("\"").append(s.asString()).append("\"");
+            } else if (exec instanceof NumberIota n) {
+                sb.append(n.getValue());
+            } else if (exec instanceof BooleanIota b) {
+                sb.append(b.asBoolean());
+            } else if (exec instanceof ProgramBlock) {
+                sb.append("[...]");
+            } else {
+                sb.append(exec.getType());
             }
         }
         return sb.toString();
@@ -458,22 +454,18 @@ public class RelayCommands {
     /**
      * 将数据栈转换为可读字符串
      */
-    private static String dataStackToString(List<IData> dataStack) {
+    private static String dataStackToString(List<Executable> dataStack) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < dataStack.size(); i++) {
-            IData data = dataStack.get(i);
+            Executable data = dataStack.get(i);
             if (i > 0) sb.append(", ");
 
-            if (data instanceof McIota iota) {
-                if (iota.isString()) {
-                    sb.append("\"").append(iota.asString()).append("\"");
-                } else if (iota.isNumber()) {
-                    sb.append(iota.getValue());
-                } else if (iota.isBoolean()) {
-                    sb.append(iota.asBoolean());
-                } else {
-                    sb.append(iota.getType());
-                }
+            if (data instanceof StringIota s) {
+                sb.append("\"").append(s.asString()).append("\"");
+            } else if (data instanceof NumberIota n) {
+                sb.append(n.getValue());
+            } else if (data instanceof BooleanIota b) {
+                sb.append(b.asBoolean());
             } else {
                 sb.append(data.getType());
             }

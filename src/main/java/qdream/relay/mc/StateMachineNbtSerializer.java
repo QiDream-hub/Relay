@@ -1,7 +1,6 @@
 package qdream.relay.mc;
 
-import qdream.relay.engine.IData;
-import qdream.relay.engine.IExecutable;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 
 import net.minecraft.nbt.CompoundTag;
@@ -24,18 +23,14 @@ public class StateMachineNbtSerializer {
         CompoundTag tag = new CompoundTag();
 
         ListTag programList = new ListTag();
-        for (IExecutable iota : machine.getProgramStackSnapshot()) {
-            if (iota instanceof McIota) {
-                programList.add(iotaSerializer.serialize((McIota) iota));
-            }
+        for (Executable iota : machine.getProgramStackSnapshot()) {
+            programList.add(iotaSerializer.serialize(iota));
         }
         tag.put("programStack", programList);
 
         ListTag dataList = new ListTag();
-        for (var data : machine.getDataStackSnapshot()) {
-            if (data instanceof McIota) {
-                dataList.add(iotaSerializer.serialize((McIota) data));
-            }
+        for (Executable data : machine.getDataStackSnapshot()) {
+            dataList.add(iotaSerializer.serialize(data));
         }
         tag.put("dataStack", dataList);
 
@@ -47,7 +42,7 @@ public class StateMachineNbtSerializer {
 
     public void deserialize(StateMachine machine, CompoundTag tag) {
         ListTag programList = tag.getList("programStack").orElse(new ListTag());
-        List<IExecutable> programStack = new ArrayList<>();
+        List<Executable> programStack = new ArrayList<>();
         for (Tag element : programList) {
             programStack.add(iotaSerializer.deserialize((CompoundTag) element));
         }
@@ -56,13 +51,13 @@ public class StateMachineNbtSerializer {
         machine.loadProgram(programStack);
 
         ListTag dataList = tag.getList("dataStack").orElse(new ListTag());
-        List<IData> dataStack = new ArrayList<>();
+        List<Executable> dataStack = new ArrayList<>();
         for (Tag element : dataList) {
             dataStack.add(iotaSerializer.deserialize((CompoundTag) element));
         }
         // 数据栈需要反转后依次压入
         java.util.Collections.reverse(dataStack);
-        for (var data : dataStack) {
+        for (Executable data : dataStack) {
             machine.pushData(data);
         }
 

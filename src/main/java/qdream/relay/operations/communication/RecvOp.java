@@ -1,11 +1,10 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.mc.McIota;
+import qdream.relay.engine.Executable;
+import qdream.relay.types.NumberIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -16,19 +15,15 @@ import qdream.relay.core.CommunicationSystem;
 public class RecvOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData channelData = executor.popData();
-        if (!(channelData instanceof McIota channel)) return;
-        
-        if (channel == null) {
+        Executable channelData = executor.popData();
+        if (channelData == null) return;
+        if (!(channelData instanceof NumberIota channel)) {
+            executor.triggerMishap("操作 relay:recv 期望 number 类型，实际为：" + channelData.getType());
             return;
         }
-        
-        if (!channel.isNumber()) {
-            throw new IllegalArgumentException("Recv 需要数值型频道号");
-        }
-        
+
         int ch = channel.asInt();
-        McIota data = CommunicationSystem.recv(ch);
+        Executable data = CommunicationSystem.recv(ch);
         executor.pushData(data);
     }
 

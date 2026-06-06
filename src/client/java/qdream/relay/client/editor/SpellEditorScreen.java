@@ -8,9 +8,8 @@ import net.minecraft.world.entity.player.Inventory;
 
 import qdream.relay.screen.SpellEditorScreenHandler;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IExecutable;
-import qdream.relay.engine.IData;
-import qdream.relay.mc.McIota;
+import qdream.relay.engine.Executable;
+import qdream.relay.types.Operation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,9 +161,9 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         y += LINE_HEIGHT;
 
         // 数据栈内容
-        List<IData> dataStack = testMachine.getDataStackSnapshot();
+        List<Executable> dataStack = testMachine.getDataStackSnapshot();
         for (int i = dataStack.size() - 1; i >= 0 && y < top + 100; i--) {
-            IData data = dataStack.get(i);
+            Executable data = dataStack.get(i);
             String text = data.getType() + ": " + data.getValue();
             graphics.text(this.font, text, x, y, 0x00AAAA);
             y += LINE_HEIGHT;
@@ -176,9 +175,9 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         y += LINE_HEIGHT;
 
         // 程序栈内容
-        List<IExecutable> programStack = testMachine.getProgramStackSnapshot();
+        List<Executable> programStack = testMachine.getProgramStackSnapshot();
         for (int i = programStack.size() - 1; i >= 0 && y < top + 200; i--) {
-            IExecutable exec = programStack.get(i);
+            Executable exec = programStack.get(i);
             String text = exec.getType() + ": " + exec.getValue();
             graphics.text(this.font, text, x, y, 0xFF8800);
             y += LINE_HEIGHT;
@@ -190,9 +189,9 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         if (program.isEmpty()) return;
 
         // 将程序加载到测试状态机
-        List<IExecutable> iotaProgram = new ArrayList<>();
+        List<Executable> iotaProgram = new ArrayList<>();
         for (String opId : program) {
-            iotaProgram.add(McIota.ofString(opId));
+            iotaProgram.add(new Operation(opId));
         }
 
         testMachine.loadProgram(iotaProgram);

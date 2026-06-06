@@ -1,36 +1,50 @@
 ---
 name: relay-architecture-patterns
-description: Relay 模组的架构模式，包括双栈状态机、IData/IExecutable 接口抽象、操作注册链式 API、engine/mc 分层架构
+description: Relay 模组的架构模式，包括双栈状态机、IData/IExecutable 接口抽象、DataWrapper 语法糖、engine/types/mc 三层架构
 source: auto-skill
-extracted_at: '2026-06-05T15:55:38.363Z'
+extracted_at: '2026-06-06T16:00:00.000Z'
 ---
 
 # Relay 模组架构模式
 
 Relay 是一个基于栈的编程模组，为 Minecraft 添加可视化法术编程系统。以下是其核心架构模式。
 
-## 0. Engine/MC 分层架构 (2026-06-05 重构，2026-06-06 单一注册表)
+## 0. Engine/Types/MC 三层架构 (2026-06-06 重构：DataWrapper 语法糖)
 
 核心执行引擎与 Minecraft 完全解耦，支持版本迁移和独立测试。
 
-**2026-06-06 更新**：移除了 `mc/IotaTypeRegistry.java`，统一使用 `engine/IotaTypeRegistry` 作为唯一类型注册表。
+**2026-06-06 重构**：
+1. 类型类从 `mc` 包移动到独立的 `types` 包
+2. 类型类只实现 `IData`（不再实现 `IExecutable`）
+3. 引入 `DataWrapper` 实现语法糖：纯数据执行时自动压入数据栈
+4. `Operation` 和 `ProgramBlock` 仍实现 `IExecutable`
 
 ```
 src/main/java/qdream/relay/
 ├── engine/                    # 纯 Java 引擎（零 MC 依赖）
-│   ├── IData.java             # 数据接口（getType() 返回 String, getValue()）
+│   ├── IData.java             # 数据接口（getType(), getValue(), toJson()）
 │   ├── IExecutable.java       # 可执行接口（继承 IData + execute()）
-│   ├── StateMachine.java      # 状态机核心（使用 IData/IExecutable）
-│   ├── IotaTypeRegistry.java  # 类型注册表（唯一）
+│   ├── StateMachine.java      # 状态机核心（使用 IExecutable）
+│   ├── DataWrapper.java       # 数据包装器（语法糖核心）
 │   ├── OperationRegistry.java # 操作注册表
 │   └── OperationSignature.java# 签名（使用字符串表示类型）
 │
+├── types/                     # 类型实现层（mod 具体类型）
+│   ├── NumberIota.java        # 数字类型（实现 IData）
+│   ├── StringIota.java        # 字符串类型（实现 IData）
+│   ├── BooleanIota.java       # 布尔类型（实现 IData）
+│   ├── VectorIota.java        # 向量类型（实现 IData）
+│   ├── EntityIota.java        # 实体类型（实现 IData）
+│   ├── NullIota.java          # 空值类型（实现 IData，单例）
+│   ├── Operation.java         # 操作引用（实现 IExecutable）
+│   ├── ProgramBlock.java      # 程序块（实现 IExecutable）
+│   ├── Iotas.java             # 工厂类（返回 IExecutable）
+│   └── IotaSerializers.java   # 序列化器注册
+│
 ├── mc/                        # MC 适配层
-│   ├── McIota.java            # IExecutable 实现
-│   ├── McIotaType.java        # 类型枚举
-│   ├── McIotaTypes.java       # 内置类型序列化器注册（委托到 engine）
 │   ├── McVec3Adapter.java     # Vec3 包装类
-│   └── NbtSerializer.java     # NBT 序列化工具
+│   ├── NbtSerializer.java     # NBT 序列化工具
+│   └── StateMachineNbtSerializer.java
 │
 ├── core/                      # MC 集成层（保留）
 │   ├── CommunicationSystem.java
@@ -38,7 +52,7 @@ src/main/java/qdream/relay/
 │   ├── ShellTickHandler.java
 │   └── EnergySystem.java
 │
-└── operations/                # 操作实现（依赖 engine 和 mc）
+└── operations/                # 操作实现（依赖 engine 和 types）
 ```
 
 ### 单一类型注册表设计
@@ -47,27 +61,108 @@ src/main/java/qdream/relay/
 |------|------|------|
 | `engine.IotaTypeRegistry` | 唯一类型注册表，管理所有 JSON 序列化器 | 纯 Java |
 | `IData.TypeRegistry` | 委托接口，简化注册调用 | 委托到 `IotaTypeRegistry` |
-| `mc.McIotaTypes.register()` | 注册所有内置类型的序列化器 | 调用 `IData.TypeRegistry.register()` |
-| `mc.McIota.toJson()` | 序列化实例 | 调用 `IotaTypeRegistry.toJson(this)` |
-
-**已删除**：`mc/IotaTypeRegistry.java` - 避免重复注册和同步问题
+| `mc.IotaSerializers.register()` | 注册所有内置类型的序列化器 | 调用 `IData.TypeRegistry.register()` |
+| `mc.NumberIota.toJson()` | 序列化实例（每个类型自己实现） | 无 |
 
 ### 关键设计决策
 
 | 特性 | 设计 | 理由 |
 |------|------|------|
-| IData 接口 | 仅 `getType()` (返回 String) 和 `getValue()` | engine 包不依赖任何具体类型定义 |
+| IData 接口 | `getType()` (返回 String), `getValue()`, `toJson()` | engine 包不依赖任何具体类型定义 |
 | IExecutable 接口 | 继承 IData，添加 `execute(StateMachine)` | 可执行单元也是数据，可存储在栈中 |
-| 类型字符串化 | 类型用 `"number"`, `"list"` 等字符串表示 | 避免 engine 依赖枚举 |
-| 具体类型实现 | mc 包中的 McIota 实现所有类型判断和转换 | 职责分离 |
-| 世界操作适配 | PlaceBlockOp/GetBlockOp 使用 McVec3Adapter.getVec3() | 在需要 MC API 时转换 |
+| 类型字符串化 | 类型用 `"relay:number"`, `"relay:string"` 等字符串表示 | 避免 engine 依赖枚举，支持跨 mod 扩展 |
+| 独立类型类 | 每个类型独立实现（`NumberIota`, `StringIota` 等） | 类型安全，代码清晰 |
+| 类型只实现 IData | 纯数据不实现 `IExecutable` | 语义清晰：数据不是操作 |
+| DataWrapper 语法糖 | `DataWrapper<IData>` 实现 `IExecutable`，execute 时自动压栈 | 统一程序栈类型 (`IExecutable`)，同时保持数据/操作分离 |
+| 工厂类返回 IExecutable | `Iotas.number(1)` 返回 `DataWrapper<NumberIota>` | 调用者无需关心包装细节 |
+| 世界操作适配 | PlaceBlockOp/GetBlockOp 使用 `McVec3Adapter.getVec3()` | 在需要 MC API 时转换 |
+
+### DataWrapper 语法糖核心
+
+```java
+// engine 包 - 数据包装器
+public class DataWrapper implements IExecutable {
+    private final IData data;
+
+    public DataWrapper(IData data) {
+        this.data = data;
+    }
+
+    @Override
+    public String getType() {
+        return data.getType();
+    }
+
+    @Override
+    public Object getValue() {
+        return data.getValue();
+    }
+
+    @Override
+    public JsonElement toJson() {
+        return data.toJson();
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        // 语法糖：纯数据执行时自动压入数据栈
+        executor.pushData(data);
+    }
+
+    public IData getData() {
+        return data;
+    }
+}
+```
+
+### 工厂类使用 DataWrapper
+
+```java
+// types 包 - 工厂类
+public final class Iotas {
+    private Iotas() {}
+
+    // 返回 IExecutable（内部是 DataWrapper）
+    public static IExecutable number(double value) {
+        return new DataWrapper(new NumberIota(value));
+    }
+
+    public static IExecutable number(int value) {
+        return new DataWrapper(new NumberIota(value));
+    }
+
+    public static IExecutable booleanIota(boolean value) {
+        return new DataWrapper(new BooleanIota(value));
+    }
+
+    public static IExecutable string(String value) {
+        return new DataWrapper(new StringIota(value));
+    }
+
+    // Operation 和 ProgramBlock 直接实现 IExecutable，无需包装
+    public static IExecutable operation(String opId) {
+        return new Operation(opId);
+    }
+
+    public static IExecutable list(List<IExecutable> items) {
+        return new ProgramBlock(items);
+    }
+
+    // 类型转换辅助（从 IData 提取）
+    public static NumberIota asNumber(IData data) {
+        if (data instanceof NumberIota n) return n;
+        throw new IllegalArgumentException("期望 number 类型，实际为：" + data.getType());
+    }
+    // ... 其他 asXxx() 方法
+}
+```
 
 ### IData/IExecutable 接口设计
 
 ```java
 // engine 包 - 纯 Java 接口
 public interface IData {
-    String getType();  // 返回 "number", "boolean", "vector" 等
+    String getType();  // 返回 "relay:number", "relay:string" 等
     Object getValue();
 }
 
@@ -76,51 +171,124 @@ public interface IExecutable extends IData {
 }
 ```
 
-### McIota 实现模式
+### 独立类型类实现模式
 
 ```java
-// mc 包 - 完整实现
-public class McIota implements IExecutable {
-    private final McIotaType type;
-    private final Object value;
+// types 包 - 数字类型（只实现 IData）
+public class NumberIota implements IData {
+    private final double value;
+
+    public NumberIota(double value) { this.value = value; }
+    public NumberIota(int value) { this.value = value; }
 
     @Override
-    public String getType() {
-        return type.toLowerCase();  // 返回小写字符串
+    public String getType() { return "relay:number"; }
+
+    @Override
+    public Object getValue() { return value; }
+
+    @Override
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:number");
+        json.addProperty("value", value);
+        return json;
     }
 
+    // 类型转换方法
+    public double asDouble() { return value; }
+    public int asInt() { return (int) value; }
+    public boolean isInteger() { return value == (int) value; }
+}
+
+// types 包 - 字符串类型（只实现 IData）
+public class StringIota implements IData {
+    private final String value;
+
+    public StringIota(String value) { this.value = value; }
+
     @Override
-    public Object getValue() {
-        return value;
+    public String getType() { return "relay:string"; }
+
+    @Override
+    public Object getValue() { return value; }
+
+    @Override
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:string");
+        json.addProperty("value", value);
+        return json;
+    }
+
+    public String asString() { return value; }
+}
+
+// types 包 - 操作引用（实现 IExecutable）
+public class Operation implements IExecutable {
+    private final String opId;
+
+    public Operation(String opId) { this.opId = opId; }
+
+    @Override
+    public String getType() { return "relay:operation"; }
+
+    @Override
+    public Object getValue() { return opId; }
+
+    @Override
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:operation");
+        json.addProperty("op", opId);
+        return json;
     }
 
     @Override
     public void execute(StateMachine executor) {
-        // 非字符串、非列表类型自动压入数据栈
-        if (type != McIotaType.STRING && type != McIotaType.LIST) {
-            executor.pushData(this);
+        executor.executeOperation(opId);  // 执行操作
+    }
+
+    public String getOpId() { return opId; }
+}
+
+// types 包 - 程序块（列表，实现 IExecutable）
+public class ProgramBlock implements IExecutable {
+    private final List<IExecutable> items;
+
+    public ProgramBlock(List<IExecutable> items) {
+        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
+    }
+
+    @Override
+    public String getType() { return "relay:list"; }
+
+    @Override
+    public Object getValue() { return items; }
+
+    @Override
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "relay:list");
+        JsonArray array = new JsonArray();
+        for (IExecutable item : items) {
+            array.add(item.toJson());
+        }
+        json.add("value", array);
+        return json;
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        // 列表反转后压入程序栈，保证从左到右的执行顺序
+        List<IExecutable> reversed = new ArrayList<>(items);
+        Collections.reverse(reversed);
+        for (IExecutable item : reversed) {
+            executor.pushProgram(item);
         }
     }
 
-    // 工厂方法
-    public static McIota ofInt(int value);
-    public static McIota ofDouble(double value);
-    public static McIota ofBoolean(boolean value);
-    public static McIota ofVector(Object vec3);
-    public static McIota ofString(String value);
-    public static McIota ofEntity(UUID entityId);
-    public static McIota ofList(List<IExecutable> value);
-    public static McIota ofNull();
-
-    // 类型判断
-    public boolean isNumber() { return type == McIotaType.NUMBER; }
-    public boolean isBoolean() { return type == McIotaType.BOOLEAN; }
-    // ...
-
-    // 类型转换
-    public double asDouble() { ... }
-    public int asInt() { ... }
-    // ...
+    public List<IExecutable> getItems() { return new ArrayList<>(items); }
 }
 ```
 
@@ -432,7 +600,7 @@ public void triggerMishap(String reason) {
     programStack.clear();
     dataStack.clear();
     remainingOps = 0;
-    
+
     if (mishapHandler != null) {
         mishapHandler.onMishap(reason);
     }
@@ -447,6 +615,63 @@ public void triggerMishap(String reason) {
 - 栈溢出
 - 缺少世界交互器
 - 队列已满（通信系统）
+
+### 操作中的类型错误报告模式（2026-06-06 更新）
+
+所有操作在类型检查失败时必须调用 `triggerMishap()` 向玩家报告错误，而不是静默返回。
+
+```java
+// ❌ 错误：静默失败，玩家无法知道问题
+public void execute(StateMachine executor) {
+    IData bData = executor.popData();
+    if (!(bData instanceof NumberIota b)) return;  // 静默返回
+    // ...
+}
+
+// ✅ 正确：报告错误到聊天栏
+public void execute(StateMachine executor) {
+    IData bData = executor.popData();
+    if (bData == null) return;
+    if (!(bData instanceof NumberIota b)) {
+        executor.triggerMishap("操作 relay:add 期望 number 类型，实际为：" + bData.getType());
+        return;
+    }
+    // ...
+}
+```
+
+### 错误消息格式
+
+```
+操作 <操作 ID> 期望 <期望类型> 类型，实际为：<实际类型>
+```
+
+示例：
+- `操作 relay:add 期望 number 类型，实际为：relay:null`
+- `操作 relay:if 期望 boolean 类型，实际为：relay:string`
+- `操作 relay:list_get 期望 number 类型，实际为：relay:boolean`
+
+### 所有操作的类型检查模板
+
+```java
+@Override
+public void execute(StateMachine executor) {
+    // 1. pop 数据
+    IData argData = executor.popData();
+    
+    // 2. 检查 null（pop 失败已触发 mishap）
+    if (argData == null) return;
+    
+    // 3. 检查类型，错误时触发 mishap
+    if (!(argData instanceof ExpectedType arg)) {
+        executor.triggerMishap("操作 relay:xxx 期望 xxx 类型，实际为：" + argData.getType());
+        return;
+    }
+    
+    // 4. 正常执行逻辑
+    // ...
+}
+```
 
 ## 6. 外壳方块实体架构
 

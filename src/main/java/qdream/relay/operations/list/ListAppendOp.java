@@ -1,15 +1,15 @@
 package qdream.relay.operations.list;
-import qdream.relay.engine.IExecutable;
-import qdream.relay.mc.McIota;
+
+import qdream.relay.engine.Executable;
+import qdream.relay.types.ProgramBlock;
 import qdream.relay.engine.OperationSignature;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
-import qdream.relay.engine.IExecutable;
+import qdream.relay.engine.Executable;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.List;
+
 /**
  * List Append 操作 - 在列表末尾添加元素
  * 输入：列表，值
@@ -18,22 +18,25 @@ import java.util.List;
 public class ListAppendOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData valueData = executor.popData();
-        if (!(valueData instanceof McIota valueIota)) return;
-        IData listData = executor.popData();
-        if (!(listData instanceof McIota listIota)) return;
-        if (valueIota == null || listIota == null) {
-            throw new IllegalArgumentException("list_append 需要列表和值参数");
+        Executable valueData = executor.popData();
+        if (valueData == null) return;
+        Executable listData = executor.popData();
+        if (listData == null) return;
+        if (!(listData instanceof ProgramBlock listBlock)) {
+            executor.triggerMishap("操作 relay:list_append 期望 list 类型，实际为：" + listData.getType());
+            return;
         }
-        if (!listIota.isList()) {
-            throw new IllegalArgumentException("list_append 第一个参数需要是列表");
-        }
-        List<IExecutable> list = listIota.asList();
+
+        List<Executable> list = listBlock.getItems();
         // 创建新列表（不可变修改）
-        List<IExecutable> newList = new ArrayList<>(list);
-        newList.add(valueIota);
-        executor.pushData(McIota.ofList(newList));
+        List<Executable> newList = new ArrayList<>(list);
+        // 所有 IData 现在都实现 IExecutable
+        if (valueData instanceof Executable exec) {
+            newList.add(exec);
+        }
+        executor.pushData(new ProgramBlock(newList));
     }
+
     @Override
     public OperationSignature getSignature() {
         return OperationSignature.builder()
@@ -42,6 +45,7 @@ public class ListAppendOp implements StackOperation {
                 .output("list")
                 .build();
     }
+
     @Override
     public int getCost() {
         return 2;

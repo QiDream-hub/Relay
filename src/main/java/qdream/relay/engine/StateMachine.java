@@ -13,8 +13,8 @@ import java.util.Collections;
  * 纯 Java 实现，不依赖 Minecraft
  */
 public class StateMachine {
-    private final Deque<IExecutable> programStack = new ArrayDeque<>();
-    private final Deque<IData> dataStack = new ArrayDeque<>();
+    private final Deque<Executable> programStack = new ArrayDeque<>();
+    private final Deque<Executable> dataStack = new ArrayDeque<>();
 
     private int remainingOps;
     private boolean hasWorldInteractor;
@@ -45,11 +45,11 @@ public class StateMachine {
      * 从列表加载程序
      * 程序列表需要反转后压入程序栈，保证从左到右的执行顺序
      */
-    public void loadProgram(List<IExecutable> program) {
-        List<IExecutable> reversed = new ArrayList<>(program);
+    public void loadProgram(List<Executable> program) {
+        List<Executable> reversed = new ArrayList<>(program);
         Collections.reverse(reversed);
         programStack.clear();
-        for (IExecutable iota : reversed) {
+        for (Executable iota : reversed) {
             programStack.push(iota);
         }
     }
@@ -64,32 +64,9 @@ public class StateMachine {
         remainingOps = ops;
 
         while (remainingOps > 0 && !programStack.isEmpty()) {
-            IExecutable top = programStack.pop();
-
-            // 检查是否是操作 ID 字符串
-            if ("string".equals(top.getType())) {
-                // 操作 ID
-                String opId = (String) top.getValue();
-                executeOperation(opId);
-            } else if ("list".equals(top.getType())) {
-                // 列表 - 反转后压入程序栈
-                @SuppressWarnings("unchecked")
-                List<IExecutable> list = (List<IExecutable>) top.getValue();
-                List<IExecutable> reversed = new ArrayList<>(list);
-                Collections.reverse(reversed);
-                for (IExecutable iota : reversed) {
-                    programStack.push(iota);
-                }
-                remainingOps--;
-            } else if ("null".equals(top.getType()) || "number".equals(top.getType()) ||
-                       "boolean".equals(top.getType()) || "vector".equals(top.getType()) ||
-                       "string".equals(top.getType()) || "entity".equals(top.getType())) {
-                // 数据 - 自动压入数据栈（宽容规则）
-                dataStack.push(top);
-                remainingOps--;
-            } else {
-                triggerMishap("未知的栈顶类型：" + top.getType());
-            }
+            Executable executable = programStack.pop();
+            executable.execute(this);
+            remainingOps--;
         }
     }
 
@@ -145,14 +122,14 @@ public class StateMachine {
     /**
      * 从程序栈弹出
      */
-    public IExecutable popProgram() {
+    public Executable popProgram() {
         return programStack.pollFirst();
     }
 
     /**
      * 压入程序栈
      */
-    public void pushProgram(IExecutable iota) {
+    public void pushProgram(Executable iota) {
         if (programStack.size() >= maxStackSize) {
             triggerMishap("程序栈超出大小限制 (" + maxStackSize + ")");
             return;
@@ -163,7 +140,7 @@ public class StateMachine {
     /**
      * 从数据栈弹出
      */
-    public IData popData() {
+    public Executable popData() {
         if (dataStack.isEmpty()) {
             triggerMishap("数据栈为空，无法弹出");
             return null;
@@ -174,7 +151,7 @@ public class StateMachine {
     /**
      * 查看数据栈顶部
      */
-    public IData peekData() {
+    public Executable peekData() {
         if (dataStack.isEmpty()) {
             return null;
         }
@@ -184,7 +161,7 @@ public class StateMachine {
     /**
      * 压入数据栈
      */
-    public void pushData(IData iota) {
+    public void pushData(Executable iota) {
         if (dataStack.size() >= maxStackSize) {
             triggerMishap("数据栈超出大小限制 (" + maxStackSize + ")");
             return;
@@ -237,14 +214,14 @@ public class StateMachine {
     /**
      * 获取数据栈快照（用于调试）
      */
-    public List<IData> getDataStackSnapshot() {
+    public List<Executable> getDataStackSnapshot() {
         return new ArrayList<>(dataStack);
     }
 
     /**
      * 获取程序栈快照（用于调试）
      */
-    public List<IExecutable> getProgramStackSnapshot() {
+    public List<Executable> getProgramStackSnapshot() {
         return new ArrayList<>(programStack);
     }
 }

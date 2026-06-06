@@ -1,11 +1,11 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.mc.McIota;
+import qdream.relay.types.BooleanIota;
+import qdream.relay.types.NumberIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
+import qdream.relay.engine.Executable;
 
 /**
  * Gt 操作 - 大于比较
@@ -13,21 +13,21 @@ import qdream.relay.engine.IData;
 public class GtOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData bData = executor.popData();
-        if (!(bData instanceof McIota b)) return;
-        IData aData = executor.popData();
-        if (!(aData instanceof McIota a)) return;
-        
-        if (b == null || a == null) {
+        Executable bData = executor.popData();
+        if (bData == null) return;
+        if (!(bData instanceof NumberIota b)) {
+            executor.triggerMishap("操作 relay:gt 期望 number 类型，实际为：" + bData.getType());
             return;
         }
-        
-        if (!a.isNumber() || !b.isNumber()) {
-            throw new IllegalArgumentException("Gt 需要两个数值参数");
+        Executable aData = executor.popData();
+        if (aData == null) return;
+        if (!(aData instanceof NumberIota a)) {
+            executor.triggerMishap("操作 relay:gt 期望 number 类型，实际为：" + aData.getType());
+            return;
         }
-        
+
         boolean result = a.asDouble() > b.asDouble();
-        executor.pushData(McIota.ofBoolean(result));
+        executor.pushData(new BooleanIota(result));
     }
 
     @Override

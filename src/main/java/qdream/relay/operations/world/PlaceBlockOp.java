@@ -1,12 +1,12 @@
 package qdream.relay.operations.world;
 
-import qdream.relay.mc.McIota;
 import qdream.relay.engine.OperationSignature;
-import qdream.relay.mc.McIotaType;
 import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.IData;
-import qdream.relay.mc.McVec3Adapter;
+import qdream.relay.engine.Executable;
+import qdream.relay.types.VectorIota;
+import qdream.relay.types.StringIota;
+import qdream.relay.types.BooleanIota;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
@@ -20,35 +20,31 @@ import net.minecraft.world.phys.Vec3;
 public class PlaceBlockOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
-        IData blockIdData = executor.popData();
-        if (!(blockIdData instanceof McIota blockIdIota)) return;
-        IData posData = executor.popData();
-        if (!(posData instanceof McIota posIota)) return;
-
-        if (blockIdIota == null || posIota == null) {
-            throw new IllegalArgumentException("place_block 需要坐标和方块 ID 参数");
+        Executable blockIdData = executor.popData();
+        if (blockIdData == null) return;
+        if (!(blockIdData instanceof StringIota blockIdIota)) {
+            executor.triggerMishap("操作 relay:place_block 期望 string 类型，实际为：" + blockIdData.getType());
+            return;
+        }
+        Executable posData = executor.popData();
+        if (posData == null) return;
+        if (!(posData instanceof VectorIota pos)) {
+            executor.triggerMishap("操作 relay:place_block 期望 vector 类型，实际为：" + posData.getType());
+            return;
         }
 
-        if (!posIota.isVector()) {
-            throw new IllegalArgumentException("place_block 第一个参数需要是向量");
-        }
-
-        if (!blockIdIota.isString()) {
-            throw new IllegalArgumentException("place_block 第二个参数需要是字符串");
-        }
-
-        Vec3 pos = ((McVec3Adapter) posIota.asVector()).getVec3();
-        BlockPos blockPos = BlockPos.containing(pos);
-        String blockId = blockIdIota.asString();
+        Vec3 vec = pos.getVec3();
+        BlockPos blockPos = BlockPos.containing(vec);
+        String blockIdStr = blockIdIota.asString();
 
         // TODO: 实现方块放置逻辑
         // Level level = executor.getWorld();
-        // Block block = BuiltInRegistries.BLOCK.get(Identifier.tryBySeparator(':', blockId).orElseThrow());
+        // Block block = BuiltInRegistries.BLOCK.get(Identifier.tryBySeparator(':', blockIdStr).orElseThrow());
         // boolean success = level.setBlock(blockPos, block.defaultBlockState(), 3);
-        // executor.pushData(McIota.ofBoolean(success));
+        // executor.pushData(new BooleanIota(success));
 
         // 临时实现：返回 false
-        executor.pushData(McIota.ofBoolean(false));
+        executor.pushData(new BooleanIota(false));
     }
 
     @Override

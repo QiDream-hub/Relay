@@ -16,10 +16,10 @@ public class IotaTypeRegistry {
      * 序列化器/反序列化器对
      */
     public static class SerDePair {
-        final IData.JsonElementSerializer serializer;
-        final IData.JsonElementDeserializer deserializer;
+        final Executable.JsonElementSerializer serializer;
+        final Executable.JsonElementDeserializer deserializer;
 
-        public SerDePair(IData.JsonElementSerializer serializer, IData.JsonElementDeserializer deserializer) {
+        public SerDePair(Executable.JsonElementSerializer serializer, Executable.JsonElementDeserializer deserializer) {
             this.serializer = serializer;
             this.deserializer = deserializer;
         }
@@ -33,16 +33,16 @@ public class IotaTypeRegistry {
      * @param serializer 序列化器
      * @param deserializer 反序列化器
      */
-    public static void register(String typeId, IData.JsonElementSerializer serializer, IData.JsonElementDeserializer deserializer) {
+    public static void register(String typeId, Executable.JsonElementSerializer serializer, Executable.JsonElementDeserializer deserializer) {
         TYPES.put(typeId, new SerDePair(serializer, deserializer));
     }
 
     /**
      * 从 JSON 反序列化
      * @param json JSON 元素，必须包含 "type" 字段
-     * @return 反序列化后的 IData
+     * @return 反序列化后的 Executable
      */
-    public static IData fromJson(JsonElement json) {
+    public static Executable fromJson(JsonElement json) {
         if (!json.isJsonObject()) {
             throw new RuntimeException("JSON 必须是对象");
         }
@@ -56,11 +56,11 @@ public class IotaTypeRegistry {
     }
 
     /**
-     * 序列化 IData 为 JSON
+     * 序列化 Executable 为 JSON
      * @param data 数据实例
      * @return JSON 元素
      */
-    public static JsonElement toJson(IData data) {
+    public static JsonElement toJson(Executable data) {
         String typeId = data.getType();
         SerDePair serDe = TYPES.get(typeId);
         if (serDe == null) {
