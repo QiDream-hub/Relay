@@ -1,25 +1,39 @@
 package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberIota;
-import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
+import qdream.relay.operations.AbstractOperation;
+
+import com.google.gson.JsonObject;
+
 import qdream.relay.engine.Executable;
 
 /**
  * Div 操作 - 除法
  */
-public class DivOp implements StackOperation {
+public class DivOp extends AbstractOperation {
+
+    protected DivOp() {
+        super("relay:div", 1, OperationSignature.builder()
+                .input("number")
+                .input("number")
+                .output("number")
+                .build());
+    }
+
     @Override
     public void execute(StateMachine executor) {
         Executable bData = executor.popData();
-        if (bData == null) return;
+        if (bData == null)
+            return;
         if (!(bData instanceof NumberIota b)) {
             executor.triggerMishap("操作 relay:div 期望 number 类型，实际为：" + bData.getId());
             return;
         }
         Executable aData = executor.popData();
-        if (aData == null) return;
+        if (aData == null)
+            return;
         if (!(aData instanceof NumberIota a)) {
             executor.triggerMishap("操作 relay:div 期望 number 类型，实际为：" + aData.getId());
             return;
@@ -36,16 +50,18 @@ public class DivOp implements StackOperation {
     }
 
     @Override
-    public OperationSignature getSignature() {
-        return OperationSignature.builder()
-                .input("number")
-                .input("number")
-                .output("number")
-                .build();
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", getId());
+        return json;
     }
 
     @Override
-    public int getCost() {
-        return 1;
+    public Executable fromJson(JsonObject json) {
+        String id = json.get("id").getAsString();
+        if (!this.getId().equals(id)) {
+            throw new IllegalArgumentException("Invalid ID for DivOp: " + id);
+        }
+        return new DivOp();
     }
 }

@@ -10,21 +10,21 @@ import java.util.Set;
  * 注册和管理所有可用的操作
  */
 public class OperationRegistry {
-    private static final Map<String, StackOperation> OPERATIONS = new HashMap<>();
+    private static final Map<String, Executable> OPERATIONS = new HashMap<>();
 
     private OperationRegistry() {}
 
     /**
      * 注册操作
      */
-    public static void register(String id, StackOperation operation) {
+    public static void register(String id, Executable operation) {
         OPERATIONS.put(id, operation);
     }
 
     /**
      * 获取操作
      */
-    public static Optional<StackOperation> get(String id) {
+    public static Optional<Executable> get(String id) {
         return Optional.ofNullable(OPERATIONS.get(id));
     }
 

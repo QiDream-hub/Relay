@@ -1,8 +1,10 @@
 package qdream.relay.operations.world;
 
-import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
+
+import com.google.gson.JsonObject;
+
 import qdream.relay.engine.Executable;
 import qdream.relay.types.VectorIota;
 import qdream.relay.types.NullIota;
@@ -16,7 +18,28 @@ import net.minecraft.world.phys.Vec3;
  * 输出：字符串（方块 ID）或 null
  * 需要世界交互器
  */
-public class GetBlockOp implements StackOperation {
+public class GetBlockOp implements Executable {
+    private static final String ID = "relay:get_block";
+
+    private static final int COST = 1;
+
+    private static final OperationSignature SIGNATURE = OperationSignature.builder()
+            .input("vector")
+            .output("string")
+            .build();
+
+    public String getId() {
+        return ID;
+    }
+
+    public int getCost() {
+        return COST;
+    }
+
+    public OperationSignature getSignature() {
+        return SIGNATURE;
+    }
+
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
@@ -46,15 +69,18 @@ public class GetBlockOp implements StackOperation {
     }
 
     @Override
-    public OperationSignature getSignature() {
-        return OperationSignature.builder()
-                .input("vector")
-                .output("string")
-                .build();
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", getId());
+        return json;
     }
 
     @Override
-    public int getCost() {
-        return 1;
+    public Executable fromJson(JsonObject json) {
+        String id = json.get("id").getAsString();
+        if (!ID.equals(id)) {
+            throw new IllegalArgumentException("Invalid ID for GetBlockOp: " + id);
+        }
+        return new GetBlockOp();
     }
 }

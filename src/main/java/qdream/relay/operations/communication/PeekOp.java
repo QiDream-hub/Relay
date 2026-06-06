@@ -2,9 +2,11 @@ package qdream.relay.operations.communication;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.types.NumberIota;
-import qdream.relay.engine.OperationSignature;
-import qdream.relay.engine.StackOperation;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
+
+import com.google.gson.JsonObject;
+
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -12,7 +14,28 @@ import qdream.relay.core.CommunicationSystem;
  * 弹出：频道号
  * 返回：数据或 null
  */
-public class PeekOp implements StackOperation {
+public class PeekOp implements Executable {
+    private static final String ID = "relay:peek";
+
+    private static final int COST = 1;
+
+    private static final OperationSignature SIGNATURE = OperationSignature.builder()
+            .input("number")
+            .output("any")
+            .build();
+
+    public String getId() {
+        return ID;
+    }
+
+    public int getCost() {
+        return COST;
+    }
+
+    public OperationSignature getSignature() {
+        return SIGNATURE;
+    }
+
     @Override
     public void execute(StateMachine executor) {
         Executable channelData = executor.popData();
@@ -28,15 +51,18 @@ public class PeekOp implements StackOperation {
     }
 
     @Override
-    public OperationSignature getSignature() {
-        return OperationSignature.builder()
-                .input("number")
-                .output("any")
-                .build();
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", getId());
+        return json;
     }
 
     @Override
-    public int getCost() {
-        return 1;
+    public Executable fromJson(JsonObject json) {
+        String id = json.get("id").getAsString();
+        if (!ID.equals(id)) {
+            throw new IllegalArgumentException("Invalid ID for PeekOp: " + id);
+        }
+        return new PeekOp();
     }
 }

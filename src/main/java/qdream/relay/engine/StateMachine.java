@@ -17,7 +17,6 @@ public class StateMachine {
     private final Deque<Executable> dataStack = new ArrayDeque<>();
 
     private int remainingOps;
-    private boolean hasWorldInteractor;
     private int maxStackSize;
 
     /**
@@ -36,7 +35,6 @@ public class StateMachine {
     public StateMachine(int maxStackSize) {
         this.maxStackSize = maxStackSize;
         this.remainingOps = 0;
-        this.hasWorldInteractor = false;
     }
 
     // ========== 程序加载 ==========
@@ -68,27 +66,6 @@ public class StateMachine {
             executable.execute(this);
             remainingOps--;
         }
-    }
-
-    /**
-     * 执行操作
-     * @param opId 操作 ID
-     */
-    public void executeOperation(String opId) {
-        OperationRegistry.get(opId).ifPresentOrElse(op -> {
-            // 检查操作数预算
-            if (remainingOps < op.getCost()) {
-                triggerMishap("操作 " + opId + " 需要 " + op.getCost() + " 操作数，但只剩 " + remainingOps);
-                return;
-            }
-
-            try {
-                op.execute(this);
-                remainingOps -= op.getCost();
-            } catch (Exception e) {
-                triggerMishap("执行操作 " + opId + " 时出错：" + e.getMessage());
-            }
-        }, () -> triggerMishap("未知操作：" + opId));
     }
 
     // ========== 事故处理 ==========
@@ -178,14 +155,6 @@ public class StateMachine {
     }
 
     // ========== 状态 ==========
-
-    public void setHasWorldInteractor(boolean has) {
-        this.hasWorldInteractor = has;
-    }
-
-    public boolean hasWorldInteractor() {
-        return hasWorldInteractor;
-    }
 
     public int getRemainingOps() {
         return remainingOps;
