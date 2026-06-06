@@ -4,6 +4,7 @@ import qdream.relay.types.NumberIota;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 
 import qdream.relay.core.CommunicationSystem;
@@ -24,7 +25,7 @@ public class RecvOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable channelData = executor.popData();
+        Operation channelData = (Operation) executor.popData();
         if (channelData == null) return;
         if (!(channelData instanceof NumberIota channel)) {
             executor.triggerMishap("操作 relay:recv 期望 number 类型，实际为：" + channelData.getId());

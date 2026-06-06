@@ -11,8 +11,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 
 /**
- * 列表类型（已废弃，使用 ProgramBlock 替代）
- * 为了向后兼容保留
+ * 列表类型
  */
 public class ListIota extends Data {
     private final List<Executable> value;

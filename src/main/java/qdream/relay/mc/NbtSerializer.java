@@ -2,6 +2,7 @@ package qdream.relay.mc;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.types.*;
 
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 
 /**
  * Minecraft NBT 序列化工具类
@@ -38,7 +40,7 @@ public class NbtSerializer {
 
     public CompoundTag serialize(Executable exec) {
         CompoundTag tag = new CompoundTag();
-        tag.putString("id", exec.getId());
+        tag.putString("id", ((Operation)exec).getId());
 
         if (exec instanceof NumberIota num) {
             if (num.isInteger()) {
@@ -57,8 +59,8 @@ public class NbtSerializer {
             tag.putDouble("z", v.z);
         } else if (exec instanceof EntityIota ent) {
             tag.putString("value", ent.asEntity().toString());
-        } else if (exec instanceof ProgramBlock list) {
-            tag.put("value", serializeList(list.getItems()));
+        } else if (exec instanceof ListIota list) {
+            tag.put("value", serializeList(list.getValue()));
         } else if (exec instanceof NullIota) {
             // 无值
         }
@@ -97,7 +99,7 @@ public class NbtSerializer {
                 var valueOpt = tag.getList("value");
                 if (valueOpt.isPresent()) {
                     ListTag listTag = valueOpt.get();
-                    yield new ProgramBlock(deserializeList(listTag));
+                    yield new ListIota(deserializeList(listTag));
                 } else {
                     yield NullIota.INSTANCE;
                 }

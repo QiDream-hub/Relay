@@ -1,12 +1,12 @@
 package qdream.relay.operations.list;
 
-import qdream.relay.types.ProgramBlock;
 import qdream.relay.types.NumberIota;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
-
+import qdream.relay.types.ListIota;
 import qdream.relay.types.NullIota;
 
 import java.util.List;
@@ -28,26 +28,28 @@ public class ListGetOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable indexData = executor.popData();
-        if (indexData == null) return;
+        Operation indexData = (Operation) executor.popData();
+        if (indexData == null)
+            return;
         if (!(indexData instanceof NumberIota index)) {
             executor.triggerMishap("操作 relay:list_get 期望 number 类型，实际为：" + indexData.getId());
             return;
         }
-        Executable listData = executor.popData();
-        if (listData == null) return;
-        if (!(listData instanceof ProgramBlock listBlock)) {
+        Operation listData = (Operation) executor.popData();
+        if (listData == null)
+            return;
+        if (!(listData instanceof ListIota list)) {
             executor.triggerMishap("操作 relay:list_get 期望 list 类型，实际为：" + listData.getId());
             return;
         }
 
-        List<Executable> list = listBlock.getItems();
-        int indexVal = index.asInt();
-        if (indexVal < 0 || indexVal >= list.size()) {
-            executor.pushData(NullIota.INSTANCE);
+        List<Executable> value = list.getValue();
+        int idx = (int) index.asDouble();
+        if (idx < 0 || idx >= value.size()) {
+            executor.pushData(new NullIota());
             return;
         }
-        executor.pushData(list.get(indexVal));
+        executor.pushData(value.get(idx));
     }
 
 }

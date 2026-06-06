@@ -1,9 +1,9 @@
 package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberIota;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 
 /**
@@ -21,14 +21,14 @@ public class DivOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable bData = executor.popData();
+        Operation bData = (Operation) executor.popData();
         if (bData == null)
             return;
         if (!(bData instanceof NumberIota b)) {
             executor.triggerMishap("操作 relay:div 期望 number 类型，实际为：" + bData.getId());
             return;
         }
-        Executable aData = executor.popData();
+        Operation aData = (Operation) executor.popData();
         if (aData == null)
             return;
         if (!(aData instanceof NumberIota a)) {

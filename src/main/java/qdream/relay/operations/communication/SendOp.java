@@ -3,8 +3,8 @@ package qdream.relay.operations.communication;
 import qdream.relay.types.NumberIota;
 import qdream.relay.types.BooleanIota;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 
 import qdream.relay.core.CommunicationSystem;
@@ -25,9 +25,9 @@ public class SendOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable dataData = executor.popData();
+        Operation dataData = (Operation) executor.popData();
         if (dataData == null) return;
-        Executable channelData = executor.popData();
+        Operation channelData = (Operation) executor.popData();
         if (channelData == null) return;
         if (!(channelData instanceof NumberIota channel)) {
             executor.triggerMishap("操作 relay:send 期望 number 类型，实际为：" + channelData.getId());

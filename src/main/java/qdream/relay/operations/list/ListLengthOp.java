@@ -1,6 +1,6 @@
 package qdream.relay.operations.list;
 
-import qdream.relay.types.ProgramBlock;
+import qdream.relay.types.ListIota;
 import qdream.relay.types.NumberIota;
 
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.List;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 
 /**
@@ -26,14 +27,15 @@ public class ListLengthOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable listData = executor.popData();
-        if (listData == null) return;
-        if (!(listData instanceof ProgramBlock listBlock)) {
+        Operation listData = (Operation) executor.popData();
+        if (listData == null)
+            return;
+        if (!(listData instanceof ListIota listBlock)) {
             executor.triggerMishap("操作 relay:list_length 期望 list 类型，实际为：" + listData.getId());
             return;
         }
 
-        List<Executable> list = listBlock.getItems();
+        List<Executable> list = listBlock.getValue();
         executor.pushData(new NumberIota(list.size()));
     }
 

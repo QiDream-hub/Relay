@@ -13,7 +13,6 @@ public abstract class Operation implements Executable {
         this.cost = cost;
     }
 
-    @Override
     public String getId() {
         return id;
     }

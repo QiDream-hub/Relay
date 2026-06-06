@@ -1,9 +1,9 @@
 package qdream.relay.operations.logic;
 
 import qdream.relay.types.BooleanIota;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 
 /**
@@ -20,7 +20,7 @@ public class NotOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable aData = executor.popData();
+        Operation aData = (Operation) executor.popData();
         if (aData == null)
             return;
         if (!(aData instanceof BooleanIota a)) {

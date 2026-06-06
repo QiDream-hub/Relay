@@ -2,9 +2,10 @@ package qdream.relay.operations.control;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.types.ProgramBlock;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.types.ListIota;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,21 +25,16 @@ public class EvalOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable listData = executor.popData();
+        Operation listData = (Operation) executor.popData();
         if (listData == null)
             return;
-        if (!(listData instanceof ProgramBlock listBlock)) {
+        if (!(listData instanceof ListIota list)) {
             executor.triggerMishap("操作 relay:eval 期望 list 类型，实际为：" + listData.getId());
             return;
         }
 
-        List<Executable> list = listBlock.getItems();
-        List<Executable> reversed = new ArrayList<>(list);
-        Collections.reverse(reversed);
-
-        for (Executable iota : reversed) {
-            executor.pushProgram(iota);
-        }
+        List<Executable> reversed = list.getValue();
+        executor.loadProgram(reversed);
     }
 
 }

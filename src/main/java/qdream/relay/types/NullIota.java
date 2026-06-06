@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Data;
 public class NullIota extends Data {
     public static final NullIota INSTANCE = new NullIota();
 
-    private NullIota() {
+    public NullIota() {
         super("relay:null", 0);
     }
 

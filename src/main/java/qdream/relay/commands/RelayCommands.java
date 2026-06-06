@@ -20,8 +20,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.types.NumberIota;
 import qdream.relay.types.StringIota;
 import qdream.relay.types.BooleanIota;
-import qdream.relay.types.ProgramBlock;
+import qdream.relay.types.ListIota;
 import qdream.relay.mc.NbtSerializer;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.items.SpellDiskItem;
 
 import java.util.ArrayList;
@@ -445,10 +446,10 @@ public class RelayCommands {
                 sb.append(n.getValue());
             } else if (exec instanceof BooleanIota b) {
                 sb.append(b.asBoolean());
-            } else if (exec instanceof ProgramBlock) {
+            } else if (exec instanceof ListIota list) {
                 sb.append("[...]");
             } else {
-                sb.append(exec.getId());
+                sb.append(((Operation)exec).getId());
             }
         }
         return sb.toString();
@@ -470,7 +471,7 @@ public class RelayCommands {
             } else if (data instanceof BooleanIota b) {
                 sb.append(b.asBoolean());
             } else {
-                sb.append(data.getId());
+                sb.append(((Operation)data).getId());
             }
         }
         return sb.toString();

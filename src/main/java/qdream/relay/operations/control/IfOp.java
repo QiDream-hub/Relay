@@ -1,15 +1,16 @@
 package qdream.relay.operations.control;
 
-import qdream.relay.types.BooleanIota;
-import qdream.relay.engine.Executable;
-import qdream.relay.engine.StateMachine;
-import qdream.relay.types.ProgramBlock;
-import qdream.relay.mc.OperationSignature;
-import qdream.relay.mc.base.Spell;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import qdream.relay.engine.Executable;
+import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.base.Spell;
+import qdream.relay.types.BooleanIota;
+import qdream.relay.types.ListIota;
 
 /**
  * If 操作 - 条件分支
@@ -21,28 +22,21 @@ public class IfOp extends Spell {
     protected IfOp() {
         super("relay:if", 1, OperationSignature.builder()
                 .input("boolean")
-                .input("list")
-                .input("list")
+                .input("any")
+                .input("any")
+                .output("any")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
-        Executable falseBranchData = executor.popData();
-        if (falseBranchData == null)
+        Operation falseBranchData = (Operation) executor.popData();
+        if (falseBranchData != null)
             return;
-        if (!(falseBranchData instanceof ProgramBlock falseBranch)) {
-            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + falseBranchData.getId());
-            return;
-        }
-        Executable trueBranchData = executor.popData();
+        Operation trueBranchData = (Operation) executor.popData();
         if (trueBranchData == null)
             return;
-        if (!(trueBranchData instanceof ProgramBlock trueBranch)) {
-            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + trueBranchData.getId());
-            return;
-        }
-        Executable conditionData = executor.popData();
+        Operation conditionData = (Operation) executor.popData();
         if (conditionData == null)
             return;
         if (!(conditionData instanceof BooleanIota condition)) {
@@ -51,17 +45,11 @@ public class IfOp extends Spell {
         }
 
         // 根据条件选择分支
-        List<Executable> selected = condition.asBoolean()
-                ? trueBranch.getItems()
-                : falseBranch.getItems();
+        Executable selected = condition.asBoolean()
+                ? trueBranchData
+                : falseBranchData;
 
-        // 反转后压入程序栈
-        List<Executable> reversed = new ArrayList<>(selected);
-        Collections.reverse(reversed);
-
-        for (Executable iota : reversed) {
-            executor.pushProgram(iota);
-        }
+        executor.pushData(selected);
     }
 
 }
