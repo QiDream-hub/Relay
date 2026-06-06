@@ -26,7 +26,7 @@ public class RelayClientNetworking {
      */
     public static void syncOperations() {
         if (!isSynced) {
-            Set<String> ops = OperationRegistry.getAllIds();
+            Set<String> ops = OperationRegistry.getAllOperationIds();
             availableOperations = new ArrayList<>(ops);
             isSynced = true;
         }

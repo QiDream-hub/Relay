@@ -15,7 +15,7 @@ import qdream.relay.core.CommunicationSystem;
  */
 public class SendOp extends Spell {
 
-    protected SendOp() {
+    public SendOp() {
         super("relay:send", 1, OperationSignature.builder()
                 .input("number")
                 .input("any")

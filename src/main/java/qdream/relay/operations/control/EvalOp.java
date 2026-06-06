@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class EvalOp extends Spell {
 
-    protected EvalOp() {
+    public EvalOp() {
         super("relay:eval", 1, OperationSignature.builder()
                 .input("list")
                 .build());

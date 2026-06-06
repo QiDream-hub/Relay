@@ -16,7 +16,7 @@ import qdream.relay.core.CommunicationSystem;
  */
 public class PeekOp extends Spell {
 
-    protected PeekOp() {
+    public PeekOp() {
         super("relay:peek", 1, OperationSignature.builder()
                 .input("number")
                 .output("any")

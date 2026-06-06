@@ -106,7 +106,7 @@ public class NbtSerializer {
             }
             case "relay:null" -> NullIota.INSTANCE;
             // 所有操作类型（default 处理）- 返回一个占位操作
-            default -> new qdream.relay.mc.base.Operation(id, 0) {
+            default -> new Operation(id, 0) {
                 @Override
                 public void execute(StateMachine executor) {
                     executor.triggerMishap("未知操作：" + id);

@@ -17,7 +17,7 @@ import java.util.ArrayList;
  */
 public class ListAppendOp extends Spell {
 
-    protected ListAppendOp() {
+    public ListAppendOp() {
         super("relay:list_append", 2, OperationSignature.builder()
                 .input("list")
                 .input("any")

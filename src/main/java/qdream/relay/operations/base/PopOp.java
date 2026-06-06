@@ -9,7 +9,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class PopOp extends Spell {
 
-    protected PopOp() {
+    public PopOp() {
         super("relay:pop", 1, OperationSignature.builder()
                 .input("any")
                 .build());

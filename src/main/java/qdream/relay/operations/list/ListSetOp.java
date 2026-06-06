@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 public class ListSetOp extends Spell {
 
-    protected ListSetOp() {
+    public ListSetOp() {
         super("relay:list_set", 2, OperationSignature.builder()
                 .input("list")
                 .input("number")

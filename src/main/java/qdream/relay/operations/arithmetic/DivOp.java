@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class DivOp extends Spell {
 
-    protected DivOp() {
+    public DivOp() {
         super("relay:div", 1, OperationSignature.builder()
                 .input("number")
                 .input("number")

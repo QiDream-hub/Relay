@@ -18,7 +18,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class ListLengthOp extends Spell {
 
-    protected ListLengthOp() {
+    public ListLengthOp() {
         super("relay:list_length", 1, OperationSignature.builder()
                 .input("list")
                 .output("number")

@@ -42,7 +42,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         super(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, syncId);
         this.blockEntity = blockEntity;
         this.program = new ArrayList<>();
-        this.availableOperations = new ArrayList<>(OperationRegistry.getAllIds());
+        this.availableOperations = new ArrayList<>(OperationRegistry.getAllOperationIds());
         
         // 调试日志
         System.out.println("[SpellEditorScreenHandler] 初始化，可用操作数量：" + availableOperations.size());

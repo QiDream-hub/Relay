@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class MulOp extends Spell {
 
-    protected MulOp() {
+    public MulOp() {
         super("relay:mul", 1, OperationSignature.builder()
                 .input("number")
                 .input("number")

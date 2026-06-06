@@ -16,7 +16,7 @@ import qdream.relay.core.CommunicationSystem;
  */
 public class RecvOp extends Spell {
 
-    protected RecvOp() {
+    public RecvOp() {
         super("relay:recv", 1, OperationSignature.builder()
                 .input("number")
                 .output("any")

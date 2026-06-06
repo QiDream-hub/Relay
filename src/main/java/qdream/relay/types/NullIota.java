@@ -12,7 +12,7 @@ public class NullIota extends Data {
     public static final NullIota INSTANCE = new NullIota();
 
     public NullIota() {
-        super("relay:null", 0);
+        super("relay:null", 1);
     }
 
     @Override

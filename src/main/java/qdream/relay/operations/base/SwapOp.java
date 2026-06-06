@@ -10,7 +10,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class SwapOp extends Spell {
 
-    protected SwapOp() {
+    public SwapOp() {
         super("relay:swap", 1, OperationSignature.builder()
                 .input("any")
                 .input("any")

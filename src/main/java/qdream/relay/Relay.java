@@ -8,11 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import qdream.relay.blocks.RelayBlocks;
 import qdream.relay.blocks.RelayBlockEntities;
-import qdream.relay.items.RelayItems;
-import qdream.relay.items.RelayDataComponents;
-import qdream.relay.networking.RelayServerNetworking;
-import qdream.relay.entities.RelayEntityTypes;
 import qdream.relay.commands.RelayCommands;
+import qdream.relay.entities.RelayEntityTypes;
+import qdream.relay.items.RelayDataComponents;
+import qdream.relay.items.RelayItems;
+import qdream.relay.mc.RelayOperations;
+import qdream.relay.networking.RelayServerNetworking;
 
 public class Relay implements ModInitializer {
 	public static final String MOD_ID = "relay";
@@ -29,6 +30,9 @@ public class Relay implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("Initializing Relay Mod");
+
+		// 注册操作和数据类型
+		RelayOperations.register();
 
 		// 注册方块和方块实体
 		RelayBlocks.register();

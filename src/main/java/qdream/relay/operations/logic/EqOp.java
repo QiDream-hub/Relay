@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class EqOp extends Spell {
 
-    protected EqOp() {
+    public EqOp() {
         super("relay:eq", 1, OperationSignature.builder()
                 .input("any")
                 .input("any")

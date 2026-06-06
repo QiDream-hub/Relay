@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class SubOp extends Spell {
 
-    protected SubOp() {
+    public SubOp() {
         super("relay:sub", 1, OperationSignature.builder()
                 .input("number")
                 .input("number")

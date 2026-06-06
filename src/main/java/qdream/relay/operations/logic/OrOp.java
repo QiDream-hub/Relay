@@ -13,7 +13,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class OrOp extends Spell {
 
-    protected OrOp() {
+    public OrOp() {
         super("relay:or", 1, OperationSignature.builder()
                 .input("boolean")
                 .input("boolean")

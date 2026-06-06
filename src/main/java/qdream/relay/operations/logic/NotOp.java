@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class NotOp extends Spell {
 
-    protected NotOp() {
+    public NotOp() {
         super("relay:not", 1, OperationSignature.builder()
                 .input("boolean")
                 .output("boolean")

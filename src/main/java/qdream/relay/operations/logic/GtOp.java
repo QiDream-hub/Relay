@@ -12,7 +12,7 @@ import qdream.relay.mc.base.Spell;
  */
 public class GtOp extends Spell {
 
-    protected GtOp() {
+    public GtOp() {
         super("relay:gt", 1, OperationSignature.builder()
                 .input("number")
                 .input("number")

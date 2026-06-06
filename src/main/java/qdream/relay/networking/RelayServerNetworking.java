@@ -30,7 +30,7 @@ public class RelayServerNetworking {
             return;
         }
         
-        List<String> ops = new ArrayList<>(OperationRegistry.getAllIds());
+        List<String> ops = new ArrayList<>(OperationRegistry.getAllOperationIds());
         // TODO: 使用 Fabric API 发送包
         // ServerPlayNetworking.send(player, new S2C_OperationListPayload(ops));
     }
