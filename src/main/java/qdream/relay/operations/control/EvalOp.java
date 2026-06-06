@@ -1,12 +1,10 @@
 package qdream.relay.operations.control;
 
 import qdream.relay.engine.Executable;
-import qdream.relay.types.ProgramBlock;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.types.ProgramBlock;
 import qdream.relay.mc.OperationSignature;
-import qdream.relay.operations.AbstractOperation;
-
-import com.google.gson.JsonObject;
+import qdream.relay.mc.base.Spell;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +14,7 @@ import java.util.List;
  * Eval 操作 - 将列表反转后压入程序栈
  * 实现控制流的核心操作
  */
-public class EvalOp extends AbstractOperation {
+public class EvalOp extends Spell {
 
     protected EvalOp() {
         super("relay:eval", 1, OperationSignature.builder()
@@ -43,19 +41,4 @@ public class EvalOp extends AbstractOperation {
         }
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for EvalOp: " + id);
-        }
-        return new EvalOp();
-    }
 }

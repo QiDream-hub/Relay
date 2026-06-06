@@ -2,12 +2,11 @@ package qdream.relay.operations.list;
 
 import qdream.relay.types.ProgramBlock;
 import qdream.relay.types.NumberIota;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.base.Spell;
 
-import com.google.gson.JsonObject;
-
-import qdream.relay.engine.Executable;
 import qdream.relay.types.NullIota;
 
 import java.util.List;
@@ -17,27 +16,14 @@ import java.util.List;
  * 输入：列表，索引（数值）
  * 输出：元素或 null
  */
-public class ListGetOp implements Executable {
-    private static final String ID = "relay:list_get";
+public class ListGetOp extends Spell {
 
-    private static final int COST = 1;
-
-    private static final OperationSignature SIGNATURE = OperationSignature.builder()
-            .input("list")
-            .input("number")
-            .output("any")
-            .build();
-
-    public String getId() {
-        return ID;
-    }
-
-    public int getCost() {
-        return COST;
-    }
-
-    public OperationSignature getSignature() {
-        return SIGNATURE;
+    protected ListGetOp() {
+        super("relay:list_get", 1, OperationSignature.builder()
+                .input("list")
+                .input("number")
+                .output("any")
+                .build());
     }
 
     @Override
@@ -64,19 +50,4 @@ public class ListGetOp implements Executable {
         executor.pushData(list.get(indexVal));
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!ID.equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for ListGetOp: " + id);
-        }
-        return new ListGetOp();
-    }
 }

@@ -2,18 +2,15 @@ package qdream.relay.operations.logic;
 
 import qdream.relay.types.BooleanIota;
 import qdream.relay.types.NumberIota;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
-import qdream.relay.operations.AbstractOperation;
-
-import com.google.gson.JsonObject;
-
-import qdream.relay.engine.Executable;
+import qdream.relay.mc.base.Spell;
 
 /**
  * Lt 操作 - 小于比较
  */
-public class LtOp extends AbstractOperation {
+public class LtOp extends Spell {
 
     protected LtOp() {
         super("relay:lt", 1, OperationSignature.builder()
@@ -44,19 +41,4 @@ public class LtOp extends AbstractOperation {
         executor.pushData(new BooleanIota(result));
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for LtOp: " + id);
-        }
-        return new LtOp();
-    }
 }

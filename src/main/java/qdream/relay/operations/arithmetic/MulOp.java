@@ -1,18 +1,15 @@
 package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberIota;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
-import qdream.relay.operations.AbstractOperation;
-
-import com.google.gson.JsonObject;
-
-import qdream.relay.engine.Executable;
+import qdream.relay.mc.base.Spell;
 
 /**
  * Mul 操作 - 乘法
  */
-public class MulOp extends AbstractOperation {
+public class MulOp extends Spell {
 
     protected MulOp() {
         super("relay:mul", 1, OperationSignature.builder()
@@ -43,19 +40,4 @@ public class MulOp extends AbstractOperation {
         executor.pushData(new NumberIota(result));
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for MulOp: " + id);
-        }
-        return new MulOp();
-    }
 }

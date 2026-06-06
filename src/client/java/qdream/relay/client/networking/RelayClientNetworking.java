@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import qdream.relay.engine.OperationRegistry;
+import qdream.relay.mc.OperationRegistry;
 
 /**
  * 客户端网络处理

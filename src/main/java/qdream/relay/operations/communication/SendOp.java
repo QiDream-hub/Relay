@@ -1,12 +1,11 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.engine.Executable;
 import qdream.relay.types.NumberIota;
 import qdream.relay.types.BooleanIota;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationSignature;
-
-import com.google.gson.JsonObject;
+import qdream.relay.mc.base.Spell;
 
 import qdream.relay.core.CommunicationSystem;
 
@@ -14,27 +13,14 @@ import qdream.relay.core.CommunicationSystem;
  * Send 操作 - 发送数据到频道
  * 弹出：频道号、数据
  */
-public class SendOp implements Executable {
-    private static final String ID = "relay:send";
+public class SendOp extends Spell {
 
-    private static final int COST = 1;
-
-    private static final OperationSignature SIGNATURE = OperationSignature.builder()
-            .input("number")
-            .input("any")
-            .output("boolean")
-            .build();
-
-    public String getId() {
-        return ID;
-    }
-
-    public int getCost() {
-        return COST;
-    }
-
-    public OperationSignature getSignature() {
-        return SIGNATURE;
+    protected SendOp() {
+        super("relay:send", 1, OperationSignature.builder()
+                .input("number")
+                .input("any")
+                .output("boolean")
+                .build());
     }
 
     @Override
@@ -59,19 +45,4 @@ public class SendOp implements Executable {
         executor.pushData(new BooleanIota(true));
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!ID.equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for SendOp: " + id);
-        }
-        return new SendOp();
-    }
 }

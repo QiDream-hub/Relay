@@ -1,17 +1,14 @@
 package qdream.relay.operations.base;
 
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
-import qdream.relay.operations.AbstractOperation;
-
-import com.google.gson.JsonObject;
-
-import qdream.relay.engine.Executable;
+import qdream.relay.mc.base.Spell;
 
 /**
  * Swap 操作 - 交换数据栈顶部两个元素
  */
-public class SwapOp extends AbstractOperation {
+public class SwapOp extends Spell {
 
     protected SwapOp() {
         super("relay:swap", 1, OperationSignature.builder()
@@ -35,19 +32,4 @@ public class SwapOp extends AbstractOperation {
         executor.pushData(secondData);
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for SwapOp: " + id);
-        }
-        return new SwapOp();
-    }
 }

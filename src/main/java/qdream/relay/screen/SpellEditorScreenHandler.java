@@ -7,7 +7,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.blocks.entity.SpellEditorBlockEntity;
-import qdream.relay.engine.OperationRegistry;
+import qdream.relay.mc.OperationRegistry;
 
 import java.util.ArrayList;
 import java.util.List;

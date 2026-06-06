@@ -1,37 +1,19 @@
 package qdream.relay.types;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.base.Data;
 
 /**
  * 字符串类型
  * 执行时自动压入数据栈
  */
-public class StringIota implements Executable {
+public class StringIota extends Data {
     private final String value;
 
     public StringIota(String value) {
+        super("relay:string", 0);
         this.value = value;
-    }
-
-    @Override
-    public String getId() {
-        return "relay:string";
-    }
-
-    @Override
-    public Object getValue() {
-        return value;
-    }
-
-    @Override
-    public JsonElement toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", "relay:string");
-        json.addProperty("value", value);
-        return json;
     }
 
     @Override
@@ -41,5 +23,24 @@ public class StringIota implements Executable {
 
     public String asString() {
         return value;
+    }
+
+    @Override
+    public Data fromJson(JsonObject json) {
+        String id = json.get("id").getAsString();
+        if (!this.getId().equals(id)) {
+            throw new IllegalArgumentException("Invalid ID for StringIota: " + id);
+        }
+        String value = json.get("value").getAsString();
+        return new StringIota(value);
+    }
+
+    @Override
+    public JsonObject toJson(Data data) {
+        StringIota stringData = (StringIota) data;
+        JsonObject json = new JsonObject();
+        json.addProperty("id", getId());
+        json.addProperty("value", stringData.value);
+        return json;
     }
 }

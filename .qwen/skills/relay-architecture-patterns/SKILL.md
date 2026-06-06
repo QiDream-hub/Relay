@@ -1,23 +1,23 @@
 ---
 name: relay-architecture-patterns
-description: Relay 模组的架构模式，包括双栈状态机、IData/IExecutable 接口抽象、DataWrapper 语法糖、engine/types/mc 三层架构
+description: Relay 模组的架构模式，包括双栈状态机、统一 Executable 接口、engine/mc 分层架构
 source: auto-skill
-extracted_at: '2026-06-06T16:00:00.000Z'
+extracted_at: '2026-06-07T00:00:00.000Z'
 ---
 
 # Relay 模组架构模式
 
 Relay 是一个基于栈的编程模组，为 Minecraft 添加可视化法术编程系统。以下是其核心架构模式。
 
-## 0. Engine/Types/MC 三层架构 (2026-06-06 重构：DataWrapper 语法糖)
+## 0. Engine/MC 两层架构 (2026-06-07 精简后)
 
-核心执行引擎与 Minecraft 完全解耦，支持版本迁移和独立测试。
+核心执行引擎与 Minecraft 解耦，支持版本迁移和独立测试。
 
-**2026-06-06 重构**：
-1. 类型类从 `mc` 包移动到独立的 `types` 包
-2. 类型类只实现 `IData`（不再实现 `IExecutable`）
-3. 引入 `DataWrapper` 实现语法糖：纯数据执行时自动压入数据栈
-4. `Operation` 和 `ProgramBlock` 仍实现 `IExecutable`
+**当前架构**：
+1. `engine/` 包：纯 Java 引擎（`Executable` 接口，`StateMachine`）
+2. `mc/` 包：Minecraft 适配层（`OperationRegistry`, `NbtSerializer`）
+3. `types/` 包：Iota 类型实现（直接实现 `Executable`）
+4. `mc/base/` 包：抽象基类（`Operation`, `Spell`, `Data`）
 
 ```
 src/main/java/qdream/relay/

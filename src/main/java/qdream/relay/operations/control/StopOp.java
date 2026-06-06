@@ -2,17 +2,13 @@ package qdream.relay.operations.control;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
-import qdream.relay.operations.AbstractOperation;
-
-import com.google.gson.JsonObject;
-
-import qdream.relay.engine.Executable;
+import qdream.relay.mc.base.Spell;
 
 /**
  * Stop 操作 - 强制终止程序
  * 清空程序栈和数据栈
  */
-public class StopOp extends AbstractOperation {
+public class StopOp extends Spell {
 
     protected StopOp() {
         super("relay:stop", 1, OperationSignature.builder().build());
@@ -28,19 +24,4 @@ public class StopOp extends AbstractOperation {
         executor.triggerMishap("stop 操作被调用");
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for StopOp: " + id);
-        }
-        return new StopOp();
-    }
 }

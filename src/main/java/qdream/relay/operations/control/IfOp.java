@@ -2,12 +2,10 @@ package qdream.relay.operations.control;
 
 import qdream.relay.types.BooleanIota;
 import qdream.relay.engine.Executable;
-import qdream.relay.types.ProgramBlock;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.types.ProgramBlock;
 import qdream.relay.mc.OperationSignature;
-import qdream.relay.operations.AbstractOperation;
-
-import com.google.gson.JsonObject;
+import qdream.relay.mc.base.Spell;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +16,7 @@ import java.util.List;
  * 从数据栈弹出：条件、真分支列表、假分支列表
  * 根据条件将其中一个分支反转后压入程序栈
  */
-public class IfOp extends AbstractOperation {
+public class IfOp extends Spell {
 
     protected IfOp() {
         super("relay:if", 1, OperationSignature.builder()
@@ -66,19 +64,4 @@ public class IfOp extends AbstractOperation {
         }
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for IfOp: " + id);
-        }
-        return new IfOp();
-    }
 }

@@ -1,6 +1,7 @@
 package qdream.relay.mc;
 
 import qdream.relay.engine.Executable;
+import qdream.relay.engine.StateMachine;
 import qdream.relay.types.*;
 
 import net.minecraft.nbt.CompoundTag;
@@ -58,8 +59,6 @@ public class NbtSerializer {
             tag.putString("value", ent.asEntity().toString());
         } else if (exec instanceof ProgramBlock list) {
             tag.put("value", serializeList(list.getItems()));
-        } else if (exec instanceof Operation op) {
-            // Operation 的 id 就是 opId，不需要额外字段
         } else if (exec instanceof NullIota) {
             // 无值
         }
@@ -94,18 +93,23 @@ public class NbtSerializer {
                 yield new EntityIota(uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr));
             }
             case "relay:list" -> {
-                // 检查是否有 value 字段，有则是 ProgramBlock，否则是 Operation
+                // 检查是否有 value 字段，有则是 ProgramBlock，否则是 NullIota
                 var valueOpt = tag.getList("value");
                 if (valueOpt.isPresent()) {
                     ListTag listTag = valueOpt.get();
                     yield new ProgramBlock(deserializeList(listTag));
                 } else {
-                    yield new Operation("relay:list");
+                    yield NullIota.INSTANCE;
                 }
             }
             case "relay:null" -> NullIota.INSTANCE;
-            // 所有操作类型（default 处理）
-            default -> new Operation(id);
+            // 所有操作类型（default 处理）- 返回一个占位操作
+            default -> new qdream.relay.mc.base.Operation(id, 0) {
+                @Override
+                public void execute(StateMachine executor) {
+                    executor.triggerMishap("未知操作：" + id);
+                }
+            };
         };
     }
 

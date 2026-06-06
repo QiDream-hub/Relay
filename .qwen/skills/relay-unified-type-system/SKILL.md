@@ -2,7 +2,7 @@
 name: relay-unified-type-system
 description: Relay 模组统一类型系统架构——所有 Iota 类型直接实现 Executable 接口，消除纯数据与可执行的二元对立
 source: auto-skill
-extracted_at: '2026-06-06T09:45:00.000Z'
+extracted_at: '2026-06-07T00:00:00.000Z'
 ---
 
 # Relay 统一类型系统架构

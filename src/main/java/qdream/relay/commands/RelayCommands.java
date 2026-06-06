@@ -21,7 +21,7 @@ import qdream.relay.types.NumberIota;
 import qdream.relay.types.StringIota;
 import qdream.relay.types.BooleanIota;
 import qdream.relay.types.ProgramBlock;
-import qdream.relay.types.Operation;
+import qdream.relay.mc.NbtSerializer;
 import qdream.relay.items.SpellDiskItem;
 
 import java.util.ArrayList;
@@ -390,13 +390,13 @@ public class RelayCommands {
      */
     private static List<Executable> parseProgram(String programStr) {
         List<Executable> program = new ArrayList<>();
-        
+
         // 去除首尾的单引号（Minecraft 命令中单引号不会被自动解析）
         programStr = programStr.trim();
         if (programStr.startsWith("'") && programStr.endsWith("'")) {
             programStr = programStr.substring(1, programStr.length() - 1);
         }
-        
+
         String[] instructions = programStr.split(";");
 
         for (String instr : instructions) {
@@ -410,8 +410,11 @@ public class RelayCommands {
             try {
                 com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
                 com.google.gson.JsonElement jsonElem = parser.parse(instr);
-                Executable iota = Executable.TypeRegistry.fromJson(jsonElem);
-                program.add(iota);
+                // 暂时使用 NbtSerializer 反序列化 - 需要将 JSON 转为 NBT
+                // TODO: 实现 JSON 序列化器
+                throw new RuntimeException("JSON 解析暂未实现，请使用 NBT 格式");
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new RuntimeException("解析 JSON 失败：" + instr, e);
             }
@@ -429,7 +432,7 @@ public class RelayCommands {
             Executable exec = program.get(i);
             if (i > 0) sb.append("; ");
 
-            if (exec instanceof Operation op) {
+            if (exec instanceof qdream.relay.mc.base.Operation op) {
                 String str = op.getId();
                 if (str.startsWith("relay:")) {
                     sb.append(str.substring(6));

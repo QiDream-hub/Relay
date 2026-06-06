@@ -1,18 +1,15 @@
 package qdream.relay.operations.logic;
 
 import qdream.relay.types.BooleanIota;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
-import qdream.relay.operations.AbstractOperation;
-
-import com.google.gson.JsonObject;
-
-import qdream.relay.engine.Executable;
+import qdream.relay.mc.base.Spell;
 
 /**
  * Eq 操作 - 等于比较
  */
-public class EqOp extends AbstractOperation {
+public class EqOp extends Spell {
 
     protected EqOp() {
         super("relay:eq", 1, OperationSignature.builder()
@@ -35,19 +32,4 @@ public class EqOp extends AbstractOperation {
         executor.pushData(new BooleanIota(result));
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for EqOp: " + id);
-        }
-        return new EqOp();
-    }
 }

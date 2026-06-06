@@ -18,6 +18,7 @@ public class StateMachine {
 
     private int remainingOps;
     private int maxStackSize;
+    private boolean hasWorldInteractor = false;
 
     /**
      * 事故回调
@@ -170,6 +171,16 @@ public class StateMachine {
 
     public int getMaxStackSize() {
         return maxStackSize;
+    }
+
+    // ========== 世界交互器 ==========
+
+    public boolean hasWorldInteractor() {
+        return hasWorldInteractor;
+    }
+
+    public void setHasWorldInteractor(boolean hasWorldInteractor) {
+        this.hasWorldInteractor = hasWorldInteractor;
     }
 
     // ========== 调试 ==========

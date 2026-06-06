@@ -1,11 +1,10 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.engine.Executable;
 import qdream.relay.types.NumberIota;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationSignature;
-
-import com.google.gson.JsonObject;
+import qdream.relay.mc.base.Spell;
 
 import qdream.relay.core.CommunicationSystem;
 
@@ -14,26 +13,13 @@ import qdream.relay.core.CommunicationSystem;
  * 弹出：频道号
  * 返回：数据或 null
  */
-public class RecvOp implements Executable {
-    private static final String ID = "relay:recv";
+public class RecvOp extends Spell {
 
-    private static final int COST = 1;
-
-    private static final OperationSignature SIGNATURE = OperationSignature.builder()
-            .input("number")
-            .output("any")
-            .build();
-
-    public String getId() {
-        return ID;
-    }
-
-    public int getCost() {
-        return COST;
-    }
-
-    public OperationSignature getSignature() {
-        return SIGNATURE;
+    protected RecvOp() {
+        super("relay:recv", 1, OperationSignature.builder()
+                .input("number")
+                .output("any")
+                .build());
     }
 
     @Override
@@ -50,19 +36,4 @@ public class RecvOp implements Executable {
         executor.pushData(data);
     }
 
-    @Override
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        return json;
-    }
-
-    @Override
-    public Executable fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!ID.equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for RecvOp: " + id);
-        }
-        return new RecvOp();
-    }
 }

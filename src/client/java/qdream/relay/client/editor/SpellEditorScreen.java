@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 import qdream.relay.screen.SpellEditorScreenHandler;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
-import qdream.relay.types.Operation;
+import qdream.relay.mc.base.Operation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,7 +164,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         List<Executable> dataStack = testMachine.getDataStackSnapshot();
         for (int i = dataStack.size() - 1; i >= 0 && y < top + 100; i--) {
             Executable data = dataStack.get(i);
-            String text = data.getId() + ": " + data.getValue();
+            String text = data.getId();
             graphics.text(this.font, text, x, y, 0x00AAAA);
             y += LINE_HEIGHT;
         }
@@ -178,7 +178,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         List<Executable> programStack = testMachine.getProgramStackSnapshot();
         for (int i = programStack.size() - 1; i >= 0 && y < top + 200; i--) {
             Executable exec = programStack.get(i);
-            String text = exec.getId() + ": " + exec.getValue();
+            String text = exec.getId();
             graphics.text(this.font, text, x, y, 0xFF8800);
             y += LINE_HEIGHT;
         }
@@ -191,7 +191,12 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         // 将程序加载到测试状态机
         List<Executable> iotaProgram = new ArrayList<>();
         for (String opId : program) {
-            iotaProgram.add(new Operation(opId));
+            iotaProgram.add(new Operation(opId, 0) {
+                @Override
+                public void execute(StateMachine executor) {
+                    // 测试用空实现
+                }
+            });
         }
 
         testMachine.loadProgram(iotaProgram);
