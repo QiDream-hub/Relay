@@ -1,6 +1,6 @@
 package qdream.relay.types;
 
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 
@@ -26,21 +26,12 @@ public class StringIota extends Data {
     }
 
     @Override
-    public Data fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for StringIota: " + id);
-        }
-        String value = json.get("value").getAsString();
-        return new StringIota(value);
+    public void toNbt(CompoundTag tag) {
+        tag.putString("value", value);
     }
 
     @Override
-    public JsonObject toJson(Data data) {
-        StringIota stringData = (StringIota) data;
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        json.addProperty("value", stringData.value);
-        return json;
+    public Data fromNbt(CompoundTag tag) {
+        return new StringIota(tag.getString("value").orElse(""));
     }
 }

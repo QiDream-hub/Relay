@@ -1,5 +1,7 @@
 package qdream.relay.mc;
 
+import net.minecraft.nbt.CompoundTag;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -7,6 +9,7 @@ import java.util.Set;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Spell;
 
 /**
  * 操作注册表
@@ -39,7 +42,7 @@ public class OperationRegistry {
     /**
      * 注册数据类型
      * @param id 数据类型 ID，如 "relay:number"
-     * @param factory 工厂方法，用于从 JSON 创建 Data 实例
+     * @param factory 工厂方法，用于创建新实例
      */
     public static void registerData(String id, DataFactory factory) {
         DATA_FACTORIES.put(id, factory);
@@ -63,6 +66,52 @@ public class OperationRegistry {
             return Optional.empty();
         }
         return Optional.of(factory.create());
+    }
+
+    /**
+     * 通过对象自身的序列化方法序列化 Executable 为 NBT
+     * @param exec 要序列化的 Executable
+     * @return 序列化后的 CompoundTag，或空 Optional（如果类型不支持）
+     */
+    public static Optional<CompoundTag> serializeToNbt(Executable exec) {
+        String id = ((qdream.relay.mc.base.Operation) exec).getId();
+        CompoundTag tag = new CompoundTag();
+        tag.putString("id", id);
+
+        if (exec instanceof Data data) {
+            data.toNbt(tag);
+            return Optional.of(tag);
+        } else if (exec instanceof Spell spell) {
+            spell.toNbt(tag);
+            return Optional.of(tag);
+        } else {
+            // 其他 Executable 类型，只保存 id
+            return Optional.of(tag);
+        }
+    }
+
+    /**
+     * 通过注册表从 NBT 反序列化 Executable
+     * @param tag NBT 标签
+     * @return 反序列化后的 Executable，或空 Optional
+     */
+    public static Optional<Executable> deserializeFromNbt(CompoundTag tag) {
+        String id = tag.getString("id").orElse("");
+        
+        // 尝试作为数据类型反序列化
+        Optional<Data> dataOpt = createData(id);
+        if (dataOpt.isPresent()) {
+            return Optional.of(dataOpt.get().fromNbt(tag));
+        }
+        
+        // 尝试作为操作获取（操作是单例，不需要反序列化）
+        Optional<Executable> opOpt = get(id);
+        if (opOpt.isPresent()) {
+            return opOpt;
+        }
+        
+        // 未知类型，返回空
+        return Optional.empty();
     }
 
     /**

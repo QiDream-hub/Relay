@@ -57,7 +57,7 @@ public class RelayOperations {
         OperationRegistry.registerData("relay:string", () -> new StringIota(""));
         OperationRegistry.registerData("relay:vector", () -> new VectorIota(new Vec3(0, 0, 0)));
         OperationRegistry.registerData("relay:entity", () -> new EntityIota(new UUID(0, 0)));
-        OperationRegistry.registerData("relay:null", NullIota::new);
+        OperationRegistry.registerData("relay:null", () -> NullIota.INSTANCE);
         OperationRegistry.registerData("relay:list", () -> new ListIota(new ArrayList<>()));
     }
 

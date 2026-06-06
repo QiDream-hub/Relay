@@ -448,65 +448,167 @@ public void tick(int ops) {
 | 每 Tick 操作数限制 | 防止卡顿 | 性能保护 |
 | 类型字符串判断 | 使用 `"string".equals(top.getType())` | engine 包不依赖枚举 |
 
-## 2. 操作注册链式 API
+## 2. 操作注册表设计 (2026-06-07 更新)
 
-使用流式构建器模式注册操作，支持元数据配置。
+### 注册表架构
+
+`OperationRegistry` 管理两类注册：
+1. **操作实例注册表** (`OPERATIONS`): 存储单例操作实例，用于执行
+2. **数据类型工厂注册表** (`DATA_FACTORIES`): 存储工厂方法，用于从 JSON 创建数据实例
 
 ```java
-// 注册 API
+public class OperationRegistry {
+    // 操作实例注册表（用于执行）
+    private static final Map<String, Executable> OPERATIONS = new HashMap<>();
+
+    // 数据类型工厂注册表（用于反序列化）
+    private static final Map<String, DataFactory> DATA_FACTORIES = new HashMap<>();
+
+    // 注册操作（单例）
+    public static void register(String id, Executable operation);
+
+    // 注册数据类型
+    public static void registerData(String id, DataFactory factory);
+
+    // 获取操作
+    public static Optional<Executable> get(String id);
+
+    // 创建数据类型实例
+    public static Optional<Data> createData(String id);
+
+    // 检查操作/数据是否存在
+    public static boolean contains(String id);
+    public static boolean containsData(String id);
+
+    // 获取所有 ID
+    public static Set<String> getAllOperationIds();
+    public static Set<String> getAllDataIds();
+}
+```
+
+### 集中注册模式
+
+创建 `RelayOperations` 类集中注册所有操作和数据类型：
+
+```java
+// mc/RelayOperations.java
+public class RelayOperations {
+    public static void register() {
+        registerDataTypes();
+        registerOperations();
+    }
+
+    private static void registerDataTypes() {
+        // 基础类型 - 工厂方法创建默认值实例
+        OperationRegistry.registerData("relay:number", () -> new NumberIota(0));
+        OperationRegistry.registerData("relay:boolean", () -> new BooleanIota(false));
+        OperationRegistry.registerData("relay:string", () -> new StringIota(""));
+        OperationRegistry.registerData("relay:vector", () -> new VectorIota(new Vec3(0, 0, 0)));
+        OperationRegistry.registerData("relay:entity", () -> new EntityIota(new UUID(0, 0)));
+        OperationRegistry.registerData("relay:null", NullIota::new);
+        OperationRegistry.registerData("relay:list", () -> new ListIota(new ArrayList<>()));
+    }
+
+    private static void registerOperations() {
+        // 基础操作
+        OperationRegistry.register("relay:pop", new PopOp());
+        OperationRegistry.register("relay:dup", new DupOp());
+        OperationRegistry.register("relay:swap", new SwapOp());
+
+        // 算术操作
+        OperationRegistry.register("relay:add", new AddOp());
+        OperationRegistry.register("relay:sub", new SubOp());
+        OperationRegistry.register("relay:mul", new MulOp());
+        OperationRegistry.register("relay:div", new DivOp());
+
+        // 逻辑操作
+        OperationRegistry.register("relay:and", new AndOp());
+        OperationRegistry.register("relay:or", new OrOp());
+        OperationRegistry.register("relay:not", new NotOp());
+
+        // 比较操作
+        OperationRegistry.register("relay:eq", new EqOp());
+        OperationRegistry.register("relay:lt", new LtOp());
+        OperationRegistry.register("relay:gt", new GtOp());
+
+        // 控制流
+        OperationRegistry.register("relay:eval", new EvalOp());
+        OperationRegistry.register("relay:if", new IfOp());
+        OperationRegistry.register("relay:stop", new StopOp());
+
+        // 通信操作
+        OperationRegistry.register("relay:send", new SendOp());
+        OperationRegistry.register("relay:recv", new RecvOp());
+        OperationRegistry.register("relay:peek", new PeekOp());
+
+        // 列表操作
+        OperationRegistry.register("relay:list.append", new ListAppendOp());
+        OperationRegistry.register("relay:list.get", new ListGetOp());
+        OperationRegistry.register("relay:list.set", new ListSetOp());
+        OperationRegistry.register("relay:list.length", new ListLengthOp());
+    }
+}
+```
+
+### 操作类构造函数可见性
+
+所有操作类的构造函数必须是 `public`，以便 `RelayOperations` 可以实例化：
+
+```java
+// operations/base/PopOp.java
+public class PopOp extends Spell {
+    public PopOp() {  // 必须是 public
+        super("relay:pop", 1, OperationSignature.builder()
+                .input("any")
+                .build());
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        executor.popData();
+    }
+}
+```
+
+### 主类调用注册
+
+```java
+// Relay.java
+public class Relay implements ModInitializer {
+    @Override
+    public void onInitialize() {
+        LOGGER.info("Initializing Relay Mod");
+
+        // 注册操作和数据类型
+        RelayOperations.register();
+
+        // 注册其他内容...
+        RelayBlocks.register();
+        RelayItems.register();
+        // ...
+    }
+}
+```
+
+### 旧版链式 API（已废弃）
+
+早期版本使用链式 API 注册操作元数据，2026-06-07 后简化为直接注册：
+
+```java
+// ❌ 旧方式（已废弃）
 OperationRegistry.register("add", new AddOp())
         .requiresWorldInteractor(false)
         .cost(1)
         .register();
 
-// 链式构建器
-public static class ChainBuilder {
-    private final String id;
-    private final StackOperation operation;
-    private OperationSignature signature;
-    private int cost = 1;
-    private boolean requiresWorldInteractor = false;
-
-    public ChainBuilder signature(OperationSignature sig) { ... }
-    public ChainBuilder cost(int cost) { ... }
-    public ChainBuilder requiresWorldInteractor(boolean requires) { ... }
-    public void register() { ... }
-}
+// ✅ 新方式
+OperationRegistry.register("relay:add", new AddOp());
 ```
 
-### 操作条目结构
-
-```java
-public class OperationEntry {
-    private final StackOperation operation;  // 执行回调
-    private OperationSignature signature;    // 类型签名（输入/输出类型）
-    private int cost;                        // 操作消耗
-    private boolean requiresWorldInteractor; // 是否需要世界交互权限
-}
-```
-
-### 执行时检查
-
-```java
-private void executeOperation(String opId) {
-    OperationRegistry.getEntry(opId).ifPresentOrElse(entry -> {
-        // 检查世界交互器
-        if (entry.requiresWorldInteractor() && !hasWorldInteractor) {
-            triggerMishap("操作 " + opId + " 需要世界交互器");
-            return;
-        }
-
-        // 检查操作数预算
-        if (remainingOps < entry.getCost()) {
-            triggerMishap("操作 " + opId + " 需要 " + entry.getCost() + " 操作数");
-            return;
-        }
-
-        entry.getOperation().execute(this);
-        remainingOps -= entry.getCost();
-    }, () -> triggerMishap("未知操作：" + opId));
-}
-```
+**简化原因**：
+- 操作元数据（cost、signature）已内建在操作实例中
+- 世界交互器检查由操作自己在 `execute()` 中处理
+- 减少抽象层，代码更清晰
 
 ## 3. 操作签名设计 (重构后)
 

@@ -46,7 +46,7 @@ public class ListGetOp extends Spell {
         List<Executable> value = list.getValue();
         int idx = (int) index.asDouble();
         if (idx < 0 || idx >= value.size()) {
-            executor.pushData(new NullIota());
+            executor.pushData(NullIota.INSTANCE);
             return;
         }
         executor.pushData(value.get(idx));

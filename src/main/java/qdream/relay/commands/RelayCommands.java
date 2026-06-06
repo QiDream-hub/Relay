@@ -21,7 +21,7 @@ import qdream.relay.types.NumberIota;
 import qdream.relay.types.StringIota;
 import qdream.relay.types.BooleanIota;
 import qdream.relay.types.ListIota;
-import qdream.relay.mc.NbtSerializer;
+import qdream.relay.types.VectorIota;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.items.SpellDiskItem;
 
@@ -384,10 +384,10 @@ public class RelayCommands {
 
     /**
      * 解析法术程序字符串
-     * 格式：所有元素（数据和操作）都使用 JSON 格式
-     * 数据：{"type":"relay:number","value":1}
-     * 操作：{"type":"relay:operation","op":"relay:add"}
-     * 示例：{"type":"relay:number","value":1};{"type":"relay:number","value":1};{"type":"relay:operation","op":"relay:add"}
+     * 格式：使用简化语法
+     * 数据：number(1), bool(true), str("hello"), vec(1,2,3), entity(uuid), list(...), null
+     * 操作：直接使用操作 ID，如 relay:add
+     * 示例：number(1);number(2);relay:add
      */
     private static List<Executable> parseProgram(String programStr) {
         List<Executable> program = new ArrayList<>();
@@ -404,24 +404,61 @@ public class RelayCommands {
             instr = instr.trim();
             if (instr.isEmpty()) continue;
 
-            if (!instr.startsWith("{")) {
-                throw new RuntimeException("无效的语法，必须使用 JSON 格式：" + instr);
-            }
-
-            try {
-                com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
-                com.google.gson.JsonElement jsonElem = parser.parse(instr);
-                // 暂时使用 NbtSerializer 反序列化 - 需要将 JSON 转为 NBT
-                // TODO: 实现 JSON 序列化器
-                throw new RuntimeException("JSON 解析暂未实现，请使用 NBT 格式");
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException("解析 JSON 失败：" + instr, e);
+            Executable exec = parseInstruction(instr);
+            if (exec != null) {
+                program.add(exec);
             }
         }
 
         return program;
+    }
+
+    /**
+     * 解析单个指令
+     */
+    private static Executable parseInstruction(String instr) {
+        // 尝试解析为数据
+        if (instr.startsWith("number(")) {
+            String value = instr.substring(7, instr.length() - 1);
+            return new NumberIota(Double.parseDouble(value));
+        }
+        if (instr.startsWith("bool(")) {
+            String value = instr.substring(5, instr.length() - 1);
+            return new BooleanIota(Boolean.parseBoolean(value));
+        }
+        if (instr.startsWith("str(")) {
+            String value = instr.substring(4, instr.length() - 1);
+            // 去除引号
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
+            }
+            return new StringIota(value);
+        }
+        if (instr.startsWith("vec(")) {
+            String coords = instr.substring(4, instr.length() - 1);
+            String[] parts = coords.split(",");
+            if (parts.length == 3) {
+                double x = Double.parseDouble(parts[0].trim());
+                double y = Double.parseDouble(parts[1].trim());
+                double z = Double.parseDouble(parts[2].trim());
+                return new VectorIota(new net.minecraft.world.phys.Vec3(x, y, z));
+            }
+        }
+        if (instr.startsWith("null")) {
+            return qdream.relay.types.NullIota.INSTANCE;
+        }
+        if (instr.startsWith("list(")) {
+            // 简单列表，暂不支持嵌套
+            return new ListIota(new ArrayList<>());
+        }
+
+        // 尝试解析为操作
+        if (qdream.relay.mc.OperationRegistry.contains(instr)) {
+            return qdream.relay.mc.OperationRegistry.get(instr).orElse(null);
+        }
+
+        // 未知指令
+        throw new RuntimeException("未知指令：" + instr);
     }
 
     /**

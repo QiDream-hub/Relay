@@ -1,6 +1,6 @@
 package qdream.relay.types;
 
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 
@@ -11,11 +11,11 @@ import java.util.UUID;
  * 执行时自动压入数据栈
  */
 public class EntityIota extends Data {
-    private final UUID value;
+    private final UUID entityId;
 
-    public EntityIota(UUID value) {
+    public EntityIota(UUID entityId) {
         super("relay:entity", 0);
-        this.value = value;
+        this.entityId = entityId;
     }
 
     @Override
@@ -24,25 +24,18 @@ public class EntityIota extends Data {
     }
 
     public UUID asEntity() {
-        return value;
+        return entityId;
     }
 
     @Override
-    public Data fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for EntityIota: " + id);
-        }
-        UUID value = UUID.fromString(json.get("value").getAsString());
-        return new EntityIota(value);
+    public void toNbt(CompoundTag tag) {
+        tag.putString("value", entityId.toString());
     }
 
     @Override
-    public JsonObject toJson(Data data) {
-        EntityIota entityData = (EntityIota) data;
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        json.addProperty("value", entityData.value.toString());
-        return json;
+    public Data fromNbt(CompoundTag tag) {
+        String uuidStr = tag.getString("value").orElse("");
+        UUID uuid = uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr);
+        return new EntityIota(uuid);
     }
 }

@@ -3,11 +3,13 @@ package qdream.relay.types;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.base.Data;
 
 /**
@@ -31,22 +33,28 @@ public class ListIota extends Data {
     }
 
     @Override
-    public Data fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for ListIota: " + id);
+    public void toNbt(CompoundTag tag) {
+        ListTag listTag = new ListTag();
+        for (Executable item : value) {
+            OperationRegistry.serializeToNbt(item).ifPresent(listTag::add);
         }
-        // TODO: 实现 JSON 反序列化
-        return new ListIota(new ArrayList<>());
+        tag.put("value", listTag);
     }
 
     @Override
-    public JsonObject toJson(Data data) {
-        ListIota listData = (ListIota) data;
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        // TODO: 实现 JSON 序列化
-        json.add("value", new JsonArray());
-        return json;
+    public Data fromNbt(CompoundTag tag) {
+        var valueOpt = tag.getList("value");
+        if (valueOpt.isPresent()) {
+            ListTag listTag = valueOpt.get();
+            List<Executable> list = new ArrayList<>();
+            for (Tag element : listTag) {
+                if (element instanceof CompoundTag compoundTag) {
+                    OperationRegistry.deserializeFromNbt(compoundTag).ifPresent(list::add);
+                }
+            }
+            return new ListIota(list);
+        } else {
+            return new ListIota(new ArrayList<>());
+        }
     }
 }

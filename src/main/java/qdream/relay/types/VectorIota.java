@@ -1,7 +1,6 @@
 package qdream.relay.types;
 
-import com.google.gson.JsonObject;
-
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -11,11 +10,11 @@ import qdream.relay.mc.base.Data;
  * 执行时自动压入数据栈
  */
 public class VectorIota extends Data {
-    private final Vec3 value;
+    private final Vec3 vec3;
 
-    public VectorIota(Vec3 value) {
+    public VectorIota(Vec3 vec3) {
         super("relay:vector", 0);
-        this.value = value;
+        this.vec3 = vec3;
     }
 
     @Override
@@ -24,36 +23,26 @@ public class VectorIota extends Data {
     }
 
     public Vec3 asVector() {
-        return value;
+        return vec3;
     }
 
     public Vec3 getVec3() {
-        return value;
+        return vec3;
     }
 
     @Override
-    public Data fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for VectorIota: " + id);
-        }
-        JsonObject posJson = json.getAsJsonObject("value");
-        double x = posJson.get("x").getAsDouble();
-        double y = posJson.get("y").getAsDouble();
-        double z = posJson.get("z").getAsDouble();
-        return new VectorIota(new Vec3(x, y, z));
+    public void toNbt(CompoundTag tag) {
+        tag.putDouble("x", vec3.x);
+        tag.putDouble("y", vec3.y);
+        tag.putDouble("z", vec3.z);
     }
 
     @Override
-    public JsonObject toJson(Data data) {
-        VectorIota vectorData = (VectorIota) data;
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        JsonObject posJson = new JsonObject();
-        posJson.addProperty("x", vectorData.value.x);
-        posJson.addProperty("y", vectorData.value.y);
-        posJson.addProperty("z", vectorData.value.z);
-        json.add("value", posJson);
-        return json;
+    public Data fromNbt(CompoundTag tag) {
+        return new VectorIota(new Vec3(
+            tag.getDouble("x").orElse(0.0),
+            tag.getDouble("y").orElse(0.0),
+            tag.getDouble("z").orElse(0.0)
+        ));
     }
 }

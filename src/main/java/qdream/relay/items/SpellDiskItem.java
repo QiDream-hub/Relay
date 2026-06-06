@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.engine.Executable;
-import qdream.relay.mc.NbtSerializer;
+import qdream.relay.mc.OperationRegistry;
 import qdream.relay.engine.StateMachine;
 
 /**
@@ -41,7 +41,7 @@ public class SpellDiskItem extends Item {
         List<Executable> result = new ArrayList<>();
         for (int i = 0; i < listTag.size(); i++) {
             Optional<CompoundTag> elementOpt = listTag.getCompound(i);
-            elementOpt.ifPresent(tag -> result.add(NbtSerializer.deserializeStatic(tag)));
+            elementOpt.ifPresent(tag -> OperationRegistry.deserializeFromNbt(tag).ifPresent(result::add));
         }
         return result;
     }
@@ -55,7 +55,7 @@ public class SpellDiskItem extends Item {
         CompoundTag programTag = new CompoundTag();
         ListTag listTag = new ListTag();
         for (Executable iota : program) {
-            listTag.add(NbtSerializer.serializeStatic(iota));
+            OperationRegistry.serializeToNbt(iota).ifPresent(listTag::add);
         }
         programTag.put("program", listTag);
         stack.set(RelayDataComponents.SPELL_PROGRAM, programTag);

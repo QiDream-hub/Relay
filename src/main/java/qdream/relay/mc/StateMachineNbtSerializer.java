@@ -15,7 +15,6 @@ import java.util.List;
  */
 public class StateMachineNbtSerializer {
     public static final StateMachineNbtSerializer INSTANCE = new StateMachineNbtSerializer();
-    private final NbtSerializer iotaSerializer = NbtSerializer.INSTANCE;
 
     private StateMachineNbtSerializer() {}
 
@@ -24,13 +23,13 @@ public class StateMachineNbtSerializer {
 
         ListTag programList = new ListTag();
         for (Executable iota : machine.getProgramStackSnapshot()) {
-            programList.add(iotaSerializer.serialize(iota));
+            OperationRegistry.serializeToNbt(iota).ifPresent(programList::add);
         }
         tag.put("programStack", programList);
 
         ListTag dataList = new ListTag();
         for (Executable data : machine.getDataStackSnapshot()) {
-            dataList.add(iotaSerializer.serialize(data));
+            OperationRegistry.serializeToNbt(data).ifPresent(dataList::add);
         }
         tag.put("dataStack", dataList);
 
@@ -44,7 +43,9 @@ public class StateMachineNbtSerializer {
         ListTag programList = tag.getList("programStack").orElse(new ListTag());
         List<Executable> programStack = new ArrayList<>();
         for (Tag element : programList) {
-            programStack.add(iotaSerializer.deserialize((CompoundTag) element));
+            if (element instanceof CompoundTag compoundTag) {
+                OperationRegistry.deserializeFromNbt(compoundTag).ifPresent(programStack::add);
+            }
         }
         // 反转后加载，保证执行顺序
         java.util.Collections.reverse(programStack);
@@ -53,7 +54,9 @@ public class StateMachineNbtSerializer {
         ListTag dataList = tag.getList("dataStack").orElse(new ListTag());
         List<Executable> dataStack = new ArrayList<>();
         for (Tag element : dataList) {
-            dataStack.add(iotaSerializer.deserialize((CompoundTag) element));
+            if (element instanceof CompoundTag compoundTag) {
+                OperationRegistry.deserializeFromNbt(compoundTag).ifPresent(dataStack::add);
+            }
         }
         // 数据栈需要反转后依次压入
         java.util.Collections.reverse(dataStack);

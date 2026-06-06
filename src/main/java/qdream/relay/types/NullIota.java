@@ -1,6 +1,6 @@
 package qdream.relay.types;
 
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 
@@ -11,8 +11,17 @@ import qdream.relay.mc.base.Data;
 public class NullIota extends Data {
     public static final NullIota INSTANCE = new NullIota();
 
-    public NullIota() {
-        super("relay:null", 1);
+    private NullIota() {
+        super("relay:null", 0);
+    }
+
+    /**
+     * 创建 NullIota 实例
+     * 注意：优先使用 INSTANCE 单例
+     */
+    public NullIota(int ignored) {
+        // 兼容工厂方法调用，实际使用单例
+        this();
     }
 
     @Override
@@ -21,19 +30,12 @@ public class NullIota extends Data {
     }
 
     @Override
-    public Data fromJson(JsonObject json) {
-        String id = json.get("id").getAsString();
-        if (!this.getId().equals(id)) {
-            throw new IllegalArgumentException("Invalid ID for NullIota: " + id);
-        }
-        return INSTANCE;
+    public void toNbt(CompoundTag tag) {
+        // NullIota 没有数据需要序列化
     }
 
     @Override
-    public JsonObject toJson(Data data) {
-        JsonObject json = new JsonObject();
-        json.addProperty("id", getId());
-        json.add("value", null);
-        return json;
+    public Data fromNbt(CompoundTag tag) {
+        return INSTANCE;
     }
 }

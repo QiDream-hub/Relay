@@ -103,6 +103,7 @@ public static final StreamCodec<FriendlyByteBuf, Payload> CODEC = ...;
 - [x] MenuType：构造函数需要 `(MenuSupplier, FeatureFlagSet)` 两个参数
 - [x] AbstractWidget：使用 `extractWidgetRenderState(GuiGraphicsExtractor, ...)` 方法
 - [x] 网络包：使用 `ByteBufCodecs.STRING_UTF8` 替代 `STRING`
+- [x] NBT 序列化：基于对象自身的序列化系统（Data.toNbt/fromNbt）
 
 ### 待修复/注意事项
 - [x] **缺失 ProgramBlock 类** - 已创建
@@ -128,7 +129,7 @@ Relay/
 │   ├── engine/           # 引擎核心 (Executable, StateMachine)
 │   ├── entities/         # 实体类型
 │   ├── items/            # 物品注册 (RelayItems, RelayDataComponents)
-│   ├── mc/               # Minecraft 适配层 (OperationRegistry, NbtSerializer)
+│   ├── mc/               # Minecraft 适配层 (OperationRegistry, StateMachineNbtSerializer)
 │   │   └── base/         # 基类 (Operation, Spell, Data)
 │   ├── mixin/            # Mixin 配置
 │   ├── networking/       # 网络通信
