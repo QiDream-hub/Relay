@@ -23,19 +23,19 @@ public class IfOp implements StackOperation {
         Executable falseBranchData = executor.popData();
         if (falseBranchData == null) return;
         if (!(falseBranchData instanceof ProgramBlock falseBranch)) {
-            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + falseBranchData.getType());
+            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + falseBranchData.getId());
             return;
         }
         Executable trueBranchData = executor.popData();
         if (trueBranchData == null) return;
         if (!(trueBranchData instanceof ProgramBlock trueBranch)) {
-            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + trueBranchData.getType());
+            executor.triggerMishap("操作 relay:if 期望 list 类型，实际为：" + trueBranchData.getId());
             return;
         }
         Executable conditionData = executor.popData();
         if (conditionData == null) return;
         if (!(conditionData instanceof BooleanIota condition)) {
-            executor.triggerMishap("操作 relay:if 期望 boolean 类型，实际为：" + conditionData.getType());
+            executor.triggerMishap("操作 relay:if 期望 boolean 类型，实际为：" + conditionData.getId());
             return;
         }
 

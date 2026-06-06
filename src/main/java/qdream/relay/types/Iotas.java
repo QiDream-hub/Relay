@@ -61,41 +61,41 @@ public final class Iotas {
         if (exec instanceof NumberIota n) {
             return n;
         }
-        throw new IllegalArgumentException("期望 number 类型，实际为：" + exec.getType());
+        throw new IllegalArgumentException("期望 number 类型，实际为：" + exec.getId());
     }
 
     public static BooleanIota asBoolean(Executable exec) {
         if (exec instanceof BooleanIota b) {
             return b;
         }
-        throw new IllegalArgumentException("期望 boolean 类型，实际为：" + exec.getType());
+        throw new IllegalArgumentException("期望 boolean 类型，实际为：" + exec.getId());
     }
 
     public static StringIota asString(Executable exec) {
         if (exec instanceof StringIota s) {
             return s;
         }
-        throw new IllegalArgumentException("期望 string 类型，实际为：" + exec.getType());
+        throw new IllegalArgumentException("期望 string 类型，实际为：" + exec.getId());
     }
 
     public static VectorIota asVector(Executable exec) {
         if (exec instanceof VectorIota v) {
             return v;
         }
-        throw new IllegalArgumentException("期望 vector 类型，实际为：" + exec.getType());
+        throw new IllegalArgumentException("期望 vector 类型，实际为：" + exec.getId());
     }
 
     public static EntityIota asEntity(Executable exec) {
         if (exec instanceof EntityIota e) {
             return e;
         }
-        throw new IllegalArgumentException("期望 entity 类型，实际为：" + exec.getType());
+        throw new IllegalArgumentException("期望 entity 类型，实际为：" + exec.getId());
     }
 
     public static ProgramBlock asList(Executable exec) {
         if (exec instanceof ProgramBlock l) {
             return l;
         }
-        throw new IllegalArgumentException("期望 list 类型，实际为：" + exec.getType());
+        throw new IllegalArgumentException("期望 list 类型，实际为：" + exec.getId());
     }
 }

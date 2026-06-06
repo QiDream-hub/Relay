@@ -17,8 +17,8 @@ public class Operation implements Executable {
     }
 
     @Override
-    public String getType() {
-        return "relay:operation";
+    public String getId() {
+        return opId;
     }
 
     @Override
@@ -29,17 +29,12 @@ public class Operation implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:operation");
-        json.addProperty("op", opId);
+        json.addProperty("id", opId);
         return json;
     }
 
     @Override
     public void execute(StateMachine executor) {
         executor.executeOperation(opId);
-    }
-
-    public String getOpId() {
-        return opId;
     }
 }

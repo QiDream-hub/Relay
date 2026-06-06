@@ -164,7 +164,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         List<Executable> dataStack = testMachine.getDataStackSnapshot();
         for (int i = dataStack.size() - 1; i >= 0 && y < top + 100; i--) {
             Executable data = dataStack.get(i);
-            String text = data.getType() + ": " + data.getValue();
+            String text = data.getId() + ": " + data.getValue();
             graphics.text(this.font, text, x, y, 0x00AAAA);
             y += LINE_HEIGHT;
         }
@@ -178,7 +178,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         List<Executable> programStack = testMachine.getProgramStackSnapshot();
         for (int i = programStack.size() - 1; i >= 0 && y < top + 200; i--) {
             Executable exec = programStack.get(i);
-            String text = exec.getType() + ": " + exec.getValue();
+            String text = exec.getId() + ": " + exec.getValue();
             graphics.text(this.font, text, x, y, 0xFF8800);
             y += LINE_HEIGHT;
         }

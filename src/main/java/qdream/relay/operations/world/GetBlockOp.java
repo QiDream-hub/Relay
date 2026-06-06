@@ -19,10 +19,16 @@ import net.minecraft.world.phys.Vec3;
 public class GetBlockOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
+        // 检查世界交互器
+        if (!executor.hasWorldInteractor()) {
+            executor.triggerMishap("操作 relay:get_block 需要世界交互器");
+            return;
+        }
+
         Executable posData = executor.popData();
         if (posData == null) return;
         if (!(posData instanceof VectorIota pos)) {
-            executor.triggerMishap("操作 relay:get_block 期望 vector 类型，实际为：" + posData.getType());
+            executor.triggerMishap("操作 relay:get_block 期望 vector 类型，实际为：" + posData.getId());
             return;
         }
 

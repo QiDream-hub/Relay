@@ -17,7 +17,7 @@ public class BooleanIota implements Executable {
     }
 
     @Override
-    public String getType() {
+    public String getId() {
         return "relay:boolean";
     }
 
@@ -29,7 +29,7 @@ public class BooleanIota implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:boolean");
+        json.addProperty("id", "relay:boolean");
         json.addProperty("value", value);
         return json;
     }

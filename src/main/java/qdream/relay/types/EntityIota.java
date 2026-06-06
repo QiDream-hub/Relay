@@ -19,7 +19,7 @@ public class EntityIota implements Executable {
     }
 
     @Override
-    public String getType() {
+    public String getId() {
         return "relay:entity";
     }
 
@@ -31,7 +31,7 @@ public class EntityIota implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:entity");
+        json.addProperty("id", "relay:entity");
         json.addProperty("value", value.toString());
         return json;
     }

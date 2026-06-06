@@ -37,7 +37,7 @@ public class NbtSerializer {
 
     public CompoundTag serialize(Executable exec) {
         CompoundTag tag = new CompoundTag();
-        tag.putString("type", exec.getType());
+        tag.putString("id", exec.getId());
 
         if (exec instanceof NumberIota num) {
             if (num.isInteger()) {
@@ -59,7 +59,7 @@ public class NbtSerializer {
         } else if (exec instanceof ProgramBlock list) {
             tag.put("value", serializeList(list.getItems()));
         } else if (exec instanceof Operation op) {
-            tag.putString("op", op.getOpId());
+            // Operation 的 id 就是 opId，不需要额外字段
         } else if (exec instanceof NullIota) {
             // 无值
         }
@@ -68,9 +68,9 @@ public class NbtSerializer {
     }
 
     public Executable deserialize(CompoundTag tag) {
-        String typeName = tag.getString("type").orElse("unknown");
+        String id = tag.getString("id").orElse("relay:null");
 
-        return switch (typeName) {
+        return switch (id) {
             case "relay:number" -> {
                 if (tag.contains("value")) {
                     var intOpt = tag.getInt("value");
@@ -94,12 +94,18 @@ public class NbtSerializer {
                 yield new EntityIota(uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr));
             }
             case "relay:list" -> {
-                ListTag listTag = tag.getList("value").orElse(new ListTag());
-                yield new ProgramBlock(deserializeList(listTag));
+                // 检查是否有 value 字段，有则是 ProgramBlock，否则是 Operation
+                var valueOpt = tag.getList("value");
+                if (valueOpt.isPresent()) {
+                    ListTag listTag = valueOpt.get();
+                    yield new ProgramBlock(deserializeList(listTag));
+                } else {
+                    yield new Operation("relay:list");
+                }
             }
-            case "relay:operation" -> new Operation(tag.getString("op").orElse(""));
-            case "relay:null", "null", "any" -> NullIota.INSTANCE;
-            default -> NullIota.INSTANCE;
+            case "relay:null" -> NullIota.INSTANCE;
+            // 所有操作类型（default 处理）
+            default -> new Operation(id);
         };
     }
 

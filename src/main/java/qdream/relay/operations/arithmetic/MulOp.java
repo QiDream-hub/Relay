@@ -15,13 +15,13 @@ public class MulOp implements StackOperation {
         Executable bData = executor.popData();
         if (bData == null) return;
         if (!(bData instanceof NumberIota b)) {
-            executor.triggerMishap("操作 relay:mul 期望 number 类型，实际为：" + bData.getType());
+            executor.triggerMishap("操作 relay:mul 期望 number 类型，实际为：" + bData.getId());
             return;
         }
         Executable aData = executor.popData();
         if (aData == null) return;
         if (!(aData instanceof NumberIota a)) {
-            executor.triggerMishap("操作 relay:mul 期望 number 类型，实际为：" + aData.getType());
+            executor.triggerMishap("操作 relay:mul 期望 number 类型，实际为：" + aData.getId());
             return;
         }
 

@@ -24,13 +24,13 @@ public class ListSetOp implements StackOperation {
         Executable indexData = executor.popData();
         if (indexData == null) return;
         if (!(indexData instanceof NumberIota index)) {
-            executor.triggerMishap("操作 relay:list_set 期望 number 类型，实际为：" + indexData.getType());
+            executor.triggerMishap("操作 relay:list_set 期望 number 类型，实际为：" + indexData.getId());
             return;
         }
         Executable listData = executor.popData();
         if (listData == null) return;
         if (!(listData instanceof ProgramBlock listBlock)) {
-            executor.triggerMishap("操作 relay:list_set 期望 list 类型，实际为：" + listData.getType());
+            executor.triggerMishap("操作 relay:list_set 期望 list 类型，实际为：" + listData.getId());
             return;
         }
 

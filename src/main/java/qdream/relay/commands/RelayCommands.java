@@ -430,7 +430,7 @@ public class RelayCommands {
             if (i > 0) sb.append("; ");
 
             if (exec instanceof Operation op) {
-                String str = op.getOpId();
+                String str = op.getId();
                 if (str.startsWith("relay:")) {
                     sb.append(str.substring(6));
                 } else {
@@ -445,7 +445,7 @@ public class RelayCommands {
             } else if (exec instanceof ProgramBlock) {
                 sb.append("[...]");
             } else {
-                sb.append(exec.getType());
+                sb.append(exec.getId());
             }
         }
         return sb.toString();
@@ -467,7 +467,7 @@ public class RelayCommands {
             } else if (data instanceof BooleanIota b) {
                 sb.append(b.asBoolean());
             } else {
-                sb.append(data.getType());
+                sb.append(data.getId());
             }
         }
         return sb.toString();

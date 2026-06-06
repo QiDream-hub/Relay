@@ -20,16 +20,22 @@ import net.minecraft.world.phys.Vec3;
 public class PlaceBlockOp implements StackOperation {
     @Override
     public void execute(StateMachine executor) {
+        // 检查世界交互器
+        if (!executor.hasWorldInteractor()) {
+            executor.triggerMishap("操作 relay:place_block 需要世界交互器");
+            return;
+        }
+
         Executable blockIdData = executor.popData();
         if (blockIdData == null) return;
         if (!(blockIdData instanceof StringIota blockIdIota)) {
-            executor.triggerMishap("操作 relay:place_block 期望 string 类型，实际为：" + blockIdData.getType());
+            executor.triggerMishap("操作 relay:place_block 期望 string 类型，实际为：" + blockIdData.getId());
             return;
         }
         Executable posData = executor.popData();
         if (posData == null) return;
         if (!(posData instanceof VectorIota pos)) {
-            executor.triggerMishap("操作 relay:place_block 期望 vector 类型，实际为：" + posData.getType());
+            executor.triggerMishap("操作 relay:place_block 期望 vector 类型，实际为：" + posData.getId());
             return;
         }
 

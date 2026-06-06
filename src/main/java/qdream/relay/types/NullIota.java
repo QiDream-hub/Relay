@@ -16,7 +16,7 @@ public class NullIota implements Executable {
     }
 
     @Override
-    public String getType() {
+    public String getId() {
         return "relay:null";
     }
 
@@ -28,7 +28,7 @@ public class NullIota implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:null");
+        json.addProperty("id", "relay:null");
         return json;
     }
 

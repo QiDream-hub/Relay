@@ -39,7 +39,7 @@ public class IotaTypeRegistry {
 
     /**
      * 从 JSON 反序列化
-     * @param json JSON 元素，必须包含 "type" 字段
+     * @param json JSON 元素，必须包含 "id" 字段
      * @return 反序列化后的 Executable
      */
     public static Executable fromJson(JsonElement json) {
@@ -47,10 +47,10 @@ public class IotaTypeRegistry {
             throw new RuntimeException("JSON 必须是对象");
         }
         JsonObject obj = json.getAsJsonObject();
-        String typeId = obj.get("type").getAsString();
-        SerDePair serDe = TYPES.get(typeId);
+        String id = obj.get("id").getAsString();
+        SerDePair serDe = TYPES.get(id);
         if (serDe == null) {
-            throw new RuntimeException("未知类型：" + typeId);
+            throw new RuntimeException("未知类型：" + id);
         }
         return serDe.deserializer.deserialize(obj);
     }
@@ -61,7 +61,7 @@ public class IotaTypeRegistry {
      * @return JSON 元素
      */
     public static JsonElement toJson(Executable data) {
-        String typeId = data.getType();
+        String typeId = data.getId();
         SerDePair serDe = TYPES.get(typeId);
         if (serDe == null) {
             throw new RuntimeException("未注册类型：" + typeId);

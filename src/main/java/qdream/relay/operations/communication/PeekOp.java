@@ -18,7 +18,7 @@ public class PeekOp implements StackOperation {
         Executable channelData = executor.popData();
         if (channelData == null) return;
         if (!(channelData instanceof NumberIota channel)) {
-            executor.triggerMishap("操作 relay:peek 期望 number 类型，实际为：" + channelData.getType());
+            executor.triggerMishap("操作 relay:peek 期望 number 类型，实际为：" + channelData.getId());
             return;
         }
 

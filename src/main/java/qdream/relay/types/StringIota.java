@@ -17,7 +17,7 @@ public class StringIota implements Executable {
     }
 
     @Override
-    public String getType() {
+    public String getId() {
         return "relay:string";
     }
 
@@ -29,7 +29,7 @@ public class StringIota implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:string");
+        json.addProperty("id", "relay:string");
         json.addProperty("value", value);
         return json;
     }

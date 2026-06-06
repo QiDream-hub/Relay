@@ -21,7 +21,7 @@ public class NumberIota implements Executable {
     }
 
     @Override
-    public String getType() {
+    public String getId() {
         return "relay:number";
     }
 
@@ -33,7 +33,7 @@ public class NumberIota implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:number");
+        json.addProperty("id", "relay:number");
         if (value == (int) value) {
             json.addProperty("value", (int) value);
         } else {

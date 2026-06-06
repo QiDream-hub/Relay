@@ -15,7 +15,7 @@ public class NotOp implements StackOperation {
         Executable aData = executor.popData();
         if (aData == null) return;
         if (!(aData instanceof BooleanIota a)) {
-            executor.triggerMishap("操作 relay:not 期望 boolean 类型，实际为：" + aData.getType());
+            executor.triggerMishap("操作 relay:not 期望 boolean 类型，实际为：" + aData.getId());
             return;
         }
 

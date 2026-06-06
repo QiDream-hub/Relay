@@ -22,7 +22,7 @@ public class ProgramBlock implements Executable {
     }
 
     @Override
-    public String getType() {
+    public String getId() {
         return "relay:list";
     }
 
@@ -34,7 +34,7 @@ public class ProgramBlock implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:list");
+        json.addProperty("id", "relay:list");
         JsonArray array = new JsonArray();
         for (Executable item : items) {
             array.add(item.toJson());

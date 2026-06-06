@@ -72,25 +72,19 @@ public class StateMachine {
 
     /**
      * 执行操作
-     * @param opId 操作 ID（不含前缀）
+     * @param opId 操作 ID
      */
     public void executeOperation(String opId) {
-        OperationRegistry.getEntry(opId).ifPresentOrElse(entry -> {
-            // 检查世界交互器
-            if (entry.requiresWorldInteractor() && !hasWorldInteractor) {
-                triggerMishap("操作 " + opId + " 需要世界交互器");
-                return;
-            }
-
-            // 检查操作数
-            if (remainingOps < entry.getCost()) {
-                triggerMishap("操作 " + opId + " 需要 " + entry.getCost() + " 操作数，但只剩 " + remainingOps);
+        OperationRegistry.get(opId).ifPresentOrElse(op -> {
+            // 检查操作数预算
+            if (remainingOps < op.getCost()) {
+                triggerMishap("操作 " + opId + " 需要 " + op.getCost() + " 操作数，但只剩 " + remainingOps);
                 return;
             }
 
             try {
-                entry.getOperation().execute(this);
-                remainingOps -= entry.getCost();
+                op.execute(this);
+                remainingOps -= op.getCost();
             } catch (Exception e) {
                 triggerMishap("执行操作 " + opId + " 时出错：" + e.getMessage());
             }

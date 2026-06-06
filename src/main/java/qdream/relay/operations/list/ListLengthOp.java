@@ -21,7 +21,7 @@ public class ListLengthOp implements StackOperation {
         Executable listData = executor.popData();
         if (listData == null) return;
         if (!(listData instanceof ProgramBlock listBlock)) {
-            executor.triggerMishap("操作 relay:list_length 期望 list 类型，实际为：" + listData.getType());
+            executor.triggerMishap("操作 relay:list_length 期望 list 类型，实际为：" + listData.getId());
             return;
         }
 

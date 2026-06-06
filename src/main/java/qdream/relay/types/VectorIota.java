@@ -22,7 +22,7 @@ public class VectorIota implements Executable {
     }
 
     @Override
-    public String getType() {
+    public String getId() {
         return "relay:vector";
     }
 
@@ -34,7 +34,7 @@ public class VectorIota implements Executable {
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "relay:vector");
+        json.addProperty("id", "relay:vector");
         JsonObject posJson = new JsonObject();
         posJson.addProperty("x", value.x());
         posJson.addProperty("y", value.y());

@@ -9,14 +9,10 @@ public class WorldOperationsInit {
 
     public static void register() {
         // 世界读取操作
-        OperationRegistry.register("relay:get_block", new GetBlockOp())
-                .requiresWorldInteractor(true)
-                .register();
+        OperationRegistry.register("relay:get_block", new GetBlockOp());
 
         // 世界写入操作
-        OperationRegistry.register("relay:place_block", new PlaceBlockOp())
-                .requiresWorldInteractor(true)
-                .register();
+        OperationRegistry.register("relay:place_block", new PlaceBlockOp());
 
         // TODO: 更多世界交互操作
         // - get_entity: 获取实体信息

@@ -28,7 +28,7 @@ public final class IotaSerializers {
                 exec -> {
                     NumberIota iota = (NumberIota) exec;
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:number");
+                    json.addProperty("id", "relay:number");
                     if (iota.isInteger()) {
                         json.addProperty("value", iota.asInt());
                     } else {
@@ -64,7 +64,7 @@ public final class IotaSerializers {
         Executable.TypeRegistry.register("relay:boolean",
                 exec -> {
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:boolean");
+                    json.addProperty("id", "relay:boolean");
                     json.addProperty("value", ((BooleanIota) exec).asBoolean());
                     return json;
                 },
@@ -75,7 +75,7 @@ public final class IotaSerializers {
         Executable.TypeRegistry.register("relay:string",
                 exec -> {
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:string");
+                    json.addProperty("id", "relay:string");
                     json.addProperty("value", ((StringIota) exec).asString());
                     return json;
                 },
@@ -86,7 +86,7 @@ public final class IotaSerializers {
         Executable.TypeRegistry.register("relay:vector",
                 exec -> {
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:vector");
+                    json.addProperty("id", "relay:vector");
                     McVec3Adapter vec = ((VectorIota) exec).asVector();
                     JsonObject posJson = new JsonObject();
                     posJson.addProperty("x", vec.x());
@@ -108,7 +108,7 @@ public final class IotaSerializers {
         Executable.TypeRegistry.register("relay:entity",
                 exec -> {
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:entity");
+                    json.addProperty("id", "relay:entity");
                     json.addProperty("value", ((EntityIota) exec).asEntity().toString());
                     return json;
                 },
@@ -119,7 +119,7 @@ public final class IotaSerializers {
         Executable.TypeRegistry.register("relay:list",
                 exec -> {
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:list");
+                    json.addProperty("id", "relay:list");
                     JsonArray array = new JsonArray();
                     for (Executable item : ((ProgramBlock) exec).getItems()) {
                         array.add(item.toJson());
@@ -131,7 +131,7 @@ public final class IotaSerializers {
                     JsonArray array = json.get("value").getAsJsonArray();
                     List<Executable> list = new ArrayList<>();
                     for (JsonElement elem : array) {
-                        list.add((Executable) Executable.TypeRegistry.fromJson(elem));
+                        list.add(Executable.TypeRegistry.fromJson(elem));
                     }
                     return new ProgramBlock(list);
                 }
@@ -141,21 +141,183 @@ public final class IotaSerializers {
         Executable.TypeRegistry.register("relay:null",
                 exec -> {
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:null");
+                    json.addProperty("id", "relay:null");
                     return json;
                 },
                 json -> NullIota.INSTANCE
         );
 
-        // 操作类型（特殊的可执行单元，用于存储操作 ID）
-        Executable.TypeRegistry.register("relay:operation",
+        // 基础操作
+        Executable.TypeRegistry.register("relay:add",
                 exec -> {
                     JsonObject json = new JsonObject();
-                    json.addProperty("type", "relay:operation");
-                    json.addProperty("op", ((Operation) exec).getOpId());
+                    json.addProperty("id", "relay:add");
                     return json;
                 },
-                json -> new Operation(json.get("op").getAsString())
+                json -> new Operation("relay:add")
+        );
+
+        Executable.TypeRegistry.register("relay:sub",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:sub");
+                    return json;
+                },
+                json -> new Operation("relay:sub")
+        );
+
+        Executable.TypeRegistry.register("relay:mul",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:mul");
+                    return json;
+                },
+                json -> new Operation("relay:mul")
+        );
+
+        Executable.TypeRegistry.register("relay:div",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:div");
+                    return json;
+                },
+                json -> new Operation("relay:div")
+        );
+
+        Executable.TypeRegistry.register("relay:and",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:and");
+                    return json;
+                },
+                json -> new Operation("relay:and")
+        );
+
+        Executable.TypeRegistry.register("relay:or",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:or");
+                    return json;
+                },
+                json -> new Operation("relay:or")
+        );
+
+        Executable.TypeRegistry.register("relay:not",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:not");
+                    return json;
+                },
+                json -> new Operation("relay:not")
+        );
+
+        Executable.TypeRegistry.register("relay:eq",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:eq");
+                    return json;
+                },
+                json -> new Operation("relay:eq")
+        );
+
+        Executable.TypeRegistry.register("relay:lt",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:lt");
+                    return json;
+                },
+                json -> new Operation("relay:lt")
+        );
+
+        Executable.TypeRegistry.register("relay:gt",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:gt");
+                    return json;
+                },
+                json -> new Operation("relay:gt")
+        );
+
+        Executable.TypeRegistry.register("relay:eval",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:eval");
+                    return json;
+                },
+                json -> new Operation("relay:eval")
+        );
+
+        Executable.TypeRegistry.register("relay:if",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:if");
+                    return json;
+                },
+                json -> new Operation("relay:if")
+        );
+
+        Executable.TypeRegistry.register("relay:send",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:send");
+                    return json;
+                },
+                json -> new Operation("relay:send")
+        );
+
+        Executable.TypeRegistry.register("relay:recv",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:recv");
+                    return json;
+                },
+                json -> new Operation("relay:recv")
+        );
+
+        Executable.TypeRegistry.register("relay:peek",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:peek");
+                    return json;
+                },
+                json -> new Operation("relay:peek")
+        );
+
+        // 列表操作
+        Executable.TypeRegistry.register("relay:list",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:list");
+                    return json;
+                },
+                json -> new Operation("relay:list")
+        );
+
+        Executable.TypeRegistry.register("relay:get",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:get");
+                    return json;
+                },
+                json -> new Operation("relay:get")
+        );
+
+        Executable.TypeRegistry.register("relay:set",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:set");
+                    return json;
+                },
+                json -> new Operation("relay:set")
+        );
+
+        Executable.TypeRegistry.register("relay:len",
+                exec -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", "relay:len");
+                    return json;
+                },
+                json -> new Operation("relay:len")
         );
     }
 }
