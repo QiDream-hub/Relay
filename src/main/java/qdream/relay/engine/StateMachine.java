@@ -95,8 +95,9 @@ public class StateMachine {
 
     /**
      * 执行操作
+     * @param opId 操作 ID（不含前缀）
      */
-    private void executeOperation(String opId) {
+    public void executeOperation(String opId) {
         OperationRegistry.getEntry(opId).ifPresentOrElse(entry -> {
             // 检查世界交互器
             if (entry.requiresWorldInteractor() && !hasWorldInteractor) {

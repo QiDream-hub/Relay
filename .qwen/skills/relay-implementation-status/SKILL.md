@@ -13,7 +13,7 @@ extracted_at: '2026-06-06T00:00:00.000Z'
 
 | 设计文档要求 | 当前实现状态 | 文件位置 | 备注 |
 |------------|------------|----------|------|
-| **命令系统** | ✅ 完成 | `commands/RelayCommands.java` | `/relay write_spell`, `/relay read`, `/relay clear` 命令 |
+| **命令系统** | ✅ 完成 | `commands/RelayCommands.java` | `/relay write_spell`, `/relay read`, `/relay clear`, `/relay run` 命令 |
 | **Iota 类型系统** | ✅ 完成 | `mc/McIota.java`, `mc/McIotaType.java` | 支持 NUMBER, BOOLEAN, VECTOR, STRING, ENTITY, LIST, NULL |
 | **双栈执行模型** | ✅ 完成 | `engine/StateMachine.java` | 维护 `programStack` 和 `dataStack` |
 | **操作注册表** | ✅ 完成 | `engine/OperationRegistry.java` | 支持链式 API 注册 |

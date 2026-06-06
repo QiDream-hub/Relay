@@ -9,12 +9,12 @@ public class WorldOperationsInit {
 
     public static void register() {
         // 世界读取操作
-        OperationRegistry.register("get_block", new GetBlockOp())
+        OperationRegistry.register("relay:get_block", new GetBlockOp())
                 .requiresWorldInteractor(true)
                 .register();
 
         // 世界写入操作
-        OperationRegistry.register("place_block", new PlaceBlockOp())
+        OperationRegistry.register("relay:place_block", new PlaceBlockOp())
                 .requiresWorldInteractor(true)
                 .register();
 

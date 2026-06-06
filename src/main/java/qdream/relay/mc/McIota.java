@@ -1,7 +1,9 @@
 package qdream.relay.mc;
 
+import com.google.gson.JsonElement;
 import qdream.relay.engine.IData;
 import qdream.relay.engine.IExecutable;
+import qdream.relay.engine.IotaTypeRegistry;
 import qdream.relay.engine.StateMachine;
 
 import java.util.List;
@@ -36,7 +38,16 @@ public class McIota implements IExecutable {
         if (type != McIotaType.STRING && type != McIotaType.LIST) {
             // 数据自动压入数据栈
             executor.pushData(this);
+        } else if (type == McIotaType.STRING) {
+            // 字符串类型作为操作执行
+            executor.executeOperation((String) value);
         }
+        // 列表类型暂不处理
+    }
+
+    @Override
+    public JsonElement toJson() {
+        return IotaTypeRegistry.toJson(this);
     }
 
     // ========== 工厂方法 ==========

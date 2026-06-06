@@ -14,6 +14,7 @@ import qdream.relay.operations.OperationsInit;
 import qdream.relay.networking.RelayServerNetworking;
 import qdream.relay.entities.RelayEntityTypes;
 import qdream.relay.commands.RelayCommands;
+import qdream.relay.mc.McIotaTypes;
 
 public class Relay implements ModInitializer {
 	public static final String MOD_ID = "relay";
@@ -31,6 +32,9 @@ public class Relay implements ModInitializer {
 
 		LOGGER.info("Initializing Relay Mod");
 
+		// 注册所有 Iota 类型
+		McIotaTypes.register();
+
 		// 注册方块和方块实体
 		RelayBlocks.register();
 		RelayBlockEntities.register();
@@ -38,7 +42,7 @@ public class Relay implements ModInitializer {
 		// 注册物品
 		RelayItems.register();
 
-		// 注册 DataComponent
+		// 注册自定义 DataComponent
 		RelayDataComponents.register();
 
 		// 注册实体

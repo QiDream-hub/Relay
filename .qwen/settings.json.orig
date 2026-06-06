@@ -10,7 +10,8 @@
       "Bash(javap *)",
       "Bash(grep *)",
       "Bash(xargs *)",
-      "Bash(mv *)"
+      "Bash(mv *)",
+      "Bash(sed *)"
     ]
   },
   "$version": 4

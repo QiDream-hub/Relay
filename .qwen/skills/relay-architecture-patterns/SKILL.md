@@ -9,9 +9,11 @@ extracted_at: '2026-06-05T15:55:38.363Z'
 
 Relay 是一个基于栈的编程模组，为 Minecraft 添加可视化法术编程系统。以下是其核心架构模式。
 
-## 0. Engine/MC 分层架构 (2026-06-05 重构)
+## 0. Engine/MC 分层架构 (2026-06-05 重构，2026-06-06 单一注册表)
 
 核心执行引擎与 Minecraft 完全解耦，支持版本迁移和独立测试。
+
+**2026-06-06 更新**：移除了 `mc/IotaTypeRegistry.java`，统一使用 `engine/IotaTypeRegistry` 作为唯一类型注册表。
 
 ```
 src/main/java/qdream/relay/
@@ -19,16 +21,16 @@ src/main/java/qdream/relay/
 │   ├── IData.java             # 数据接口（getType() 返回 String, getValue()）
 │   ├── IExecutable.java       # 可执行接口（继承 IData + execute()）
 │   ├── StateMachine.java      # 状态机核心（使用 IData/IExecutable）
-│   ├── StackOperation.java    # 操作接口
+│   ├── IotaTypeRegistry.java  # 类型注册表（唯一）
 │   ├── OperationRegistry.java # 操作注册表
 │   └── OperationSignature.java# 签名（使用字符串表示类型）
 │
 ├── mc/                        # MC 适配层
 │   ├── McIota.java            # IExecutable 实现
 │   ├── McIotaType.java        # 类型枚举
+│   ├── McIotaTypes.java       # 内置类型序列化器注册（委托到 engine）
 │   ├── McVec3Adapter.java     # Vec3 包装类
-│   ├── NbtSerializer.java     # NBT 序列化工具
-│   └── StateMachineNbtSerializer.java
+│   └── NbtSerializer.java     # NBT 序列化工具
 │
 ├── core/                      # MC 集成层（保留）
 │   ├── CommunicationSystem.java
@@ -38,6 +40,17 @@ src/main/java/qdream/relay/
 │
 └── operations/                # 操作实现（依赖 engine 和 mc）
 ```
+
+### 单一类型注册表设计
+
+| 组件 | 职责 | 依赖 |
+|------|------|------|
+| `engine.IotaTypeRegistry` | 唯一类型注册表，管理所有 JSON 序列化器 | 纯 Java |
+| `IData.TypeRegistry` | 委托接口，简化注册调用 | 委托到 `IotaTypeRegistry` |
+| `mc.McIotaTypes.register()` | 注册所有内置类型的序列化器 | 调用 `IData.TypeRegistry.register()` |
+| `mc.McIota.toJson()` | 序列化实例 | 调用 `IotaTypeRegistry.toJson(this)` |
+
+**已删除**：`mc/IotaTypeRegistry.java` - 避免重复注册和同步问题
 
 ### 关键设计决策
 

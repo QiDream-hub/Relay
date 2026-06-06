@@ -11,90 +11,90 @@ import qdream.relay.operations.world.*;
 
 /**
  * 操作初始化器
- * 注册所有可用操作
+ * 注册所有可用操作（使用完整命名空间 ID）
  */
 public class OperationsInit {
 
     public static void register() {
         // 基础栈操作
-        OperationRegistry.register("pop", new PopOp())
+        OperationRegistry.register("relay:pop", new PopOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("dup", new DupOp())
+        OperationRegistry.register("relay:dup", new DupOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("swap", new SwapOp())
+        OperationRegistry.register("relay:swap", new SwapOp())
                 .requiresWorldInteractor(false)
                 .register();
 
         // 算术操作
-        OperationRegistry.register("add", new AddOp())
+        OperationRegistry.register("relay:add", new AddOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("sub", new SubOp())
+        OperationRegistry.register("relay:sub", new SubOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("mul", new MulOp())
+        OperationRegistry.register("relay:mul", new MulOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("div", new DivOp())
+        OperationRegistry.register("relay:div", new DivOp())
                 .requiresWorldInteractor(false)
                 .register();
 
         // 逻辑操作
-        OperationRegistry.register("and", new AndOp())
+        OperationRegistry.register("relay:and", new AndOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("or", new OrOp())
+        OperationRegistry.register("relay:or", new OrOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("not", new NotOp())
+        OperationRegistry.register("relay:not", new NotOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("eq", new EqOp())
+        OperationRegistry.register("relay:eq", new EqOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("lt", new LtOp())
+        OperationRegistry.register("relay:lt", new LtOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("gt", new GtOp())
+        OperationRegistry.register("relay:gt", new GtOp())
                 .requiresWorldInteractor(false)
                 .register();
 
         // 控制流
-        OperationRegistry.register("eval", new EvalOp())
+        OperationRegistry.register("relay:eval", new EvalOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("if", new IfOp())
+        OperationRegistry.register("relay:if", new IfOp())
                 .requiresWorldInteractor(false)
                 .register();
 
         // 通信操作
-        OperationRegistry.register("send", new SendOp())
+        OperationRegistry.register("relay:send", new SendOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("recv", new RecvOp())
+        OperationRegistry.register("relay:recv", new RecvOp())
                 .requiresWorldInteractor(false)
                 .register();
 
-        OperationRegistry.register("peek", new PeekOp())
+        OperationRegistry.register("relay:peek", new PeekOp())
                 .requiresWorldInteractor(false)
                 .register();
 
         // 控制流 - stop
-        OperationRegistry.register("stop", new StopOp())
+        OperationRegistry.register("relay:stop", new StopOp())
                 .requiresWorldInteractor(false)
                 .register();
 

@@ -11,7 +11,8 @@
       "Bash(grep *)",
       "Bash(xargs *)",
       "Bash(mv *)",
-      "Bash(sed *)"
+      "Bash(sed *)",
+      "Bash(rm *)"
     ]
   },
   "$version": 4

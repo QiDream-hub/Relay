@@ -2,18 +2,22 @@ package qdream.relay.items;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.engine.IExecutable;
 import qdream.relay.mc.McIota;
+import qdream.relay.mc.NbtSerializer;
 import qdream.relay.engine.StateMachine;
 
 /**
  * 法术磁盘物品
  * 存储栈图程序（Iota 列表）
- * 使用 26.1.2 DataComponent 系统实现
+ * 使用 26.1.2 DataComponent 系统，底层使用 NBT 格式存储
  */
 public class SpellDiskItem extends Item {
 
@@ -23,21 +27,50 @@ public class SpellDiskItem extends Item {
 
     /**
      * 从磁盘读取程序
+     * @return 程序列表，如果没有程序则返回空列表
      */
     public static List<IExecutable> getProgram(ItemStack stack) {
-        return RelayDataComponents.getProgram(stack);
+        CompoundTag programTag = stack.get(RelayDataComponents.SPELL_PROGRAM);
+        if (programTag == null) {
+            return List.of();
+        }
+        Optional<ListTag> listOpt = programTag.getList("program");
+        if (listOpt.isEmpty()) {
+            return List.of();
+        }
+        ListTag listTag = listOpt.get();
+        List<IExecutable> result = new ArrayList<>();
+        for (int i = 0; i < listTag.size(); i++) {
+            Optional<CompoundTag> elementOpt = listTag.getCompound(i);
+            elementOpt.ifPresent(tag -> result.add(NbtSerializer.deserializeStatic(tag)));
+        }
+        return result;
     }
 
     /**
      * 保存程序到磁盘
+     * @param stack 物品堆
+     * @param program 程序列表
      */
     public static void setProgram(ItemStack stack, List<IExecutable> program) {
-        RelayDataComponents.setProgram(stack, program);
+        CompoundTag programTag = new CompoundTag();
+        ListTag listTag = new ListTag();
+        for (IExecutable iota : program) {
+            if (iota instanceof McIota mcIota) {
+                listTag.add(NbtSerializer.serializeStatic(mcIota));
+            } else {
+                throw new RuntimeException("不支持的 IExecutable 类型：" + iota.getClass());
+            }
+        }
+        programTag.put("program", listTag);
+        stack.set(RelayDataComponents.SPELL_PROGRAM, programTag);
     }
 
     /**
      * 从状态机保存状态
      * 保存程序栈和数据栈的完整状态
+     * @param stack 物品堆
+     * @param machine 状态机
      */
     public static void saveFromStateMachine(ItemStack stack, StateMachine machine) {
         // 获取程序栈快照
@@ -45,7 +78,7 @@ public class SpellDiskItem extends Item {
         // 反转回原始顺序（快照是栈顺序，需要转为列表顺序）
         List<IExecutable> program = new ArrayList<>(programStack);
         java.util.Collections.reverse(program);
-        
+
         // 保存程序
         setProgram(stack, program);
     }
@@ -53,32 +86,44 @@ public class SpellDiskItem extends Item {
     /**
      * 加载状态到状态机
      * 恢复程序栈和数据栈
+     * @param stack 物品堆
+     * @param machine 状态机
      */
     public static void loadToStateMachine(ItemStack stack, StateMachine machine) {
         List<IExecutable> program = getProgram(stack);
-        if (program != null && !program.isEmpty()) {
+        if (!program.isEmpty()) {
             machine.loadProgram(program);
         }
     }
 
     /**
      * 检查磁盘是否有程序
+     * @param stack 物品堆
+     * @return 是否有程序
      */
     public static boolean hasProgram(ItemStack stack) {
-        return RelayDataComponents.hasProgram(stack);
+        return stack.has(RelayDataComponents.SPELL_PROGRAM);
     }
 
     /**
      * 获取程序大小
+     * @param stack 物品堆
+     * @return 程序元素数量
      */
     public static int getProgramSize(ItemStack stack) {
-        return RelayDataComponents.getProgramSize(stack);
+        CompoundTag programTag = stack.get(RelayDataComponents.SPELL_PROGRAM);
+        if (programTag == null) {
+            return 0;
+        }
+        Optional<ListTag> listOpt = programTag.getList("program");
+        return listOpt.map(ListTag::size).orElse(0);
     }
 
     /**
      * 清空磁盘
+     * @param stack 物品堆
      */
     public static void clear(ItemStack stack) {
-        RelayDataComponents.clear(stack);
+        stack.remove(RelayDataComponents.SPELL_PROGRAM);
     }
 }

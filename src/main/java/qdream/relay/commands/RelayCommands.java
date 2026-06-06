@@ -16,9 +16,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import qdream.relay.blocks.entity.ShellBlockEntity;
 import qdream.relay.core.ShellContainer;
+import qdream.relay.engine.IData;
 import qdream.relay.engine.IExecutable;
+import qdream.relay.engine.StateMachine;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.McIota;
+import qdream.relay.mc.McIotaTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,10 @@ public class RelayCommands {
             Component.literal("无效的插槽位置")
     );
 
+    private static final SimpleCommandExceptionType RUN_ERROR = new SimpleCommandExceptionType(
+            Component.literal("运行程序时出错")
+    );
+
     /**
      * 注册所有命令
      */
@@ -43,8 +50,8 @@ public class RelayCommands {
         LiteralCommandNode<CommandSourceStack> root = Commands.literal("relay")
                 .build();
 
-        // /relay write_spell <hand|shell> [slot] <program_string>
-        LiteralCommandNode<CommandSourceStack> writeSpell = Commands.literal("write_spell")
+        // /relay write <hand|shell> [slot] <program_string>
+        LiteralCommandNode<CommandSourceStack> write = Commands.literal("write")
                 .then(Commands.argument("target", StringArgumentType.word())
                         .suggests((ctx, builder) -> {
                             builder.suggest("hand");
@@ -98,10 +105,32 @@ public class RelayCommands {
                 )
                 .build();
 
+        // /relay run <hand|shell> [slot] [ops]
+        LiteralCommandNode<CommandSourceStack> run = Commands.literal("run")
+                .then(Commands.argument("target", StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            builder.suggest("hand");
+                            builder.suggest("shell");
+                            return builder.buildFuture();
+                        })
+                        .then(Commands.argument("ops", IntegerArgumentType.integer(1, 10000))
+                                .executes(RelayCommands::runHand)
+                        )
+                        .then(Commands.literal("shell")
+                                .then(Commands.argument("pos", StringArgumentType.word())
+                                        .then(Commands.argument("ops", IntegerArgumentType.integer(1, 10000))
+                                                .executes(RelayCommands::runShell)
+                                        )
+                                )
+                        )
+                )
+                .build();
+
         dispatcher.getRoot().addChild(root);
-        root.addChild(writeSpell);
+        root.addChild(write);
         root.addChild(clear);
         root.addChild(read);
+        root.addChild(run);
     }
 
     /**
@@ -110,7 +139,7 @@ public class RelayCommands {
     private static int writeSpellToHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         var player = source.getPlayerOrException();
-        
+
         ItemStack stack = player.getMainHandItem();
 
         if (!(stack.getItem() instanceof SpellDiskItem)) {
@@ -118,7 +147,13 @@ public class RelayCommands {
         }
 
         String programStr = StringArgumentType.getString(context, "program");
-        List<IExecutable> program = parseProgram(programStr);
+        List<IExecutable> program;
+        try {
+            program = parseProgram(programStr);
+        } catch (RuntimeException e) {
+            source.sendFailure(Component.literal("§c 程序解析失败：" + e.getMessage()));
+            return 0;
+        }
 
         SpellDiskItem.setProgram(stack, program);
 
@@ -146,7 +181,13 @@ public class RelayCommands {
             throw NO_DISK.create();
         }
 
-        List<IExecutable> program = parseProgram(programStr);
+        List<IExecutable> program;
+        try {
+            program = parseProgram(programStr);
+        } catch (RuntimeException e) {
+            source.sendFailure(Component.literal("§c 程序解析失败：" + e.getMessage()));
+            return 0;
+        }
         SpellDiskItem.setProgram(disk, program);
         shell.setChanged();
 
@@ -219,6 +260,98 @@ public class RelayCommands {
     }
 
     /**
+     * 运行手中的法术磁盘程序
+     */
+    private static int runHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        var player = source.getPlayerOrException();
+        ItemStack stack = player.getMainHandItem();
+
+        if (!(stack.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        int ops = IntegerArgumentType.getInteger(context, "ops");
+
+        List<IExecutable> program = SpellDiskItem.getProgram(stack);
+        if (program.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("法术磁盘为空，无法运行"), true);
+            return 0;
+        }
+
+        StateMachine machine = new StateMachine();
+        machine.setMishapHandler(reason -> {
+            try {
+                source.sendFailure(Component.literal("§c 事故：" + reason));
+            } catch (Exception e) {
+                // 忽略
+            }
+        });
+
+        machine.loadProgram(program);
+        machine.tick(ops);
+
+        List<IData> dataStack = machine.getDataStackSnapshot();
+        StringBuilder result = new StringBuilder();
+        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        if (!dataStack.isEmpty()) {
+            result.append(", 数据栈：§f").append(dataStackToString(dataStack));
+        }
+
+        source.sendSuccess(() -> Component.literal(result.toString()), true);
+        return 1;
+    }
+
+    /**
+     * 运行外壳方块中的法术磁盘程序
+     */
+    private static int runShell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        String posStr = StringArgumentType.getString(context, "pos");
+        int ops = IntegerArgumentType.getInteger(context, "ops");
+
+        var pos = parseBlockPos(posStr, source);
+        BlockEntity blockEntity = source.getLevel().getBlockEntity(pos);
+
+        if (!(blockEntity instanceof ShellContainer shell)) {
+            throw INVALID_SLOT.create();
+        }
+
+        ItemStack disk = shell.getDiskStack();
+        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        List<IExecutable> program = SpellDiskItem.getProgram(disk);
+        if (program.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("法术磁盘为空，无法运行"), true);
+            return 0;
+        }
+
+        StateMachine machine = new StateMachine();
+        machine.setMishapHandler(reason -> {
+            try {
+                source.sendFailure(Component.literal("§c 事故：" + reason));
+            } catch (Exception e) {
+                // 忽略
+            }
+        });
+
+        machine.loadProgram(program);
+        machine.tick(ops);
+
+        List<IData> dataStack = machine.getDataStackSnapshot();
+        StringBuilder result = new StringBuilder();
+        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        if (!dataStack.isEmpty()) {
+            result.append(", 数据栈：§f").append(dataStackToString(dataStack));
+        }
+
+        source.sendSuccess(() -> Component.literal(result.toString()), true);
+        return 1;
+    }
+
+    /**
      * 读取外壳方块中的法术磁盘
      */
     private static int readShell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -249,56 +382,37 @@ public class RelayCommands {
 
     /**
      * 解析法术程序字符串
-     * 格式：指令 1;指令 2;指令 3
-     * 支持：push <值>, pop, dup, swap, add, sub, mul, div, eval 等
+     * 格式：所有元素（数据和操作）都使用 JSON 格式
+     * 数据：{"type":"relay:number","value":1}
+     * 操作：{"type":"relay:operation","op":"relay:add"}
+     * 示例：{"type":"relay:number","value":1};{"type":"relay:number","value":1};{"type":"relay:operation","op":"relay:add"}
      */
     private static List<IExecutable> parseProgram(String programStr) {
         List<IExecutable> program = new ArrayList<>();
+        
+        // 去除首尾的单引号（Minecraft 命令中单引号不会被自动解析）
+        programStr = programStr.trim();
+        if (programStr.startsWith("'") && programStr.endsWith("'")) {
+            programStr = programStr.substring(1, programStr.length() - 1);
+        }
+        
         String[] instructions = programStr.split(";");
 
         for (String instr : instructions) {
             instr = instr.trim();
             if (instr.isEmpty()) continue;
 
-            if (instr.equals("pop")) {
-                program.add(createOperation("relay:pop"));
-            } else if (instr.equals("dup")) {
-                program.add(createOperation("relay:dup"));
-            } else if (instr.equals("swap")) {
-                program.add(createOperation("relay:swap"));
-            } else if (instr.equals("add")) {
-                program.add(createOperation("relay:add"));
-            } else if (instr.equals("sub")) {
-                program.add(createOperation("relay:sub"));
-            } else if (instr.equals("mul")) {
-                program.add(createOperation("relay:mul"));
-            } else if (instr.equals("div")) {
-                program.add(createOperation("relay:div"));
-            } else if (instr.equals("eval")) {
-                program.add(createOperation("relay:eval"));
-            } else if (instr.equals("if")) {
-                program.add(createOperation("relay:if"));
-            } else if (instr.equals("and")) {
-                program.add(createOperation("relay:and"));
-            } else if (instr.equals("or")) {
-                program.add(createOperation("relay:or"));
-            } else if (instr.equals("not")) {
-                program.add(createOperation("relay:not"));
-            } else if (instr.equals("eq")) {
-                program.add(createOperation("relay:eq"));
-            } else if (instr.equals("lt")) {
-                program.add(createOperation("relay:lt"));
-            } else if (instr.equals("gt")) {
-                program.add(createOperation("relay:gt"));
-            } else if (instr.equals("send")) {
-                program.add(createOperation("relay:send"));
-            } else if (instr.equals("recv")) {
-                program.add(createOperation("relay:recv"));
-            } else if (instr.equals("peek")) {
-                program.add(createOperation("relay:peek"));
-            } else {
-                // 未知指令作为字符串压入
-                program.add(McIota.ofString(instr));
+            if (!instr.startsWith("{")) {
+                throw new RuntimeException("无效的语法，必须使用 JSON 格式：" + instr);
+            }
+
+            try {
+                com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+                com.google.gson.JsonElement jsonElem = parser.parse(instr);
+                IExecutable iota = (IExecutable) IData.TypeRegistry.fromJson(jsonElem);
+                program.add(iota);
+            } catch (Exception e) {
+                throw new RuntimeException("解析 JSON 失败：" + instr, e);
             }
         }
 
@@ -336,6 +450,32 @@ public class RelayCommands {
                 } else {
                     sb.append(iota.getType());
                 }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 将数据栈转换为可读字符串
+     */
+    private static String dataStackToString(List<IData> dataStack) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < dataStack.size(); i++) {
+            IData data = dataStack.get(i);
+            if (i > 0) sb.append(", ");
+
+            if (data instanceof McIota iota) {
+                if (iota.isString()) {
+                    sb.append("\"").append(iota.asString()).append("\"");
+                } else if (iota.isNumber()) {
+                    sb.append(iota.getValue());
+                } else if (iota.isBoolean()) {
+                    sb.append(iota.asBoolean());
+                } else {
+                    sb.append(iota.getType());
+                }
+            } else {
+                sb.append(data.getType());
             }
         }
         return sb.toString();

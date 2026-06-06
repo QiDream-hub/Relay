@@ -6,19 +6,19 @@ import qdream.relay.engine.OperationRegistry;
 public class ListOperationsInit {
     public static void register() {
         // 列表长度
-        OperationRegistry.register("list_length", new ListLengthOp())
+        OperationRegistry.register("relay:list_length", new ListLengthOp())
                 .requiresWorldInteractor(false)
                 .register();
         // 列表获取
-        OperationRegistry.register("list_get", new ListGetOp())
+        OperationRegistry.register("relay:list_get", new ListGetOp())
                 .requiresWorldInteractor(false)
                 .register();
         // 列表设置
-        OperationRegistry.register("list_set", new ListSetOp())
+        OperationRegistry.register("relay:list_set", new ListSetOp())
                 .requiresWorldInteractor(false)
                 .register();
         // 列表追加
-        OperationRegistry.register("list_append", new ListAppendOp())
+        OperationRegistry.register("relay:list_append", new ListAppendOp())
                 .requiresWorldInteractor(false)
                 .register();
         // TODO: 更多列表操作
