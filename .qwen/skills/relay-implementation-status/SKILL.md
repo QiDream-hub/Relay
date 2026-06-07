@@ -14,37 +14,40 @@ extracted_at: '2026-06-06T00:00:00.000Z'
 | 设计文档要求 | 当前实现状态 | 文件位置 | 备注 |
 |------------|------------|----------|------|
 | **命令系统** | ✅ 完成 | `commands/RelayCommands.java` | `/relay write_spell`, `/relay read`, `/relay clear`, `/relay run` 命令 |
-| **Iota 类型系统** | ✅ 完成 | `mc/McIota.java`, `mc/McIotaType.java` | 支持 NUMBER, BOOLEAN, VECTOR, STRING, ENTITY, LIST, NULL |
+| **Iota 类型系统** | ✅ 完成 | `types/*.java` | 支持 NUMBER, BOOLEAN, VECTOR, STRING, ENTITY, LIST, NULL |
 | **双栈执行模型** | ✅ 完成 | `engine/StateMachine.java` | 维护 `programStack` 和 `dataStack` |
-| **操作注册表** | ✅ 完成 | `engine/OperationRegistry.java` | 支持链式 API 注册 |
+| **操作注册表** | ✅ 完成 | `mc/OperationRegistry.java` | 支持链式 API 注册 |
 | **永续运行机制** | ✅ 完成 | `core/ShellTickHandler.java` | 每 tick 驱动状态机 |
 | **操作数预算** | ✅ 完成 | `StateMachine.tick(int ops)` | 控制每 tick 执行数量 |
 | **反转压入规则** | ✅ 完成 | `EvalOp.java`, `IfOp.java`, `StateMachine.tick()` | 保证从左到右执行顺序 |
-| **宽容规则** | ✅ 完成 | `StateMachine.tick()` + `McIota.execute()` | 程序栈弹出数据自动压入数据栈 |
+| **宽容规则** | ✅ 完成 | `StateMachine.tick()` + 数据类型 `execute()` | 程序栈弹出数据自动压入数据栈 |
 | **事故处理** | ✅ 完成 | `StateMachine.triggerMishap()` | 清空双栈并回调 |
 | **通信系统** | ✅ 完成 | `core/CommunicationSystem.java` | 全局 Map，频道容量 1000 |
-| **基础操作库** | ✅ 完成 | `operations/base/`, `operations/arithmetic/`, `operations/logic/`, `operations/control/`, `operations/communication/` | Push, Pop, Dup, Swap, Add, Sub, Mul, Div, And, Or, Not, Eq, Lt, Gt, Eval, If, Stop, Send, Recv, Peek |
-| **列表操作** | ⚠️ 部分完成 | `operations/list/` | ListGet, ListSet, ListLength, ListAppend |
-| **世界交互操作** | ⚠️ 部分完成 | `operations/world/` | GetBlock, PlaceBlock |
+| **基础操作库** | ✅ 完成 | `operations/` | 21 个操作：Pop, Dup, Swap, Add, Sub, Mul, Div, And, Or, Not, Eq, Lt, Gt, Eval, If, Stop, Send, Recv, Peek, ListAppend, ListGet, ListSet, ListLength |
+| **列表操作** | ✅ 完成 | `operations/list/` | ListGet, ListSet, ListLength, ListAppend |
 | **核心合并逻辑** | ✅ 完成 | `core/CoreGroup.java` | 相邻核心扫描合并 |
 | **外壳容器抽象** | ✅ 完成 | `core/ShellContainer.java` | 统一三种外壳接口 |
 | **Engine/MC 分层** | ✅ 完成 | `engine/` + `mc/` | 纯 Java 引擎零 MC 依赖 |
 | **法术磁盘持久化** | ✅ 完成 | `items/SpellDiskItem.java`, `items/RelayDataComponents.java` | 使用 26.1.2 DataComponent 系统 |
+| **BlockEntity NBT 持久化** | ✅ 完成 | `blocks/entity/ShellBlockEntity.java` | 使用 26.1.2 ValueInput/ValueOutput API |
+| **状态机序列化** | ✅ 完成 | `mc/StateMachineNbtSerializer.java` | 序列化双栈状态到 NBT |
+| **GUI 系统** | ✅ 完成 | `screen/` + `client/editor/` | 外壳 GUI + 法术编辑器 GUI |
 
 ## 二、待完成/简化的功能
 
 | 设计文档要求 | 当前实现状态 | 问题描述 | 优先级 |
 |------------|------------|----------|--------|
 | **能量管理** | ⚠️ 简化 | `EnergySystem.java` 只提取紫水晶，未集成到状态机执行流程 | P0 |
-| **世界交互器检查** | ⚠️ 部分实现 | `requiresWorldInteractor` 已注册，但世界操作需要实际检查 | P1 |
+| **世界交互器检查** | ⚠️ 部分实现 | 操作自己在 `execute()` 中检查，但世界操作需要实际实现 | P1 |
 | **interval 可调** | ⚠️ 简化 | `ShellTickHandler.updateCoreState()` 硬编码 interval=1，未从核心读取 | P1 |
 | **网络同步** | ❌ 未实现 | 26.1.2 网络 API 变更，`RelayServerNetworking.java` 为空 | P1 |
-| **客户端编辑器** | ⚠️ 简化 | `SpellEditorScreen.java` 只有框架，缺少 UI Widget | P2 |
-| **实体外壳** | ⚠️ 待完善 | `RelayEntityTypes` 已注册，实体 tick 逻辑待实现 | P1 |
+| **实体外壳** | ⚠️ 待完善 | `RelayEntityTypes` 已注册，实体完整逻辑待实现 | P1 |
 | **工具外壳** | ⚠️ 待完善 | `ToolShellItem.java` 已创建，tick 激活逻辑待实现 | P1 |
 | **能量预检** | ❌ 未实现 | 设计文档要求"能量不足时跳过整个 batch" | P0 |
 | **操作签名类型推导** | ⚠️ 未使用 | `OperationSignature` 已创建，但编辑器未使用 | P2 |
-| **BlockEntity NBT 持久化** | ❌ 未实现 | `ShellBlockEntity` 未覆盖 `saveAdditional/loadAdditional` | P0 |
+| **方块 codec() 方法** | ⚠️ 简化 | `ShellBlock.codec()` 和 `SpellEditorBlock.codec()` 返回 null | P1 |
+| **物品栏序列化** | ⚠️ 简化 | 由于 DataComponent 系统，ItemStack 序列化暂时简化 | P2 |
+| **法术编辑器鼠标交互** | ⚠️ 简化 | `SpellEditorScreen` 鼠标点击事件处理待完善 | P2 |
 
 ## 三、代码质量问题
 
@@ -132,45 +135,44 @@ if (!(channelData instanceof McIota channel)) return;
    - 任务：执行前检查能量，不足时跳过 batch
    - 设计：参考文档"能量预检"规则
 
-2. **BlockEntity NBT 持久化**
-   - 文件：`blocks/entity/ShellBlockEntity.java`
-   - 任务：实现 `saveAdditional(CompoundTag, HolderLookup.Provider)` 和 `loadAdditional()`
-   - 依赖：26.1.2 ValueInput/ValueOutput API
-
 ### P1 - 完善体验（重要功能）
 
-1. **网络 API 适配 26.1.2**
+1. **方块 codec() 方法实现**
+   - 文件：`blocks/ShellBlock.java`, `blocks/SpellEditorBlock.java`
+   - 任务：实现正确的 `MapCodec<? extends BaseEntityBlock>`
+   - 影响：方块放置和注册需要
+
+2. **网络 API 适配 26.1.2**
    - 文件：`networking/RelayServerNetworking.java`, `networking/payloads/`
    - 任务：使用新的 PayloadTypeRegistry API
 
-2. **客户端编辑器 UI 实现**
-   - 文件：`client/editor/SpellEditorScreen.java`
-   - 任务：添加操作列表、程序编辑区、类型推导提示
-
 3. **实体/工具外壳 tick 逻辑**
    - 文件：`entities/EntityShell.java`, `items/ToolShellItem.java`
-   - 任务：实现 `tick()` 方法调用状态机
+   - 任务：实现完整的 `tick()` 方法调用状态机
 
-4. **世界交互器实际检查**
-   - 文件：`operations/world/*.java`
-   - 任务：在 `execute()` 中检查 `executor.hasWorldInteractor()`
-
-5. **CoreGroup 与 ShellTickHandler 集成**
+4. **CoreGroup 与 ShellTickHandler 集成**
    - 文件：`core/ShellTickHandler.java`
    - 任务：tick 时调用 `CoreGroup.fromWorld()` 更新核心状态
 
 ### P2 - 优化（可延后）
 
-1. **代码重构**
+1. **物品栏 DataComponent 适配**
+   - 文件：`blocks/entity/ShellBlockEntity.java`
+   - 任务：使用 DataComponent 系统序列化 ItemStack
+
+2. **法术编辑器鼠标交互完善**
+   - 文件：`client/editor/SpellEditorScreen.java`
+   - 任务：实现点击添加/删除操作的交互逻辑
+
+3. **代码重构**
    - StateMachine 类型判断逻辑提取
-   - 移除 McIota.execute() 冗余
    - 统一操作错误处理策略
 
-2. **操作签名在编辑器中的使用**
+4. **操作签名在编辑器中的使用**
    - 文件：`client/editor/SpellEditorScreen.java`
    - 任务：使用 `OperationSignature` 进行类型推导和验证
 
-3. **单元测试编写**
+5. **单元测试编写**
    - 测试 StateMachine 执行逻辑
    - 测试通信系统
    - 测试操作正确性
@@ -190,3 +192,64 @@ if (!(channelData instanceof McIota channel)) return;
 - 外壳 GUI 可打开
 - 状态机可执行程序
 - 通信系统可跨外壳传递数据
+- 世界保存/加载后状态正确恢复
+
+## 六、序列化系统架构（2026-06-07 完成）
+
+### 序列化场景
+
+1. **法术磁盘加载/保存程序** ✅
+   - 位置：`SpellDiskItem.java`
+   - 方式：使用 DataComponent 存储 `CompoundTag`
+   - 方法：`getProgram()`, `setProgram()`, `saveFromStateMachine()`, `loadToStateMachine()`
+
+2. **外壳方块实体持久化** ✅
+   - 位置：`ShellBlockEntity.java`
+   - 方式：使用 26.1.2 的 `ValueInput`/`ValueOutput` 系统
+   - 方法：`saveAdditional(ValueOutput)`, `loadAdditional(ValueInput)`, `getUpdateTag()`
+   - 保存数据：能量、状态机状态、TickHandler 状态
+
+3. **状态机完整状态序列化** ✅
+   - 位置：`StateMachineNbtSerializer.java`
+   - 方式：使用 NBT `CompoundTag`
+   - 方法：`serialize()`, `deserialize()`
+   - 保存数据：程序栈、数据栈、世界交互器状态、栈大小限制
+
+4. **Iota 类型序列化** ✅
+   - 位置：各种 Iota 类型（`NumberIota`, `ListIota` 等）
+   - 方式：继承 `Data` 基类，实现 `toNbt()`/`fromNbt()` 方法
+   - 注册：通过 `OperationRegistry.registerData()` 注册数据类型工厂
+
+### 序列化流程
+
+```
+玩家编写程序
+    ↓
+保存到法术磁盘 (SpellDiskItem.setProgram)
+    ↓
+[CompoundTag 存储 via DataComponent]
+    ↓
+外壳方块读取磁盘 (ShellTickHandler.tryInitialize)
+    ↓
+加载到状态机 (SpellDiskItem.loadToStateMachine)
+    ↓
+StateMachine.loadProgram(program)
+    ↓
+世界保存时 (ShellBlockEntity.saveAdditional)
+    ↓
+[ValueOutput 存储]
+    - energy: int
+    - stateMachine: CompoundTag (嵌套)
+    - tickCounter, coreCount, interval, initialized
+    ↓
+世界加载时 (ShellBlockEntity.loadAdditional)
+    ↓
+恢复所有状态
+```
+
+### 26.1.2 API 适配要点
+
+1. **ValueInput/ValueOutput** - 位于 `net.minecraft.world.level.storage` 包
+2. **CompoundTag getter 返回 Optional** - 使用 `.orElse()` 或 `.isPresent()` 处理
+3. **HolderLookup.Provider** - `getUpdateTag()` 方法需要此参数
+4. **Codec 系统** - 使用 `CompoundTag.CODEC` 进行复杂类型序列化

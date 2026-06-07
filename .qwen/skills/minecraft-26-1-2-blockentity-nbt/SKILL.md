@@ -2,7 +2,7 @@
 name: minecraft-26-1-2-blockentity-nbt
 description: Minecraft 26.1.2 中 BlockEntity 和 Entity 的 NBT 读写系统变更及 DataComponent 替代方案
 source: auto-skill
-extracted_at: '2026-05-30T12:30:04.081Z'
+extracted_at: '2026-06-07T16:40:00.000Z'
 ---
 
 # Minecraft 26.1.2 BlockEntity 和 Entity NBT 系统变更
@@ -94,67 +94,126 @@ public class SimpleEntityShell extends EntityShell {
 
 ## BlockEntity NBT 读写
 
-### 旧写法 (1.20.1 及之前)
+### 26.1.2 实际使用的 API - ValueInput/ValueOutput + Codec
+
+根据 Fabric 官方教程和实际实现，26.1.2 的 `BlockEntity` 序列化使用 `ValueInput`/`ValueOutput` 配合 `Codec`：
 
 ```java
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.nbt.CompoundTag;
+
 @Override
-protected void writeNbt(CompoundTag nbt) {
-    super.writeNbt(nbt);
-    nbt.putInt("energy", energy);
-    nbt.put("item", itemStack.writeNbt(new CompoundTag()));
+protected void saveAdditional(ValueOutput output) {
+    super.saveAdditional(output);
+    
+    // 保存简单类型
+    output.putInt("energy", energy);
+    output.putBoolean("initialized", true);
+    
+    // 保存复杂类型 - 使用 Codec
+    CompoundTag machineTag = serializeStateMachine();
+    output.store("stateMachine", CompoundTag.CODEC, machineTag);
+    
+    // 保存物品栏 - 使用 CompoundTag 作为中间格式
+    CompoundTag inventoryTag = new CompoundTag();
+    for (int i = 0; i < inventory.length; i++) {
+        if (!inventory[i].isEmpty()) {
+            CompoundTag slotTag = new CompoundTag();
+            // 保存物品 ID 和数量（简化版，未保存 DataComponent）
+            var itemId = BuiltInRegistries.ITEM.getKey(inventory[i].getItem());
+            if (itemId != null) {
+                slotTag.putString("id", itemId.toString());
+                slotTag.putInt("Count", inventory[i].getCount());
+                inventoryTag.put("slot_" + i, slotTag);
+            }
+        }
+    }
+    output.store("inventory", CompoundTag.CODEC, inventoryTag);
 }
 
 @Override
-protected void readNbt(CompoundTag nbt) {
-    super.readNbt(nbt);
-    energy = nbt.getInt("energy");
-    itemStack = ItemStack.fromNbt(nbt.getCompound("item"));
+protected void loadAdditional(ValueInput input) {
+    super.loadAdditional(input);
+    
+    // 加载简单类型
+    energy = input.getIntOr("energy", 0);
+    boolean initialized = input.getBooleanOr("initialized", false);
+    
+    // 加载复杂类型 - 使用 Codec
+    input.read("stateMachine", CompoundTag.CODEC).ifPresent(tag -> {
+        deserializeStateMachine((CompoundTag) tag);
+    });
+    
+    // 加载物品栏
+    input.read("inventory", CompoundTag.CODEC).ifPresent(inventoryTag -> {
+        for (int i = 0; i < inventory.length; i++) {
+            inventoryTag.getCompound("slot_" + i).ifPresent(slotTag -> {
+                slotTag.getString("id").ifPresent(itemIdStr -> {
+                    slotTag.getInt("Count").ifPresent(count -> {
+                        var itemId = Identifier.tryParse(itemIdStr);
+                        if (itemId != null) {
+                            var itemOpt = BuiltInRegistries.ITEM.getOptional(itemId);
+                            itemOpt.ifPresent(item -> {
+                                inventory[i] = new ItemStack(item, count);
+                            });
+                        }
+                    });
+                });
+            });
+        }
+    });
 }
 ```
 
-### 新写法 (26.1.2) - 使用 ValueInput/ValueOutput
+### ValueInput/ValueOutput API
 
 ```java
-@Override
-protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-    super.saveAdditional(tag, provider);
-    tag.putInt("energy", energy);
-    tag.put("item", itemStack.save(provider, new CompoundTag()));
-}
+// ValueOutput - 写入数据
+output.putInt(String key, int value);
+output.putBoolean(String key, boolean value);
+output.putDouble(String key, double value);
+output.putString(String key, String value);
+output.store(String key, Codec<T> codec, T value);  // 复杂类型
 
-@Override
-protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-    super.loadAdditional(tag, provider);
-    energy = tag.getInt("energy").orElse(0);
-    itemStack = ItemStack.parse(provider, tag.getCompound("item")).orElse(ItemStack.EMPTY);
-}
+// ValueInput - 读取数据
+int getIntOr(String key, int defaultValue);
+boolean getBooleanOr(String key, boolean defaultValue);
+double getDoubleOr(String key, double defaultValue);
+String getStringOr(String key, String defaultValue);
+Optional<T> read(String key, Codec<T> codec);  // 复杂类型
+Optional<CompoundTag> getCompound(String key);  // 嵌套 CompoundTag
 ```
 
 ### 注意事项
 
 1. **`CompoundTag` 的 getter 方法返回 `Optional`**：
    ```java
-   // 旧写法
-   int value = nbt.getInt("key");
-   
-   // 新写法
-   int value = nbt.getInt("key").orElse(0);
+   // 26.1.2 新 API
+   int value = tag.getInt("key").orElse(0);
+   Optional<ListTag> listOpt = tag.getList("key");
+   Optional<CompoundTag> compoundOpt = tag.getCompound("key");
    ```
 
-2. **`ItemStack.save()` 和 `ItemStack.parse()` 需要 `HolderLookup.Provider`**：
+2. **`ValueInput`/`ValueOutput` 位于 `net.minecraft.world.level.storage` 包**：
    ```java
-   // 保存
-   tag.put("item", itemStack.save(provider, new CompoundTag()));
-   
-   // 读取
-   itemStack = ItemStack.parse(provider, tag.getCompound("item")).orElse(ItemStack.EMPTY);
+   import net.minecraft.world.level.storage.ValueOutput;
+   import net.minecraft.world.level.storage.ValueInput;
    ```
 
-3. **`BlockEntity` 的 `setChanged()` 替代 `markDirty()`**：
+3. **`CompoundTag.CODEC` 是内置的 Codec**，可以直接用于 `output.store()` 和 `input.read()`
+
+4. **物品栏序列化简化方案**（由于 DataComponent 系统复杂）：
+   - 只保存物品 ID 和数量
+   - 使用 `BuiltInRegistries.ITEM.getKey()` 获取物品 ID
+   - 使用 `BuiltInRegistries.ITEM.getOptional()` 查找物品
+   - DataComponent 的完整序列化标记为 TODO
+
+5. **`BlockEntity` 的 `setChanged()` 替代 `markDirty()`**：
    ```java
    // 旧写法
    markDirty();
-   
+
    // 新写法
    setChanged();
    ```
@@ -235,83 +294,179 @@ if (customData != null) {
 
 ## getUpdateTag() 方法变更
 
-### 旧写法
-
-```java
-@Override
-public CompoundTag getUpdateTag() {
-    CompoundTag tag = super.getUpdateTag();
-    saveAdditional(tag);
-    return tag;
-}
-```
-
 ### 新写法 (26.1.2)
 
 ```java
 @Override
-public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-    CompoundTag tag = super.getUpdateTag(provider);
-    saveAdditional(tag, provider);
-    return tag;
+public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+    return saveWithoutMetadata(registryLookup);
+}
+```
+
+这个方法用于客户端同步 - 当玩家加载区块或移动到有方块实体的区块时，客户端会收到正确的数据。
+
+### 配合 setChanged() 广播更新
+
+```java
+@Override
+public void setChanged() {
+    super.setChanged();
+    
+    if (level == null) return;
+    
+    BlockState state = getBlockState();
+    level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_ALL);
 }
 ```
 
 ## 完整示例
 
-### ShellBlockEntity 完整实现
+### ShellBlockEntity 完整实现 (26.1.2)
 
 ```java
-public class ShellBlockEntity extends BlockEntity {
-    private int energy = 0;
+public class ShellBlockEntity extends BlockEntity implements MenuProvider {
     private final ItemStack[] inventory = new ItemStack[4];
-    
+    private final StateMachine stateMachine;
+    private int energy;
+
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(MY_BLOCK_ENTITY_TYPE, pos, state);
         Arrays.fill(inventory, ItemStack.EMPTY);
+        this.stateMachine = new StateMachine(1024);
+        this.energy = 0;
     }
-    
+
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
-        tag.putInt("energy", energy);
-        
-        // 保存物品栏
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+
+        // 保存物品栏 - 使用 CompoundTag 作为中间格式
+        CompoundTag inventoryTag = new CompoundTag();
         for (int i = 0; i < inventory.length; i++) {
             if (!inventory[i].isEmpty()) {
-                tag.put("inventory_" + i, inventory[i].save(provider, new CompoundTag()));
+                CompoundTag slotTag = new CompoundTag();
+                var itemId = BuiltInRegistries.ITEM.getKey(inventory[i].getItem());
+                if (itemId != null) {
+                    slotTag.putString("id", itemId.toString());
+                    slotTag.putInt("Count", inventory[i].getCount());
+                    inventoryTag.put("slot_" + i, slotTag);
+                }
             }
         }
+        output.store("inventory", CompoundTag.CODEC, inventoryTag);
+
+        // 保存能量
+        output.putInt("energy", energy);
+
+        // 保存状态机状态 - 使用 CompoundTag.CODEC
+        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
+        output.store("stateMachine", CompoundTag.CODEC, machineTag);
     }
-    
+
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
-        energy = tag.getInt("energy").orElse(0);
-        
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+
         // 加载物品栏
-        for (int i = 0; i < inventory.length; i++) {
-            String key = "inventory_" + i;
-            if (tag.contains(key)) {
-                inventory[i] = ItemStack.parse(provider, tag.getCompound(key)).orElse(ItemStack.EMPTY);
-            } else {
-                inventory[i] = ItemStack.EMPTY;
+        input.read("inventory", CompoundTag.CODEC).ifPresent(inventoryTag -> {
+            for (int i = 0; i < inventory.length; i++) {
+                inventoryTag.getCompound("slot_" + i).ifPresent(slotTag -> {
+                    slotTag.getString("id").ifPresent(itemIdStr -> {
+                        slotTag.getInt("Count").ifPresent(count -> {
+                            var itemId = Identifier.tryParse(itemIdStr);
+                            if (itemId != null) {
+                                var itemOpt = BuiltInRegistries.ITEM.getOptional(itemId);
+                                itemOpt.ifPresent(item -> {
+                                    inventory[i] = new ItemStack(item, count);
+                                });
+                            }
+                        });
+                    });
+                });
             }
+        });
+
+        // 加载能量
+        energy = input.getIntOr("energy", 0);
+
+        // 加载状态机状态
+        input.read("stateMachine", CompoundTag.CODEC).ifPresent(tag -> {
+            StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, (CompoundTag) tag);
+        });
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+        return saveWithoutMetadata(registryLookup);
+    }
+
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if (level != null) {
+            BlockState state = getBlockState();
+            level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_ALL);
         }
     }
-    
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        CompoundTag tag = super.getUpdateTag(provider);
-        saveAdditional(tag, provider);
+}
+```
+
+### StateMachineNbtSerializer 实现
+
+```java
+public class StateMachineNbtSerializer {
+    public static final StateMachineNbtSerializer INSTANCE = new StateMachineNbtSerializer();
+
+    public CompoundTag serialize(StateMachine machine) {
+        CompoundTag tag = new CompoundTag();
+
+        // 保存程序栈
+        ListTag programList = new ListTag();
+        for (Executable exe : machine.getProgramStackSnapshot()) {
+            OperationRegistry.serializeToNbt(exe).ifPresent(programList::add);
+        }
+        tag.put("programStack", programList);
+
+        // 保存数据栈
+        ListTag dataList = new ListTag();
+        for (Executable data : machine.getDataStackSnapshot()) {
+            OperationRegistry.serializeToNbt(data).ifPresent(dataList::add);
+        }
+        tag.put("dataStack", dataList);
+
+        tag.putBoolean("hasWorldInteractor", machine.hasWorldInteractor());
+        tag.putInt("maxStackSize", machine.getMaxStackSize());
+
         return tag;
     }
-    
-    public void updateState() {
-        setChanged();
-        if (level != null) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+
+    public void deserialize(StateMachine machine, CompoundTag tag) {
+        // 加载程序栈
+        ListTag programList = tag.getList("programStack").orElse(new ListTag());
+        List<Executable> programStack = new ArrayList<>();
+        for (Tag element : programList) {
+            if (element instanceof CompoundTag compoundTag) {
+                OperationRegistry.deserializeFromNbt(compoundTag).ifPresent(programStack::add);
+            }
         }
+        Collections.reverse(programStack);
+        machine.loadProgram(programStack);
+
+        // 加载数据栈
+        ListTag dataList = tag.getList("dataStack").orElse(new ListTag());
+        List<Executable> dataStack = new ArrayList<>();
+        for (Tag element : dataList) {
+            if (element instanceof CompoundTag compoundTag) {
+                OperationRegistry.deserializeFromNbt(compoundTag).ifPresent(dataStack::add);
+            }
+        }
+        Collections.reverse(dataStack);
+        for (Executable data : dataStack) {
+            machine.pushData(data);
+        }
+
+        machine.setHasWorldInteractor(tag.getBoolean("hasWorldInteractor").orElse(false));
+        machine.setMaxStackSize(tag.getInt("maxStackSize").orElse(1024));
     }
 }
 ```
