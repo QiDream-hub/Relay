@@ -10,12 +10,17 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.core.HolderLookup;
 
 import qdream.relay.blocks.RelayBlockEntities;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.screen.ShellScreenHandler;
+import qdream.relay.mc.StateMachineNbtSerializer;
 
 /**
  * 外壳方块实体
@@ -137,6 +142,52 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public boolean isClientSide() {
         return level != null && level.isClientSide();
+    }
+
+    // ========== NBT 序列化与反序列化 (26.1.2 ValueInput/ValueOutput) ==========
+
+    @Override
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+
+        // 保存能量
+        output.putInt("energy", energy);
+
+        // 保存状态机状态 - 使用 CompoundTag.CODEC 序列化
+        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
+        output.store("stateMachine", CompoundTag.CODEC, machineTag);
+
+        // 保存 TickHandler 状态
+        output.putInt("tickCounter", tickHandler.getTickCounter());
+        output.putInt("coreCount", tickHandler.getCoreCount());
+        output.putInt("interval", tickHandler.getInterval());
+        output.putBoolean("initialized", tickHandler.isInitialized());
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+
+        // 加载能量
+        energy = input.getIntOr("energy", 0);
+
+        // 加载状态机状态
+        input.read("stateMachine", CompoundTag.CODEC).ifPresent(machineTag -> {
+            StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, (CompoundTag) machineTag);
+        });
+
+        // 加载 TickHandler 状态
+        tickHandler.setTickCounter(input.getIntOr("tickCounter", 0));
+        tickHandler.setCoreCount(input.getIntOr("coreCount", 0));
+        tickHandler.setInterval(input.getIntOr("interval", 0));
+        tickHandler.setInitialized(input.getBooleanOr("initialized", false));
+    }
+
+    // ========== 同步数据包 ==========
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+        return saveWithoutMetadata(registryLookup);
     }
 
     // ========== 状态访问（兼容旧代码） ==========

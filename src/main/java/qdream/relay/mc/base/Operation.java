@@ -3,7 +3,7 @@ package qdream.relay.mc.base;
 
 import qdream.relay.engine.Executable;
 
-public abstract class Operation extends Executable {
+public abstract class Operation implements Executable {
     protected final String id;
     protected final int cost;
 
