@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.mc.ProgramCompiler.CompilationException;
 import qdream.relay.types.NumberIota;
 import qdream.relay.types.StringIota;
 import qdream.relay.types.BooleanIota;
@@ -151,9 +153,9 @@ public class RelayCommands {
         String programStr = StringArgumentType.getString(context, "program");
         List<Executable> program;
         try {
-            program = parseProgram(programStr);
-        } catch (RuntimeException e) {
-            source.sendFailure(Component.literal("§c 程序解析失败：" + e.getMessage()));
+            program = ProgramCompiler.compile(programStr);
+        } catch (CompilationException e) {
+            source.sendFailure(Component.literal("§c 程序编译失败：" + e.getMessage()));
             return 0;
         }
 
@@ -185,9 +187,9 @@ public class RelayCommands {
 
         List<Executable> program;
         try {
-            program = parseProgram(programStr);
-        } catch (RuntimeException e) {
-            source.sendFailure(Component.literal("§c 程序解析失败：" + e.getMessage()));
+            program = ProgramCompiler.compile(programStr);
+        } catch (CompilationException e) {
+            source.sendFailure(Component.literal("§c 程序编译失败：" + e.getMessage()));
             return 0;
         }
         SpellDiskItem.setProgram(disk, program);
@@ -380,85 +382,6 @@ public class RelayCommands {
 
         source.sendSuccess(() -> Component.literal("法术程序 (§e" + program.size() + "§r 个指令): §f" + programToString(program)), true);
         return program.size();
-    }
-
-    /**
-     * 解析法术程序字符串
-     * 格式：使用简化语法
-     * 数据：number(1), bool(true), str("hello"), vec(1,2,3), entity(uuid), list(...), null
-     * 操作：直接使用操作 ID，如 relay:add
-     * 示例：number(1);number(2);relay:add
-     */
-    private static List<Executable> parseProgram(String programStr) {
-        List<Executable> program = new ArrayList<>();
-
-        // 去除首尾的单引号（Minecraft 命令中单引号不会被自动解析）
-        programStr = programStr.trim();
-        if (programStr.startsWith("'") && programStr.endsWith("'")) {
-            programStr = programStr.substring(1, programStr.length() - 1);
-        }
-
-        String[] instructions = programStr.split(";");
-
-        for (String instr : instructions) {
-            instr = instr.trim();
-            if (instr.isEmpty()) continue;
-
-            Executable exec = parseInstruction(instr);
-            if (exec != null) {
-                program.add(exec);
-            }
-        }
-
-        return program;
-    }
-
-    /**
-     * 解析单个指令
-     */
-    private static Executable parseInstruction(String instr) {
-        // 尝试解析为数据
-        if (instr.startsWith("number(")) {
-            String value = instr.substring(7, instr.length() - 1);
-            return new NumberIota(Double.parseDouble(value));
-        }
-        if (instr.startsWith("bool(")) {
-            String value = instr.substring(5, instr.length() - 1);
-            return new BooleanIota(Boolean.parseBoolean(value));
-        }
-        if (instr.startsWith("str(")) {
-            String value = instr.substring(4, instr.length() - 1);
-            // 去除引号
-            if (value.startsWith("\"") && value.endsWith("\"")) {
-                value = value.substring(1, value.length() - 1);
-            }
-            return new StringIota(value);
-        }
-        if (instr.startsWith("vec(")) {
-            String coords = instr.substring(4, instr.length() - 1);
-            String[] parts = coords.split(",");
-            if (parts.length == 3) {
-                double x = Double.parseDouble(parts[0].trim());
-                double y = Double.parseDouble(parts[1].trim());
-                double z = Double.parseDouble(parts[2].trim());
-                return new VectorIota(new net.minecraft.world.phys.Vec3(x, y, z));
-            }
-        }
-        if (instr.startsWith("null")) {
-            return qdream.relay.types.NullIota.INSTANCE;
-        }
-        if (instr.startsWith("list(")) {
-            // 简单列表，暂不支持嵌套
-            return new ListIota(new ArrayList<>());
-        }
-
-        // 尝试解析为操作
-        if (qdream.relay.mc.OperationRegistry.contains(instr)) {
-            return qdream.relay.mc.OperationRegistry.get(instr).orElse(null);
-        }
-
-        // 未知指令
-        throw new RuntimeException("未知指令：" + instr);
     }
 
     /**

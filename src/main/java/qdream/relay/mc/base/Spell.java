@@ -21,7 +21,7 @@ public abstract class Spell extends Operation {
      * @param tag 要写入的 CompoundTag（已经包含 id 字段）
      */
     public void toNbt(CompoundTag tag) {
-        // 默认实现：只序列化 id，子类可以扩展
+        tag.putString("id", id);
     }
 
     /**
