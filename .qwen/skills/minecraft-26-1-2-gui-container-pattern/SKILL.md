@@ -141,16 +141,52 @@ public class ShellContainerWrapper implements Container {
 
 ```java
 public class ShellScreenHandler extends AbstractContainerMenu {
-    private final ShellContainer container;
+    // 插槽布局常量
+    private static final int CONTAINER_SLOT_COUNT = 4;
+    private static final int PLAYER_INVENTORY_SLOT_COUNT = 27;
+    private static final int PLAYER_HOTBAR_SLOT_COUNT = 9;
 
+    // 插槽索引范围
+    private static final int CONTAINER_START = 0;
+    private static final int CONTAINER_END = CONTAINER_SLOT_COUNT;
+    private static final int INVENTORY_START = CONTAINER_END;
+    private static final int INVENTORY_END = INVENTORY_START + PLAYER_INVENTORY_SLOT_COUNT;
+    private static final int HOTBAR_START = INVENTORY_END;
+    private static final int HOTBAR_END = HOTBAR_START + PLAYER_HOTBAR_SLOT_COUNT;
+
+    // GUI 布局
+    private static final int CONTAINER_SLOT_X = 80;
+    private static final int CONTAINER_SLOT_Y = 10;
+    private static final int SLOT_SPACING_Y = 30;
+    private static final int INVENTORY_SLOT_X = 8;
+    private static final int INVENTORY_SLOT_Y = 140;
+    private static final int HOTBAR_SLOT_Y = 198;
+    private static final int SLOT_SIZE = 18;
+
+    private final ShellContainer container;
+    private final Container wrapper;
+
+    /**
+     * 客户端构造方法（没有实际容器）
+     */
+    public ShellScreenHandler(int syncId, Inventory playerInventory) {
+        this(syncId, playerInventory, null);
+    }
+
+    /**
+     * 服务端构造方法（有实际容器）
+     */
     public ShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container) {
         super(RelayScreenHandlers.SHELL_SCREEN_HANDLER, syncId);
         this.container = container;
+        this.wrapper = container != null ? new ShellContainerWrapper(container) : new EmptyShellContainer();
+
+        checkContainerSize(this.wrapper, CONTAINER_SLOT_COUNT);
 
         // 容器插槽 - 使用 ShellContainerWrapper 适配
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < CONTAINER_SLOT_COUNT; ++i) {
             final int slotIndex = i;
-            this.addSlot(new Slot(new ShellContainerWrapper(container), slotIndex, x, y) {
+            this.addSlot(new Slot(this.wrapper, slotIndex, CONTAINER_SLOT_X, CONTAINER_SLOT_Y + i * SLOT_SPACING_Y) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return true; // 或实现物品过滤
@@ -161,33 +197,117 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         // 玩家物品栏
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 8 + x * 18, 140 + y * 18));
+                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, INVENTORY_SLOT_X + x * SLOT_SIZE, INVENTORY_SLOT_Y + y * SLOT_SIZE));
             }
         }
 
         // 玩家热键栏
         for (int x = 0; x < 9; ++x) {
-            this.addSlot(new Slot(playerInventory, x, 8 + x * 18, 198));
+            this.addSlot(new Slot(playerInventory, x, INVENTORY_SLOT_X + x * SLOT_SIZE, HOTBAR_SLOT_Y));
         }
     }
 
+    /**
+     * Shift+点击物品时的快速移动逻辑
+     */
     @Override
-    public ItemStack quickMoveStack(Player player, int invSlot) {
-        return ItemStack.EMPTY; // 实现快速移动逻辑
+    public ItemStack quickMoveStack(Player player, int slotIndex) {
+        ItemStack clicked = ItemStack.EMPTY;
+        Slot slot = this.slots.get(slotIndex);
+
+        if (slot != null && slot.hasItem()) {
+            ItemStack stackInSlot = slot.getItem();
+            clicked = stackInSlot.copy();
+
+            // 从容器插槽移动到玩家物品栏
+            if (slotIndex < CONTAINER_END) {
+                if (!this.moveItemStackTo(stackInSlot, INVENTORY_START, HOTBAR_END, true)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+            // 从玩家物品栏移动到容器插槽
+            else if (slotIndex < HOTBAR_END) {
+                if (!this.moveItemStackTo(stackInSlot, CONTAINER_START, CONTAINER_END, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+
+            // 更新插槽状态
+            if (stackInSlot.isEmpty()) {
+                slot.setByPlayer(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+        }
+
+        return clicked;
     }
 
     @Override
     public boolean stillValid(Player player) {
-        return true;
+        return this.wrapper.stillValid(player);
+    }
+
+    /**
+     * 空容器实现（用于客户端）
+     */
+    private static class EmptyShellContainer extends ShellContainerWrapper {
+        private final ItemStack[] emptyInventory = new ItemStack[CONTAINER_SLOT_COUNT];
+
+        public EmptyShellContainer() {
+            super(new DummyShellContainer());
+            for (int i = 0; i < CONTAINER_SLOT_COUNT; i++) {
+                emptyInventory[i] = ItemStack.EMPTY;
+            }
+        }
+
+        @Override
+        public ItemStack getItem(int slot) {
+            return slot >= 0 && slot < CONTAINER_SLOT_COUNT ? emptyInventory[slot] : ItemStack.EMPTY;
+        }
+
+        @Override
+        public void setItem(int slot, ItemStack stack) {
+            if (slot >= 0 && slot < CONTAINER_SLOT_COUNT) {
+                emptyInventory[slot] = stack;
+            }
+        }
+    }
+
+    /**
+     * 伪容器用于 EmptyShellContainer 的构造
+     */
+    private static class DummyShellContainer implements ShellContainer {
+        @Override public ItemStack getInventorySlot(int slot) { return ItemStack.EMPTY; }
+        @Override public void setInventorySlot(int slot, ItemStack stack) {}
+        @Override public StateMachine getStateMachine() { return new StateMachine(1024); }
+        @Override public int getCoreCount() { return 0; }
+        @Override public int getInterval() { return 1; }
+        @Override public boolean isInitialized() { return false; }
+        @Override public void setInitialized(boolean initialized) {}
+        @Override public int getEnergy() { return 0; }
+        @Override public void setEnergy(int energy) {}
+        @Override public void setChanged() {}
+        @Override public boolean isClientSide() { return true; }
     }
 }
 ```
+
+**关键要点**:
+- **双构造方法模式**: 客户端构造方法调用服务端构造方法并传入 `null` 容器
+- **EmptyShellContainer**: 客户端需要空容器实现，避免 `NullPointerException`
+- **插槽索引范围常量**: 便于 `quickMoveStack` 中判断物品来源
+- **quickMoveStack 逻辑**: 
+  - 从容器到物品栏：`moveItemStackTo(stack, INVENTORY_START, HOTBAR_END, true)`（从后往前填）
+  - 从物品栏到容器：`moveItemStackTo(stack, CONTAINER_START, CONTAINER_END, false)`（从前往后填）
+- **stillValid 委托**: 委托给 wrapper 检查，客户端空容器始终返回 `true`
 
 ### 4. MenuType 注册模式
 
 ```java
 public class RelayScreenHandlers {
     public static final MenuType<ShellScreenHandler> SHELL_SCREEN_HANDLER;
+    public static final MenuType<SpellEditorScreenHandler> SPELL_EDITOR_SCREEN_HANDLER;
 
     static {
         // MenuType 构造函数需要 (MenuSupplier, FeatureFlagSet)
@@ -197,6 +317,13 @@ public class RelayScreenHandlers {
         );
         Identifier id = Identifier.fromNamespaceAndPath(MOD_ID, "shell");
         Registry.register(BuiltInRegistries.MENU, id, SHELL_SCREEN_HANDLER);
+
+        SPELL_EDITOR_SCREEN_HANDLER = new MenuType<>(
+            (syncId, inventory) -> new SpellEditorScreenHandler(syncId, inventory),
+            FeatureFlags.VANILLA_SET
+        );
+        Identifier editorId = Identifier.fromNamespaceAndPath(MOD_ID, "spell_editor");
+        Registry.register(BuiltInRegistries.MENU, editorId, SPELL_EDITOR_SCREEN_HANDLER);
     }
 
     public static void init() {}
@@ -230,7 +357,7 @@ public class RelayClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         // 从共享包导入并初始化
-        qdream.relay.screen.RelayScreenHandlers.init();
+        RelayScreenHandlersClient.init();
     }
 }
 ```
@@ -240,32 +367,59 @@ public class RelayClient implements ClientModInitializer {
 **必须**在客户端注册 Screen 工厂，否则打开 GUI 时会报错 `Failed to create screen for menu type`：
 
 ```java
-public class RelayClient implements ClientModInitializer {
-    @Override
-    public void onInitializeClient() {
-        // 注册 Screen 工厂 - 必须在客户端初始化
+public class RelayScreenHandlersClient {
+    public static void init() {
+        // 注册外壳方块屏幕
+        MenuScreens.register(RelayScreenHandlers.SHELL_SCREEN_HANDLER, ShellScreen::new);
+
+        // 注册法术编辑器屏幕
         MenuScreens.register(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, SpellEditorScreen::new);
     }
 }
 ```
 
-### 8. AbstractContainerScreen 泛型参数
-
-26.1.2 的 `AbstractContainerScreen` 是泛型类，**必须**指定类型参数：
+### 8. AbstractContainerScreen 实现模式
 
 ```java
-// 错误：缺少泛型参数
-public class SpellEditorScreen extends AbstractContainerScreen {
-    // ...
-}
+public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
 
-// 正确：指定 Menu 类型
-public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreenHandler> {
-    // ...
+    private static final Identifier CONTAINER_TEXTURE = 
+        Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/container/shell.png");
+
+    public ShellScreen(ShellScreenHandler handler, Inventory inventory, Component title) {
+        super(handler, inventory, title);
+        // 标题居中
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
+        // 玩家物品栏标题位置
+        this.inventoryLabelY = this.imageHeight - 94;
+    }
+
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractBackground(graphics, mouseX, mouseY, delta);
+        // 渲染容器纹理背景
+        graphics.blit(
+            RenderPipelines.GUI_TEXTURED,
+            CONTAINER_TEXTURE,
+            this.leftPos,
+            this.topPos,
+            0.0F,
+            0.0F,
+            this.imageWidth,
+            this.imageHeight,
+            BACKGROUND_TEXTURE_WIDTH,
+            BACKGROUND_TEXTURE_HEIGHT
+        );
+    }
 }
 ```
 
-`AbstractContainerScreen<T extends AbstractContainerMenu>` 的泛型参数 `T` 必须与 `MenuType<T>` 的类型一致。
+**关键要点**:
+- **泛型参数**: `AbstractContainerScreen<T>` 的 `T` 必须与 `MenuType<T>` 的类型一致
+- **extractBackground**: 26.1.2 使用此方法渲染背景，而非旧的 `renderBackground`
+- **extractRenderState**: 用于渲染自定义 UI 内容（文本、分隔线等）
+- **纹理路径**: 使用 `Identifier.fromNamespaceAndPath(modId, path)` 指定纹理
+- **标题居中**: `titleLabelX = (imageWidth - font.width(title)) / 2`
 
 ## 常见错误及解决方案
 

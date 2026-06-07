@@ -1,11 +1,6 @@
 package qdream.relay.client;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.gui.screens.MenuScreens;
-
-import qdream.relay.client.networking.RelayClientNetworking;
-import qdream.relay.client.editor.SpellEditorScreen;
-import qdream.relay.screen.RelayScreenHandlers;
 
 /**
  * 客户端入口
@@ -13,13 +8,11 @@ import qdream.relay.screen.RelayScreenHandlers;
 public class RelayClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        // 注册 Screen 工厂 - 26.1.2 使用带 Inventory 的构造函数
-        MenuScreens.register(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, SpellEditorScreen::new);
-
-        // 注册实体渲染器
+        // 注册 Screen 和实体渲染器
+        RelayScreenHandlersClient.init();
         RelayEntityRenderers.register();
 
         // 注册网络处理
-        RelayClientNetworking.register();
+        qdream.relay.client.networking.RelayClientNetworking.register();
     }
 }

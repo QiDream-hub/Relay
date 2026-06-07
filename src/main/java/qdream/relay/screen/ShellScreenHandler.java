@@ -1,12 +1,12 @@
 package qdream.relay.screen;
 
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-import qdream.relay.screen.RelayScreenHandlers;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.items.ShellContainerWrapper;
 
@@ -20,20 +20,52 @@ import qdream.relay.items.ShellContainerWrapper;
  */
 public class ShellScreenHandler extends AbstractContainerMenu {
 
-    private final ShellContainer container;
+    // 插槽布局常量
+    private static final int CONTAINER_SLOT_COUNT = 4;
+    private static final int PLAYER_INVENTORY_SLOT_COUNT = 27;
+    private static final int PLAYER_HOTBAR_SLOT_COUNT = 9;
 
+    // 插槽索引范围
+    private static final int CONTAINER_START = 0;
+    private static final int CONTAINER_END = CONTAINER_SLOT_COUNT;
+    private static final int INVENTORY_START = CONTAINER_END;
+    private static final int INVENTORY_END = INVENTORY_START + PLAYER_INVENTORY_SLOT_COUNT;
+    private static final int HOTBAR_START = INVENTORY_END;
+    private static final int HOTBAR_END = HOTBAR_START + PLAYER_HOTBAR_SLOT_COUNT;
+
+    // GUI 布局
+    private static final int CONTAINER_SLOT_X = 80;
+    private static final int CONTAINER_SLOT_Y = 10;
+    private static final int SLOT_SPACING_Y = 30;
+    private static final int INVENTORY_SLOT_X = 8;
+    private static final int INVENTORY_SLOT_Y = 140;
+    private static final int HOTBAR_SLOT_Y = 198;
+    private static final int SLOT_SIZE = 18;
+
+    private final ShellContainer container;
+    private final Container wrapper;
+
+    /**
+     * 客户端构造方法（没有实际容器）
+     */
     public ShellScreenHandler(int syncId, Inventory playerInventory) {
         this(syncId, playerInventory, null);
     }
 
+    /**
+     * 服务端构造方法（有实际容器）
+     */
     public ShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container) {
         super(RelayScreenHandlers.SHELL_SCREEN_HANDLER, syncId);
         this.container = container;
+        this.wrapper = container != null ? new ShellContainerWrapper(container) : new EmptyShellContainer();
 
-        // 外壳 4 个插槽
-        for (int i = 0; i < 4; ++i) {
+        checkContainerSize(this.wrapper, CONTAINER_SLOT_COUNT);
+
+        // 外壳 4 个插槽（垂直排列）
+        for (int i = 0; i < CONTAINER_SLOT_COUNT; ++i) {
             final int slotIndex = i;
-            this.addSlot(new Slot(new ShellContainerWrapper(container), slotIndex, 80, 10 + i * 30) {
+            this.addSlot(new Slot(this.wrapper, slotIndex, CONTAINER_SLOT_X, CONTAINER_SLOT_Y + i * SLOT_SPACING_Y) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return true;
@@ -41,26 +73,149 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             });
         }
 
-        // 玩家物品栏
+        // 玩家主物品栏（3 行 x9 列）
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 8 + x * 18, 140 + y * 18));
+                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, INVENTORY_SLOT_X + x * SLOT_SIZE, INVENTORY_SLOT_Y + y * SLOT_SIZE));
             }
         }
 
-        // 玩家热键栏
+        // 玩家热键栏（1 行 x9 列）
         for (int x = 0; x < 9; ++x) {
-            this.addSlot(new Slot(playerInventory, x, 8 + x * 18, 198));
+            this.addSlot(new Slot(playerInventory, x, INVENTORY_SLOT_X + x * SLOT_SIZE, HOTBAR_SLOT_Y));
         }
     }
 
+    /**
+     * Shift+点击物品时的快速移动逻辑
+     */
     @Override
-    public ItemStack quickMoveStack(Player player, int invSlot) {
-        return ItemStack.EMPTY;
+    public ItemStack quickMoveStack(Player player, int slotIndex) {
+        ItemStack clicked = ItemStack.EMPTY;
+        Slot slot = this.slots.get(slotIndex);
+
+        if (slot != null && slot.hasItem()) {
+            ItemStack stackInSlot = slot.getItem();
+            clicked = stackInSlot.copy();
+
+            // 从容器插槽移动到玩家物品栏
+            if (slotIndex < CONTAINER_END) {
+                if (!this.moveItemStackTo(stackInSlot, INVENTORY_START, HOTBAR_END, true)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+            // 从玩家物品栏移动到容器插槽
+            else if (slotIndex < HOTBAR_END) {
+                if (!this.moveItemStackTo(stackInSlot, CONTAINER_START, CONTAINER_END, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+
+            // 更新插槽状态
+            if (stackInSlot.isEmpty()) {
+                slot.setByPlayer(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+        }
+
+        return clicked;
     }
 
     @Override
     public boolean stillValid(Player player) {
-        return true;
+        return this.wrapper.stillValid(player);
+    }
+
+    /**
+     * 空容器实现（用于客户端）
+     */
+    private static class EmptyShellContainer extends ShellContainerWrapper {
+        private final ItemStack[] emptyInventory = new ItemStack[CONTAINER_SLOT_COUNT];
+
+        public EmptyShellContainer() {
+            super(new DummyShellContainer());
+            for (int i = 0; i < CONTAINER_SLOT_COUNT; i++) {
+                emptyInventory[i] = ItemStack.EMPTY;
+            }
+        }
+
+        @Override
+        public ItemStack getItem(int slot) {
+            return slot >= 0 && slot < CONTAINER_SLOT_COUNT ? emptyInventory[slot] : ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack removeItem(int slot, int amount) {
+            ItemStack stack = getItem(slot);
+            if (!stack.isEmpty()) {
+                ItemStack result = stack.split(amount);
+                setItem(slot, stack);
+                return result;
+            }
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack removeItemNoUpdate(int slot) {
+            ItemStack stack = getItem(slot);
+            if (!stack.isEmpty()) {
+                setItem(slot, ItemStack.EMPTY);
+                return stack;
+            }
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public void setItem(int slot, ItemStack stack) {
+            if (slot >= 0 && slot < CONTAINER_SLOT_COUNT) {
+                emptyInventory[slot] = stack;
+            }
+        }
+
+        @Override
+        public boolean isEmpty() {
+            for (ItemStack stack : emptyInventory) {
+                if (!stack.isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public void clearContent() {
+            for (int i = 0; i < CONTAINER_SLOT_COUNT; i++) {
+                emptyInventory[i] = ItemStack.EMPTY;
+            }
+        }
+    }
+
+    /**
+     * 伪容器用于 EmptyShellContainer 的构造
+     */
+    private static class DummyShellContainer implements ShellContainer {
+        @Override
+        public ItemStack getInventorySlot(int slot) { return ItemStack.EMPTY; }
+        @Override
+        public void setInventorySlot(int slot, ItemStack stack) {}
+        @Override
+        public qdream.relay.engine.StateMachine getStateMachine() { return new qdream.relay.engine.StateMachine(1024); }
+        @Override
+        public int getCoreCount() { return 0; }
+        @Override
+        public int getInterval() { return 1; }
+        @Override
+        public boolean isInitialized() { return false; }
+        @Override
+        public void setInitialized(boolean initialized) {}
+        @Override
+        public int getEnergy() { return 0; }
+        @Override
+        public void setEnergy(int energy) {}
+        @Override
+        public void setChanged() {}
+        @Override
+        public boolean isClientSide() { return true; }
     }
 }
