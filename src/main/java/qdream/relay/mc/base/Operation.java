@@ -16,6 +16,7 @@ public abstract class Operation implements Executable {
         return id;
     }
 
+    @Override
     public int getCost() {
         return cost;
     }

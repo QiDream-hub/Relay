@@ -293,7 +293,7 @@ public class RelayCommands {
         });
 
         machine.loadProgram(program);
-        machine.tick(ops);
+        machine.run(ops);
 
         List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();
@@ -342,7 +342,7 @@ public class RelayCommands {
         });
 
         machine.loadProgram(program);
-        machine.tick(ops);
+        machine.run(ops);
 
         List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();

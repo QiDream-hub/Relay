@@ -57,15 +57,20 @@ public class StateMachine {
 
     /**
      * 执行一个 tick
+     * 
      * @param ops 本 tick 可用的操作数
      */
-    public void tick(int ops) {
+    public void run(int ops) {
         remainingOps = ops;
 
         while (remainingOps > 0 && !programStack.isEmpty()) {
             Executable executable = programStack.pop();
             executable.execute(this);
-            remainingOps--;
+            int cost = executable.getCost();
+            if (cost > remainingOps) {
+                break;
+            }
+            remainingOps -= cost;
         }
     }
 

@@ -204,7 +204,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // 执行 10 个 tick 用于测试
         for (int tick = 0; tick < 10 && testMachine.isRunning(); tick++) {
-            testMachine.tick(10);
+            testMachine.run(10);
         }
     }
 

@@ -11,4 +11,9 @@ public interface Executable {
      * @param executor 状态机执行器
      */
     void execute(StateMachine executor);
+
+    /**
+     * 执行时消耗的资源
+     */
+    int getCost();
 }

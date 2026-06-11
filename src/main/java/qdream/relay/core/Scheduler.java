@@ -76,7 +76,7 @@ public class Scheduler {
                     scheduled.shell.getStateMachine().setHasWorldInteractor(
                         !scheduled.shell.getInteractorStack().isEmpty()
                     );
-                    scheduled.shell.getStateMachine().tick(scheduled.shell.getCoreCount());
+                    scheduled.shell.getStateMachine().run(scheduled.shell.getCoreCount());
                     scheduled.shell.setChanged();
                 }
             }
