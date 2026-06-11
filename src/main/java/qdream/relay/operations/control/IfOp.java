@@ -1,16 +1,11 @@
 package qdream.relay.operations.control;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.types.BooleanIota;
-import qdream.relay.types.ListIota;
 
 /**
  * If 操作 - 条件分支
@@ -31,7 +26,7 @@ public class IfOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         Operation falseBranchData = (Operation) executor.popData();
-        if (falseBranchData != null)
+        if (falseBranchData == null)
             return;
         Operation trueBranchData = (Operation) executor.popData();
         if (trueBranchData == null)

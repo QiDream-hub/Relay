@@ -73,9 +73,6 @@ public class Scheduler {
                     scheduled.tickCounter = 0;
                     
                     // 执行状态机 tick
-                    scheduled.shell.getStateMachine().setHasWorldInteractor(
-                        !scheduled.shell.getInteractorStack().isEmpty()
-                    );
                     scheduled.shell.getStateMachine().run(scheduled.shell.getCoreCount());
                     scheduled.shell.setChanged();
                 }

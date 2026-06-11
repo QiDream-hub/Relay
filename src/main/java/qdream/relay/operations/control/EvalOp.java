@@ -7,8 +7,6 @@ import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.types.ListIota;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**

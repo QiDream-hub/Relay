@@ -18,7 +18,6 @@ public class StateMachine {
 
     private int remainingOps;
     private int maxStackSize;
-    private boolean hasWorldInteractor = false;
 
     /**
      * 事故回调
@@ -47,30 +46,34 @@ public class StateMachine {
     public void loadProgram(List<Executable> program) {
         List<Executable> reversed = new ArrayList<>(program);
         Collections.reverse(reversed);
-        programStack.clear();
         for (Executable iota : reversed) {
-            programStack.push(iota);
+            pushProgram(iota);
         }
     }
 
-    // ========== Tick 执行 ==========
+    // ========== 执行 ==========
 
     /**
-     * 执行一个 tick
+     * 进行一次执行
      * 
-     * @param ops 本 tick 可用的操作数
+     * @param ops 本次执行可用的操作数
      */
     public void run(int ops) {
         remainingOps = ops;
 
         while (remainingOps > 0 && !programStack.isEmpty()) {
             Executable executable = programStack.pop();
-            executable.execute(this);
             int cost = executable.getCost();
             if (cost > remainingOps) {
                 break;
             }
             remainingOps -= cost;
+            try {
+                executable.execute(this);
+            } catch (Exception e) {
+                triggerMishap("未知错误:" + e.getMessage());
+                break;
+            }
         }
     }
 
@@ -176,16 +179,6 @@ public class StateMachine {
 
     public int getMaxStackSize() {
         return maxStackSize;
-    }
-
-    // ========== 世界交互器 ==========
-
-    public boolean hasWorldInteractor() {
-        return hasWorldInteractor;
-    }
-
-    public void setHasWorldInteractor(boolean hasWorldInteractor) {
-        this.hasWorldInteractor = hasWorldInteractor;
     }
 
     // ========== 调试 ==========

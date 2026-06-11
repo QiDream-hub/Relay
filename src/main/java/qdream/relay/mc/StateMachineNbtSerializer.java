@@ -33,7 +33,6 @@ public class StateMachineNbtSerializer {
         }
         tag.put("dataStack", dataList);
 
-        tag.putBoolean("hasWorldInteractor", machine.hasWorldInteractor());
         tag.putInt("maxStackSize", machine.getMaxStackSize());
 
         return tag;
@@ -64,7 +63,6 @@ public class StateMachineNbtSerializer {
             machine.pushData(data);
         }
 
-        machine.setHasWorldInteractor(tag.getBoolean("hasWorldInteractor").orElse(false));
         machine.setMaxStackSize(tag.getInt("maxStackSize").orElse(1024));
     }
 }

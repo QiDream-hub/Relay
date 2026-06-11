@@ -45,7 +45,6 @@ public class ShellTickHandler {
             tickCounter++;
             if (tickCounter >= interval) {
                 tickCounter = 0;
-                container.getStateMachine().setHasWorldInteractor(container.hasWorldInteractor());
                 container.getStateMachine().run(coreCount);
                 container.setChanged();
             }
