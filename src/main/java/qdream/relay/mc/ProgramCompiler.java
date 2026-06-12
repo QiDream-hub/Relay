@@ -1,5 +1,10 @@
 package qdream.relay.mc;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import qdream.relay.types.*;
 import qdream.relay.engine.Executable;
 
@@ -359,6 +364,74 @@ public class ProgramCompiler {
         while (pos < input.length() && Character.isWhitespace(input.charAt(pos))) {
             pos++;
         }
+    }
+
+    /**
+     * 将程序列表编译为 JSON 数组
+     * @param program 程序列表
+     * @return JSON 数组
+     */
+    public static JsonArray toJson(List<Executable> program) {
+        JsonArray array = new JsonArray();
+        for (Executable exec : program) {
+            OperationRegistry.serializeToJson(exec).ifPresent(array::add);
+        }
+        return array;
+    }
+
+    /**
+     * 将程序列表编译为 JSON 字符串
+     * @param program 程序列表
+     * @return JSON 字符串
+     */
+    public static String toJsonString(List<Executable> program) {
+        return toJson(program).toString();
+    }
+
+    /**
+     * 从 JSON 字符串反编译为程序列表
+     * @param jsonStr JSON 字符串
+     * @return 程序列表
+     * @throws CompilationException 解析错误
+     */
+    public static List<Executable> compileFromJson(String jsonStr) throws CompilationException {
+        if (jsonStr == null || jsonStr.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        try {
+            JsonElement element = JsonParser.parseString(jsonStr);
+            if (!element.isJsonArray()) {
+                throw new CompilationException("JSON 程序必须是数组格式");
+            }
+            return fromJson(element.getAsJsonArray());
+        } catch (com.google.gson.JsonSyntaxException e) {
+            throw new CompilationException("JSON 解析失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 从 JSON 数组反编译为程序列表
+     * @param array JSON 数组
+     * @return 程序列表
+     * @throws CompilationException 解析错误
+     */
+    public static List<Executable> fromJson(JsonArray array) throws CompilationException {
+        List<Executable> program = new ArrayList<>();
+        for (int i = 0; i < array.size(); i++) {
+            JsonElement element = array.get(i);
+            if (!element.isJsonObject()) {
+                throw new CompilationException("程序元素 #" + i + " 必须是 JSON 对象");
+            }
+            JsonObject obj = element.getAsJsonObject();
+            Optional<Executable> exec = OperationRegistry.deserializeFromJson(obj);
+            if (exec.isEmpty()) {
+                String id = obj.has("id") ? obj.get("id").getAsString() : "未知";
+                throw new CompilationException("未知的指令: " + id + " (位置 #" + i + ")");
+            }
+            program.add(exec.get());
+        }
+        return program;
     }
 
     /**

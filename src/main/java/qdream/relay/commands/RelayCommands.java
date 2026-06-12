@@ -135,6 +135,47 @@ public class RelayCommands {
         root.addChild(clear);
         root.addChild(read);
         root.addChild(run);
+
+        // /relay jsonread <hand|shell> [slot]
+        LiteralCommandNode<CommandSourceStack> jsonread = Commands.literal("jsonread")
+                .then(Commands.argument("target", StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            builder.suggest("hand");
+                            builder.suggest("shell");
+                            return builder.buildFuture();
+                        })
+                        .executes(RelayCommands::jsonReadHand)
+                        .then(Commands.literal("shell")
+                                .then(Commands.argument("pos", StringArgumentType.word())
+                                        .executes(RelayCommands::jsonReadShell)
+                                )
+                        )
+                )
+                .build();
+
+        // /relay jsonwrite <hand|shell> [slot] <json>
+        LiteralCommandNode<CommandSourceStack> jsonwrite = Commands.literal("jsonwrite")
+                .then(Commands.argument("target", StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            builder.suggest("hand");
+                            builder.suggest("shell");
+                            return builder.buildFuture();
+                        })
+                        .then(Commands.argument("json", StringArgumentType.greedyString())
+                                .executes(RelayCommands::jsonWriteToHand)
+                        )
+                        .then(Commands.literal("shell")
+                                .then(Commands.argument("pos", StringArgumentType.word())
+                                        .then(Commands.argument("json", StringArgumentType.greedyString())
+                                                .executes(RelayCommands::jsonWriteToShell)
+                                        )
+                                )
+                        )
+                )
+                .build();
+
+        root.addChild(jsonread);
+        root.addChild(jsonwrite);
     }
 
     /**
@@ -381,6 +422,105 @@ public class RelayCommands {
         }
 
         source.sendSuccess(() -> Component.literal("法术程序 (§e" + program.size() + "§r 个指令): §f" + programToString(program)), true);
+        return program.size();
+    }
+
+    /**
+     * JSON 读取手中的法术磁盘
+     */
+    private static int jsonReadHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        var player = source.getPlayerOrException();
+        ItemStack stack = player.getMainHandItem();
+
+        if (!(stack.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        String json = SpellDiskItem.exportToJson(stack);
+        source.sendSuccess(() -> Component.literal("JSON 程序: §f" + json), true);
+        return 1;
+    }
+
+    /**
+     * JSON 读取外壳方块中的法术磁盘
+     */
+    private static int jsonReadShell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        String posStr = StringArgumentType.getString(context, "pos");
+
+        var pos = parseBlockPos(posStr, source);
+        BlockEntity blockEntity = source.getLevel().getBlockEntity(pos);
+
+        if (!(blockEntity instanceof ShellContainer shell)) {
+            throw INVALID_SLOT.create();
+        }
+
+        ItemStack disk = shell.getDiskStack();
+        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        String json = SpellDiskItem.exportToJson(disk);
+        source.sendSuccess(() -> Component.literal("JSON 程序: §f" + json), true);
+        return 1;
+    }
+
+    /**
+     * JSON 写入手中的法术磁盘
+     */
+    private static int jsonWriteToHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        var player = source.getPlayerOrException();
+        ItemStack stack = player.getMainHandItem();
+
+        if (!(stack.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        String jsonStr = StringArgumentType.getString(context, "json");
+        try {
+            SpellDiskItem.importFromJson(stack, jsonStr);
+        } catch (CompilationException e) {
+            source.sendFailure(Component.literal("§c JSON 解析失败: " + e.getMessage()));
+            return 0;
+        }
+
+        List<Executable> program = SpellDiskItem.getProgram(stack);
+        source.sendSuccess(() -> Component.literal("已写入 JSON 程序: §e" + program.size() + "§r 个指令"), true);
+        return program.size();
+    }
+
+    /**
+     * JSON 写入外壳方块中的法术磁盘
+     */
+    private static int jsonWriteToShell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        String posStr = StringArgumentType.getString(context, "pos");
+        String jsonStr = StringArgumentType.getString(context, "json");
+
+        var pos = parseBlockPos(posStr, source);
+        BlockEntity blockEntity = source.getLevel().getBlockEntity(pos);
+
+        if (!(blockEntity instanceof ShellContainer shell)) {
+            throw INVALID_SLOT.create();
+        }
+
+        ItemStack disk = shell.getDiskStack();
+        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        try {
+            SpellDiskItem.importFromJson(disk, jsonStr);
+        } catch (CompilationException e) {
+            source.sendFailure(Component.literal("§c JSON 解析失败: " + e.getMessage()));
+            return 0;
+        }
+        shell.setChanged();
+
+        List<Executable> program = SpellDiskItem.getProgram(disk);
+        source.sendSuccess(() -> Component.literal("已向外壳写入 JSON 程序: §e" + program.size() + "§r 个指令"), true);
         return program.size();
     }
 

@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
+import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.engine.StateMachine;
 
 /**
@@ -120,5 +121,26 @@ public class SpellDiskItem extends Item {
      */
     public static void clear(ItemStack stack) {
         stack.remove(RelayDataComponents.SPELL_PROGRAM);
+    }
+
+    /**
+     * 导出磁盘程序为 JSON 字符串
+     * @param stack 物品堆
+     * @return JSON 字符串，如果没有程序则返回 "[]"
+     */
+    public static String exportToJson(ItemStack stack) {
+        List<Executable> program = getProgram(stack);
+        return ProgramCompiler.toJsonString(program);
+    }
+
+    /**
+     * 从 JSON 字符串导入程序到磁盘
+     * @param stack 物品堆
+     * @param jsonStr JSON 字符串
+     * @throws ProgramCompiler.CompilationException 解析错误
+     */
+    public static void importFromJson(ItemStack stack, String jsonStr) throws ProgramCompiler.CompilationException {
+        List<Executable> program = ProgramCompiler.compileFromJson(jsonStr);
+        setProgram(stack, program);
     }
 }

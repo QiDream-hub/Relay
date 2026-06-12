@@ -1,5 +1,6 @@
 package qdream.relay.types;
 
+import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -54,5 +55,18 @@ public class NumberIota extends Data {
         } else {
             return new NumberIota(tag.getDouble("value").orElse(0.0));
         }
+    }
+
+    @Override
+    public void toJson(JsonObject json) {
+        json.addProperty("value", value);
+    }
+
+    @Override
+    public Data fromJson(JsonObject json) {
+        if (json.has("value")) {
+            return new NumberIota(json.get("value").getAsDouble());
+        }
+        return new NumberIota(0);
     }
 }

@@ -3,6 +3,9 @@ package qdream.relay.types;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -56,5 +59,29 @@ public class ListIota extends Data {
         } else {
             return new ListIota(new ArrayList<>());
         }
+    }
+
+    @Override
+    public void toJson(JsonObject json) {
+        JsonArray array = new JsonArray();
+        for (Executable item : value) {
+            OperationRegistry.serializeToJson(item).ifPresent(array::add);
+        }
+        json.add("value", array);
+    }
+
+    @Override
+    public Data fromJson(JsonObject json) {
+        if (json.has("value") && json.get("value").isJsonArray()) {
+            JsonArray array = json.getAsJsonArray("value");
+            List<Executable> list = new ArrayList<>();
+            for (JsonElement element : array) {
+                if (element.isJsonObject()) {
+                    OperationRegistry.deserializeFromJson(element.getAsJsonObject()).ifPresent(list::add);
+                }
+            }
+            return new ListIota(list);
+        }
+        return new ListIota(new ArrayList<>());
     }
 }

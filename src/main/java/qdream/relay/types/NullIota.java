@@ -1,5 +1,6 @@
 package qdream.relay.types;
 
+import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -36,6 +37,16 @@ public class NullIota extends Data {
 
     @Override
     public Data fromNbt(CompoundTag tag) {
+        return INSTANCE;
+    }
+
+    @Override
+    public void toJson(JsonObject json) {
+        // NullIota 没有数据需要序列化
+    }
+
+    @Override
+    public Data fromJson(JsonObject json) {
         return INSTANCE;
     }
 }

@@ -1,6 +1,7 @@
 package qdream.relay.client.editor;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -25,9 +26,6 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
     private final StateMachine testMachine;
 
-    // 选中的操作索引（用于删除）
-    private int selectedProgramIndex = -1;
-
     // 运行状态
     private String lastMishapReason = null;
 
@@ -37,12 +35,16 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     private static final int PANEL_PADDING = 10;
     private static final int LINE_HEIGHT = 12;
     private static final int GUI_WIDTH = 400;
-    private static final int GUI_HEIGHT = 280;
+    private static final int GUI_HEIGHT = 370;
 
-    // 面板区域
-    private static final int OPERATIONS_X = 0;
-    private static final int PROGRAM_X = OPERATIONS_PANEL_WIDTH;
-    private static final int STACK_X = OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH;
+    // 列表区域上下边距
+    private static final int LIST_TOP_MARGIN = LINE_HEIGHT + 8;  // 标题行 + 间距
+    private static final int LIST_BOTTOM_MARGIN = 20;             // 底部提示区高度
+    private static final int EDITOR_PANEL_HEIGHT = 260;           // 编辑器面板区域总高度（不含背包）
+
+    // 自定义 Widget（在 init 中创建）
+    private OperationListWidget operationListWidget;
+    private ProgramListWidget programListWidget;
 
     public SpellEditorScreen(SpellEditorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -54,7 +56,34 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     protected void init() {
         super.init();
 
-        // 控制按钮区域（右侧面板上方）
+        // 计算列表 Widget 的纵向范围（仅占据编辑器面板区域，不延伸到背包）
+        int listTop = this.topPos + LIST_TOP_MARGIN;
+        int listHeight = EDITOR_PANEL_HEIGHT - LIST_TOP_MARGIN - LIST_BOTTOM_MARGIN;
+
+        // 可用操作列表 Widget
+        operationListWidget = new OperationListWidget(
+            this.leftPos + PANEL_PADDING,
+            listTop,
+            OPERATIONS_PANEL_WIDTH - PANEL_PADDING * 2,
+            listHeight,
+            this.font,
+            this.menu.getAvailableOperations()
+        );
+        operationListWidget.setOnOperationClicked(opId -> this.menu.addOperation(opId));
+        this.addRenderableWidget(operationListWidget);
+
+        // 程序列表 Widget
+        programListWidget = new ProgramListWidget(
+            this.leftPos + OPERATIONS_PANEL_WIDTH + PANEL_PADDING,
+            listTop,
+            PROGRAM_PANEL_WIDTH - PANEL_PADDING,
+            listHeight,
+            this.font,
+            this.menu.getProgram()
+        );
+        this.addRenderableWidget(programListWidget);
+
+        // 控制按钮区域（右侧面板）
         int buttonX = this.leftPos + OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH + PANEL_PADDING * 3;
         int buttonY = this.topPos + 180;
 
@@ -69,6 +98,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         // 删除选中按钮
         this.addRenderableWidget(Button.builder(Component.literal("删除"), btn -> onDelete())
             .pos(buttonX, buttonY + 50).size(60, 20).build());
+        // 将玩家物品栏标题移出可视区域
+        this.inventoryLabelY = this.imageHeight + 10;
     }
 
     @Override
@@ -79,74 +110,40 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         // 渲染边框
         graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0xFF404040);
 
-        // 调用父类渲染 Slot 等
+        // 调用父类渲染 Slot 等（也会渲染已注册的 Widget）
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         int left = this.leftPos;
         int top = this.topPos;
 
-        // 渲染分隔线
-        graphics.verticalLine(left + OPERATIONS_PANEL_WIDTH, top, top + this.imageHeight, 0xFF404040);
-        graphics.verticalLine(left + OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH, top, top + this.imageHeight, 0xFF404040);
+        // 渲染分隔线（仅贯穿编辑器面板区域）
+        int panelBottom = top + EDITOR_PANEL_HEIGHT;
+        graphics.verticalLine(left + OPERATIONS_PANEL_WIDTH, top, panelBottom, 0xFF404040);
+        graphics.verticalLine(left + OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH, top, panelBottom, 0xFF404040);
 
-        // 渲染面板标题
-        graphics.text(this.font, "可用操作", left + PANEL_PADDING, top + 5, 0x00FF00);
-        graphics.text(this.font, "程序列表", left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING * 2, top + 5, 0xFFFF00);
-        graphics.text(this.font, "栈视图", left + OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH + PANEL_PADDING * 3, top + 5, 0x00FFFF);
+        // 编辑器面板与背包的分隔线
+        graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, 0xFF505050);
 
-        // 渲染各面板内容
-        renderOperationList(graphics, left, top);
-        renderProgramList(graphics, left, top);
+        // 渲染面板标题（在 Widget 之上）
+        graphics.text(this.font, "可用操作", left + PANEL_PADDING, top + 5, 0xFF00FF00);
+        graphics.text(this.font, "程序列表", left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING, top + 5, 0xFFFFFF00);
+        graphics.text(this.font, "栈视图", left + OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH + PANEL_PADDING * 3, top + 5, 0xFF00FFFF);
+
+        // 渲染栈视图（仍为手绘，不属于列表 Widget）
         renderStacks(graphics, left, top);
 
         // 渲染事故信息
         if (lastMishapReason != null) {
             int infoX = left + OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH + PANEL_PADDING * 3;
-            graphics.text(this.font, "事故：" + lastMishapReason, infoX, this.topPos + 240, 0xFF0000);
+            graphics.text(this.font, "事故：" + lastMishapReason, infoX, this.topPos + 240, 0xFFFF0000);
         }
 
-        // 渲染操作提示
-        graphics.text(this.font, "点击操作添加", left + PANEL_PADDING, this.topPos + this.imageHeight - 55, 0x888888);
-        graphics.text(this.font, "点击程序选中", left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING * 2, this.topPos + this.imageHeight - 55, 0x888888);
-    }
-
-    /**
-     * 渲染可用操作列表
-     */
-    private void renderOperationList(GuiGraphicsExtractor graphics, int left, int top) {
-        List<String> ops = this.menu.getAvailableOperations();
-        int y = top + LINE_HEIGHT + 5;
-        int maxLines = 18;  // 增加最大行数
-        for (int i = 0; i < Math.min(ops.size(), maxLines); i++) {
-            String op = ops.get(i);
-            int color = 0x00AA00;
-            graphics.text(this.font, op, left + PANEL_PADDING, y, color);
-            y += LINE_HEIGHT;
-        }
-
-        // 渲染操作数量提示
-        graphics.text(this.font, "共 " + ops.size() + " 个操作", left + PANEL_PADDING, top + this.imageHeight - 70, 0x666666);
-    }
-
-    /**
-     * 渲染程序列表
-     */
-    private void renderProgramList(GuiGraphicsExtractor graphics, int left, int top) {
-        List<String> program = this.menu.getProgram();
-        int x = left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING * 2;
-        int y = top + LINE_HEIGHT + 5;
-        for (int i = 0; i < program.size(); i++) {
-            String op = program.get(i);
-            
-            // 渲染选中背景
-            if (i == selectedProgramIndex) {
-                graphics.fill(x - 2, y - 2, x + 100, y + LINE_HEIGHT - 2, 0x40FFFF00);
-            }
-            
-            int color = (i == selectedProgramIndex) ? 0xFFFF00 : 0xFFFFFF;
-            graphics.text(this.font, (i + 1) + ". " + op, x, y, color);
-            y += LINE_HEIGHT;
-        }
+        // 渲染操作提示（编辑器面板底部）
+        int hintY = top + EDITOR_PANEL_HEIGHT - 14;
+        graphics.text(this.font, "滚轮滚动 · 点击添加",
+            left + PANEL_PADDING, hintY, 0xFF888888);
+        graphics.text(this.font, "滚轮滚动 · 点击选中",
+            left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING, hintY, 0xFF888888);
     }
 
     /**
@@ -157,29 +154,29 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         int y = top + LINE_HEIGHT + 5;
 
         // 数据栈标题
-        graphics.text(this.font, "数据栈:", x, y, 0x00FFFF);
+        graphics.text(this.font, "数据栈:", x, y, 0xFF00FFFF);
         y += LINE_HEIGHT;
 
         // 数据栈内容
         List<Executable> dataStack = testMachine.getDataStackSnapshot();
         for (int i = dataStack.size() - 1; i >= 0 && y < top + 100; i--) {
             Executable data = dataStack.get(i);
-            String text = ((Operation)data).getId();
-            graphics.text(this.font, text, x, y, 0x00AAAA);
+            String text = ((Operation) data).getId();
+            graphics.text(this.font, text, x, y, 0xFF00AAAA);
             y += LINE_HEIGHT;
         }
 
         // 程序栈标题
         y += 10;
-        graphics.text(this.font, "程序栈:", x, y, 0xFF8800);
+        graphics.text(this.font, "程序栈:", x, y, 0xFFFF8800);
         y += LINE_HEIGHT;
 
         // 程序栈内容
         List<Executable> programStack = testMachine.getProgramStackSnapshot();
         for (int i = programStack.size() - 1; i >= 0 && y < top + 200; i--) {
             Executable exec = programStack.get(i);
-            String text = ((Operation)exec).getId();
-            graphics.text(this.font, text, x, y, 0xFF8800);
+            String text = ((Operation) exec).getId();
+            graphics.text(this.font, text, x, y, 0xFFFF8800);
             y += LINE_HEIGHT;
         }
     }
@@ -210,19 +207,32 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
     private void onClear() {
         this.menu.clearProgram();
-        selectedProgramIndex = -1;
+        programListWidget.clearSelection();
         lastMishapReason = null;
     }
 
     private void onDelete() {
-        if (selectedProgramIndex >= 0 && selectedProgramIndex < this.menu.getProgram().size()) {
-            this.menu.removeOperation(selectedProgramIndex);
-            selectedProgramIndex = -1;
+        int selectedIndex = programListWidget.getSelectedIndex();
+        if (selectedIndex >= 0 && selectedIndex < this.menu.getProgram().size()) {
+            this.menu.removeOperation(selectedIndex);
+            programListWidget.clearSelection();
         }
     }
 
-    // 鼠标点击处理 - 用于添加/选中操作
-    // 注意：26.1.2 中使用 extractRenderState 渲染，鼠标事件需要特殊处理
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        // AbstractContainerScreen.mouseScrolled 不转发给子 Widget，手动分发
+        for (var widget : this.children()) {
+            if (widget instanceof AbstractWidget aw
+                && mouseX >= aw.getX() && mouseX < aw.getX() + aw.getWidth()
+                && mouseY >= aw.getY() && mouseY < aw.getY() + aw.getHeight()) {
+                if (aw.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+                    return true;
+                }
+            }
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
 
     @Override
     public boolean isPauseScreen() {

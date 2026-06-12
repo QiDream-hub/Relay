@@ -1,5 +1,6 @@
 package qdream.relay.mc;
 
+import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
@@ -148,6 +149,52 @@ public class OperationRegistry {
     public static void clear() {
         OPERATIONS.clear();
         DATA_FACTORIES.clear();
+    }
+
+    /**
+     * 通过对象自身的序列化方法序列化 Executable 为 JSON
+     * @param exec 要序列化的 Executable
+     * @return 序列化后的 JsonObject，或空 Optional（如果类型不支持）
+     */
+    public static Optional<JsonObject> serializeToJson(Executable exec) {
+        String id = ((qdream.relay.mc.base.Operation) exec).getId();
+        JsonObject json = new JsonObject();
+        json.addProperty("id", id);
+
+        if (exec instanceof Data data) {
+            data.toJson(json);
+            return Optional.of(json);
+        } else if (exec instanceof Spell spell) {
+            spell.toJson(json);
+            return Optional.of(json);
+        } else {
+            // 其他 Executable 类型，只保存 id
+            return Optional.of(json);
+        }
+    }
+
+    /**
+     * 通过注册表从 JSON 反序列化 Executable
+     * @param json JSON 对象
+     * @return 反序列化后的 Executable，或空 Optional
+     */
+    public static Optional<Executable> deserializeFromJson(JsonObject json) {
+        String id = json.has("id") ? json.get("id").getAsString() : "";
+
+        // 尝试作为数据类型反序列化
+        Optional<Data> dataOpt = createData(id);
+        if (dataOpt.isPresent()) {
+            return Optional.of(dataOpt.get().fromJson(json));
+        }
+
+        // 尝试作为操作获取（操作是单例，不需要反序列化）
+        Optional<Executable> opOpt = get(id);
+        if (opOpt.isPresent()) {
+            return opOpt;
+        }
+
+        // 未知类型，返回空
+        return Optional.empty();
     }
 
     /**

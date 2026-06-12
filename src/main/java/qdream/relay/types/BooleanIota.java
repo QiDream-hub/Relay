@@ -1,5 +1,6 @@
 package qdream.relay.types;
 
+import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -33,5 +34,15 @@ public class BooleanIota extends Data {
     @Override
     public Data fromNbt(CompoundTag tag) {
         return new BooleanIota(tag.getBoolean("value").orElse(false));
+    }
+
+    @Override
+    public void toJson(JsonObject json) {
+        json.addProperty("value", value);
+    }
+
+    @Override
+    public Data fromJson(JsonObject json) {
+        return new BooleanIota(json.has("value") && json.get("value").getAsBoolean());
     }
 }

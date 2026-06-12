@@ -50,16 +50,16 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
             System.out.println("  - " + op);
         }
 
-        // 玩家物品栏
+        // 玩家物品栏（放置在编辑器面板下方，避免重叠）
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 8 + x * 18, 170 + y * 18));
+                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 8 + x * 18, 290 + y * 18));
             }
         }
 
         // 玩家热键栏
         for (int x = 0; x < 9; ++x) {
-            this.addSlot(new Slot(playerInventory, x, 8 + x * 18, 248));
+            this.addSlot(new Slot(playerInventory, x, 8 + x * 18, 350));
         }
     }
 

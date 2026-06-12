@@ -1,5 +1,6 @@
 package qdream.relay.types;
 
+import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -37,5 +38,20 @@ public class EntityIota extends Data {
         String uuidStr = tag.getString("value").orElse("");
         UUID uuid = uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr);
         return new EntityIota(uuid);
+    }
+
+    @Override
+    public void toJson(JsonObject json) {
+        json.addProperty("value", entityId.toString());
+    }
+
+    @Override
+    public Data fromJson(JsonObject json) {
+        if (json.has("value")) {
+            String uuidStr = json.get("value").getAsString();
+            UUID uuid = uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr);
+            return new EntityIota(uuid);
+        }
+        return new EntityIota(new UUID(0, 0));
     }
 }
