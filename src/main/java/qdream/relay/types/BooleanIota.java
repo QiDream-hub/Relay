@@ -28,6 +28,7 @@ public class BooleanIota extends Data {
 
     @Override
     public void toNbt(CompoundTag tag) {
+        super.toNbt(tag);
         tag.putBoolean("value", value);
     }
 
@@ -38,6 +39,7 @@ public class BooleanIota extends Data {
 
     @Override
     public void toJson(JsonObject json) {
+        super.toJson(json);
         json.addProperty("value", value);
     }
 

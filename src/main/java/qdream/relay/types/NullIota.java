@@ -32,7 +32,7 @@ public class NullIota extends Data {
 
     @Override
     public void toNbt(CompoundTag tag) {
-        // NullIota 没有数据需要序列化
+        super.toNbt(tag);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class NullIota extends Data {
 
     @Override
     public void toJson(JsonObject json) {
-        // NullIota 没有数据需要序列化
+        super.toJson(json);
     }
 
     @Override

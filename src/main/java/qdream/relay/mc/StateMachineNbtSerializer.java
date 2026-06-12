@@ -2,6 +2,7 @@ package qdream.relay.mc;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.base.Operation;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,13 +24,17 @@ public class StateMachineNbtSerializer {
 
         ListTag programList = new ListTag();
         for (Executable iota : machine.getProgramStackSnapshot()) {
-            OperationRegistry.serializeToNbt(iota).ifPresent(programList::add);
+            CompoundTag itemTag = new CompoundTag();
+            ((Operation) iota).toNbt(itemTag);
+            programList.add(itemTag);
         }
         tag.put("programStack", programList);
 
         ListTag dataList = new ListTag();
         for (Executable data : machine.getDataStackSnapshot()) {
-            OperationRegistry.serializeToNbt(data).ifPresent(dataList::add);
+            CompoundTag itemTag = new CompoundTag();
+            ((Operation) data).toNbt(itemTag);
+            dataList.add(itemTag);
         }
         tag.put("dataStack", dataList);
 
@@ -43,7 +48,11 @@ public class StateMachineNbtSerializer {
         List<Executable> programStack = new ArrayList<>();
         for (Tag element : programList) {
             if (element instanceof CompoundTag compoundTag) {
-                OperationRegistry.deserializeFromNbt(compoundTag).ifPresent(programStack::add);
+                String id = compoundTag.getString("id").orElse("");
+                OperationRegistry.getEntry(id).ifPresent(entry -> {
+                    Operation instance = (Operation) entry.create();
+                    programStack.add(instance.fromNbt(compoundTag));
+                });
             }
         }
         // 反转后加载，保证执行顺序
@@ -54,7 +63,11 @@ public class StateMachineNbtSerializer {
         List<Executable> dataStack = new ArrayList<>();
         for (Tag element : dataList) {
             if (element instanceof CompoundTag compoundTag) {
-                OperationRegistry.deserializeFromNbt(compoundTag).ifPresent(dataStack::add);
+                String id = compoundTag.getString("id").orElse("");
+                OperationRegistry.getEntry(id).ifPresent(entry -> {
+                    Operation instance = (Operation) entry.create();
+                    dataStack.add(instance.fromNbt(compoundTag));
+                });
             }
         }
         // 数据栈需要反转后依次压入

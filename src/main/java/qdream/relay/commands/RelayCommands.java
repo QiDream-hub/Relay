@@ -194,7 +194,7 @@ public class RelayCommands {
         String programStr = StringArgumentType.getString(context, "program");
         List<Executable> program;
         try {
-            program = ProgramCompiler.compile(programStr);
+            program = ProgramCompiler.compileFromJson(programStr);
         } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c 程序编译失败：" + e.getMessage()));
             return 0;
@@ -228,7 +228,7 @@ public class RelayCommands {
 
         List<Executable> program;
         try {
-            program = ProgramCompiler.compile(programStr);
+            program = ProgramCompiler.compileFromJson(programStr);
         } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c 程序编译失败：" + e.getMessage()));
             return 0;

@@ -30,6 +30,7 @@ public class EntityIota extends Data {
 
     @Override
     public void toNbt(CompoundTag tag) {
+        super.toNbt(tag);
         tag.putString("value", entityId.toString());
     }
 
@@ -42,6 +43,7 @@ public class EntityIota extends Data {
 
     @Override
     public void toJson(JsonObject json) {
+        super.toJson(json);
         json.addProperty("value", entityId.toString());
     }
 

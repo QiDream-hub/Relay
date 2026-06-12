@@ -40,6 +40,7 @@ public class NumberIota extends Data {
 
     @Override
     public void toNbt(CompoundTag tag) {
+        super.toNbt(tag);
         if (isInteger()) {
             tag.putInt("value", asInt());
         } else {
@@ -59,6 +60,7 @@ public class NumberIota extends Data {
 
     @Override
     public void toJson(JsonObject json) {
+        super.toJson(json);
         json.addProperty("value", value);
     }
 

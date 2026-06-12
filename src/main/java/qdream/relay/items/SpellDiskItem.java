@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.engine.StateMachine;
 
 /**
@@ -42,7 +43,13 @@ public class SpellDiskItem extends Item {
         List<Executable> result = new ArrayList<>();
         for (int i = 0; i < listTag.size(); i++) {
             Optional<CompoundTag> elementOpt = listTag.getCompound(i);
-            elementOpt.ifPresent(tag -> OperationRegistry.deserializeFromNbt(tag).ifPresent(result::add));
+            elementOpt.ifPresent(tag -> {
+                String id = tag.getString("id").orElse("");
+                OperationRegistry.getEntry(id).ifPresent(entry -> {
+                    Operation instance = (Operation) entry.create();
+                    result.add(instance.fromNbt(tag));
+                });
+            });
         }
         return result;
     }
@@ -56,7 +63,9 @@ public class SpellDiskItem extends Item {
         CompoundTag programTag = new CompoundTag();
         ListTag listTag = new ListTag();
         for (Executable iota : program) {
-            OperationRegistry.serializeToNbt(iota).ifPresent(listTag::add);
+            CompoundTag itemTag = new CompoundTag();
+            ((Operation) iota).toNbt(itemTag);
+            listTag.add(itemTag);
         }
         programTag.put("program", listTag);
         stack.set(RelayDataComponents.SPELL_PROGRAM, programTag);

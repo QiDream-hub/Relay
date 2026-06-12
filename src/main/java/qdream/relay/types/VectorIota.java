@@ -33,33 +33,41 @@ public class VectorIota extends Data {
 
     @Override
     public void toNbt(CompoundTag tag) {
-        tag.putDouble("x", vec3.x);
-        tag.putDouble("y", vec3.y);
-        tag.putDouble("z", vec3.z);
+        super.toNbt(tag);
+        CompoundTag vecTag = new CompoundTag();
+        vecTag.putDouble("x", vec3.x);
+        vecTag.putDouble("y", vec3.y);
+        vecTag.putDouble("z", vec3.z);
+        tag.put("value", vecTag);
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
+        CompoundTag vecTag = tag.getCompound("value").orElse(new CompoundTag());
         return new VectorIota(new Vec3(
-            tag.getDouble("x").orElse(0.0),
-            tag.getDouble("y").orElse(0.0),
-            tag.getDouble("z").orElse(0.0)
+            vecTag.getDouble("x").orElse(0.0),
+            vecTag.getDouble("y").orElse(0.0),
+            vecTag.getDouble("z").orElse(0.0)
         ));
     }
 
     @Override
     public void toJson(JsonObject json) {
-        json.addProperty("x", vec3.x);
-        json.addProperty("y", vec3.y);
-        json.addProperty("z", vec3.z);
+        super.toJson(json);
+        JsonObject vecJson = new JsonObject();
+        vecJson.addProperty("x", vec3.x);
+        vecJson.addProperty("y", vec3.y);
+        vecJson.addProperty("z", vec3.z);
+        json.add("value", vecJson);
     }
 
     @Override
     public Data fromJson(JsonObject json) {
+        JsonObject vecJson = json.getAsJsonObject("value");
         return new VectorIota(new Vec3(
-            json.has("x") ? json.get("x").getAsDouble() : 0.0,
-            json.has("y") ? json.get("y").getAsDouble() : 0.0,
-            json.has("z") ? json.get("z").getAsDouble() : 0.0
+            vecJson.has("x") ? vecJson.get("x").getAsDouble() : 0.0,
+            vecJson.has("y") ? vecJson.get("y").getAsDouble() : 0.0,
+            vecJson.has("z") ? vecJson.get("z").getAsDouble() : 0.0
         ));
     }
 }

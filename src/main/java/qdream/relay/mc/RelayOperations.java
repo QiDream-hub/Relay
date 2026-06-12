@@ -1,6 +1,5 @@
 package qdream.relay.mc;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import net.minecraft.world.phys.Vec3;
@@ -35,6 +34,8 @@ import qdream.relay.types.NumberIota;
 import qdream.relay.types.StringIota;
 import qdream.relay.types.VectorIota;
 
+import java.util.ArrayList;
+
 /**
  * 注册所有操作和数据类型
  */
@@ -52,51 +53,58 @@ public class RelayOperations {
 
     private static void registerDataTypes() {
         // 基础类型 - 工厂方法创建默认值实例
-        OperationRegistry.registerData("relay:number", () -> new NumberIota(0));
-        OperationRegistry.registerData("relay:boolean", () -> new BooleanIota(false));
-        OperationRegistry.registerData("relay:string", () -> new StringIota(""));
-        OperationRegistry.registerData("relay:vector", () -> new VectorIota(new Vec3(0, 0, 0)));
-        OperationRegistry.registerData("relay:entity", () -> new EntityIota(new UUID(0, 0)));
-        OperationRegistry.registerData("relay:null", () -> NullIota.INSTANCE);
-        OperationRegistry.registerData("relay:list", () -> new ListIota(new ArrayList<>()));
+        OperationRegistry.register("relay:number",
+            new OperationRegistry.DataEntry(() -> new NumberIota(0)));
+        OperationRegistry.register("relay:boolean",
+            new OperationRegistry.DataEntry(() -> new BooleanIota(false)));
+        OperationRegistry.register("relay:string",
+            new OperationRegistry.DataEntry(() -> new StringIota("")));
+        OperationRegistry.register("relay:vector",
+            new OperationRegistry.DataEntry(() -> new VectorIota(new Vec3(0, 0, 0))));
+        OperationRegistry.register("relay:entity",
+            new OperationRegistry.DataEntry(() -> new EntityIota(new UUID(0, 0))));
+        OperationRegistry.register("relay:null",
+            new OperationRegistry.DataEntry(() -> NullIota.INSTANCE));
+        OperationRegistry.register("relay:list",
+            new OperationRegistry.DataEntry(() -> new ListIota(new ArrayList<>())));
     }
 
     private static void registerOperations() {
         // 基础操作
-        OperationRegistry.register("relay:pop", new PopOp());
-        OperationRegistry.register("relay:dup", new DupOp());
-        OperationRegistry.register("relay:swap", new SwapOp());
+        OperationRegistry.register("relay:pop", new OperationRegistry.OpEntry(new PopOp()));
+        OperationRegistry.register("relay:dup", new OperationRegistry.OpEntry(new DupOp()));
+        OperationRegistry.register("relay:swap", new OperationRegistry.OpEntry(new SwapOp()));
 
         // 算术操作
-        OperationRegistry.register("relay:add", new AddOp());
-        OperationRegistry.register("relay:sub", new SubOp());
-        OperationRegistry.register("relay:mul", new MulOp());
-        OperationRegistry.register("relay:div", new DivOp());
+        OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new AddOp()));
+        OperationRegistry.register("relay:sub", new OperationRegistry.OpEntry(new SubOp()));
+        OperationRegistry.register("relay:mul", new OperationRegistry.OpEntry(new MulOp()));
+        OperationRegistry.register("relay:div", new OperationRegistry.OpEntry(new DivOp()));
 
         // 逻辑操作
-        OperationRegistry.register("relay:and", new AndOp());
-        OperationRegistry.register("relay:or", new OrOp());
-        OperationRegistry.register("relay:not", new NotOp());
+        OperationRegistry.register("relay:and", new OperationRegistry.OpEntry(new AndOp()));
+        OperationRegistry.register("relay:or", new OperationRegistry.OpEntry(new OrOp()));
+        OperationRegistry.register("relay:not", new OperationRegistry.OpEntry(new NotOp()));
 
         // 比较操作
-        OperationRegistry.register("relay:eq", new EqOp());
-        OperationRegistry.register("relay:lt", new LtOp());
-        OperationRegistry.register("relay:gt", new GtOp());
+        OperationRegistry.register("relay:eq", new OperationRegistry.OpEntry(new EqOp()));
+        OperationRegistry.register("relay:lt", new OperationRegistry.OpEntry(new LtOp()));
+        OperationRegistry.register("relay:gt", new OperationRegistry.OpEntry(new GtOp()));
 
         // 控制流
-        OperationRegistry.register("relay:eval", new EvalOp());
-        OperationRegistry.register("relay:if", new IfOp());
-        OperationRegistry.register("relay:stop", new StopOp());
+        OperationRegistry.register("relay:eval", new OperationRegistry.OpEntry(new EvalOp()));
+        OperationRegistry.register("relay:if", new OperationRegistry.OpEntry(new IfOp()));
+        OperationRegistry.register("relay:stop", new OperationRegistry.OpEntry(new StopOp()));
 
         // 通信操作
-        OperationRegistry.register("relay:send", new SendOp());
-        OperationRegistry.register("relay:recv", new RecvOp());
-        OperationRegistry.register("relay:peek", new PeekOp());
+        OperationRegistry.register("relay:send", new OperationRegistry.OpEntry(new SendOp()));
+        OperationRegistry.register("relay:recv", new OperationRegistry.OpEntry(new RecvOp()));
+        OperationRegistry.register("relay:peek", new OperationRegistry.OpEntry(new PeekOp()));
 
         // 列表操作
-        OperationRegistry.register("relay:list.append", new ListAppendOp());
-        OperationRegistry.register("relay:list.get", new ListGetOp());
-        OperationRegistry.register("relay:list.set", new ListSetOp());
-        OperationRegistry.register("relay:list.length", new ListLengthOp());
+        OperationRegistry.register("relay:list.append", new OperationRegistry.OpEntry(new ListAppendOp()));
+        OperationRegistry.register("relay:list.get", new OperationRegistry.OpEntry(new ListGetOp()));
+        OperationRegistry.register("relay:list.set", new OperationRegistry.OpEntry(new ListSetOp()));
+        OperationRegistry.register("relay:list.length", new OperationRegistry.OpEntry(new ListLengthOp()));
     }
 }
