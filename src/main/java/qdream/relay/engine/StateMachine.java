@@ -9,8 +9,6 @@ import java.util.Collections;
 /**
  * 状态机执行器
  * 维护双栈，执行操作
- *
- * 纯 Java 实现，不依赖 Minecraft
  */
 public class StateMachine {
     private final Deque<Executable> programStack = new ArrayDeque<>();
