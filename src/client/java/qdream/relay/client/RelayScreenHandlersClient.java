@@ -3,7 +3,7 @@ package qdream.relay.client;
 import net.minecraft.client.gui.screens.MenuScreens;
 
 import qdream.relay.client.screen.ShellScreen;
-import qdream.relay.client.editor.SpellEditorScreen;
+import qdream.relay.client.screen.SpellEditorScreen;
 import qdream.relay.screen.RelayScreenHandlers;
 
 /**

@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.mc.ProgramCompiler.CompilationException;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.engine.StateMachine;
 
@@ -61,11 +62,12 @@ public class SpellDiskItem extends Item {
      */
     public static void setProgram(ItemStack stack, List<Executable> program) {
         CompoundTag programTag = new CompoundTag();
-        ListTag listTag = new ListTag();
-        for (Executable iota : program) {
-            CompoundTag itemTag = new CompoundTag();
-            ((Operation) iota).toNbt(itemTag);
-            listTag.add(itemTag);
+        ListTag listTag;
+        try {
+            listTag = ProgramCompiler.toNbt(program);
+        } catch (CompilationException e) {
+            listTag = new ListTag();
+            e.printStackTrace();
         }
         programTag.put("program", listTag);
         stack.set(RelayDataComponents.SPELL_PROGRAM, programTag);

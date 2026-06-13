@@ -27,7 +27,6 @@ import qdream.relay.mc.StateMachineNbtSerializer;
 /**
  * 外壳方块实体
  * 维护状态机，执行 tick，处理持久化
- * 注意：26.1.2 的 NBT 系统有重大变化，暂时简化实现
  */
 public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer {
 
@@ -36,6 +35,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     private final ShellTickHandler tickHandler;
 
     private int energy;
+    private boolean enabled;
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
@@ -45,6 +45,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         this.stateMachine = new StateMachine(1024);
         this.tickHandler = new ShellTickHandler();
         this.energy = 0;
+        this.enabled = false;
 
         // 设置事故回调
         this.stateMachine.setMishapHandler(reason -> {
@@ -59,16 +60,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
      */
     public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
         entity.tickHandler.tick(entity);
-    }
-
-    /**
-     * 保存程序到磁盘
-     */
-    public void saveProgramToDisk() {
-        ItemStack diskStack = inventory[DISK_SLOT];
-        if (!diskStack.isEmpty()) {
-            // TODO: 将当前状态机状态保存到磁盘
-        }
     }
 
     // ========== MenuProvider 接口 ==========
@@ -127,6 +118,21 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     }
 
     @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        setChanged();
+        // 通知客户端同步
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    @Override
     public int getEnergy() {
         return energy;
     }
@@ -179,6 +185,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
         output.store("stateMachine", CompoundTag.CODEC, machineTag);
 
+        // 保存开关状态
+        output.putBoolean("enabled", enabled);
+
         // 保存 TickHandler 状态
         output.putInt("tickCounter", tickHandler.getTickCounter());
         output.putInt("coreCount", tickHandler.getCoreCount());
@@ -219,6 +228,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         input.read("stateMachine", CompoundTag.CODEC).ifPresent(machineTag -> {
             StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, (CompoundTag) machineTag);
         });
+
+        // 加载开关状态
+        enabled = input.getBooleanOr("enabled", false);
 
         // 加载 TickHandler 状态
         tickHandler.setTickCounter(input.getIntOr("tickCounter", 0));

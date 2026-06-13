@@ -86,6 +86,16 @@ public interface ShellContainer {
     void setInitialized(boolean initialized);
 
     /**
+     * 是否已启用（开关状态）
+     */
+    boolean isEnabled();
+
+    /**
+     * 设置启用状态
+     */
+    void setEnabled(boolean enabled);
+
+    /**
      * 获取当前能量
      */
     int getEnergy();

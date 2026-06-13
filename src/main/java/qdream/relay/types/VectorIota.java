@@ -1,5 +1,7 @@
 package qdream.relay.types;
 
+import java.util.List;
+
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
@@ -18,7 +20,9 @@ public class VectorIota extends Data {
         super("relay:vector", 0,
             OperationSignature.builder()
                     .output("relay:vector")
-                    .input("minecraft:vector")
+                    .input("number")
+                    .input("number")
+                    .input("number")
                     .build()
         );
         this.vec3 = vec3;

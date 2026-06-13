@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Operation;
 
@@ -98,6 +100,34 @@ public class ProgramCompiler {
             program.add(instance.fromJson(obj));
         }
         return program;
+    }
+
+    public static List<Executable> fromNbt(ListTag nbt) throws CompilationException {
+        List<Executable> program = new ArrayList<>();
+        for (int i = 0; i < nbt.size(); i++) {
+            CompoundTag tag = nbt.getCompound(i).orElseThrow(() -> new CompilationException("NBT 缺少指令数据"));
+            String id = tag.getString("id").orElseThrow(() -> new CompilationException("NBT 缺少指令 ID"));
+            Optional<OperationRegistry.Entry> entryOpt = OperationRegistry.getEntry(id);
+            if (entryOpt.isEmpty()) {
+                throw new CompilationException("未知的指令: " + id + " (位置 #" + i + ")");
+            }
+            Operation instance = (Operation) entryOpt.get().create();
+            program.add(instance.fromNbt(tag));
+        }
+        return program;
+    }
+
+    public static ListTag toNbt(List<Executable> program) throws CompilationException {
+        ListTag listTag = new ListTag();
+        for (Executable exec : program) {
+            if (exec instanceof Operation) {
+                CompoundTag tag = new CompoundTag();
+                ((Operation) exec).toNbt(tag);
+                listTag.add(tag);
+            }
+            throw new CompilationException("指令 " + exec + " 不是 Operation 类型");
+        }
+        return listTag;
     }
 
     // ========== 异常 ==========

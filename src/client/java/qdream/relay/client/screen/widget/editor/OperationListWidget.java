@@ -1,4 +1,4 @@
-package qdream.relay.client.editor;
+package qdream.relay.client.screen.widget.editor;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
