@@ -15,7 +15,7 @@ import qdream.relay.types.BooleanIota;
 public class IfOp extends Spell {
 
     public IfOp() {
-        super("relay:if", 1, OperationSignature.builder()
+        super("relay:if",1, 1, OperationSignature.builder()
                 .input("boolean")
                 .input("any")
                 .input("any")

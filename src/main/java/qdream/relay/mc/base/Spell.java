@@ -7,14 +7,15 @@ import qdream.relay.mc.OperationSignature;
  * 序列化/反序列化直接继承 Operation 的默认实现（仅处理 id）。
  */
 public abstract class Spell extends Operation {
-    protected final OperationSignature signature;
+    // 操作消耗的能量
+    protected final int energy;
 
-    public Spell(String id, int cost, OperationSignature signature) {
-        super(id, cost);
-        this.signature = signature;
+    public Spell(String id, int cost,int energy, OperationSignature signature) {
+        super(id, cost,signature);
+        this.energy = energy;
     }
 
-    public OperationSignature getSignature() {
-        return signature;
+    public int getEnergy() {
+        return energy;
     }
 }

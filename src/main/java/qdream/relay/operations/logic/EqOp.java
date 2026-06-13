@@ -12,10 +12,10 @@ import qdream.relay.mc.base.Spell;
 public class EqOp extends Spell {
 
     public EqOp() {
-        super("relay:eq", 1, OperationSignature.builder()
+        super("relay:eq", 1, 1, OperationSignature.builder()
                 .input("any")
                 .input("any")
-                .output("boolean")
+                .output("relay:boolean")
                 .build());
     }
 

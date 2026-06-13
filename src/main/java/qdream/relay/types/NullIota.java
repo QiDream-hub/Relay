@@ -3,6 +3,7 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
 
 /**
@@ -13,7 +14,11 @@ public class NullIota extends Data {
     public static final NullIota INSTANCE = new NullIota();
 
     private NullIota() {
-        super("relay:null", 0);
+        super("relay:null", 0,
+            OperationSignature.builder()
+                    .output("relay:null")
+                    .build()
+        );
     }
 
     /**

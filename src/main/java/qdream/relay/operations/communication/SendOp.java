@@ -16,10 +16,10 @@ import qdream.relay.core.CommunicationSystem;
 public class SendOp extends Spell {
 
     public SendOp() {
-        super("relay:send", 1, OperationSignature.builder()
+        super("relay:send", 1, 1, OperationSignature.builder()
                 .input("number")
                 .input("any")
-                .output("boolean")
+                .output("relay:boolean")
                 .build());
     }
 

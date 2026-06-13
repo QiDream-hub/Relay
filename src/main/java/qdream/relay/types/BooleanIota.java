@@ -3,6 +3,7 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
 
 /**
@@ -13,7 +14,11 @@ public class BooleanIota extends Data {
     private final boolean value;
 
     public BooleanIota(boolean value) {
-        super("relay:boolean", 0);
+        super("relay:boolean", 0,
+                OperationSignature.builder()
+                        .output("relay:boolean")
+                        .input("boolean")
+                        .build());
         this.value = value;
     }
 

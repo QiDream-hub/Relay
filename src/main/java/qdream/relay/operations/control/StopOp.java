@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Spell;
 public class StopOp extends Spell {
 
     public StopOp() {
-        super("relay:stop", 1, OperationSignature.builder().build());
+        super("relay:stop", 1, 1, OperationSignature.builder().build());
     }
 
     @Override

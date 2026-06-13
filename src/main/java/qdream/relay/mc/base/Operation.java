@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 
 import qdream.relay.engine.Executable;
+import qdream.relay.mc.OperationSignature;
 
 /**
  * 操作基类
@@ -13,10 +14,13 @@ import qdream.relay.engine.Executable;
 public abstract class Operation implements Executable {
     protected final String id;
     protected final int cost;
+        protected final OperationSignature signature;
 
-    public Operation(String id, int cost) {
+
+    public Operation(String id, int cost, OperationSignature signature) {
         this.id = id;
         this.cost = cost;
+        this.signature = signature;
     }
 
     public String getId() {
@@ -26,6 +30,10 @@ public abstract class Operation implements Executable {
     @Override
     public int getCost() {
         return cost;
+    }
+
+    public OperationSignature getSignature() {
+        return signature;
     }
 
     // ========== JSON 序列化/反序列化 ==========

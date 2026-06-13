@@ -12,10 +12,10 @@ import qdream.relay.mc.base.Spell;
 public class SubOp extends Spell {
 
     public SubOp() {
-        super("relay:sub", 1, OperationSignature.builder()
+        super("relay:sub", 1, 1, OperationSignature.builder()
                 .input("number")
                 .input("number")
-                .output("number")
+                .output("relay:number")
                 .build());
     }
 

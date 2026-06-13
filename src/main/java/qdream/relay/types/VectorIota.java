@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
 
 /**
@@ -14,7 +15,12 @@ public class VectorIota extends Data {
     private final Vec3 vec3;
 
     public VectorIota(Vec3 vec3) {
-        super("relay:vector", 0);
+        super("relay:vector", 0,
+            OperationSignature.builder()
+                    .output("relay:vector")
+                    .input("minecraft:vector")
+                    .build()
+        );
         this.vec3 = vec3;
     }
 

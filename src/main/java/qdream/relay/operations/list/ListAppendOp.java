@@ -18,10 +18,10 @@ import java.util.ArrayList;
 public class ListAppendOp extends Spell {
 
     public ListAppendOp() {
-        super("relay:list_append", 2, OperationSignature.builder()
-                .input("list")
+        super("relay:list_append", 2, 1, OperationSignature.builder()
+                .input("relay:list")
                 .input("any")
-                .output("list")
+                .output("relay:list")
                 .build());
     }
 

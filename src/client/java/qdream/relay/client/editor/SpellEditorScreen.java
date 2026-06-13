@@ -187,14 +187,14 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // 将程序加载到测试状态机
         List<Executable> iotaProgram = new ArrayList<>();
-        for (String opId : program) {
-            iotaProgram.add(new Operation(opId, 0) {
-                @Override
-                public void execute(StateMachine executor) {
-                    // 测试用空实现
-                }
-            });
-        }
+        // for (String opId : program) {
+        //     iotaProgram.add(new Operation(opId, 0) {
+        //         @Override
+        //         public void execute(StateMachine executor) {
+        //             // 测试用空实现
+        //         }
+        //     });
+        // }
 
         testMachine.loadProgram(iotaProgram);
         lastMishapReason = null;

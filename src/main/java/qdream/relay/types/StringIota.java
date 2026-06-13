@@ -3,6 +3,7 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
 
 /**
@@ -13,7 +14,12 @@ public class StringIota extends Data {
     private final String value;
 
     public StringIota(String value) {
-        super("relay:string", 0);
+        super("relay:string", 0,
+            OperationSignature.builder()
+                    .output("relay:string")
+                    .input("string")
+                    .build()
+        );
         this.value = value;
     }
 

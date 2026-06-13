@@ -3,6 +3,7 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
 
 import java.util.UUID;
@@ -15,7 +16,12 @@ public class EntityIota extends Data {
     private final UUID entityId;
 
     public EntityIota(UUID entityId) {
-        super("relay:entity", 0);
+        super("relay:entity", 0, OperationSignature.builder()
+                .output("relay:entity")
+                .input("minecraft:entity")
+                .build()
+            
+        );
         this.entityId = entityId;
     }
 

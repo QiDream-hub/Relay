@@ -14,10 +14,10 @@ import qdream.relay.mc.base.Spell;
 public class OrOp extends Spell {
 
     public OrOp() {
-        super("relay:or", 1, OperationSignature.builder()
+        super("relay:or",1, 1, OperationSignature.builder()
                 .input("boolean")
                 .input("boolean")
-                .output("boolean")
+                .output("relay:boolean")
                 .build());
     }
 

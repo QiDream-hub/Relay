@@ -19,8 +19,8 @@ import java.util.List;
 public class ListGetOp extends Spell {
 
     public ListGetOp() {
-        super("relay:list_get", 1, OperationSignature.builder()
-                .input("list")
+        super("relay:list_get", 1, 1, OperationSignature.builder()
+                .input("relay:list")
                 .input("number")
                 .output("any")
                 .build());
