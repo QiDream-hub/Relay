@@ -12,10 +12,10 @@ import qdream.relay.mc.base.Spell;
 public class AndOp extends Spell {
 
     public AndOp() {
-        super("relay:and", 1, OperationSignature.builder()
+        super("relay:and", 1, 1, OperationSignature.builder()
                 .input("boolean")
                 .input("boolean")
-                .output("boolean")
+                .output("relay:boolean")
                 .build());
     }
 

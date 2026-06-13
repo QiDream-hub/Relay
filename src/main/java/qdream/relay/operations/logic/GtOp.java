@@ -13,10 +13,10 @@ import qdream.relay.mc.base.Spell;
 public class GtOp extends Spell {
 
     public GtOp() {
-        super("relay:gt", 1, OperationSignature.builder()
+        super("relay:gt", 1, 1, OperationSignature.builder()
                 .input("number")
                 .input("number")
-                .output("boolean")
+                .output("relay:boolean")
                 .build());
     }
 

@@ -11,7 +11,7 @@ import qdream.relay.mc.base.Spell;
 public class DupOp extends Spell {
 
     public DupOp() {
-        super("relay:dup", 1, OperationSignature.builder()
+        super("relay:dup", 1, 1, OperationSignature.builder()
                 .input("any")
                 .output("any")
                 .output("any")

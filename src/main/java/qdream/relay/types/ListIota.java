@@ -13,6 +13,7 @@ import net.minecraft.nbt.Tag;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationRegistry;
+import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
 
@@ -23,7 +24,12 @@ public class ListIota extends Data {
     private final List<Executable> value;
 
     public ListIota(List<Executable> value) {
-        super("relay:list", 0);
+        super("relay:list", 0,
+                OperationSignature.builder()
+                        .output("relay:list")
+                        .input("relay:list")
+                        .build()
+        );
         this.value = value != null ? new ArrayList<>(value) : new ArrayList<>();
     }
 
