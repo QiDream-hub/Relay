@@ -3,27 +3,43 @@ package qdream.relay.networking;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
+import qdream.relay.blocks.entity.ShellBlockEntity;
+import qdream.relay.core.ShellContainer;
 import qdream.relay.networking.payloads.*;
 import qdream.relay.mc.OperationRegistry;
 
 /**
  * 服务端网络处理
- * 注意：26.1.2 版本的 Fabric API 网络系统有重大变化，暂时简化实现
  */
 public class RelayServerNetworking {
 
     public static void register() {
-        // 由于 26.1.2 的网络 API 有重大变化
-        // 这里暂时不注册任何 payload
-        // 等待 Fabric API 更新后再实现完整的网络同步
+        // 注册 C2S_ToggleShellPayload
+        PayloadTypeRegistry.serverboundPlay().register(C2S_ToggleShellPayload.TYPE, C2S_ToggleShellPayload.CODEC);
+
+        // 注册服务端接收处理器
+        ServerPlayNetworking.registerGlobalReceiver(C2S_ToggleShellPayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player == null) return;
+
+            context.server().execute(() -> {
+                if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                    ShellContainer container = handler.getContainer();
+                    if (container != null) {
+                        container.setEnabled(!container.isEnabled());
+                    }
+                }
+            });
+        });
     }
     
     /**
      * 发送操作列表到客户端
-     * 注意：需要使用 Fabric API 的网络系统
      */
     public static void sendOperationList(ServerPlayer player) {
         if (player == null) {
@@ -31,7 +47,6 @@ public class RelayServerNetworking {
         }
         
         List<String> ops = new ArrayList<>(OperationRegistry.getAllOperationIds());
-        // TODO: 使用 Fabric API 发送包
-        // ServerPlayNetworking.send(player, new S2C_OperationListPayload(ops));
+        // TODO: 发送 S2C_OperationListPayload
     }
 }

@@ -29,6 +29,11 @@ public class ShellTickHandler {
             return;
         }
 
+        // 未启用时不执行
+        if (!container.isEnabled()) {
+            return;
+        }
+
         // 更新核心状态
         updateCoreState(container);
 

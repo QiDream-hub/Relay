@@ -83,4 +83,13 @@ public class ToolShellItem extends Item {
     public void setInitialized(ItemStack shell, boolean initialized) {
         // TODO: 使用 DataComponent 实现
     }
+
+    public boolean isEnabled(ItemStack shell) {
+        // TODO: 使用 DataComponent 实现
+        return false;
+    }
+
+    public void setEnabled(ItemStack shell, boolean enabled) {
+        // TODO: 使用 DataComponent 实现
+    }
 }

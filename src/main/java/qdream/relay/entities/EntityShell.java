@@ -39,6 +39,7 @@ public abstract class EntityShell extends Entity implements MenuProvider, ShellC
     private int energy;
     private int lifetime;
     private int maxLifetime;
+    private boolean enabled;
 
     public EntityShell(EntityType<? extends EntityShell> type, Level world) {
         super(type, world);
@@ -50,6 +51,7 @@ public abstract class EntityShell extends Entity implements MenuProvider, ShellC
         this.energy = 0;
         this.lifetime = 0;
         this.maxLifetime = 6000;
+        this.enabled = false;
 
         this.stateMachine.setMishapHandler(reason -> {
             spawnMishapParticles();
@@ -202,6 +204,14 @@ public abstract class EntityShell extends Entity implements MenuProvider, ShellC
 
     public void setInitialized(boolean initialized) {
         tickHandler.setInitialized(initialized);
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public int getEnergy() {

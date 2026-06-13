@@ -5,6 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.core.ShellContainer;
@@ -34,8 +35,8 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     private static final int HOTBAR_END = HOTBAR_START + PLAYER_HOTBAR_SLOT_COUNT;
 
     // GUI 布局
-    private static final int CONTAINER_SLOT_X = 80;
-    private static final int CONTAINER_SLOT_Y = 10;
+    private static final int CONTAINER_SLOT_X = 50; // 向左移动，靠近标签
+    private static final int CONTAINER_SLOT_Y = 12;
     private static final int SLOT_SPACING_Y = 30;
     private static final int INVENTORY_SLOT_X = 8;
     private static final int INVENTORY_SLOT_Y = 140;
@@ -44,6 +45,12 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
     private final ShellContainer container;
     private final Container wrapper;
+
+    // 数据同步槽（服务端 → 客户端）
+    private final DataSlot enabledSlot = DataSlot.standalone();
+    private final DataSlot coreCountSlot = DataSlot.standalone();
+    private final DataSlot energySlot = DataSlot.standalone();
+    private final DataSlot initializedSlot = DataSlot.standalone();
 
     /**
      * 客户端构造方法（没有实际容器）
@@ -62,6 +69,12 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
         checkContainerSize(this.wrapper, CONTAINER_SLOT_COUNT);
 
+        // 注册数据同步槽
+        this.addDataSlot(enabledSlot);
+        this.addDataSlot(coreCountSlot);
+        this.addDataSlot(energySlot);
+        this.addDataSlot(initializedSlot);
+
         // 外壳 4 个插槽（垂直排列）
         for (int i = 0; i < CONTAINER_SLOT_COUNT; ++i) {
             final int slotIndex = i;
@@ -76,7 +89,8 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         // 玩家主物品栏（3 行 x9 列）
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, INVENTORY_SLOT_X + x * SLOT_SIZE, INVENTORY_SLOT_Y + y * SLOT_SIZE));
+                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, INVENTORY_SLOT_X + x * SLOT_SIZE,
+                        INVENTORY_SLOT_Y + y * SLOT_SIZE));
             }
         }
 
@@ -125,6 +139,53 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player player) {
         return this.wrapper.stillValid(player);
+    }
+
+    @Override
+    public void broadcastChanges() {
+        super.broadcastChanges();
+        // 从服务端同步状态到客户端
+        if (container != null) {
+            enabledSlot.set(container.isEnabled() ? 1 : 0);
+            coreCountSlot.set(container.getCoreCount());
+            energySlot.set(container.getEnergy());
+            initializedSlot.set(container.isInitialized() ? 1 : 0);
+        }
+    }
+
+    /**
+     * 客户端调用：切换开关状态（本地预览）
+     * 实际服务端切换通过网络包完成
+     */
+    public void toggleEnabled() {
+        enabledSlot.set(enabledSlot.get() == 0 ? 1 : 0);
+    }
+
+    /** 获取当前启用状态（读取同步槽） */
+    public boolean isEnabled() {
+        return enabledSlot.get() != 0;
+    }
+
+    /** 获取同步的核心数量 */
+    public int getSyncedCoreCount() {
+        return coreCountSlot.get();
+    }
+
+    /** 获取同步的能量值 */
+    public int getSyncedEnergy() {
+        return energySlot.get();
+    }
+
+    /** 获取同步的初始化状态 */
+    public boolean isSyncedInitialized() {
+        return initializedSlot.get() != 0;
+    }
+
+    /**
+     * 获取实际的 ShellContainer（可能为 null）
+     */
+    public ShellContainer getContainer() {
+        return container;
     }
 
     /**
@@ -196,26 +257,63 @@ public class ShellScreenHandler extends AbstractContainerMenu {
      */
     private static class DummyShellContainer implements ShellContainer {
         @Override
-        public ItemStack getInventorySlot(int slot) { return ItemStack.EMPTY; }
+        public ItemStack getInventorySlot(int slot) {
+            return ItemStack.EMPTY;
+        }
+
         @Override
-        public void setInventorySlot(int slot, ItemStack stack) {}
+        public void setInventorySlot(int slot, ItemStack stack) {
+        }
+
         @Override
-        public qdream.relay.engine.StateMachine getStateMachine() { return new qdream.relay.engine.StateMachine(1024); }
+        public qdream.relay.engine.StateMachine getStateMachine() {
+            return new qdream.relay.engine.StateMachine(1024);
+        }
+
         @Override
-        public int getCoreCount() { return 0; }
+        public int getCoreCount() {
+            return 0;
+        }
+
         @Override
-        public int getInterval() { return 1; }
+        public int getInterval() {
+            return 1;
+        }
+
         @Override
-        public boolean isInitialized() { return false; }
+        public boolean isInitialized() {
+            return false;
+        }
+
         @Override
-        public void setInitialized(boolean initialized) {}
+        public void setInitialized(boolean initialized) {
+        }
+
         @Override
-        public int getEnergy() { return 0; }
+        public boolean isEnabled() {
+            return false;
+        }
+
         @Override
-        public void setEnergy(int energy) {}
+        public void setEnabled(boolean enabled) {
+        }
+
         @Override
-        public void setChanged() {}
+        public int getEnergy() {
+            return 0;
+        }
+
         @Override
-        public boolean isClientSide() { return true; }
+        public void setEnergy(int energy) {
+        }
+
+        @Override
+        public void setChanged() {
+        }
+
+        @Override
+        public boolean isClientSide() {
+            return true;
+        }
     }
 }

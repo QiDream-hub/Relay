@@ -221,6 +221,136 @@ if (buttonBottom > this.topPos + this.imageHeight) {
 }
 ```
 
+## 物品栏面板 Widget 化
+
+将玩家背包单独渲染为一个独立的 Widget，避免背景渲染超出背包范围，并确保居中显示。
+
+### 问题背景
+- 默认的物品栏渲染由 `AbstractContainerScreen` 管理，背景由 ScreenHandler 的插槽控制
+- 直接渲染物品栏背景时容易出现背景超出、不居中的问题
+- 需要将视觉渲染（Widget）与插槽逻辑（ScreenHandler）分离
+
+### 解决方案：InventoryPanelWidget
+
+创建独立的背包面板 Widget，只渲染背景和插槽框，不依赖 Inventory 对象：
+
+```java
+// InventoryPanelWidget.java
+public class InventoryPanelWidget extends AbstractWidget {
+    private static final int SLOT_SIZE = 18;
+    private static final int SLOT_SPACING = 18;
+    private static final int MAIN_INVENTORY_ROWS = 3;
+    private static final int HOTBAR_ROW_Y_OFFSET = 54;
+    private static final int PADDING = 8;
+
+    public InventoryPanelWidget(int x, int y, int width, int height, Font font) {
+        super(x, y, width, height, Component.empty());
+        this.font = font;
+    }
+
+    @Override
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, ...) {
+        int x = getX();
+        int y = getY();
+
+        // 渲染背景
+        graphics.fill(x, y, x + this.width, y + this.height, BG_COLOR);
+        graphics.outline(x, y, this.width, this.height, BORDER_COLOR);
+
+        // 计算物品栏起始位置（标题下方）
+        int invStartX = x + PADDING;
+        int invStartY = y + PADDING + 10;
+
+        // 渲染主物品栏（3 行 x 9 列）
+        for (int row = 0; row < MAIN_INVENTORY_ROWS; row++) {
+            for (int col = 0; col < 9; col++) {
+                int slotX = invStartX + col * SLOT_SPACING;
+                int slotY = invStartY + row * SLOT_SPACING;
+                renderSlotBackground(graphics, slotX, slotY);
+            }
+        }
+
+        // 渲染热键栏（1 行 x 9 列）
+        int hotbarY = invStartY + HOTBAR_ROW_Y_OFFSET;
+        for (int col = 0; col < 9; col++) {
+            int slotX = invStartX + col * SLOT_SPACING;
+            renderSlotBackground(graphics, slotX, hotbarY);
+        }
+    }
+
+    private void renderSlotBackground(GuiGraphicsExtractor graphics, int x, int y) {
+        graphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, SLOT_BG_COLOR);
+        graphics.outline(x, y, SLOT_SIZE, SLOT_SIZE, SLOT_BORDER_COLOR);
+    }
+}
+```
+
+### ScreenHandler 插槽位置对齐
+
+确保 ScreenHandler 中的插槽位置与 Widget 渲染的插槽背景一致：
+
+```java
+// SpellEditorScreenHandler.java
+private static final int INVENTORY_START_X = 124; // (410 - 178) / 2 + 8
+private static final int INVENTORY_START_Y = 310;
+private static final int SLOT_SIZE = 18;
+
+public SpellEditorScreenHandler(int syncId, Inventory playerInventory, ...) {
+    // 玩家主物品栏（3 行 x 9 列）
+    for (int y = 0; y < 3; ++y) {
+        for (int x = 0; x < 9; ++x) {
+            this.addSlot(new Slot(playerInventory, x + y * 9 + 9,
+                INVENTORY_START_X + x * SLOT_SIZE,
+                INVENTORY_START_Y + y * SLOT_SIZE));
+        }
+    }
+
+    // 玩家热键栏（1 行 x 9 列）
+    int hotbarY = INVENTORY_START_Y + 54;
+    for (int x = 0; x < 9; ++x) {
+        this.addSlot(new Slot(playerInventory, x,
+            INVENTORY_START_X + x * SLOT_SIZE,
+            hotbarY));
+    }
+}
+```
+
+### Screen 中添加 Widget
+
+在 `SpellEditorScreen.init()` 中添加背包面板 Widget，居中放置：
+
+```java
+// SpellEditorScreen.java
+private static final int INVENTORY_PANEL_WIDTH = 178;
+private static final int INVENTORY_PANEL_HEIGHT = 100;
+
+@Override
+protected void init() {
+    // ... 其他初始化 ...
+
+    // 背包面板 Widget（居中放置在底部）
+    int inventoryPanelX = left + (this.imageWidth - INVENTORY_PANEL_WIDTH) / 2;
+    int inventoryPanelY = top + EDITOR_PANEL_HEIGHT + 10;
+    inventoryPanelWidget = new InventoryPanelWidget(
+        inventoryPanelX, inventoryPanelY,
+        INVENTORY_PANEL_WIDTH, INVENTORY_PANEL_HEIGHT,
+        this.font
+    );
+    this.addRenderableWidget(inventoryPanelWidget);
+
+    // 隐藏默认的背包标签
+    this.inventoryLabelY = 10000;
+}
+```
+
+### 设计优势
+
+1. **视觉与逻辑分离**：Widget 只负责渲染背景，ScreenHandler 管理插槽逻辑
+2. **居中显示**：通过计算 `(imageWidth - panelWidth) / 2` 确保居中
+3. **背景限制**：背景渲染严格限制在 Widget 范围内，不会超出
+4. **API 兼容性**：不依赖 `Inventory` 对象，避免 26.1.2 API 变更问题
+5. **可复用性**：可轻松应用到其他需要自定义物品栏渲染的 GUI
+
 ## 验证步骤
 
 ```bash
@@ -235,5 +365,6 @@ if (buttonBottom > this.topPos + this.imageHeight) {
 - GUI 显示深色背景
 - 三个面板清晰分隔
 - 按钮完全在背景区域内
-- 物品栏在 GUI 底部正确显示
+- 背包面板居中显示在编辑器下方
+- 插槽背景与实际插槽位置精确对齐
 - 文本内容可见且位置正确

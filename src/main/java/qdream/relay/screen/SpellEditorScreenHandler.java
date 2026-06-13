@@ -34,6 +34,11 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
     /** 磁盘插槽位置 */
     private static final int DISK_SLOT_X = 260;
     private static final int DISK_SLOT_Y = 18;
+    
+    /** 背包面板起始位置（与 InventoryPanelWidget 保持一致） */
+    private static final int INVENTORY_START_X = 124; // (410 - 178) / 2 + 8
+    private static final int INVENTORY_START_Y = 310;
+    private static final int SLOT_SIZE = 18;
 
     /**
      * 当前编辑的程序条目列表
@@ -78,16 +83,21 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
             }
         });
 
-        // 玩家物品栏（放置在编辑器面板下方）
+        // 玩家物品栏（主物品栏 3 行 x 9 列）
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 8 + x * 18, 310 + y * 18));
+                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 
+                    INVENTORY_START_X + x * SLOT_SIZE, 
+                    INVENTORY_START_Y + y * SLOT_SIZE));
             }
         }
 
-        // 玩家热键栏
+        // 玩家热键栏（1 行 x 9 列）
+        int hotbarY = INVENTORY_START_Y + 54; // 3 行主物品栏下方的额外偏移
         for (int x = 0; x < 9; ++x) {
-            this.addSlot(new Slot(playerInventory, x, 8 + x * 18, 370));
+            this.addSlot(new Slot(playerInventory, x, 
+                INVENTORY_START_X + x * SLOT_SIZE, 
+                hotbarY));
         }
     }
 

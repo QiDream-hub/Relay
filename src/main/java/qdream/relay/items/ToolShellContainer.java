@@ -55,6 +55,16 @@ public class ToolShellContainer implements ShellContainer {
     }
 
     @Override
+    public boolean isEnabled() {
+        return toolShell.isEnabled(stack);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        toolShell.setEnabled(stack, enabled);
+    }
+
+    @Override
     public int getEnergy() {
         return 0;
     }

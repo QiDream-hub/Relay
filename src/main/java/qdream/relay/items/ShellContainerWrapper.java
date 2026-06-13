@@ -145,6 +145,19 @@ public class ShellContainerWrapper implements Container {
         }
     }
 
+    public boolean isEnabled() {
+        if (delegate != null) {
+            return delegate.isEnabled();
+        }
+        return false;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (delegate != null) {
+            delegate.setEnabled(enabled);
+        }
+    }
+
     public int getEnergy() {
         if (delegate != null) {
             return delegate.getEnergy();

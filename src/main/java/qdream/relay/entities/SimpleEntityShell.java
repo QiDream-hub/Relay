@@ -28,6 +28,7 @@ public class SimpleEntityShell extends EntityShell {
     protected void addAdditionalSaveData(ValueOutput output) {
         output.putInt("lifetime", getLifetime());
         output.putInt("energy", getEnergy());
+        output.putBoolean("enabled", isEnabled());
     }
 
     @Override

@@ -31,7 +31,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     private static final int PANEL_PADDING = 10;
     private static final int LINE_HEIGHT = 12;
     private static final int GUI_WIDTH = 410;
-    private static final int GUI_HEIGHT = 400;
+    private static final int GUI_HEIGHT = 420;
     private static final int EDITOR_PANEL_HEIGHT = 290;
     private static final int LIST_TOP_MARGIN = LINE_HEIGHT + 8;
     private static final int LIST_BOTTOM_MARGIN = 4;
@@ -59,6 +59,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
     public SpellEditorScreen(SpellEditorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
+        // 设置背包标签位置（由 AbstractContainerScreen 自动渲染）
+        this.inventoryLabelY = EDITOR_PANEL_HEIGHT + 10;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         int left = this.leftPos;
         int top = this.topPos;
         int listTop = top + LIST_TOP_MARGIN;
-        
+
         // 计算右侧面板位置
         rightX = left + OPERATIONS_PANEL_WIDTH + PROGRAM_PANEL_WIDTH + PANEL_PADDING;
         rightTop = top + 50;
@@ -107,8 +109,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         // ===== 右侧面板：输入框 Widget =====
         // 先创建一个空的 SignatureInputWidget（无签名时不可见）
         signatureInputWidget = new SignatureInputWidget(
-            signatureInputX, signatureInputY, 
-            signatureInputWidth, 
+            signatureInputX, signatureInputY,
+            signatureInputWidth,
             null,  // 初始没有签名
             this.font
         );
@@ -124,10 +126,10 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         this.addRenderableWidget(addButton);
 
         // 保存按钮
-        int buttonY = GUI_HEIGHT - 70;
+        int buttonY = GUI_HEIGHT - 80;
         int buttonW = 70;
         int buttonSpacing = 8;
-        
+
         saveButton = Button.builder(Component.literal("保存"), btn -> onSave())
             .pos(rightX + 16, top + 16)
             .size(buttonW, 20)
@@ -145,8 +147,6 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             .pos(rightX + buttonW + buttonSpacing, buttonY)
             .size(buttonW, 20)
             .build());
-
-        this.inventoryLabelY = this.imageHeight + 10;
     }
 
     // ==================== 事件处理 ====================
