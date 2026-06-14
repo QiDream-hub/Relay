@@ -1,24 +1,28 @@
 package qdream.relay.screen;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import qdream.relay.blocks.entity.custom.SpellEditorBlockEntity;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.ProgramCompiler.CompilationException;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
+import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gson.JsonObject;
 
@@ -33,17 +37,11 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
     /** 磁盘插槽位置 */
     private static final int DISK_SLOT_X = 260;
     private static final int DISK_SLOT_Y = 18;
-    
+
     /** 背包面板起始位置（与 InventoryPanelWidget 保持一致） */
-    private static final int INVENTORY_START_X = 124; // (410 - 178) / 2 + 8
+    private static final int INVENTORY_START_X = 124;
     private static final int INVENTORY_START_Y = 310;
     private static final int SLOT_SIZE = 18;
-
-    /**
-     * 当前编辑的程序条目列表
-     * json格式
-     */
-    private final List<Executable> program;
 
     /** 所有可用的操作 ID */
     private final List<String> availableOperations;
@@ -54,9 +52,6 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
     /** 方块实体引用 */
     private final SpellEditorBlockEntity blockEntity;
 
-    /** 磁盘容器 */
-    private final SimpleContainer diskContainer;
-
     public SpellEditorScreenHandler(int syncId, Inventory playerInventory) {
         this(syncId, playerInventory, null);
     }
@@ -64,82 +59,207 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
     public SpellEditorScreenHandler(int syncId, Inventory playerInventory, SpellEditorBlockEntity blockEntity) {
         super(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, syncId);
         this.blockEntity = blockEntity;
-        this.program = new ArrayList<>();
         this.availableOperations = new ArrayList<>(OperationRegistry.getAllOperationIds());
         this.availableDataTypes = new ArrayList<>(OperationRegistry.getAllDataIds());
 
-        // 磁盘容器 + 插槽
-        this.diskContainer = new SimpleContainer(1) {
-            @Override
-            public void setChanged() {
-                super.setChanged();
-            }
-        };
-        this.addSlot(new Slot(this.diskContainer, 0, DISK_SLOT_X, DISK_SLOT_Y) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return stack.getItem() instanceof SpellDiskItem;
-            }
-        });
+        // 使用 BlockEntity 的物品栏（如果存在）
+        if (blockEntity != null) {
+            this.addSlot(new Slot(blockEntity, 0, DISK_SLOT_X, DISK_SLOT_Y) {
+                @Override
+                public boolean mayPlace(ItemStack stack) {
+                    return stack.getItem() instanceof SpellDiskItem;
+                }
+
+                @Override
+                public void onQuickCraft(ItemStack stack, ItemStack previousStack) {
+                    super.onQuickCraft(stack, previousStack);
+                    // 磁盘放入时，加载并同步
+                    if (!stack.isEmpty() && stack.getItem() instanceof SpellDiskItem) {
+                        loadProgramFromDisk(stack);
+                    }
+                }
+                
+                @Override
+                public void set(ItemStack stack) {
+                    super.set(stack);
+                    // 磁盘变化时，加载并同步
+                    if (!stack.isEmpty() && stack.getItem() instanceof SpellDiskItem) {
+                        loadProgramFromDisk(stack);
+                    }
+                }
+            });
+        } else {
+            // 客户端没有 BlockEntity 时使用临时容器
+            this.addSlot(new Slot(new net.minecraft.world.SimpleContainer(1), 0, DISK_SLOT_X, DISK_SLOT_Y) {
+                @Override
+                public boolean mayPlace(ItemStack stack) {
+                    return stack.getItem() instanceof SpellDiskItem;
+                }
+            });
+        }
 
         // 玩家物品栏（主物品栏 3 行 x 9 列）
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 
-                    INVENTORY_START_X + x * SLOT_SIZE, 
+                this.addSlot(new Slot(playerInventory, x + y * 9 + 9,
+                    INVENTORY_START_X + x * SLOT_SIZE,
                     INVENTORY_START_Y + y * SLOT_SIZE));
             }
         }
 
         // 玩家热键栏（1 行 x 9 列）
-        int hotbarY = INVENTORY_START_Y + 54; // 3 行主物品栏下方的额外偏移
+        int hotbarY = INVENTORY_START_Y + 54;
         for (int x = 0; x < 9; ++x) {
-            this.addSlot(new Slot(playerInventory, x, 
-                INVENTORY_START_X + x * SLOT_SIZE, 
+            this.addSlot(new Slot(playerInventory, x,
+                INVENTORY_START_X + x * SLOT_SIZE,
                 hotbarY));
+        }
+
+        // 打开 GUI 时自动从磁盘加载程序（仅当 program 为空时）
+        if (blockEntity != null && blockEntity.getLevel() != null && !blockEntity.getLevel().isClientSide()) {
+            if (blockEntity.getProgram().isEmpty()) {
+                ItemStack diskStack = getDiskItem();
+                if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
+                    // 从磁盘加载并同步到客户端
+                    loadProgramFromDisk(diskStack);
+                }
+            } else {
+                // program 不为空，直接同步到客户端
+                syncProgramToClient();
+            }
         }
     }
 
     // ==================== 程序编辑 ====================
 
+    /**
+     * 从磁盘加载程序到编辑器
+     * @param diskStack 磁盘物品（直接传入，避免客户端/服务端不同步）
+     */
+    public void loadProgramFromDisk(ItemStack diskStack) {
+        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
+            return;
+        }
+
+        if (blockEntity != null) {
+            List<Executable> loadedProgram = SpellDiskItem.getProgram(diskStack);
+            blockEntity.setProgram(loadedProgram);
+        }
+
+        // 同步到客户端
+        syncProgramToClient();
+    }
+
+    /**
+     * 将当前程序列表同步到客户端
+     */
+    public void syncProgramToClient() {
+        if (blockEntity != null && blockEntity.getLevel() != null) {
+            Level level = blockEntity.getLevel();
+            if (!level.isClientSide()) {
+                level.players().stream()
+                    .filter(p -> p.containerMenu == this)
+                    .filter(p -> p instanceof ServerPlayer)
+                    .findFirst()
+                    .ifPresent(p -> {
+                        try {
+                            ListTag programList = ProgramCompiler.toNbt(blockEntity.getProgram());
+                            CompoundTag programTag = new CompoundTag();
+                            programTag.put("program", programList);
+                            ServerPlayNetworking.send((ServerPlayer) p, new S2C_SyncSpellDiskPayload(programTag));
+                        } catch (ProgramCompiler.CompilationException e) {
+                            e.printStackTrace();
+                        }
+                    });
+            }
+        }
+    }
+
+    /**
+     * 处理客户端程序修改
+     * @param programTag 程序 NBT 数据
+     */
+    public void onProgramModified(CompoundTag programTag) {
+        if (blockEntity == null) return;
+        
+        Optional<ListTag> listOpt = programTag.getList("program");
+        if (listOpt.isEmpty()) {
+            return;
+        }
+
+        try {
+            List<Executable> newProgram = ProgramCompiler.fromNbt(listOpt.get());
+            blockEntity.setProgram(newProgram);
+        } catch (ProgramCompiler.CompilationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 保存程序到磁盘
+     */
+    public void saveProgramToDisk() {
+        if (blockEntity == null) return;
+        
+        ItemStack diskStack = getDiskItem();
+        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
+            return;
+        }
+
+        SpellDiskItem.setProgram(diskStack, blockEntity.getProgram());
+    }
+
+    /**
+     * 从磁盘加载程序到编辑器（使用当前插槽中的物品）
+     */
+    public void loadProgramFromDisk() {
+        loadProgramFromDisk(getDiskItem());
+    }
+
     public List<Executable> getProgramEntries() {
-        return program;
+        return blockEntity != null ? blockEntity.getProgram() : new ArrayList<>();
     }
 
     /** 添加操作到程序 */
     public void addOperation(String opId) {
+        if (blockEntity == null) return;
         if (OperationRegistry.contains(opId)) {
             JsonObject json = new JsonObject();
             json.addProperty("id", opId);
-            this.program.add(((Operation)OperationRegistry.getEntry(opId).orElse(null).create()).fromJson(json));
+            Executable entry = ((Operation)OperationRegistry.getEntry(opId).orElse(null).create()).fromJson(json);
+            blockEntity.getProgram().add(entry);
         }
     }
 
     /** 添加数据常量到程序 */
     public void addDataEntry(String typeId, JsonObject extraFields) {
+        if (blockEntity == null) return;
         if (OperationRegistry.contains(typeId)) {
             JsonObject json = new JsonObject();
             json.addProperty("id", typeId);
-            // 合并额外字段到 JSON 中
             if (extraFields != null) {
                 for (var entry : extraFields.entrySet()) {
                     json.add(entry.getKey(), entry.getValue());
                 }
             }
-            this.program.add(((Operation)OperationRegistry.getEntry(typeId).orElse(null).create()).fromJson(json));
+            Executable entry = ((Operation)OperationRegistry.getEntry(typeId).orElse(null).create()).fromJson(json);
+            blockEntity.getProgram().add(entry);
         }
     }
 
     /** 从程序移除条目 */
     public void removeEntry(int index) {
-        if (index >= 0 && index < this.program.size()) {
-            this.program.remove(index);
+        if (blockEntity == null) return;
+        List<Executable> program = blockEntity.getProgram();
+        if (index >= 0 && index < program.size()) {
+            program.remove(index);
         }
     }
 
     /** 清空程序 */
     public void clearProgram() {
-        this.program.clear();
+        if (blockEntity == null) return;
+        blockEntity.getProgram().clear();
     }
 
     // ==================== 查询 ====================
@@ -162,56 +282,6 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
                 return null;
             })
             .orElse(null);
-    }
-
-    // ==================== 保存 ====================
-
-    /**
-     * 将当前程序保存到磁盘插槽中的法术磁盘
-     * @return 保存结果消息
-     * @throws CompilationException 
-     */
-    public String saveToDisk() throws CompilationException {
-        ItemStack diskStack = getDiskItem();
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
-            return "请放入法术磁盘";
-        }
-        if (this.program.isEmpty()) {
-            return "程序为空";
-        }
-
-        SpellDiskItem.setProgram(diskStack, this.program);
-        return "已保存 " + this.program.size() + " 条指令";
-    }
-
-    /** 将程序序列化为 CompoundTag（用于网络传输） */
-    public CompoundTag programToTag() {
-        CompoundTag tag = new CompoundTag();
-        ListTag listTag;
-        try {
-            listTag = ProgramCompiler.toNbt(this.program);
-        } catch (CompilationException e) {
-            listTag = new ListTag();
-            e.printStackTrace();
-        }
-        tag.put("program", listTag);
-        return tag;
-    }
-
-    /** 从 CompoundTag 反序列化程序（用于网络传输） */
-    public void programFromTag(CompoundTag tag) {
-        tag.getList("program").ifPresent(listTag -> {
-            try {
-                this.program.addAll(ProgramCompiler.fromNbt(listTag));
-            } catch (CompilationException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    /** 获取磁盘物品 */
-    public ItemStack getDiskItem() {
-        return this.getSlot(DISK_SLOT).getItem();
     }
 
     // ==================== 物品移动 ====================
@@ -252,8 +322,29 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         return true;
     }
 
-    /** 获取磁盘容器（供客户端检测变化） */
-    public SimpleContainer getDiskContainer() {
-        return diskContainer;
+    /** 获取磁盘物品 */
+    public ItemStack getDiskItem() {
+        return this.getSlot(DISK_SLOT).getItem();
+    }
+    
+    /**
+     * 当磁盘放入插槽时调用（由客户端通过 C2S 包触发）
+     */
+    public void onDiskInserted(ItemStack diskStack) {
+        if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
+            loadProgramFromDisk(diskStack);
+        }
+    }
+
+    /**
+     * 当玩家关闭 GUI 时调用，保存程序到磁盘
+     */
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        // 关闭界面时保存程序到磁盘
+        if (blockEntity != null) {
+            blockEntity.saveProgramToDisk();
+        }
     }
 }

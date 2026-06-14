@@ -4,11 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import qdream.relay.client.screen.SpellEditorScreen;
+import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
+import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 
 /**
  * 客户端网络处理
- * 注意：由于 26.1.2 网络 API 变更，暂时使用本地注册表同步
  */
 public class RelayClientNetworking {
 
@@ -16,8 +23,24 @@ public class RelayClientNetworking {
     private static boolean isSynced = false;
 
     public static void register() {
-        // 26.1.2 网络 API 变更，暂时不注册网络接收器
-        // 使用本地同步方式获取操作列表
+        // 注册 S2C_SyncSpellDiskPayload 客户端接收器（payload 类型已在 RelayServerNetworking 中注册）
+        ClientPlayNetworking.registerGlobalReceiver(S2C_SyncSpellDiskPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.screen instanceof SpellEditorScreen editorScreen) {
+                    try {
+                        CompoundTag tag = payload.programNbt();
+                        ListTag listTag = tag.getList("program").orElse(null);
+                        if (listTag != null) {
+                            List<Executable> program = ProgramCompiler.fromNbt(listTag);
+                            editorScreen.updateProgramFromServer(program);
+                        }
+                    } catch (ProgramCompiler.CompilationException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        });
     }
 
     /**

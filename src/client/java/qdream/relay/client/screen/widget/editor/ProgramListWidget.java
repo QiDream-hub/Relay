@@ -8,10 +8,9 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Data;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
-import qdream.relay.screen.SpellEditorScreenHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -36,7 +35,7 @@ public class ProgramListWidget extends AbstractWidget {
     private static final int SCROLLBAR_BG = 0xFF303030;
 
     private final Font font;
-    private final List<Executable> program;
+    private List<Executable> program = new ArrayList<>();
     private IntConsumer onSelectionChanged;
 
     /** 滚动偏移量（以行为单位） */
@@ -48,10 +47,17 @@ public class ProgramListWidget extends AbstractWidget {
     /** 当前鼠标悬停的条目索引，-1 表示无悬停 */
     private int hoveredIndex = -1;
 
-    public ProgramListWidget(int x, int y, int width, int height, Font font, List<Executable> program) {
+    public ProgramListWidget(int x, int y, int width, int height, Font font) {
         super(x, y, width, height, Component.empty());
         this.font = font;
+    }
+    
+    /**
+     * 设置程序列表（从服务端同步）
+     */
+    public void setProgram(List<Executable> program) {
         this.program = program;
+        this.scrollOffset = 0;
     }
 
     public void setOnSelectionChanged(IntConsumer callback) {

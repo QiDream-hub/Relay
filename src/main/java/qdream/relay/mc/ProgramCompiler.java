@@ -120,12 +120,13 @@ public class ProgramCompiler {
     public static ListTag toNbt(List<Executable> program) throws CompilationException {
         ListTag listTag = new ListTag();
         for (Executable exec : program) {
-            if (exec instanceof Operation) {
+            if (exec instanceof Operation op) {
                 CompoundTag tag = new CompoundTag();
-                ((Operation) exec).toNbt(tag);
+                op.toNbt(tag);
                 listTag.add(tag);
+            } else {
+                throw new CompilationException("指令 " + exec + " 不是 Operation 类型");
             }
-            throw new CompilationException("指令 " + exec + " 不是 Operation 类型");
         }
         return listTag;
     }

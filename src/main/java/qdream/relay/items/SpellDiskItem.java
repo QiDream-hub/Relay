@@ -41,18 +41,12 @@ public class SpellDiskItem extends Item {
             return List.of();
         }
         ListTag listTag = listOpt.get();
-        List<Executable> result = new ArrayList<>();
-        for (int i = 0; i < listTag.size(); i++) {
-            Optional<CompoundTag> elementOpt = listTag.getCompound(i);
-            elementOpt.ifPresent(tag -> {
-                String id = tag.getString("id").orElse("");
-                OperationRegistry.getEntry(id).ifPresent(entry -> {
-                    Operation instance = (Operation) entry.create();
-                    result.add(instance.fromNbt(tag));
-                });
-            });
+        try {
+            return ProgramCompiler.fromNbt(listTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            e.printStackTrace();
+            return List.of();
         }
-        return result;
     }
 
     /**
@@ -61,16 +55,19 @@ public class SpellDiskItem extends Item {
      * @param program 程序列表
      */
     public static void setProgram(ItemStack stack, List<Executable> program) {
+        if (program.isEmpty()) {
+            stack.remove(RelayDataComponents.SPELL_PROGRAM);
+            return;
+        }
+        
         CompoundTag programTag = new CompoundTag();
-        ListTag listTag;
         try {
-            listTag = ProgramCompiler.toNbt(program);
-        } catch (CompilationException e) {
-            listTag = new ListTag();
+            ListTag listTag = ProgramCompiler.toNbt(program);
+            programTag.put("program", listTag);
+            stack.set(RelayDataComponents.SPELL_PROGRAM, programTag);
+        } catch (ProgramCompiler.CompilationException e) {
             e.printStackTrace();
         }
-        programTag.put("program", listTag);
-        stack.set(RelayDataComponents.SPELL_PROGRAM, programTag);
     }
 
     /**
