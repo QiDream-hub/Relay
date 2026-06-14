@@ -14,6 +14,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import qdream.relay.Relay;
+import qdream.relay.blocks.custom.ShellBlock;
+import qdream.relay.blocks.custom.SpellEditorBlock;
 
 /**
  * 方块注册表

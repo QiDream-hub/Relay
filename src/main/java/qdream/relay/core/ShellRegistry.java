@@ -6,7 +6,7 @@ import java.util.WeakHashMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 
-import qdream.relay.blocks.entity.ShellBlockEntity;
+import qdream.relay.blocks.entity.custom.ShellBlockEntity;
 
 /**
  * 外壳注册表

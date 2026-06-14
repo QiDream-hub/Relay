@@ -1,6 +1,14 @@
 package qdream.relay.core;
 
+import java.util.List;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
+import qdream.relay.engine.Executable;
+import qdream.relay.items.RelayDataComponents;
+import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.mc.ProgramCompiler.CompilationException;
 
 /**
  * 外壳 Tick 处理器
@@ -91,7 +99,18 @@ public class ShellTickHandler {
     private void tryInitialize(ShellContainer container) {
         ItemStack diskStack = container.getDiskStack();
         if (!diskStack.isEmpty()) {
-            // TODO: 从磁盘读取程序列表
+            CompoundTag compoundTag = diskStack.get(RelayDataComponents.SPELL_PROGRAM);
+            if (compoundTag != null) {
+                ListTag programTag = compoundTag.getList("program").orElse(null);
+                List<Executable> fromNbt;
+                try {
+                    fromNbt = ProgramCompiler.fromNbt(programTag);
+                } catch (CompilationException e) {
+                    fromNbt = List.of();
+                    e.printStackTrace();
+                }
+                container.getStateMachine().loadProgram(fromNbt);
+            }
             container.setInitialized(true);
             initialized = true;
         }

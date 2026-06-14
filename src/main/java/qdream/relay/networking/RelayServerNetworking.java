@@ -7,8 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import qdream.relay.blocks.entity.ShellBlockEntity;
+import qdream.relay.blocks.entity.custom.ShellBlockEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.networking.payloads.*;
 import qdream.relay.mc.OperationRegistry;

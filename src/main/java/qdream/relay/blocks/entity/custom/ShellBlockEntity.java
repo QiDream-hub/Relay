@@ -1,4 +1,4 @@
-package qdream.relay.blocks.entity;
+package qdream.relay.blocks.entity.custom;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,11 +14,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
-
-import qdream.relay.blocks.RelayBlockEntities;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.ContainerHelper;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.screen.ShellScreenHandler;
@@ -30,7 +29,8 @@ import qdream.relay.mc.StateMachineNbtSerializer;
  */
 public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer {
 
-    private final ItemStack[] inventory = new ItemStack[4];
+    // 使用 NonNullList 替代数组，支持 ContainerHelper 序列化
+    private final NonNullList<ItemStack> inventory = NonNullList.withSize(4, ItemStack.EMPTY);
     private final StateMachine stateMachine;
     private final ShellTickHandler tickHandler;
 
@@ -39,9 +39,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
-        for (int i = 0; i < inventory.length; i++) {
-            inventory[i] = ItemStack.EMPTY;
-        }
         this.stateMachine = new StateMachine(1024);
         this.tickHandler = new ShellTickHandler();
         this.energy = 0;
@@ -78,16 +75,16 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public ItemStack getInventorySlot(int slot) {
-        if (slot >= 0 && slot < inventory.length) {
-            return inventory[slot];
+        if (slot >= 0 && slot < inventory.size()) {
+            return inventory.get(slot);
         }
         return ItemStack.EMPTY;
     }
 
     @Override
     public void setInventorySlot(int slot, ItemStack stack) {
-        if (slot >= 0 && slot < inventory.length) {
-            inventory[slot] = stack;
+        if (slot >= 0 && slot < inventory.size()) {
+            inventory.set(slot, stack);
             setChanged();
         }
     }
@@ -158,25 +155,8 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
 
-        // 保存物品栏 - 暂时简化处理，只保存物品 ID 和数量
-        // 26.1.2 的 ItemStack 序列化需要使用新的 DataComponent 系统
-        // 这里使用 CompoundTag 作为中间格式
-        CompoundTag inventoryTag = new CompoundTag();
-        for (int i = 0; i < inventory.length; i++) {
-            if (!inventory[i].isEmpty()) {
-                CompoundTag slotTag = new CompoundTag();
-                // 保存物品 ID
-                var itemId = BuiltInRegistries.ITEM.getKey(inventory[i].getItem());
-                if (itemId != null) {
-                    slotTag.putString("id", itemId.toString());
-                    // 保存数量
-                    slotTag.putInt("Count", inventory[i].getCount());
-                    // TODO: 保存 DataComponent
-                    inventoryTag.put("slot_" + i, slotTag);
-                }
-            }
-        }
-        output.store("inventory", CompoundTag.CODEC, inventoryTag);
+        // 保存物品栏 - 使用 ContainerHelper 处理 DataComponent 系统
+        ContainerHelper.saveAllItems(output, this.inventory);
 
         // 保存能量
         output.putInt("energy", energy);
@@ -199,27 +179,8 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
 
-        // 加载物品栏 - 暂时简化处理
-        input.read("inventory", CompoundTag.CODEC).ifPresent(inventoryTag -> {
-            for (int i = 0; i < inventory.length; i++) {
-                int slotIndex = i;  // 用于 lambda 表达式
-                inventoryTag.getCompound("slot_" + i).ifPresent(slotTag -> {
-                    slotTag.getString("id").ifPresent(itemIdStr -> {
-                        slotTag.getInt("Count").ifPresent(count -> {
-                            // 根据物品 ID 查找物品
-                            var itemId = Identifier.tryParse(itemIdStr);
-                            if (itemId != null) {
-                                var itemOpt = BuiltInRegistries.ITEM.getOptional(itemId);
-                                itemOpt.ifPresent(item -> {
-                                    inventory[slotIndex] = new ItemStack(item, count);
-                                    // TODO: 加载 DataComponent
-                                });
-                            }
-                        });
-                    });
-                });
-            }
-        });
+        // 加载物品栏 - 使用 ContainerHelper 处理 DataComponent 系统
+        ContainerHelper.loadAllItems(input, this.inventory);
 
         // 加载能量
         energy = input.getIntOr("energy", 0);

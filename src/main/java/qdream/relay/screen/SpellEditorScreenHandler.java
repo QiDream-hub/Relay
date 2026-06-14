@@ -8,8 +8,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-
-import qdream.relay.blocks.entity.SpellEditorBlockEntity;
+import qdream.relay.blocks.entity.custom.SpellEditorBlockEntity;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.OperationRegistry;

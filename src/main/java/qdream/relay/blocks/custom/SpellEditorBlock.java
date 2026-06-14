@@ -1,4 +1,4 @@
-package qdream.relay.blocks;
+package qdream.relay.blocks.custom;
 
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -13,7 +13,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 
-import qdream.relay.blocks.entity.SpellEditorBlockEntity;
+import qdream.relay.blocks.entity.RelayBlockEntities;
+import qdream.relay.blocks.entity.custom.SpellEditorBlockEntity;
 
 /**
  * 法术编辑器方块

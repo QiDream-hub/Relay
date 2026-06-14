@@ -1,4 +1,4 @@
-package qdream.relay.blocks;
+package qdream.relay.blocks.custom;
 
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -19,7 +19,8 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import com.mojang.serialization.MapCodec;
 
-import qdream.relay.blocks.entity.ShellBlockEntity;
+import qdream.relay.blocks.entity.RelayBlockEntities;
+import qdream.relay.blocks.entity.custom.ShellBlockEntity;
 
 /**
  * 外壳方块
@@ -35,7 +36,7 @@ public class ShellBlock extends BaseEntityBlock {
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null; // 简单返回 null，实际应该实现正确的 codec
+        return simpleCodec(ShellBlock::new);
     }
 
     @Override

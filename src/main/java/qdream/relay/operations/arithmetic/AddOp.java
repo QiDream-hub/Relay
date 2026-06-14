@@ -1,6 +1,7 @@
 package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberIota;
+import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Operation;
@@ -37,6 +38,7 @@ public class AddOp extends Spell {
         }
 
         double result = a.asDouble() + b.asDouble();
+        Relay.LOGGER.info("AddOp: " + result);
         executor.pushData(new NumberIota(result));
     }
 

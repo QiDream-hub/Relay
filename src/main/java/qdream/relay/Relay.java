@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import qdream.relay.blocks.RelayBlocks;
-import qdream.relay.blocks.RelayBlockEntities;
+import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.commands.RelayCommands;
 import qdream.relay.entities.RelayEntityTypes;
 import qdream.relay.items.RelayDataComponents;

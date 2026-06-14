@@ -1,4 +1,4 @@
-package qdream.relay.blocks.entity;
+package qdream.relay.blocks.entity.custom;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -8,8 +8,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
-
-import qdream.relay.blocks.RelayBlockEntities;
+import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.screen.SpellEditorScreenHandler;
 
 /**
