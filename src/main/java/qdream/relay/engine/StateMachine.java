@@ -91,6 +91,15 @@ public class StateMachine {
         }
     }
 
+    /**
+     * 清空状态机（用于重置）
+     */
+    public void clear() {
+        programStack.clear();
+        dataStack.clear();
+        remainingOps = 0;
+    }
+
     public void setMishapHandler(MishapHandler handler) {
         this.mishapHandler = handler;
     }

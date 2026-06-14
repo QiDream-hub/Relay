@@ -22,6 +22,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.mc.StateMachineNbtSerializer;
+import qdream.relay.core.ShellRegistry;
 
 /**
  * 外壳方块实体
@@ -50,6 +51,18 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
         });
+
+        // 注册到 ShellRegistry
+        if (level != null && !level.isClientSide()) {
+            ShellRegistry.register(this, pos);
+        }
+    }
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        // 从 ShellRegistry 注销
+        ShellRegistry.unregister(this);
     }
 
     /**

@@ -21,6 +21,7 @@ import com.mojang.serialization.MapCodec;
 
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.blocks.entity.custom.ShellBlockEntity;
+import qdream.relay.core.ShellRegistry;
 
 /**
  * 外壳方块

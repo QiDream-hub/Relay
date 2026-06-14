@@ -48,13 +48,21 @@ public class ShellTickHandler {
         // 更新能量状态
         updateEnergy(container);
 
+        // 检查磁盘是否变更，如果变更则重置初始化状态
+        if (initialized && !container.getDiskStack().equals(lastDisk)) {
+            initialized = false;
+            container.setInitialized(false);
+            container.getStateMachine().clear();
+        }
+        lastDisk = container.getDiskStack().copy();
+
         // 尝试初始化
         if (!initialized) {
             tryInitialize(container);
         }
 
         // 执行状态机
-        if (initialized && coreCount > 0) {
+        if (initialized && coreCount > 0 && container.getStateMachine().isRunning()) {
             tickCounter++;
             if (tickCounter >= interval) {
                 tickCounter = 0;
@@ -63,6 +71,9 @@ public class ShellTickHandler {
             }
         }
     }
+
+    // 记录上一个磁盘，用于检测变更
+    private net.minecraft.world.item.ItemStack lastDisk = net.minecraft.world.item.ItemStack.EMPTY;
 
     /**
      * 更新核心状态
@@ -99,20 +110,23 @@ public class ShellTickHandler {
     private void tryInitialize(ShellContainer container) {
         ItemStack diskStack = container.getDiskStack();
         if (!diskStack.isEmpty()) {
-            CompoundTag compoundTag = diskStack.get(RelayDataComponents.SPELL_PROGRAM);
+            CompoundTag compoundTag = diskStack.get(qdream.relay.items.RelayDataComponents.SPELL_PROGRAM);
             if (compoundTag != null) {
                 ListTag programTag = compoundTag.getList("program").orElse(null);
-                List<Executable> fromNbt;
-                try {
-                    fromNbt = ProgramCompiler.fromNbt(programTag);
-                } catch (CompilationException e) {
-                    fromNbt = List.of();
-                    e.printStackTrace();
+                if (programTag != null && !programTag.isEmpty()) {
+                    List<Executable> fromNbt;
+                    try {
+                        fromNbt = qdream.relay.mc.ProgramCompiler.fromNbt(programTag);
+                    } catch (qdream.relay.mc.ProgramCompiler.CompilationException e) {
+                        fromNbt = List.of();
+                        e.printStackTrace();
+                    }
+                    container.getStateMachine().loadProgram(fromNbt);
+                    // 只有成功加载程序后才设置 initialized
+                    container.setInitialized(true);
+                    initialized = true;
                 }
-                container.getStateMachine().loadProgram(fromNbt);
             }
-            container.setInitialized(true);
-            initialized = true;
         }
     }
 
