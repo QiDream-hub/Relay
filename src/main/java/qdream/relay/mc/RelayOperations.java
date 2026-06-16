@@ -23,6 +23,7 @@ import qdream.relay.operations.logic.LtOp;
 import qdream.relay.operations.logic.NotOp;
 import qdream.relay.operations.logic.OrOp;
 import qdream.relay.operations.list.ListAppendOp;
+import qdream.relay.operations.list.ListCreatOp;
 import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListSetOp;
@@ -102,9 +103,10 @@ public class RelayOperations {
         OperationRegistry.register("relay:peek", new OperationRegistry.OpEntry(new PeekOp()));
 
         // 列表操作
-        OperationRegistry.register("relay:list.append", new OperationRegistry.OpEntry(new ListAppendOp()));
-        OperationRegistry.register("relay:list.get", new OperationRegistry.OpEntry(new ListGetOp()));
-        OperationRegistry.register("relay:list.set", new OperationRegistry.OpEntry(new ListSetOp()));
-        OperationRegistry.register("relay:list.length", new OperationRegistry.OpEntry(new ListLengthOp()));
+        OperationRegistry.register("relay:list_append", new OperationRegistry.OpEntry(new ListAppendOp()));
+        OperationRegistry.register("relay:list_get", new OperationRegistry.OpEntry(new ListGetOp()));
+        OperationRegistry.register("relay:list_set", new OperationRegistry.OpEntry(new ListSetOp()));
+        OperationRegistry.register("relay:list_length", new OperationRegistry.OpEntry(new ListLengthOp()));
+        OperationRegistry.register("relay:list_creat", new OperationRegistry.OpEntry(new ListCreatOp()));
     }
 }
