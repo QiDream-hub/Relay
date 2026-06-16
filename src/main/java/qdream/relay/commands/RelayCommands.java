@@ -10,7 +10,10 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -92,7 +95,7 @@ public class RelayCommands {
                 )
                 .build();
 
-        // /relay read <hand|shell> [slot]
+        // /relay read <hand|shell> [slot] [format]
         LiteralCommandNode<CommandSourceStack> read = Commands.literal("read")
                 .then(Commands.argument("target", StringArgumentType.word())
                         .suggests((ctx, builder) -> {
@@ -101,9 +104,25 @@ public class RelayCommands {
                             return builder.buildFuture();
                         })
                         .executes(RelayCommands::readHand)
+                        .then(Commands.argument("format", StringArgumentType.word())
+                                .suggests((ctx, builder) -> {
+                                    builder.suggest("json");
+                                    builder.suggest("nbt");
+                                    return builder.buildFuture();
+                                })
+                                .executes(RelayCommands::readHandFormatted)
+                        )
                         .then(Commands.literal("shell")
                                 .then(Commands.argument("pos", StringArgumentType.word())
                                         .executes(RelayCommands::readShell)
+                                        .then(Commands.argument("format", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> {
+                                                    builder.suggest("json");
+                                                    builder.suggest("nbt");
+                                                    return builder.buildFuture();
+                                                })
+                                                .executes(RelayCommands::readShellFormatted)
+                                        )
                                 )
                         )
                 )
@@ -136,23 +155,6 @@ public class RelayCommands {
         root.addChild(read);
         root.addChild(run);
 
-        // /relay jsonread <hand|shell> [slot]
-        LiteralCommandNode<CommandSourceStack> jsonread = Commands.literal("jsonread")
-                .then(Commands.argument("target", StringArgumentType.word())
-                        .suggests((ctx, builder) -> {
-                            builder.suggest("hand");
-                            builder.suggest("shell");
-                            return builder.buildFuture();
-                        })
-                        .executes(RelayCommands::jsonReadHand)
-                        .then(Commands.literal("shell")
-                                .then(Commands.argument("pos", StringArgumentType.word())
-                                        .executes(RelayCommands::jsonReadShell)
-                                )
-                        )
-                )
-                .build();
-
         // /relay jsonwrite <hand|shell> [slot] <json>
         LiteralCommandNode<CommandSourceStack> jsonwrite = Commands.literal("jsonwrite")
                 .then(Commands.argument("target", StringArgumentType.word())
@@ -174,7 +176,6 @@ public class RelayCommands {
                 )
                 .build();
 
-        root.addChild(jsonread);
         root.addChild(jsonwrite);
     }
 
@@ -300,7 +301,7 @@ public class RelayCommands {
             return 0;
         }
 
-        source.sendSuccess(() -> Component.literal("法术程序 (§e" + program.size() + "§r 个指令): §f" + programToString(program)), true);
+        source.sendSuccess(() -> copyableText("法术程序 (§e" + program.size() + "§r 个指令): §f", programToString(program)), true);
         return program.size();
     }
 
@@ -397,6 +398,82 @@ public class RelayCommands {
     }
 
     /**
+     * 按格式读取手中的法术磁盘
+     */
+    private static int readHandFormatted(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        var player = source.getPlayerOrException();
+        ItemStack stack = player.getMainHandItem();
+
+        if (!(stack.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        String format = StringArgumentType.getString(context, "format");
+        List<Executable> program = SpellDiskItem.getProgram(stack);
+        if (program.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
+            return 0;
+        }
+
+        sendFormattedProgram(source, program, format);
+        return program.size();
+    }
+
+    /**
+     * 按格式读取外壳方块中的法术磁盘
+     */
+    private static int readShellFormatted(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        String posStr = StringArgumentType.getString(context, "pos");
+        String format = StringArgumentType.getString(context, "format");
+
+        var pos = parseBlockPos(posStr, source);
+        BlockEntity blockEntity = source.getLevel().getBlockEntity(pos);
+
+        if (!(blockEntity instanceof ShellContainer shell)) {
+            throw INVALID_SLOT.create();
+        }
+
+        ItemStack disk = shell.getDiskStack();
+        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        List<Executable> program = SpellDiskItem.getProgram(disk);
+        if (program.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
+            return 0;
+        }
+
+        sendFormattedProgram(source, program, format);
+        return program.size();
+    }
+
+    /**
+     * 按指定格式发送程序输出
+     */
+    private static void sendFormattedProgram(CommandSourceStack source, List<Executable> program, String format) {
+        switch (format.toLowerCase()) {
+            case "json" -> {
+                String json = ProgramCompiler.toJsonString(program);
+                source.sendSuccess(() -> copyableText("JSON 程序 (§e" + program.size() + "§r 个指令): §f", json), true);
+            }
+            case "nbt" -> {
+                try {
+                    String nbt = ProgramCompiler.toNbt(program).toString();
+                    source.sendSuccess(() -> copyableText("NBT 程序 (§e" + program.size() + "§r 个指令): §f", nbt), true);
+                } catch (ProgramCompiler.CompilationException e) {
+                    source.sendFailure(Component.literal("§c NBT 序列化失败: " + e.getMessage()));
+                }
+            }
+            default -> {
+                source.sendSuccess(() -> copyableText("法术程序 (§e" + program.size() + "§r 个指令): §f", programToString(program)), true);
+            }
+        }
+    }
+
+    /**
      * 读取外壳方块中的法术磁盘
      */
     private static int readShell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -421,49 +498,8 @@ public class RelayCommands {
             return 0;
         }
 
-        source.sendSuccess(() -> Component.literal("法术程序 (§e" + program.size() + "§r 个指令): §f" + programToString(program)), true);
+        source.sendSuccess(() -> copyableText("法术程序 (§e" + program.size() + "§r 个指令): §f", programToString(program)), true);
         return program.size();
-    }
-
-    /**
-     * JSON 读取手中的法术磁盘
-     */
-    private static int jsonReadHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        CommandSourceStack source = context.getSource();
-        var player = source.getPlayerOrException();
-        ItemStack stack = player.getMainHandItem();
-
-        if (!(stack.getItem() instanceof SpellDiskItem)) {
-            throw NO_DISK.create();
-        }
-
-        String json = SpellDiskItem.exportToJson(stack);
-        source.sendSuccess(() -> Component.literal("JSON 程序: §f" + json), true);
-        return 1;
-    }
-
-    /**
-     * JSON 读取外壳方块中的法术磁盘
-     */
-    private static int jsonReadShell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        CommandSourceStack source = context.getSource();
-        String posStr = StringArgumentType.getString(context, "pos");
-
-        var pos = parseBlockPos(posStr, source);
-        BlockEntity blockEntity = source.getLevel().getBlockEntity(pos);
-
-        if (!(blockEntity instanceof ShellContainer shell)) {
-            throw INVALID_SLOT.create();
-        }
-
-        ItemStack disk = shell.getDiskStack();
-        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
-            throw NO_DISK.create();
-        }
-
-        String json = SpellDiskItem.exportToJson(disk);
-        source.sendSuccess(() -> Component.literal("JSON 程序: §f" + json), true);
-        return 1;
     }
 
     /**
@@ -575,6 +611,22 @@ public class RelayCommands {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * 构建带点击复制功能的文本组件
+     * 点击后内容会被填入聊天输入框，方便玩家复制
+     */
+    private static MutableComponent copyableText(String prefix, String content) {
+        MutableComponent label = Component.literal(prefix);
+        MutableComponent body = Component.literal(content)
+                .withStyle(style -> style
+                        .withClickEvent(new ClickEvent.CopyToClipboard(content))
+                        .withHoverEvent(new HoverEvent.ShowText(
+                                Component.literal("§7点击复制到剪贴板")))
+                        .withUnderlined(true)
+                );
+        return label.append(body);
     }
 
     /**
