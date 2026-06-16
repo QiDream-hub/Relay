@@ -3,9 +3,9 @@ package qdream.relay.operations.logic;
 import qdream.relay.types.BooleanIota;
 import qdream.relay.types.NumberIota;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Gt 操作 - 大于比较

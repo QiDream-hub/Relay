@@ -3,8 +3,9 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.SignatureName;
 
 /**
  * 数字类型
@@ -15,11 +16,10 @@ public class NumberIota extends Data {
 
     public NumberIota(double value) {
         super("relay:number", 0,
-            OperationSignature.builder()
-                    .output("relay:number")
-                    .input("number")
-                    .build()
-        );
+                DataSignature.builder()
+                        .output("relay:number")
+                        .input(SignatureName.builder().setName("number").setType("Number").build())
+                        .build());
         this.value = value;
     }
 

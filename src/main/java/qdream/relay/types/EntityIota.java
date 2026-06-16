@@ -3,8 +3,9 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.SignatureName;
 
 import java.util.UUID;
 
@@ -16,12 +17,10 @@ public class EntityIota extends Data {
     private final UUID entityId;
 
     public EntityIota(UUID entityId) {
-        super("relay:entity", 0, OperationSignature.builder()
+        super("relay:entity", 0, DataSignature.builder()
                 .output("relay:entity")
-                .input("minecraft:entity")
-                .build()
-            
-        );
+                .input(SignatureName.builder().setName("uuid").setType("minecraft:entity").build())
+                .build());
         this.entityId = entityId;
     }
 
@@ -37,12 +36,19 @@ public class EntityIota extends Data {
     @Override
     public void toNbt(CompoundTag tag) {
         super.toNbt(tag);
-        tag.putString("value", entityId.toString());
+        CompoundTag valueTag = new CompoundTag();
+        valueTag.putString("uuid", entityId.toString());
+        tag.put("value", valueTag);
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
-        String uuidStr = tag.getString("value").orElse("");
+        CompoundTag valueTag = tag.getCompound("value").orElse(null);
+        if (valueTag == null) {
+            return new EntityIota(new UUID(0, 0));
+        }
+
+        String uuidStr = valueTag.getString("uuid").orElse("");
         UUID uuid = uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr);
         return new EntityIota(uuid);
     }
@@ -50,15 +56,20 @@ public class EntityIota extends Data {
     @Override
     public void toJson(JsonObject json) {
         super.toJson(json);
-        json.addProperty("value", entityId.toString());
+        JsonObject valueObject = new JsonObject();
+        valueObject.addProperty("uuid", entityId.toString());
+        json.add("value", valueObject);
     }
 
     @Override
     public Data fromJson(JsonObject json) {
         if (json.has("value")) {
-            String uuidStr = json.get("value").getAsString();
-            UUID uuid = uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr);
-            return new EntityIota(uuid);
+            JsonObject valueObject = json.get("value").getAsJsonObject();
+            if (valueObject.has("uuid")) {
+                String uuidStr = valueObject.get("uuid").getAsString();
+                UUID uuid = uuidStr.isEmpty() ? new UUID(0, 0) : UUID.fromString(uuidStr);
+                return new EntityIota(uuid);
+            }
         }
         return new EntityIota(new UUID(0, 0));
     }

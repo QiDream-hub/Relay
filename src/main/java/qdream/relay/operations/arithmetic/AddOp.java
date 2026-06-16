@@ -1,11 +1,11 @@
 package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberIota;
-import qdream.relay.Relay;
+// import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Add 操作 - 加法
@@ -38,7 +38,7 @@ public class AddOp extends Spell {
         }
 
         double result = a.asDouble() + b.asDouble();
-        Relay.LOGGER.info("AddOp: " + result);
+        // Relay.LOGGER.info("AddOp: " + result);
         executor.pushData(new NumberIota(result));
     }
 

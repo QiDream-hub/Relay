@@ -10,13 +10,17 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.Signature;
+import qdream.relay.mc.signature.SignatureName;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ibm.icu.impl.locale.LikelySubtags.Data;
+
 /**
- * 根据 OperationSignature 动态创建输入框的 Widget
+ * 根据 Signature 动态创建输入框的 Widget
  * 支持滚动浏览、自动布局
  */
 public class SignatureInputWidget extends AbstractWidget {
@@ -34,7 +38,7 @@ public class SignatureInputWidget extends AbstractWidget {
     private static final int SCROLLBAR_BG = 0xFF404040;
 
     private final Font font;
-    private OperationSignature signature;
+    private DataSignature signature;
     private final List<EditBox> inputFields = new ArrayList<>();
     private final List<String> fieldLabels = new ArrayList<>();
 
@@ -47,7 +51,7 @@ public class SignatureInputWidget extends AbstractWidget {
     /** 可视区域高度 */
     private int viewHeight = 0;
 
-    public SignatureInputWidget(int x, int y, int width, OperationSignature signature, Font font) {
+    public SignatureInputWidget(int x, int y, int width, DataSignature signature, Font font) {
         super(x, y, width, calculateViewHeight(width), Component.literal("Signature Input"));
         this.font = font;
         this.signature = signature;
@@ -73,8 +77,8 @@ public class SignatureInputWidget extends AbstractWidget {
         contentHeight = inputCount * (FIELD_HEIGHT + FIELD_SPACING) + PADDING * 2;
 
         for (int i = 0; i < inputCount; i++) {
-            List<String> types = signature.getInputs().get(i);
-            String hintText = buildHintText(types);
+            SignatureName signatureName = signature.getInputs().get(i);
+            String hintText = buildHintText(signatureName);
             String label = "P" + (i + 1);
 
             fieldLabels.add(label);
@@ -95,14 +99,14 @@ public class SignatureInputWidget extends AbstractWidget {
         }
     }
 
-    private String buildHintText(List<String> types) {
-        if (types == null || types.isEmpty()) {
+    private String buildHintText(SignatureName types) {
+        if (types == null) {
             return "any";
         }
-        if (types.size() == 1) {
-            return types.get(0);
+        if (types.getType().size() == 1) {
+            return types.getName() + ":" + types.getType().get(0);
         }
-        return String.join(" | ", types);
+        return types.getName() + ":" + String.join(" | ", types.getType());
     }
 
     private int getFieldWidth() {
@@ -133,7 +137,7 @@ public class SignatureInputWidget extends AbstractWidget {
     /**
      * 更新签名并重建输入框
      */
-    public void updateSignature(OperationSignature newSignature) {
+    public void updateSignature(DataSignature newSignature) {
         this.signature = newSignature;
         this.scrollOffset = 0;
 

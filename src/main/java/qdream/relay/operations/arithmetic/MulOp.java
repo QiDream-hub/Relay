@@ -2,9 +2,9 @@ package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberIota;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Mul 操作 - 乘法

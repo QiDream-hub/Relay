@@ -2,8 +2,8 @@ package qdream.relay.operations.base;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Dup 操作 - 复制数据栈顶部

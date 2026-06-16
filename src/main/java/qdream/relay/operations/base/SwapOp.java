@@ -2,8 +2,8 @@ package qdream.relay.operations.base;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Swap 操作 - 交换数据栈顶部两个元素

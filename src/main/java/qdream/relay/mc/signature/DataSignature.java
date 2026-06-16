@@ -1,19 +1,19 @@
-package qdream.relay.mc;
+package qdream.relay.mc.signature;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * 操作类型签名
- * 用于描述操作的输入和输出类型
+ * 数据类型签名
+ * 用于描述数据构建时的输入和输出类型
  * 使用字符串表示类型，使 engine 包不依赖具体类型定义
  */
-public class OperationSignature {
-    private final List<List<String>> inputs;
+public class DataSignature implements Signature<SignatureName, List<String>> {
+    private final List<SignatureName> inputs;
     private final List<List<String>> outputs;
 
-    public OperationSignature(List<List<String>> inputs, List<List<String>> outputs) {
+    public DataSignature(List<SignatureName> inputs, List<List<String>> outputs) {
         this.inputs = Collections.unmodifiableList(new ArrayList<>(inputs));
         this.outputs = Collections.unmodifiableList(new ArrayList<>(outputs));
     }
@@ -22,24 +22,24 @@ public class OperationSignature {
         return new Builder();
     }
 
-    public List<List<String>> getInputs() {
+    @Override
+    public List<SignatureName> getInputs() {
         return inputs;
     }
 
+    @Override
     public List<List<String>> getOutputs() {
         return outputs;
     }
 
+    @Override
     public int inputCount() {
         return inputs.size();
     }
 
+    @Override
     public int outputCount() {
         return outputs.size();
-    }
-
-    public String inputAt(int index, int inputIndex) {
-        return inputs.get(index).get(inputIndex);
     }
 
     public String outputAt(int index, int outputIndex) {
@@ -47,16 +47,11 @@ public class OperationSignature {
     }
 
     public static class Builder {
-        private final List<List<String>> inputs = new ArrayList<>();
+        private final List<SignatureName> inputs = new ArrayList<>();
         private final List<List<String>> outputs = new ArrayList<>();
 
-        public Builder input(List<String> type) {
+        public Builder input(SignatureName type) {
             inputs.add(type);
-            return this;
-        }
-
-        public Builder input(String type) {
-            inputs.add(List.of(type));
             return this;
         }
 
@@ -69,9 +64,10 @@ public class OperationSignature {
             outputs.add(List.of(type));
             return this;
         }
-        
-        public OperationSignature build() {
-            return new OperationSignature(inputs, outputs);
+
+        public DataSignature build() {
+            return new DataSignature(inputs, outputs);
         }
     }
+
 }

@@ -1,8 +1,8 @@
 package qdream.relay.operations.control;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Stop 操作 - 强制终止程序

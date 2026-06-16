@@ -2,7 +2,7 @@ package qdream.relay.mc.base;
 
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
-import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.signature.DataSignature;
 
 /**
  * 数据类型基类
@@ -10,8 +10,11 @@ import qdream.relay.mc.OperationSignature;
  * 序列化方法继承自 Operation（写入 id），子类 override 以添加自身字段。
  */
 public abstract class Data extends Operation {
-    public Data(String id, int cost, OperationSignature signature) {
-        super(id, cost, signature);
+    protected final DataSignature signature;
+
+    public Data(String id, int cost, DataSignature signature) {
+        super(id, cost);
+        this.signature = signature;
     }
 
     /**
@@ -25,4 +28,9 @@ public abstract class Data extends Operation {
      */
     @Override
     public abstract Data fromJson(JsonObject json);
+
+    @Override
+    public DataSignature getSignature() {
+        return signature;
+    }
 }

@@ -1,6 +1,6 @@
 package qdream.relay.mc.base;
 
-import qdream.relay.mc.OperationSignature;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * 指令类型基类（无状态单例操作）
@@ -10,12 +10,20 @@ public abstract class Spell extends Operation {
     // 操作消耗的能量
     protected final int energy;
 
+    protected final OperationSignature signature;
+
     public Spell(String id, int cost,int energy, OperationSignature signature) {
-        super(id, cost,signature);
+        super(id, cost);
         this.energy = energy;
+        this.signature = signature;
     }
 
     public int getEnergy() {
         return energy;
+    }
+
+    @Override
+    public OperationSignature getSignature() {
+        return signature;
     }
 }

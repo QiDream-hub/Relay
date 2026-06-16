@@ -13,9 +13,10 @@ import net.minecraft.nbt.Tag;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationRegistry;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.SignatureName;
 
 /**
  * 列表类型
@@ -25,11 +26,10 @@ public class ListIota extends Data {
 
     public ListIota(List<Executable> value) {
         super("relay:list", 0,
-                OperationSignature.builder()
+                DataSignature.builder()
                         .output("relay:list")
-                        .input("relay:list")
-                        .build()
-        );
+                        .input(SignatureName.builder().setName("list").setType("relay:list").build())
+                        .build());
         this.value = value != null ? new ArrayList<>(value) : new ArrayList<>();
     }
 
@@ -51,28 +51,31 @@ public class ListIota extends Data {
             ((Operation) item).toNbt(itemTag);
             listTag.add(itemTag);
         }
-        tag.put("value", listTag);
+        CompoundTag valueTag = new CompoundTag();
+        valueTag.put("list", listTag);
+        tag.put("value", valueTag);
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
-        var valueOpt = tag.getList("value");
-        if (valueOpt.isPresent()) {
-            ListTag listTag = valueOpt.get();
-            List<Executable> list = new ArrayList<>();
-            for (Tag element : listTag) {
-                if (element instanceof CompoundTag compoundTag) {
-                    String id = compoundTag.getString("id").orElse("");
-                    OperationRegistry.getEntry(id).ifPresent(entry -> {
-                        Operation instance = (Operation) entry.create();
-                        list.add(instance.fromNbt(compoundTag));
-                    });
-                }
-            }
-            return new ListIota(list);
-        } else {
-            return new ListIota(new ArrayList<>());
-        }
+        List<Executable> list = tag.getCompound("value")
+                .flatMap(ct -> ct.getList("list"))
+                .map(listTag -> {
+                    List<Executable> result = new ArrayList<>();
+                    for (Tag element : listTag) {
+                        if (element instanceof CompoundTag compoundTag) {
+                            String id = compoundTag.getString("id").orElse("");
+                            OperationRegistry.getEntry(id).ifPresent(entry -> {
+                                Operation instance = (Operation) entry.create();
+                                result.add(instance.fromNbt(compoundTag));
+                            });
+                        }
+                    }
+                    return result;
+                })
+                .orElse(new ArrayList<>());
+
+        return new ListIota(list);
     }
 
     @Override
@@ -84,26 +87,34 @@ public class ListIota extends Data {
             ((Operation) item).toJson(itemJson);
             array.add(itemJson);
         }
-        json.add("value", array);
+        JsonObject valueObject = new JsonObject();
+        valueObject.add("list", array);
+        json.add("value", valueObject);
     }
 
     @Override
     public Data fromJson(JsonObject json) {
-        if (json.has("value") && json.get("value").isJsonArray()) {
-            JsonArray array = json.getAsJsonArray("value");
-            List<Executable> list = new ArrayList<>();
-            for (JsonElement element : array) {
-                if (element.isJsonObject()) {
-                    JsonObject obj = element.getAsJsonObject();
-                    String id = obj.has("id") ? obj.get("id").getAsString() : "";
-                    OperationRegistry.getEntry(id).ifPresent(entry -> {
-                        Operation instance = (Operation) entry.create();
-                        list.add(instance.fromJson(obj));
-                    });
+        List<Executable> list = new ArrayList<>();
+
+        if (json.has("value") && json.get("value").isJsonObject()) {
+            JsonObject valueObject = json.getAsJsonObject("value");
+
+            if (valueObject.has("list") && valueObject.get("list").isJsonArray()) {
+                JsonArray array = valueObject.getAsJsonArray("list");
+
+                for (JsonElement element : array) {
+                    if (element.isJsonObject()) {
+                        JsonObject obj = element.getAsJsonObject();
+                        String id = obj.has("id") ? obj.get("id").getAsString() : "";
+                        OperationRegistry.getEntry(id).ifPresent(entry -> {
+                            Operation instance = (Operation) entry.create();
+                            list.add(instance.fromJson(obj));
+                        });
+                    }
                 }
             }
-            return new ListIota(list);
         }
-        return new ListIota(new ArrayList<>());
+
+        return new ListIota(list);
     }
 }

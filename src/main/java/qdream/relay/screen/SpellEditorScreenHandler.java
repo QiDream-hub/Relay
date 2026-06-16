@@ -14,10 +14,9 @@ import qdream.relay.blocks.entity.custom.SpellEditorBlockEntity;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.OperationRegistry;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
+import qdream.relay.mc.signature.Signature;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 
 import java.util.ArrayList;
@@ -272,7 +271,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         return availableDataTypes;
     }
 
-    public OperationSignature getOperationSignature(String opId) {
+    public Signature getOperationSignature(String opId) {
         return OperationRegistry.getEntry(opId)
             .map(entry -> {
                 Executable exec = entry.create();

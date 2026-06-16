@@ -3,8 +3,9 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.SignatureName;
 
 /**
  * 布尔类型
@@ -15,9 +16,9 @@ public class BooleanIota extends Data {
 
     public BooleanIota(boolean value) {
         super("relay:boolean", 0,
-                OperationSignature.builder()
+                DataSignature.builder()
                         .output("relay:boolean")
-                        .input("boolean")
+                        .input(SignatureName.builder().setName("boolean").setType("Boolean").build())
                         .build());
         this.value = value;
     }
@@ -34,22 +35,35 @@ public class BooleanIota extends Data {
     @Override
     public void toNbt(CompoundTag tag) {
         super.toNbt(tag);
-        tag.putBoolean("value", value);
+        CompoundTag value = new CompoundTag();
+        value.putBoolean("boolean", this.value);
+        tag.put("value", value);
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
-        return new BooleanIota(tag.getBoolean("value").orElse(false));
+        // 方式1：使用 Optional 链式调用
+        Boolean value = tag.getCompound("value")
+                .flatMap(ct -> ct.getBoolean("boolean"))
+                .orElse(false);
+
+        return new BooleanIota(value);
     }
 
     @Override
     public void toJson(JsonObject json) {
         super.toJson(json);
-        json.addProperty("value", value);
+        JsonObject value = new JsonObject();
+        value.addProperty("boolean", this.value);
+        json.add("value", value);
     }
 
     @Override
     public Data fromJson(JsonObject json) {
-        return new BooleanIota(json.has("value") && json.get("value").getAsBoolean());
+        if (json.has("value")) {
+            JsonObject jsonObject = json.get("value").getAsJsonObject();
+            return new BooleanIota(jsonObject.has("boolean") && jsonObject.get("boolean").getAsBoolean());
+        }
+        return new BooleanIota(false);
     }
 }

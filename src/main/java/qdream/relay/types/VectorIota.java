@@ -1,13 +1,12 @@
 package qdream.relay.types;
 
-import java.util.List;
-
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.SignatureName;
 
 /**
  * 向量类型
@@ -18,14 +17,13 @@ public class VectorIota extends Data {
 
     public VectorIota(Vec3 vec3) {
         super("relay:vector", 0,
-            OperationSignature.builder()
-                    .output("relay:vector")
-                    .input("number")
-                    .input("number")
-                    .input("number")
-                    .build()
-        );
-        this.vec3 = vec3;
+                DataSignature.builder()
+                        .output("relay:vector")
+                        .input(SignatureName.builder().setName("x").setType("Number").build())
+                        .input(SignatureName.builder().setName("y").setType("Number").build())
+                        .input(SignatureName.builder().setName("z").setType("Number").build())
+                        .build());
+        this.vec3 = vec3 != null ? vec3 : new Vec3(0, 0, 0);
     }
 
     @Override
@@ -53,12 +51,14 @@ public class VectorIota extends Data {
 
     @Override
     public Data fromNbt(CompoundTag tag) {
-        CompoundTag vecTag = tag.getCompound("value").orElse(new CompoundTag());
-        return new VectorIota(new Vec3(
-            vecTag.getDouble("x").orElse(0.0),
-            vecTag.getDouble("y").orElse(0.0),
-            vecTag.getDouble("z").orElse(0.0)
-        ));
+        Vec3 vec = tag.getCompound("value")
+                .map(ct -> new Vec3(
+                        ct.getDouble("x").orElse(0.0),
+                        ct.getDouble("y").orElse(0.0),
+                        ct.getDouble("z").orElse(0.0)))
+                .orElse(new Vec3(0, 0, 0));
+
+        return new VectorIota(vec);
     }
 
     @Override
@@ -73,11 +73,16 @@ public class VectorIota extends Data {
 
     @Override
     public Data fromJson(JsonObject json) {
-        JsonObject vecJson = json.getAsJsonObject("value");
-        return new VectorIota(new Vec3(
-            vecJson.has("x") ? vecJson.get("x").getAsDouble() : 0.0,
-            vecJson.has("y") ? vecJson.get("y").getAsDouble() : 0.0,
-            vecJson.has("z") ? vecJson.get("z").getAsDouble() : 0.0
-        ));
+        Vec3 vec = new Vec3(0, 0, 0);
+
+        if (json.has("value") && json.get("value").isJsonObject()) {
+            JsonObject vecJson = json.getAsJsonObject("value");
+            vec = new Vec3(
+                    vecJson.has("x") ? vecJson.get("x").getAsDouble() : 0.0,
+                    vecJson.has("y") ? vecJson.get("y").getAsDouble() : 0.0,
+                    vecJson.has("z") ? vecJson.get("z").getAsDouble() : 0.0);
+        }
+
+        return new VectorIota(vec);
     }
 }

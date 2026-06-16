@@ -3,8 +3,9 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.SignatureName;
 
 /**
  * 字符串类型
@@ -15,11 +16,10 @@ public class StringIota extends Data {
 
     public StringIota(String value) {
         super("relay:string", 0,
-            OperationSignature.builder()
-                    .output("relay:string")
-                    .input("string")
-                    .build()
-        );
+                DataSignature.builder()
+                        .output("relay:string")
+                        .input(SignatureName.builder().setName("string").setType("String").build())
+                        .build());
         this.value = value;
     }
 
@@ -35,22 +35,31 @@ public class StringIota extends Data {
     @Override
     public void toNbt(CompoundTag tag) {
         super.toNbt(tag);
-        tag.putString("value", value);
+        CompoundTag value = new CompoundTag();
+        value.putString("string", this.value != null ? this.value : "");
+        tag.put("value", value);
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
-        return new StringIota(tag.getString("value").orElse(""));
+        String string = tag.getCompound("value").flatMap(ct -> ct.getString("string")).orElse("");
+        return new StringIota(string);
     }
 
     @Override
     public void toJson(JsonObject json) {
         super.toJson(json);
-        json.addProperty("value", value);
+        JsonObject value = new JsonObject();
+        value.addProperty("string", this.value);
+        json.add("value", value);
     }
 
     @Override
     public Data fromJson(JsonObject json) {
-        return new StringIota(json.has("value") ? json.get("value").getAsString() : "");
+        if (json.has("value")) {
+            JsonObject value = json.get("value").getAsJsonObject();
+            return new StringIota(value.get("string").getAsString());
+        }
+        return new StringIota("");
     }
 }

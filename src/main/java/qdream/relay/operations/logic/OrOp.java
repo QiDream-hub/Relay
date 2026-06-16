@@ -4,9 +4,9 @@ import qdream.relay.types.BooleanIota;
 
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Or 操作 - 逻辑或

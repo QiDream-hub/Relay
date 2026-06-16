@@ -24,10 +24,12 @@ import qdream.relay.client.screen.widget.editor.TypeListWidget;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.OperationRegistry;
-import qdream.relay.mc.OperationSignature;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.mc.signature.Signature;
 import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
 import qdream.relay.screen.SpellEditorScreenHandler;
@@ -95,48 +97,44 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // ===== 左侧面板：操作列表 =====
         operationListWidget = new OperationListWidget(
-            left + PANEL_PADDING, listTop,
-            OPERATIONS_PANEL_WIDTH - PANEL_PADDING * 2, OPS_LIST_HEIGHT,
-            this.font, this.menu.getAvailableOperations()
-        );
+                left + PANEL_PADDING, listTop,
+                OPERATIONS_PANEL_WIDTH - PANEL_PADDING * 2, OPS_LIST_HEIGHT,
+                this.font, this.menu.getAvailableOperations());
         operationListWidget.setOnOperationClicked(this::addOperationToClientProgram);
         this.addRenderableWidget(operationListWidget);
 
         // ===== 左侧面板：类型列表 =====
         int typeListTop = listTop + OPS_LIST_HEIGHT + TYPE_LIST_GAP;
         typeListWidget = new TypeListWidget(
-            left + PANEL_PADDING, typeListTop,
-            OPERATIONS_PANEL_WIDTH - PANEL_PADDING * 2, TYPE_LIST_HEIGHT,
-            this.font, this.menu.getAvailableDataTypes()
-        );
+                left + PANEL_PADDING, typeListTop,
+                OPERATIONS_PANEL_WIDTH - PANEL_PADDING * 2, TYPE_LIST_HEIGHT,
+                this.font, this.menu.getAvailableDataTypes());
         typeListWidget.setOnTypeSelected(this::onTypeSelected);
         this.addRenderableWidget(typeListWidget);
 
         // ===== 中间面板：程序列表 =====
         int programHeight = EDITOR_PANEL_HEIGHT - LIST_TOP_MARGIN - LIST_BOTTOM_MARGIN;
         programListWidget = new ProgramListWidget(
-            left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING, listTop,
-            PROGRAM_PANEL_WIDTH - PANEL_PADDING, programHeight,
-            this.font
-        );
+                left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING, listTop,
+                PROGRAM_PANEL_WIDTH - PANEL_PADDING, programHeight,
+                this.font);
         this.addRenderableWidget(programListWidget);
 
         // ===== 右侧面板：输入框 Widget =====
         // 先创建一个空的 SignatureInputWidget（无签名时不可见）
         signatureInputWidget = new SignatureInputWidget(
-            signatureInputX, signatureInputY,
-            signatureInputWidth,
-            null,  // 初始没有签名
-            this.font
-        );
+                signatureInputX, signatureInputY,
+                signatureInputWidth,
+                null, // 初始没有签名
+                this.font);
         signatureInputWidget.visible = false;
         this.addRenderableWidget(signatureInputWidget);
 
         // 添加常量按钮
         addButton = Button.builder(Component.literal("添加"), btn -> onAddConstant())
-            .pos(signatureInputX, rightTop + signatureInputWidth + 10)
-            .size(40, 20)
-            .build();
+                .pos(signatureInputX, rightTop + signatureInputWidth + 10)
+                .size(40, 20)
+                .build();
         addButton.visible = false;
         this.addRenderableWidget(addButton);
 
@@ -146,29 +144,29 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         int buttonSpacing = 8;
 
         saveButton = Button.builder(Component.literal("保存"), btn -> onSave())
-            .pos(rightX + 16, top + 16)
-            .size(buttonW, 20)
-            .build();
+                .pos(rightX + 16, top + 16)
+                .size(buttonW, 20)
+                .build();
         this.addRenderableWidget(saveButton);
 
         // 加载按钮（保存按钮右边）
         Button loadButton = Button.builder(Component.literal("加载"), btn -> onLoad())
-            .pos(rightX + 16 + buttonW + buttonSpacing, top + 16)
-            .size(buttonW, 20)
-            .build();
+                .pos(rightX + 16 + buttonW + buttonSpacing, top + 16)
+                .size(buttonW, 20)
+                .build();
         this.addRenderableWidget(loadButton);
 
         // 清空程序按钮
         this.addRenderableWidget(Button.builder(Component.literal("清空"), btn -> onClear())
-            .pos(rightX, buttonY)
-            .size(buttonW, 20)
-            .build());
+                .pos(rightX, buttonY)
+                .size(buttonW, 20)
+                .build());
 
         // 删除选中按钮
         this.addRenderableWidget(Button.builder(Component.literal("删除"), btn -> onDelete())
-            .pos(rightX + buttonW + buttonSpacing, buttonY)
-            .size(buttonW, 20)
-            .build());
+                .pos(rightX + buttonW + buttonSpacing, buttonY)
+                .size(buttonW, 20)
+                .build());
     }
 
     // ==================== 事件处理 ====================
@@ -178,11 +176,11 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         if (typeId != null) {
             // 获取类型的操作签名
-            OperationSignature signature = this.menu.getOperationSignature(typeId);
+            Signature signature = this.menu.getOperationSignature(typeId);
 
-            if (signature != null && signature.inputCount() > 0) {
+            if (signature != null && signature.inputCount() > 0 && signature instanceof DataSignature dataSignature) {
                 // 有参数：更新并显示 SignatureInputWidget
-                signatureInputWidget.updateSignature(signature);
+                signatureInputWidget.updateSignature(dataSignature);
                 signatureInputWidget.updatePosition(signatureInputX, signatureInputY);
                 signatureInputWidget.visible = true;
                 addButton.visible = true;
@@ -207,7 +205,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     }
 
     private void onAddConstant() {
-        if (selectedTypeId == null) return;
+        if (selectedTypeId == null)
+            return;
 
         // 从 SignatureInputWidget 获取输入值
         List<String> inputValues = signatureInputWidget.getInputValues();
@@ -222,7 +221,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // 检查是否所有输入框都非空
         boolean hasEmpty = inputValues.stream().allMatch(String::isEmpty);
-        if (hasEmpty) return;
+        if (hasEmpty)
+            return;
 
         // 构建参数 JSON
         JsonObject json = new JsonObject();
@@ -257,7 +257,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
                 }
             }
             try {
-                Executable entry = ((Operation) OperationRegistry.getEntry(typeId).orElse(null).create()).fromJson(json);
+                Executable entry = ((Operation) OperationRegistry.getEntry(typeId).orElse(null).create())
+                        .fromJson(json);
                 this.clientProgramCache.add(entry);
                 this.programListWidget.setProgram(this.clientProgramCache);
                 syncProgramToServer();
@@ -342,9 +343,9 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         // 深色背景
-        graphics.fill(this.leftPos, this.topPos, 
-            this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 
-            0xFF101010);
+        graphics.fill(this.leftPos, this.topPos,
+                this.leftPos + this.imageWidth, this.topPos + this.imageHeight,
+                0xFF101010);
         graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0xFF404040);
 
         super.extractRenderState(graphics, mouseX, mouseY, delta);
@@ -378,7 +379,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         graphics.text(this.font, "点击选中/删除", left + OPERATIONS_PANEL_WIDTH + PANEL_PADDING, hintY, 0xFF666666);
     }
 
-    // ==================== 事件转发（AbstractContainerScreen 会拦截键盘事件） ====================
+    // ==================== 事件转发（AbstractContainerScreen 会拦截键盘事件）
+    // ====================
 
     @Override
     public boolean keyPressed(KeyEvent event) {
@@ -407,9 +409,9 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         // 优先转发给自定义 Widget（避免被 AbstractContainerScreen 的插槽逻辑拦截）
         for (var widget : this.children()) {
             if (widget instanceof AbstractWidget aw
-                && aw.visible
-                && event.x() >= aw.getX() && event.x() < aw.getX() + aw.getWidth()
-                && event.y() >= aw.getY() && event.y() < aw.getY() + aw.getHeight()) {
+                    && aw.visible
+                    && event.x() >= aw.getX() && event.x() < aw.getX() + aw.getWidth()
+                    && event.y() >= aw.getY() && event.y() < aw.getY() + aw.getHeight()) {
                 if (aw.mouseClicked(event, doubleClick)) {
                     return true;
                 }
@@ -424,8 +426,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         for (var widget : this.children()) {
             if (widget instanceof AbstractWidget aw
-                && mouseX >= aw.getX() && mouseX < aw.getX() + aw.getWidth()
-                && mouseY >= aw.getY() && mouseY < aw.getY() + aw.getHeight()) {
+                    && mouseX >= aw.getX() && mouseX < aw.getX() + aw.getWidth()
+                    && mouseY >= aw.getY() && mouseY < aw.getY() + aw.getHeight()) {
                 if (aw.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
                     return true;
                 }
@@ -438,7 +440,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     public boolean isPauseScreen() {
         return false;
     }
-    
+
     // ==================== 服务端同步 ====================
 
     /**
