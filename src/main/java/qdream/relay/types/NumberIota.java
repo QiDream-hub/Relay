@@ -47,34 +47,31 @@ public class NumberIota extends Data {
     @Override
     public void toNbt(CompoundTag tag) {
         super.toNbt(tag);
-        if (isInteger()) {
-            tag.putInt("value", asInt());
-        } else {
-            tag.putDouble("value", asDouble());
-        }
+        CompoundTag value = new CompoundTag();
+        value.putString("number", String.valueOf(this.value));
+        tag.put("value", value);
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
-        var intOpt = tag.getInt("value");
-        if (intOpt.isPresent()) {
-            return new NumberIota(intOpt.get());
-        } else {
-            return new NumberIota(tag.getDouble("value").orElse(0.0));
-        }
+        String value = tag.getCompound("value")
+                .flatMap(ct -> ct.getString("number"))
+                .orElse("0.0");
+        return new NumberIota(Double.parseDouble(value));
     }
 
     @Override
     public void toJson(JsonObject json) {
         super.toJson(json);
-        json.addProperty("value", value);
+        JsonObject value = new JsonObject();
+        value.addProperty("number", this.value);
+        json.add("value", value);
     }
 
     @Override
     public Data fromJson(JsonObject json) {
-        if (json.has("value")) {
-            return new NumberIota(json.get("value").getAsDouble());
-        }
-        return new NumberIota(0);
+        String value = json.get("value").getAsJsonObject()
+                .get("number").getAsString();
+        return new NumberIota(Double.parseDouble(value));
     }
 }

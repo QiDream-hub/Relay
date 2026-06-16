@@ -19,7 +19,7 @@ public class EntityIota extends Data {
     public EntityIota(UUID entityId) {
         super("relay:entity", 0, DataSignature.builder()
                 .output("relay:entity")
-                .input(SignatureName.builder().setName("uuid").setType("minecraft:entity").build())
+                .input(SignatureName.builder().setName("uuid").setType("String").build())
                 .build());
         this.entityId = entityId;
     }

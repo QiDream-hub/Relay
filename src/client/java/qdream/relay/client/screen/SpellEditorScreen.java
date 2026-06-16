@@ -219,7 +219,9 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         JsonElement valueElement = buildValueElement(inputValues, signature);
 
         JsonObject extraFields = new JsonObject();
-        extraFields.add("value", valueElement);
+        if (valueElement != null) {
+           extraFields.add("value", valueElement); 
+        }
         addDataToClientProgram(selectedTypeId, extraFields);
         // 清空输入框
         signatureInputWidget.clear();
@@ -227,27 +229,16 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
     /**
      * 根据签名和输入值构建 value 的 JsonElement
-     * - NumberIota (单 Number 输入): value 为原始数字
-     * - 其他类型: value 为 {输入名: 值} 对象
      */
     private JsonElement buildValueElement(Map<String, String> inputValues, Signature signature) {
-        if (signature instanceof DataSignature ds && ds.inputCount() == 1) {
-            var input = ds.getInputs().get(0);
-            String rawValue = inputValues.getOrDefault(input.getName(), "");
-            List<String> types = input.getType();
-            // 单 Number 输入 → value 为原始数字
-            if (types != null && types.size() == 1 && "Number".equals(types.get(0))) {
-                try {
-                    return new JsonPrimitive(Double.parseDouble(rawValue));
-                } catch (NumberFormatException e) {
-                    return new JsonPrimitive(0.0);
-                }
-            }
+        if (signature instanceof DataSignature) {
+            JsonObject obj = new JsonObject();
+            inputValues.forEach((key, value) -> obj.addProperty(key, value));
+            return obj;
         }
-        // 其他情况 → value 为 {输入名: 值} 对象
-        JsonObject obj = new JsonObject();
-        inputValues.forEach((key, value) -> obj.addProperty(key, value));
-        return obj;
+
+        // 不属于 DataSignature
+        return null;
     }
 
     /**
