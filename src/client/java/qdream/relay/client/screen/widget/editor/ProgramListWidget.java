@@ -173,7 +173,7 @@ public class ProgramListWidget extends AbstractWidget {
             } else if (entry instanceof Data data) {
                 JsonObject json = new JsonObject();
                 data.toJson(json);
-                label = '[' + data.getId() + "]:" + json.get("data");
+                label = '[' + data.getId() + "]:" + json.get("value");
             } else {
                 label = "[?]";
             }

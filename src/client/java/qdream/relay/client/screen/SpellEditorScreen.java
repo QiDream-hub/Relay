@@ -187,9 +187,6 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
                 signatureInputWidget.updatePosition(signatureInputX, signatureInputY);
                 signatureInputWidget.visible = true;
                 addButton.visible = true;
-
-                // 可选：聚焦第一个输入框
-                signatureInputWidget.focusFirst();
             } else {
                 // 无参数类型：隐藏输入框，直接添加
                 signatureInputWidget.visible = false;

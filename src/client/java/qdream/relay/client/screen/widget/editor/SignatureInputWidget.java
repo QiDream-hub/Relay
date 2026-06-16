@@ -214,6 +214,14 @@ public class SignatureInputWidget extends AbstractWidget {
     }
 
     // ==================== 事件处理 ====================
+
+    /** 取消所有 EditBox 的焦点（EditBox 之间不会联动取消） */
+    private void clearAllFieldFocus() {
+        for (EditBox field : inputFields.values()) {
+            field.setFocused(false);
+        }
+    }
+
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (!this.visible)
@@ -226,18 +234,18 @@ public class SignatureInputWidget extends AbstractWidget {
             return true;
         }
 
-        // 转发给输入框，并管理焦点
-        for (EditBox field : inputFields.values()) {
-            if (isMouseOverField(field, event.x(), event.y())) {
+        // 先取消所有焦点，再聚焦点击的输入框
+        clearAllFieldFocus();
+
+        // 转发给输入框
+        for (String label : fieldLabels) {
+            EditBox field = inputFields.get(label);
+            if (field != null && isMouseOverField(field, event.x(), event.y())) {
                 field.setFocused(true);
                 return field.mouseClicked(event, doubleClick);
             }
         }
 
-        // 点击在空白区域，取消所有焦点
-        for (EditBox field : inputFields.values()) {
-            field.setFocused(false);
-        }
         return false;
     }
 
@@ -317,9 +325,7 @@ public class SignatureInputWidget extends AbstractWidget {
     public void setFocused(boolean focused) {
         super.setFocused(focused);
         if (!focused) {
-            for (EditBox field : inputFields.values()) {
-                field.setFocused(false);
-            }
+            clearAllFieldFocus();
         }
     }
 
