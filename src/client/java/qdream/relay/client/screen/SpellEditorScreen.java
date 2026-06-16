@@ -2,8 +2,11 @@ package qdream.relay.client.screen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -193,9 +196,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
                 addButton.visible = false;
 
                 // 无参数数据类型可以直接添加
-                JsonObject json = new JsonObject();
-                json.addProperty("value", "");
-                addDataToClientProgram(typeId, json);
+                addDataToClientProgram(typeId, null);
             }
         } else {
             // 未选中任何类型
@@ -209,39 +210,47 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             return;
 
         // 从 SignatureInputWidget 获取输入值
-        List<String> inputValues = signatureInputWidget.getInputValues();
+        Map<String, String> inputValues = signatureInputWidget.getInputValues();
 
         if (inputValues.isEmpty()) {
-            // 没有输入框，直接添加空值
-            JsonObject json = new JsonObject();
-            json.addProperty("value", "");
-            addDataToClientProgram(selectedTypeId, json);
+            addDataToClientProgram("relay:null", null);
             return;
         }
 
-        // 检查是否所有输入框都非空
-        boolean hasEmpty = inputValues.stream().allMatch(String::isEmpty);
-        if (hasEmpty)
-            return;
+        // 根据类型的签名构建正确的 value JSON 结构
+        Signature signature = this.menu.getOperationSignature(selectedTypeId);
+        JsonElement valueElement = buildValueElement(inputValues, signature);
 
-        // 构建参数 JSON
-        JsonObject json = new JsonObject();
-        if (inputValues.size() == 1) {
-            // 单参数
-            json.addProperty("value", inputValues.get(0));
-        } else {
-            // 多参数
-            JsonObject params = new JsonObject();
-            for (int i = 0; i < inputValues.size(); i++) {
-                params.addProperty("param" + i, inputValues.get(i));
-            }
-            json.add("params", params);
-        }
-
-        addDataToClientProgram(selectedTypeId, json);
-
+        JsonObject extraFields = new JsonObject();
+        extraFields.add("value", valueElement);
+        addDataToClientProgram(selectedTypeId, extraFields);
         // 清空输入框
         signatureInputWidget.clear();
+    }
+
+    /**
+     * 根据签名和输入值构建 value 的 JsonElement
+     * - NumberIota (单 Number 输入): value 为原始数字
+     * - 其他类型: value 为 {输入名: 值} 对象
+     */
+    private JsonElement buildValueElement(Map<String, String> inputValues, Signature signature) {
+        if (signature instanceof DataSignature ds && ds.inputCount() == 1) {
+            var input = ds.getInputs().get(0);
+            String rawValue = inputValues.getOrDefault(input.getName(), "");
+            List<String> types = input.getType();
+            // 单 Number 输入 → value 为原始数字
+            if (types != null && types.size() == 1 && "Number".equals(types.get(0))) {
+                try {
+                    return new JsonPrimitive(Double.parseDouble(rawValue));
+                } catch (NumberFormatException e) {
+                    return new JsonPrimitive(0.0);
+                }
+            }
+        }
+        // 其他情况 → value 为 {输入名: 值} 对象
+        JsonObject obj = new JsonObject();
+        inputValues.forEach((key, value) -> obj.addProperty(key, value));
+        return obj;
     }
 
     /**

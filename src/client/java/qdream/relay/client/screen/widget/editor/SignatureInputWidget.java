@@ -11,13 +11,12 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.Signature;
 import qdream.relay.mc.signature.SignatureName;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import com.ibm.icu.impl.locale.LikelySubtags.Data;
+import java.util.Map;
 
 /**
  * 根据 Signature 动态创建输入框的 Widget
@@ -39,7 +38,7 @@ public class SignatureInputWidget extends AbstractWidget {
 
     private final Font font;
     private DataSignature signature;
-    private final List<EditBox> inputFields = new ArrayList<>();
+    private final Map<String, EditBox> inputFields = new HashMap<>();
     private final List<String> fieldLabels = new ArrayList<>();
 
     /** 滚动偏移量（像素） */
@@ -78,10 +77,9 @@ public class SignatureInputWidget extends AbstractWidget {
 
         for (int i = 0; i < inputCount; i++) {
             SignatureName signatureName = signature.getInputs().get(i);
-            String hintText = buildHintText(signatureName);
-            String label = "P" + (i + 1);
+            String hintText = buildHintText(signatureName.getType());
 
-            fieldLabels.add(label);
+            fieldLabels.add(signatureName.getName());
 
             EditBox editBox = new EditBox(
                     font,
@@ -94,19 +92,18 @@ public class SignatureInputWidget extends AbstractWidget {
             editBox.setHint(Component.literal(hintText).withStyle(ChatFormatting.GRAY));
             editBox.setMaxLength(256);
             editBox.setBordered(true);
-
-            inputFields.add(editBox);
+            inputFields.put(signatureName.getName(), editBox);
         }
     }
 
-    private String buildHintText(SignatureName types) {
-        if (types == null) {
+    private String buildHintText(List<String> types) {
+        if (types == null || types.isEmpty()) {
             return "any";
         }
-        if (types.getType().size() == 1) {
-            return types.getName() + ":" + types.getType().get(0);
+        if (types.size() == 1) {
+            return types.get(0);
         }
-        return types.getName() + ":" + String.join(" | ", types.getType());
+        return String.join(" | ", types);
     }
 
     private int getFieldWidth() {
@@ -126,8 +123,9 @@ public class SignatureInputWidget extends AbstractWidget {
     }
 
     private void updateFieldPositions() {
-        for (int i = 0; i < inputFields.size(); i++) {
-            EditBox field = inputFields.get(i);
+        for (int i = 0; i < fieldLabels.size(); i++) {
+            EditBox field = inputFields.get(fieldLabels.get(i));
+            if (field == null) continue;
             int fieldY = getY() + PADDING + i * (FIELD_HEIGHT + FIELD_SPACING) - scrollOffset;
             field.setX(getX() + PADDING + LABEL_WIDTH);
             field.setY(fieldY);
@@ -166,10 +164,11 @@ public class SignatureInputWidget extends AbstractWidget {
     /**
      * 获取所有输入值
      */
-    public List<String> getInputValues() {
-        List<String> values = new ArrayList<>();
-        for (EditBox field : inputFields) {
-            values.add(field.getValue());
+    public Map<String, String> getInputValues() {
+        Map<String, String> values = new HashMap<>();
+        for (String label : fieldLabels) {
+            EditBox field = inputFields.get(label);
+            values.put(label, field.getValue());
         }
         return values;
     }
@@ -178,8 +177,11 @@ public class SignatureInputWidget extends AbstractWidget {
      * 设置指定索引的值
      */
     public void setValue(int index, String value) {
-        if (index >= 0 && index < inputFields.size()) {
-            inputFields.get(index).setValue(value);
+        if (index >= 0 && index < fieldLabels.size()) {
+            EditBox field = inputFields.get(fieldLabels.get(index));
+            if (field != null) {
+                field.setValue(value);
+            }
         }
     }
 
@@ -187,7 +189,7 @@ public class SignatureInputWidget extends AbstractWidget {
      * 清空所有输入
      */
     public void clear() {
-        for (EditBox field : inputFields) {
+        for (EditBox field : inputFields.values()) {
             field.setValue("");
         }
     }
@@ -196,8 +198,11 @@ public class SignatureInputWidget extends AbstractWidget {
      * 聚焦第一个输入框
      */
     public void focusFirst() {
-        if (!inputFields.isEmpty()) {
-            inputFields.get(0).setFocused(true);
+        if (!fieldLabels.isEmpty()) {
+            EditBox field = inputFields.get(fieldLabels.get(0));
+            if (field != null) {
+                field.setFocused(true);
+            }
         }
     }
 
@@ -222,7 +227,7 @@ public class SignatureInputWidget extends AbstractWidget {
         }
 
         // 转发给输入框，并管理焦点
-        for (EditBox field : inputFields) {
+        for (EditBox field : inputFields.values()) {
             if (isMouseOverField(field, event.x(), event.y())) {
                 field.setFocused(true);
                 return field.mouseClicked(event, doubleClick);
@@ -230,7 +235,7 @@ public class SignatureInputWidget extends AbstractWidget {
         }
 
         // 点击在空白区域，取消所有焦点
-        for (EditBox field : inputFields) {
+        for (EditBox field : inputFields.values()) {
             field.setFocused(false);
         }
         return false;
@@ -239,7 +244,7 @@ public class SignatureInputWidget extends AbstractWidget {
     @Override
     public boolean keyPressed(KeyEvent event) {
         // 转发给当前聚焦的输入框
-        for (EditBox field : inputFields) {
+        for (EditBox field : inputFields.values()) {
             if (field.isFocused()) {
                 return field.keyPressed(event);
             }
@@ -250,7 +255,7 @@ public class SignatureInputWidget extends AbstractWidget {
     @Override
     public boolean charTyped(CharacterEvent event) {
         // 转发给当前聚焦的输入框
-        for (EditBox field : inputFields) {
+        for (EditBox field : inputFields.values()) {
             if (field.isFocused()) {
                 return field.charTyped(event);
             }
@@ -285,7 +290,7 @@ public class SignatureInputWidget extends AbstractWidget {
         }
 
         // 转发给输入框
-        for (EditBox field : inputFields) {
+        for (EditBox field : inputFields.values()) {
             if (isMouseOverField(field, event.x(), event.y())) {
                 return field.mouseDragged(event, dx, dy);
             }
@@ -312,7 +317,7 @@ public class SignatureInputWidget extends AbstractWidget {
     public void setFocused(boolean focused) {
         super.setFocused(focused);
         if (!focused) {
-            for (EditBox field : inputFields) {
+            for (EditBox field : inputFields.values()) {
                 field.setFocused(false);
             }
         }
@@ -346,7 +351,7 @@ public class SignatureInputWidget extends AbstractWidget {
         graphics.enableScissor(clipX, clipY, clipX + clipWidth, clipY + clipHeight);
 
         // 渲染输入框
-        for (EditBox field : inputFields) {
+        for (EditBox field : inputFields.values()) {
             if (field.visible) {
                 field.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
             }
