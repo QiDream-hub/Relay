@@ -6,11 +6,11 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.blocks.RelayBlocks;
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.commands.RelayCommands;
 import qdream.relay.entities.RelayEntityTypes;
-import qdream.relay.items.RelayDataComponents;
 import qdream.relay.items.RelayItems;
 import qdream.relay.mc.RelayOperations;
 import qdream.relay.networking.RelayServerNetworking;

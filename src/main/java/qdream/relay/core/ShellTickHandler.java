@@ -5,8 +5,8 @@ import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
+import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.Executable;
-import qdream.relay.items.RelayDataComponents;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
 
@@ -110,7 +110,7 @@ public class ShellTickHandler {
     private void tryInitialize(ShellContainer container) {
         ItemStack diskStack = container.getDiskStack();
         if (!diskStack.isEmpty()) {
-            CompoundTag compoundTag = diskStack.get(qdream.relay.items.RelayDataComponents.SPELL_PROGRAM);
+            CompoundTag compoundTag = diskStack.get(qdream.relay.Component.RelayDataComponents.SPELL_PROGRAM);
             if (compoundTag != null) {
                 ListTag programTag = compoundTag.getList("program").orElse(null);
                 if (programTag != null && !programTag.isEmpty()) {

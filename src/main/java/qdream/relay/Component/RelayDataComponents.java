@@ -1,4 +1,4 @@
-package qdream.relay.items;
+package qdream.relay.Component;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
