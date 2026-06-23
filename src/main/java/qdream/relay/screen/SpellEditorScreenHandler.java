@@ -34,7 +34,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
     /** 磁盘插槽索引 */
     public static final int DISK_SLOT = 0;
     /** 磁盘插槽位置 */
-    private static final int DISK_SLOT_X = 360;
+    private static final int DISK_SLOT_X = 160;
     private static final int DISK_SLOT_Y = 18;
 
     /** 背包面板起始位置 */

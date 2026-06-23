@@ -134,6 +134,16 @@ public class CustomMultiLineEditBox extends AbstractTextAreaWidget {
     }
 
     /**
+     * 在光标位置插入文本并自动追加逗号
+     * 插入后光标位于逗号之后，不选中任何内容
+     * @param textToInsert 要插入的文本（不含逗号）
+     */
+    public void insertWithComma(String textToInsert) {
+        String fullText = textToInsert + ",";
+        insertText(fullText);
+    }
+
+    /**
      * 删除光标前的字符
      */
     public void deleteBackward() {
@@ -333,29 +343,33 @@ public class CustomMultiLineEditBox extends AbstractTextAreaWidget {
             this.setFocused(true);
             this.focusedTime = Util.getMillis();
 
+            int newPos = calculateCursorPos(event.x(), event.y());
+
             if (doubleClick) {
                 // 双击选中单词
+                this.cursorPos = newPos;
                 selectWordAtCursor();
+            } else if (event.hasShiftDown() && this.selectionStart >= 0) {
+                // 按住 Shift 扩展选区
+                this.cursorPos = newPos;
             } else {
-                // 计算光标位置
-                int newPos = calculateCursorPos(event.x(), event.y());
-                if (event.hasShiftDown() && this.selectionStart >= 0) {
-                    // 按住 Shift 扩展选区
-                    this.cursorPos = newPos;
-                } else {
-                    // 新选区
-                    this.cursorPos = newPos;
-                    this.selectionStart = newPos;
-                }
+                // 单击：仅移动光标，不创建选区
+                this.cursorPos = newPos;
+                this.selectionStart = -1;
             }
             return true;
         }
         return false;
     }
 
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (this.isFocused() && button == 0) {
-            int newPos = calculateCursorPos(mouseX, mouseY);
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (this.isFocused() && event.button() == 0) {
+            int newPos = calculateCursorPos(event.x(), event.y());
+            // 拖动时保持选区起始点不变，只更新光标位置
+            if (this.selectionStart < 0) {
+                this.selectionStart = this.cursorPos;
+            }
             this.cursorPos = newPos;
             return true;
         }

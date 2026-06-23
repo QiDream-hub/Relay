@@ -18,13 +18,20 @@ import java.util.function.Consumer;
  */
 public class TypeListWidget extends AbstractWidget {
 
-    private static final int LINE_HEIGHT = 14;
-    private static final int PADDING = 4;
+    private static final int LINE_HEIGHT = 11;
+    private static final int PADDING = 3;
+    private static final int HEADER_HEIGHT = 16;
+    
+    private static final int BG_COLOR = 0xFF1E1E1E;
+    private static final int HEADER_BG = 0xFF252525;
+    private static final int BORDER_COLOR = 0xFF3A3A3A;
     private static final int TEXT_COLOR = 0xFFAAAAFF;
     private static final int HOVER_COLOR = 0xFFCCCCFF;
     private static final int HOVER_BG = 0x308080FF;
-    private static final int SCROLLBAR_COLOR = 0xFF808080;
-    private static final int SCROLLBAR_BG = 0xFF303030;
+    private static final int SELECTED_BG = 0x408080FF;
+    private static final int SCROLLBAR_COLOR = 0xFF505050;
+    private static final int SCROLLBAR_HOVER = 0xFF707070;
+    private static final int SCROLLBAR_BG = 0xFF2A2A2A;
 
     private final Font font;
     private final List<String> dataTypes;
@@ -35,6 +42,12 @@ public class TypeListWidget extends AbstractWidget {
 
     /** 滚动偏移量（以行为单位） */
     private int scrollOffset = 0;
+
+    /** 当前选中的条目索引，-1 表示无选中 */
+    private int selectedIndex = -1;
+
+    /** 滚动条悬停状态 */
+    private boolean scrollbarHovered = false;
 
     public TypeListWidget(int x, int y, int width, int height, Font font, List<String> dataTypes) {
         super(x, y, width, height, Component.empty());
@@ -48,7 +61,7 @@ public class TypeListWidget extends AbstractWidget {
 
     /** 获取可视区域内可显示的最大行数 */
     private int getVisibleLineCount() {
-        return Math.max(1, (this.height - PADDING * 2) / LINE_HEIGHT);
+        return Math.max(1, (this.height - HEADER_HEIGHT - PADDING * 2) / LINE_HEIGHT);
     }
 
     /** 获取最大滚动偏移 */
@@ -59,8 +72,8 @@ public class TypeListWidget extends AbstractWidget {
     /** 根据鼠标坐标计算条目索引，超出范围返回 -1 */
     private int getEntryAt(double mouseX, double mouseY) {
         double relX = mouseX - (getX() + PADDING);
-        double relY = mouseY - (getY() + PADDING);
-        if (relX < 0 || relX > this.width - PADDING * 2 || relY < 0)
+        double relY = mouseY - (getY() + HEADER_HEIGHT + PADDING);
+        if (relX < 0 || relX > this.width - PADDING * 2 - 4 || relY < 0)
             return -1;
         int index = scrollOffset + (int) (relY / LINE_HEIGHT);
         if (index < 0 || index >= dataTypes.size())
@@ -68,16 +81,24 @@ public class TypeListWidget extends AbstractWidget {
         return index;
     }
 
+    /** 检查鼠标是否在滚动条上 */
+    private boolean isMouseOnScrollbar(double mouseX, double mouseY) {
+        int sbX = getX() + this.width - 4;
+        return mouseX >= sbX && mouseX <= getX() + this.width;
+    }
+
     // ==================== 事件处理 ====================
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (!this.visible) return false;
+        
         if (event.button() == 0) {
             int index = getEntryAt(event.x(), event.y());
             if (index >= 0 && index < dataTypes.size()) {
-                String typeId = dataTypes.get(index);
+                selectedIndex = index;
                 if (onTypeClicked != null) {
-                    onTypeClicked.accept(typeId);
+                    onTypeClicked.accept(dataTypes.get(index));
                 }
                 return true;
             }
@@ -87,9 +108,17 @@ public class TypeListWidget extends AbstractWidget {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (dataTypes.size() <= getVisibleLineCount()) return false;
         scrollOffset -= (int) scrollY;
         scrollOffset = Math.max(0, Math.min(scrollOffset, getMaxScroll()));
         return true;
+    }
+
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return this.visible && 
+               mouseX >= this.getX() && mouseX < this.getX() + this.width &&
+               mouseY >= this.getY() && mouseY < this.getY() + this.height;
     }
 
     // ==================== 渲染 ====================
@@ -101,17 +130,27 @@ public class TypeListWidget extends AbstractWidget {
         int visibleLines = getVisibleLineCount();
 
         // 背景
-        graphics.fill(x, y, x + this.width, y + this.height, 0xFF1A1A1A);
+        graphics.fill(x, y, x + this.width, y + this.height, BG_COLOR);
+        
+        // 外边框
+        graphics.outline(x, y, this.width, this.height, BORDER_COLOR);
 
-        // 启用裁剪区域
-        graphics.enableScissor(x + PADDING, y + PADDING, x + this.width - PADDING, y + this.height - PADDING);
+        // 标题栏背景
+        graphics.fill(x, y, x + this.width, y + HEADER_HEIGHT, HEADER_BG);
+        graphics.horizontalLine(x, x + this.width, y + HEADER_HEIGHT, BORDER_COLOR);
 
         // 更新悬停索引
         hoveredIndex = getEntryAt(mouseX, mouseY);
+        scrollbarHovered = isMouseOnScrollbar(mouseX, mouseY);
+
+        // 启用裁剪区域（底部留出计数提示的空间）
+        int contentBottom = y + this.height - LINE_HEIGHT - 4;
+        graphics.enableScissor(x + PADDING, y + HEADER_HEIGHT + PADDING, 
+                               x + this.width - PADDING - 4, contentBottom);
 
         // 渲染列表条目
         int textX = x + PADDING + 2;
-        int textY = y + PADDING;
+        int textY = y + HEADER_HEIGHT + PADDING;
 
         for (int i = 0; i < visibleLines && (i + scrollOffset) < dataTypes.size(); i++) {
             int dataIndex = i + scrollOffset;
@@ -119,10 +158,13 @@ public class TypeListWidget extends AbstractWidget {
             int entryY = textY + i * LINE_HEIGHT;
 
             boolean isHovered = (dataIndex == hoveredIndex);
+            boolean isSelected = (dataIndex == selectedIndex);
 
-            // 悬停背景
-            if (isHovered) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING, entryY + LINE_HEIGHT - 1, HOVER_BG);
+            // 选中背景优先于悬停背景
+            if (isSelected) {
+                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1, SELECTED_BG);
+            } else if (isHovered) {
+                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1, HOVER_BG);
             }
 
             int color = isHovered ? HOVER_COLOR : TEXT_COLOR;
@@ -136,9 +178,12 @@ public class TypeListWidget extends AbstractWidget {
             renderScrollBar(graphics, x, y, visibleLines);
         }
 
-        // 底部计数提示
-        int countY = y + this.height - LINE_HEIGHT;
-        graphics.text(this.font, "共 " + dataTypes.size() + " 个类型", x + PADDING, countY, 0xFF666666);
+        // 标题文字
+        graphics.text(this.font, "数据类型", x + PADDING + 2, y + 4, 0xFFAAAAFF);
+
+        // 底部计数提示（在裁剪区域外渲染，确保可见）
+        int countY = y + this.height - LINE_HEIGHT - 2;
+        graphics.text(this.font, dataTypes.size() + " 个类型", x + PADDING, countY, 0xFF666666);
     }
 
     /**
@@ -146,19 +191,20 @@ public class TypeListWidget extends AbstractWidget {
      */
     private void renderScrollBar(GuiGraphicsExtractor graphics, int x, int y, int visibleLines) {
         int sbX = x + this.width - 4;
-        int sbTop = y + PADDING;
-        int sbHeight = this.height - PADDING * 2;
+        int sbTop = y + HEADER_HEIGHT + PADDING;
+        int sbHeight = this.height - HEADER_HEIGHT - PADDING * 2;
 
         // 滚动条背景
-        graphics.fill(sbX, sbTop, sbX + 3, sbTop + sbHeight, SCROLLBAR_BG);
+        graphics.fill(sbX, sbTop, sbX + 4, sbTop + sbHeight, SCROLLBAR_BG);
 
         // 滚动条滑块
         float ratio = (float) visibleLines / dataTypes.size();
-        int thumbHeight = Math.max(8, (int) (sbHeight * ratio));
+        int thumbHeight = Math.max(10, (int) (sbHeight * ratio));
         float scrollRatio = getMaxScroll() > 0 ? (float) scrollOffset / getMaxScroll() : 0;
         int thumbY = sbTop + (int) ((sbHeight - thumbHeight) * scrollRatio);
 
-        graphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbHeight, SCROLLBAR_COLOR);
+        int thumbColor = scrollbarHovered ? SCROLLBAR_HOVER : SCROLLBAR_COLOR;
+        graphics.fill(sbX, thumbY, sbX + 4, thumbY + thumbHeight, thumbColor);
     }
 
     @Override

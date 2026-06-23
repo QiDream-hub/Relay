@@ -203,6 +203,18 @@ public class JsonEditorWidget extends AbstractWidget {
         return true;
     }
 
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (!this.visible) {
+            return false;
+        }
+        // 确保聚焦
+        if (!this.editBox.isFocused()) {
+            this.editBox.setFocused(true);
+        }
+        return this.editBox.mouseDragged(event, deltaX, deltaY);
+    }
+
     /**
      * 处理滚动条点击
      */
@@ -233,6 +245,15 @@ public class JsonEditorWidget extends AbstractWidget {
      */
     public void insertAtCursor(String text) {
         this.editBox.insertText(text);
+    }
+
+    /**
+     * 在光标位置插入文本并自动追加逗号
+     * 插入后光标位于逗号之后，不选中任何内容
+     * @param textToInsert 要插入的文本（不含逗号）
+     */
+    public void insertWithComma(String textToInsert) {
+        this.editBox.insertWithComma(textToInsert);
     }
 
     @Override

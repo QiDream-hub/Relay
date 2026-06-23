@@ -36,20 +36,35 @@ import qdream.relay.screen.SpellEditorScreenHandler;
  */
 public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreenHandler> {
 
-    // 布局常量 - 大尺寸编辑器布局
+    // ===== 布局常量 =====
     private static final int GUI_WIDTH = 410;
     private static final int GUI_HEIGHT = 420;
+
+    // 左侧面板
     private static final int PANEL_WIDTH = 120;
     private static final int PANEL_PADDING = 10;
-    private static final int LINE_HEIGHT = 12;
+
+    // 右侧编辑器区域
+    private static final int EDITOR_TOP_MARGIN = 16;
+    private static final int EDITOR_BOTTOM_MARGIN = 8;
     private static final int EDITOR_PANEL_HEIGHT = 290;
-    private static final int LIST_TOP_MARGIN = LINE_HEIGHT + 8;
-    private static final int LIST_BOTTOM_MARGIN = 4;
-    private static final int OPS_LIST_HEIGHT = 130;
-    private static final int TYPE_LIST_HEIGHT = 90;
-    private static final int TYPE_LIST_GAP = LINE_HEIGHT + 10;
+
+    // 列表布局
+    private static final int LIST_TOP_MARGIN = 8;
+    private static final int OPS_LIST_HEIGHT = 160; // 操作列表高度 (增加 30px)
+    private static final int TYPE_LIST_HEIGHT = 110; // 类型列表高度 (增加 20px)
+    private static final int LIST_GAP = 8; // 两个列表之间的间距
+
+    // 按钮
     private static final int BUTTON_WIDTH = 50;
     private static final int BUTTON_HEIGHT = 20;
+    private static final int BUTTON_SPACING = 6;
+
+    // 颜色
+    private static final int BG_COLOR = 0xFF101010;
+    private static final int BORDER_COLOR = 0xFF404040;
+    private static final int SEPARATOR_COLOR = 0xFF404040;
+    private static final int INVENTORY_SEPARATOR_COLOR = 0xFF505050;
 
     // 自定义 Widget
     private OperationListWidget operationListWidget;
@@ -71,40 +86,43 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         int left = this.leftPos;
         int top = this.topPos;
+
+        // ===== 左侧面板布局 =====
         int listTop = top + LIST_TOP_MARGIN;
+        int listWidth = PANEL_WIDTH - PANEL_PADDING * 2;
 
-        // 计算右侧编辑器区域
+        // ===== 右侧编辑器区域 =====
         int editorX = left + PANEL_WIDTH + PANEL_PADDING;
-        int editorY = top + LIST_TOP_MARGIN;
+        int editorY = top + EDITOR_TOP_MARGIN;
         int editorWidth = GUI_WIDTH - PANEL_WIDTH - PANEL_PADDING * 3;
-        int editorHeight = EDITOR_PANEL_HEIGHT - LIST_TOP_MARGIN - LIST_BOTTOM_MARGIN - BUTTON_HEIGHT;
+        int editorHeight = EDITOR_PANEL_HEIGHT - EDITOR_TOP_MARGIN - EDITOR_BOTTOM_MARGIN - BUTTON_HEIGHT;
 
-        // 计算右侧按钮
-        int buttonY = top + 16;
-        int buttonSpacing = 6;
-        int buttonX = editorX + editorWidth - BUTTON_WIDTH * 3 - buttonSpacing * 2;
+        // 右侧按钮位置
+        int buttonY = top + EDITOR_TOP_MARGIN;
+        int buttonX = editorX + editorWidth - BUTTON_WIDTH * 3 - BUTTON_SPACING * 2;
 
-        // ===== 左侧面板：操作列表 =====
+        // ===== 创建 Widget =====
+        // 操作列表
         operationListWidget = new OperationListWidget(
                 left + PANEL_PADDING, listTop,
-                PANEL_WIDTH - PANEL_PADDING * 2, OPS_LIST_HEIGHT,
+                listWidth, OPS_LIST_HEIGHT,
                 this.font, this.menu.getAvailableOperations());
         operationListWidget.setOnOperationClicked(this::onOperationClicked);
         this.addRenderableWidget(operationListWidget);
 
-        // ===== 左侧面板：类型列表 =====
-        int typeListTop = listTop + OPS_LIST_HEIGHT + TYPE_LIST_GAP;
+        // 类型列表
+        int typeListTop = listTop + OPS_LIST_HEIGHT + LIST_GAP;
         typeListWidget = new TypeListWidget(
                 left + PANEL_PADDING, typeListTop,
-                PANEL_WIDTH - PANEL_PADDING * 2, TYPE_LIST_HEIGHT,
+                listWidth, TYPE_LIST_HEIGHT,
                 this.font, this.menu.getAvailableDataTypes());
         typeListWidget.setOnTypeClicked(this::onTypeClicked);
         this.addRenderableWidget(typeListWidget);
 
         // ===== 右侧面板：JSON 编辑器 =====
         jsonEditorWidget = new JsonEditorWidget(
-                editorX, editorY + BUTTON_HEIGHT,
-                editorWidth, editorHeight - BUTTON_HEIGHT,
+                editorX, editorY + BUTTON_HEIGHT + LIST_GAP,
+                editorWidth, editorHeight,
                 this.font);
         this.addRenderableWidget(jsonEditorWidget);
 
@@ -118,14 +136,14 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // 加载按钮
         loadButton = Button.builder(Component.literal("加载"), btn -> onLoad())
-                .pos(buttonX + BUTTON_WIDTH + buttonSpacing, buttonY)
+                .pos(buttonX + BUTTON_WIDTH + BUTTON_SPACING, buttonY)
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
         this.addRenderableWidget(loadButton);
 
         // 保存按钮
         saveButton = Button.builder(Component.literal("保存"), btn -> onSave())
-                .pos(buttonX + (BUTTON_WIDTH + buttonSpacing) * 2, buttonY)
+                .pos(buttonX + (BUTTON_WIDTH + BUTTON_SPACING) * 2, buttonY)
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
         this.addRenderableWidget(saveButton);
@@ -138,25 +156,27 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
     /**
      * 点击操作列表时，在光标位置插入操作 JSON
+     * 插入后自动追加逗号，不选中内容
      */
     private void onOperationClicked(String opId) {
         // 从注册表获取操作实例
         OperationRegistry.get(opId).ifPresent(op -> {
             JsonObject json = new JsonObject();
             ((qdream.relay.mc.base.Operation) op).toJson(json);
-            jsonEditorWidget.insertAtCursor(json.toString() + "\n");
+            jsonEditorWidget.insertWithComma(json.toString());
         });
     }
 
     /**
      * 点击类型列表时，在光标位置插入数据类型 JSON
+     * 插入后自动追加逗号，不选中内容
      */
     private void onTypeClicked(String typeId) {
         // 从注册表获取数据类型实例（默认值）
         OperationRegistry.get(typeId).ifPresent(data -> {
             JsonObject json = new JsonObject();
             ((qdream.relay.mc.base.Operation) data).toJson(json);
-            jsonEditorWidget.insertAtCursor(json.toString() + "\n");
+            jsonEditorWidget.insertWithComma(json.toString());
         });
     }
 
@@ -262,9 +282,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         // 深色背景
         graphics.fill(this.leftPos, this.topPos,
-                this.leftPos + this.imageWidth, this.topPos + this.imageHeight,
-                0xFF101010);
-        graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0xFF404040);
+                this.leftPos + this.imageWidth, this.topPos + this.imageHeight, BG_COLOR);
+        graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, BORDER_COLOR);
 
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
@@ -273,22 +292,12 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         int panelBottom = top + EDITOR_PANEL_HEIGHT;
 
         // 分隔线
-        graphics.verticalLine(left + PANEL_WIDTH, top, panelBottom, 0xFF404040);
-        graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, 0xFF505050);
+        graphics.verticalLine(left + PANEL_WIDTH, top, panelBottom, SEPARATOR_COLOR);
+        graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, INVENTORY_SEPARATOR_COLOR);
 
-        // 面板标题
-        graphics.text(this.font, "可用操作", left + PANEL_PADDING, top + 5, 0xFF00FF00);
         graphics.text(this.font, "JSON 编辑器", left + PANEL_WIDTH + PANEL_PADDING, top + 5, 0xFFFFFF00);
 
-        // 类型列表标题
-        int typeListTop = top + LIST_TOP_MARGIN + OPS_LIST_HEIGHT + TYPE_LIST_GAP;
-        graphics.text(this.font, "数据类型", left + PANEL_PADDING, typeListTop - LINE_HEIGHT - 2, 0xFFAAAAFF);
-
-        // 操作提示
-        int hintY = top + EDITOR_PANEL_HEIGHT - 14;
-        graphics.text(this.font, "点击添加操作", left + PANEL_PADDING, hintY, 0xFF666666);
     }
-
 
     // ==================== 事件转发 ====================
 
@@ -330,6 +339,30 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         }
 
         return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        // 优先转发给 JSON 编辑器
+        if (jsonEditorWidget != null && jsonEditorWidget.visible) {
+            if (jsonEditorWidget.mouseDragged(event, deltaX, deltaY)) {
+                return true;
+            }
+        }
+
+        // 转发给其他自定义 Widget
+        for (var widget : this.children()) {
+            if (widget instanceof net.minecraft.client.gui.components.AbstractWidget aw
+                    && aw.visible
+                    && event.x() >= aw.getX() && event.x() < aw.getX() + aw.getWidth()
+                    && event.y() >= aw.getY() && event.y() < aw.getY() + aw.getHeight()) {
+                if (aw.mouseDragged(event, deltaX, deltaY)) {
+                    return true;
+                }
+            }
+        }
+
+        return super.mouseDragged(event, deltaX, deltaY);
     }
 
     // ==================== 滚轮转发 ====================

@@ -2,7 +2,7 @@
 name: custom-multiline-editbox
 description: 自定义 MultiLineEditBox 实现精确光标控制的模式 - 继承 AbstractTextAreaWidget 实现完整的多行文本编辑功能
 source: auto-skill
-extracted_at: '2026-06-24T12:30:00.000Z'
+extracted_at: '2026-06-24T12:45:00.000Z'
 ---
 
 # 自定义 MultiLineEditBox 实现精确光标控制
@@ -65,6 +65,11 @@ public void insertText(String textToInsert) {
     this.ensureCursorVisible();
     this.onValueChanged();
 }
+
+// 插入文本并自动追加逗号（用于法术编辑器插入操作/数据）
+public void insertWithComma(String textToInsert) {
+    insertText(textToInsert + ",");
+}
 ```
 
 ### 3. 实现键盘事件处理
@@ -109,23 +114,46 @@ public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
     if (this.visible && this.isMouseOver(event.x(), event.y())) {
         this.setFocused(true);
         this.focusedTime = Util.getMillis();
-        
+
+        int newPos = calculateCursorPos(event.x(), event.y());
+
         if (doubleClick) {
-            selectWordAtCursor();  // 双击选中单词
+            // 双击选中单词
+            this.cursorPos = newPos;
+            selectWordAtCursor();
+        } else if (event.hasShiftDown() && this.selectionStart >= 0) {
+            // Shift+ 点击：扩展选区
+            this.cursorPos = newPos;
         } else {
-            int newPos = calculateCursorPos(event.x(), event.y());
-            if (event.hasShiftDown() && this.selectionStart >= 0) {
-                this.cursorPos = newPos;  // Shift+ 点击扩展选区
-            } else {
-                this.cursorPos = newPos;
-                this.selectionStart = newPos;  // 新选区
-            }
+            // 单击：仅移动光标，不创建选区
+            this.cursorPos = newPos;
+            this.selectionStart = -1;
         }
         return true;
     }
     return false;
 }
+
+// 拖动鼠标创建选区
+public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    if (this.isFocused() && button == 0) {
+        int newPos = calculateCursorPos(mouseX, mouseY);
+        // 拖动时保持选区起始点不变，只更新光标位置
+        if (this.selectionStart < 0) {
+            this.selectionStart = this.cursorPos;
+        }
+        this.cursorPos = newPos;
+        return true;
+    }
+    return false;
+}
 ```
+
+**交互设计要点**：
+- **单击**：仅移动光标，不创建选区（避免误触选中）
+- **双击**：选中光标处的单词
+- **Shift+ 单击**：扩展现有选区
+- **拖动**：从拖动起点到当前位置创建选区
 
 ### 5. 实现渲染方法
 
@@ -226,6 +254,10 @@ editBox.setValueListener(() -> { /* 处理变化 */ });
 // 在光标位置插入文本
 editBox.insertText("{\"id\":\"relay:add\"}\n");
 
+// 插入操作/数据时自动追加逗号（法术编辑器场景）
+editBox.insertWithComma("{\"id\":\"relay:number\",\"value\":1}");
+// 结果：{"id":"relay:number","value":1},
+
 // 获取/设置光标位置
 int cursorPos = editBox.getCursorPos();
 editBox.setCursorPos(10);
@@ -239,6 +271,10 @@ editBox.setCursorPos(10);
 4. **光标闪烁效果**：使用 `Util.getMillis()` 计算时间，每 300ms 切换一次可见性
 5. **选区处理**：在插入/删除文本时检查选区，有选区时先替换选区内容
 6. **字符编码处理**：使用 `Character.toString(int)` 而非 `String.valueOf(int)` 转换代码点
+7. **交互优化**：
+   - 单击仅移动光标，避免误触选中
+   - 拖动时自动创建选区，支持精确文本选择
+   - 提供 `insertWithComma()` 方法，用于法术编辑器插入操作/数据时自动追加逗号
 
 ## 适用场景
 
