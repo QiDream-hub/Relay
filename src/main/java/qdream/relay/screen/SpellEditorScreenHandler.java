@@ -34,10 +34,10 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
     /** 磁盘插槽索引 */
     public static final int DISK_SLOT = 0;
     /** 磁盘插槽位置 */
-    private static final int DISK_SLOT_X = 260;
+    private static final int DISK_SLOT_X = 360;
     private static final int DISK_SLOT_Y = 18;
 
-    /** 背包面板起始位置（与 InventoryPanelWidget 保持一致） */
+    /** 背包面板起始位置 */
     private static final int INVENTORY_START_X = 124;
     private static final int INVENTORY_START_Y = 310;
     private static final int SLOT_SIZE = 18;

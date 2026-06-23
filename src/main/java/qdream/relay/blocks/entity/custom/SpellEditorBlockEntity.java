@@ -185,7 +185,7 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("法术编辑器");
+        return Component.literal("");
     }
 
     @Override

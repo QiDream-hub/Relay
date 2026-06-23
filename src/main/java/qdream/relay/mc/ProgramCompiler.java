@@ -1,5 +1,7 @@
 package qdream.relay.mc;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,18 +21,21 @@ import java.util.Optional;
  * 负责 JSON 格式的程序序列化与反序列化
  * <p>
  * 程序格式：JSON 数组，每个元素包含 "id" 字段标识类型
+ * 
  * <pre>
  * [{"id":"relay:number","value":42},{"id":"relay:number","value":42},{"id":"relay:add"}]
  * </pre>
  */
 public class ProgramCompiler {
 
-    private ProgramCompiler() {}
+    private ProgramCompiler() {
+    }
 
     // ========== 序列化 ==========
 
     /**
      * 将程序列表编译为 JSON 数组
+     * 
      * @param program 程序列表
      * @return JSON 数组
      */
@@ -46,6 +51,7 @@ public class ProgramCompiler {
 
     /**
      * 将程序列表编译为 JSON 字符串
+     * 
      * @param program 程序列表
      * @return JSON 字符串
      */
@@ -53,10 +59,30 @@ public class ProgramCompiler {
         return toJson(program).toString();
     }
 
+    /**
+     * 将程序列表编译为格式化的 JSON 字符串
+     * 
+     * @param program 程序列表
+     * @return 格式化 JSON 字符串
+     */
+    public static String toPrettyJson(List<Executable> program) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonArray array = new JsonArray();
+        for (Executable item : program) {
+            if (item instanceof Operation operation) {
+                JsonObject op = new JsonObject();
+                operation.toJson(op);
+                array.add(op);
+            }
+        }
+        return gson.toJson(array);
+    }
+
     // ========== 反序列化 ==========
 
     /**
      * 从 JSON 字符串反编译为程序列表
+     * 
      * @param jsonStr JSON 字符串
      * @return 程序列表
      * @throws CompilationException 解析错误
@@ -79,6 +105,7 @@ public class ProgramCompiler {
 
     /**
      * 从 JSON 数组反编译为程序列表
+     * 
      * @param array JSON 数组
      * @return 程序列表
      * @throws CompilationException 解析错误

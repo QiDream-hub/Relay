@@ -1,15 +1,111 @@
 ---
 name: relay-spell-editor-gui-rendering
-description: Relay 法术编辑器 GUI 渲染与布局适配 - 26.1.2 AbstractContainerScreen 背景渲染、按钮定位、面板布局
+description: Relay 法术编辑器 GUI 渲染与布局适配 - 26.1.2 AbstractContainerScreen 背景渲染、官方纹理使用、按钮定位、面板布局
 source: auto-skill
-extracted_at: '2026-06-06T12:00:00.000Z'
+extracted_at: '2026-06-24T12:00:00.000Z'
 ---
 
 # Relay 法术编辑器 GUI 渲染与布局适配
 
-在 Minecraft 26.1.2 中使用 `AbstractContainerScreen` 实现自定义 GUI 的完整渲染流程，包括背景绘制、按钮定位、面板布局调整。
+在 Minecraft 26.1.2 中使用 `AbstractContainerScreen` 实现自定义 GUI 的完整渲染流程，包括背景绘制、官方纹理使用、按钮定位、面板布局调整。
 
-## 核心问题与解决方案
+## 方案选择
+
+### 方案 1: 使用官方纹理（推荐）
+仿照熔炉等原版 GUI，使用 Minecraft 官方纹理作为背景，自动渲染玩家背包。
+
+**优点**：
+- 与原版 GUI 风格一致
+- 玩家背包自动渲染，无需手动处理
+- 纹理经过官方设计，视觉效果更好
+
+**缺点**：
+- 尺寸固定为 176x166（标准熔炉尺寸）
+- 布局需要适应纹理的插槽位置
+
+### 方案 2: 自定义纯色背景
+手动绘制纯色背景和边框，完全自定义布局。
+
+**优点**：
+- 尺寸和布局完全自由
+- 适合复杂的多栏布局
+
+**缺点**：
+- 需要手动渲染背包背景
+- 视觉风格可能与原版不一致
+
+## 使用官方纹理的实现方法
+
+### 1. 定义纹理 Identifier
+
+```java
+private static final Identifier BACKGROUND_TEXTURE = 
+    Identifier.withDefaultNamespace("textures/gui/container/furnace.png");
+```
+
+### 2. 设置标准尺寸
+
+```java
+private static final int GUI_WIDTH = 176;   // 标准熔炉宽度
+private static final int GUI_HEIGHT = 166;  // 标准熔炉高度
+
+public SpellEditorScreen(SpellEditorScreenHandler handler, Inventory inventory, Component title) {
+    super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
+    this.inventoryLabelY = 84;  // 背包标签 Y 位置（熔炉标准）
+}
+```
+
+### 3. 渲染背景纹理
+
+```java
+@Override
+public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+    // 渲染官方背景纹理
+    int x = this.leftPos;
+    int y = this.topPos;
+    graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND_TEXTURE, 
+                  x, y, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
+
+    // 调用父类渲染 Slot（物品栏）
+    super.extractRenderState(graphics, mouseX, mouseY, delta);
+
+    // 渲染自定义内容（标题、按钮等）
+    graphics.text(this.font, "操作", x + 8, y + 8, 0xFF00FF00);
+    graphics.text(this.font, "JSON", x + 68, y + 8, 0xFFFFFF00);
+}
+```
+
+### 4. ScreenHandler 插槽位置对齐
+
+熔炉的背包位置在 `(8, 84)`，需要调整 ScreenHandler 中的插槽坐标：
+
+```java
+// SpellEditorScreenHandler.java
+private static final int INVENTORY_START_X = 8;   // 熔炉背包 X 位置
+private static final int INVENTORY_START_Y = 84;  // 熔炉背包 Y 位置
+private static final int SLOT_SIZE = 18;
+
+public SpellEditorScreenHandler(int syncId, Inventory playerInventory, ...) {
+    // 玩家主物品栏（3 行 x 9 列）
+    for (int y = 0; y < 3; ++y) {
+        for (int x = 0; x < 9; ++x) {
+            this.addSlot(new Slot(playerInventory, x + y * 9 + 9,
+                INVENTORY_START_X + x * SLOT_SIZE,
+                INVENTORY_START_Y + y * SLOT_SIZE));
+        }
+    }
+
+    // 玩家热键栏（1 行 x 9 列）
+    int hotbarY = INVENTORY_START_Y + 54;
+    for (int x = 0; x < 9; ++x) {
+        this.addSlot(new Slot(playerInventory, x,
+            INVENTORY_START_X + x * SLOT_SIZE,
+            hotbarY));
+    }
+}
+```
+
+## 核心问题与解决方案（自定义背景方案）
 
 ### 问题 1: 背景不显示
 **现象**: GUI 打开后透明，看不到面板背景
@@ -21,17 +117,17 @@ extracted_at: '2026-06-06T12:00:00.000Z'
 @Override
 public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
     // 绘制深色背景
-    graphics.fill(this.leftPos, this.topPos, 
-                 this.leftPos + this.imageWidth, 
-                 this.topPos + this.imageHeight, 
+    graphics.fill(this.leftPos, this.topPos,
+                 this.leftPos + this.imageWidth,
+                 this.topPos + this.imageHeight,
                  0xFF101010);
-    
+
     // 绘制边框
     graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0xFF404040);
-    
+
     // 调用父类渲染 Slot（物品栏）
     super.extractRenderState(graphics, mouseX, mouseY, delta);
-    
+
     // ... 渲染其他内容
 }
 ```

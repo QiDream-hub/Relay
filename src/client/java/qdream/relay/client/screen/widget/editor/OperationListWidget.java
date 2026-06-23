@@ -107,7 +107,7 @@ public class OperationListWidget extends AbstractWidget {
 
         // 渲染列表条目
         int textX = x + PADDING + 2;
-        int textY = y + PADDING;
+        int textY = y;
         for (int i = 0; i < visibleLines && (i + scrollOffset) < operations.size(); i++) {
             int dataIndex = i + scrollOffset;
             String op = operations.get(dataIndex);

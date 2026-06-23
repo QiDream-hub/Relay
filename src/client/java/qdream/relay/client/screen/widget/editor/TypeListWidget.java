@@ -13,16 +13,14 @@ import java.util.function.Consumer;
 /**
  * 数据类型列表 Widget
  * 显示可用的 Iota 数据类型（如 string, number, boolean 等）
- * 支持滚动浏览、点击选中、悬停高亮
- * 点击选中某类型后通知父级，父级据此显示输入框提示
+ * 支持滚动浏览、点击添加、悬停高亮
+ * 点击某类型时通过回调通知父级添加该类型
  */
 public class TypeListWidget extends AbstractWidget {
 
     private static final int LINE_HEIGHT = 14;
     private static final int PADDING = 4;
     private static final int TEXT_COLOR = 0xFFAAAAFF;
-    private static final int SELECTED_COLOR = 0xFFFFFFFF;
-    private static final int SELECTED_BG = 0x408080FF;
     private static final int HOVER_COLOR = 0xFFCCCCFF;
     private static final int HOVER_BG = 0x308080FF;
     private static final int SCROLLBAR_COLOR = 0xFF808080;
@@ -30,14 +28,11 @@ public class TypeListWidget extends AbstractWidget {
 
     private final Font font;
     private final List<String> dataTypes;
-    private Consumer<String> onTypeSelected;
-
-    /** 当前选中的类型 ID */
-    private String selectedType = null;
+    private Consumer<String> onTypeClicked;
 
     /** 悬停索引 */
     private int hoveredIndex = -1;
-    
+
     /** 滚动偏移量（以行为单位） */
     private int scrollOffset = 0;
 
@@ -47,23 +42,15 @@ public class TypeListWidget extends AbstractWidget {
         this.dataTypes = dataTypes;
     }
 
-    public void setOnTypeSelected(Consumer<String> callback) {
-        this.onTypeSelected = callback;
+    public void setOnTypeClicked(Consumer<String> callback) {
+        this.onTypeClicked = callback;
     }
 
-    public String getSelectedType() {
-        return selectedType;
-    }
-
-    public void clearSelection() {
-        selectedType = null;
-    }
-    
     /** 获取可视区域内可显示的最大行数 */
     private int getVisibleLineCount() {
         return Math.max(1, (this.height - PADDING * 2) / LINE_HEIGHT);
     }
-    
+
     /** 获取最大滚动偏移 */
     private int getMaxScroll() {
         return Math.max(0, dataTypes.size() - getVisibleLineCount());
@@ -73,9 +60,11 @@ public class TypeListWidget extends AbstractWidget {
     private int getEntryAt(double mouseX, double mouseY) {
         double relX = mouseX - (getX() + PADDING);
         double relY = mouseY - (getY() + PADDING);
-        if (relX < 0 || relX > this.width - PADDING * 2 || relY < 0) return -1;
+        if (relX < 0 || relX > this.width - PADDING * 2 || relY < 0)
+            return -1;
         int index = scrollOffset + (int) (relY / LINE_HEIGHT);
-        if (index < 0 || index >= dataTypes.size()) return -1;
+        if (index < 0 || index >= dataTypes.size())
+            return -1;
         return index;
     }
 
@@ -87,16 +76,15 @@ public class TypeListWidget extends AbstractWidget {
             int index = getEntryAt(event.x(), event.y());
             if (index >= 0 && index < dataTypes.size()) {
                 String typeId = dataTypes.get(index);
-                selectedType = (selectedType != null && selectedType.equals(typeId)) ? null : typeId;
-                if (onTypeSelected != null) {
-                    onTypeSelected.accept(selectedType);
+                if (onTypeClicked != null) {
+                    onTypeClicked.accept(typeId);
                 }
                 return true;
             }
         }
         return false;
     }
-    
+
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         scrollOffset -= (int) scrollY;
@@ -124,30 +112,20 @@ public class TypeListWidget extends AbstractWidget {
         // 渲染列表条目
         int textX = x + PADDING + 2;
         int textY = y + PADDING;
-        
+
         for (int i = 0; i < visibleLines && (i + scrollOffset) < dataTypes.size(); i++) {
             int dataIndex = i + scrollOffset;
             String typeId = dataTypes.get(dataIndex);
             int entryY = textY + i * LINE_HEIGHT;
 
-            boolean isSelected = typeId.equals(selectedType);
             boolean isHovered = (dataIndex == hoveredIndex);
 
-            if (isSelected) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING, entryY + LINE_HEIGHT - 1, SELECTED_BG);
-            } else if (isHovered) {
+            // 悬停背景
+            if (isHovered) {
                 graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING, entryY + LINE_HEIGHT - 1, HOVER_BG);
             }
 
-            int color;
-            if (isSelected) {
-                color = SELECTED_COLOR;
-            } else if (isHovered) {
-                color = HOVER_COLOR;
-            } else {
-                color = TEXT_COLOR;
-            }
-
+            int color = isHovered ? HOVER_COLOR : TEXT_COLOR;
             graphics.text(this.font, typeId, textX, entryY, color);
         }
 
@@ -157,8 +135,12 @@ public class TypeListWidget extends AbstractWidget {
         if (dataTypes.size() > visibleLines) {
             renderScrollBar(graphics, x, y, visibleLines);
         }
+
+        // 底部计数提示
+        int countY = y + this.height - LINE_HEIGHT;
+        graphics.text(this.font, "共 " + dataTypes.size() + " 个类型", x + PADDING, countY, 0xFF666666);
     }
-    
+
     /**
      * 渲染右侧滚动条
      */
