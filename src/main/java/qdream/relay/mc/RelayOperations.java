@@ -1,17 +1,12 @@
 package qdream.relay.mc;
 
-import java.util.UUID;
-
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.operations.arithmetic.AddOp;
 import qdream.relay.operations.arithmetic.DivOp;
 import qdream.relay.operations.arithmetic.MulOp;
 import qdream.relay.operations.arithmetic.SubOp;
 import qdream.relay.operations.base.DupOp;
-import qdream.relay.operations.base.GetOwnerOp;
-import qdream.relay.operations.base.GetSelfOp;
 import qdream.relay.operations.base.GetWorldInteractorOp;
-import qdream.relay.operations.base.IsPlayerOp;
 import qdream.relay.operations.base.PopOp;
 import qdream.relay.operations.base.SwapOp;
 import qdream.relay.operations.communication.PeekOp;
@@ -21,6 +16,9 @@ import qdream.relay.operations.communication.SendMessageOp;
 import qdream.relay.operations.control.EvalOp;
 import qdream.relay.operations.control.IfOp;
 import qdream.relay.operations.control.StopOp;
+import qdream.relay.operations.entity.GetOwnerOp;
+import qdream.relay.operations.entity.GetSelfOp;
+import qdream.relay.operations.entity.IsPlayerOp;
 import qdream.relay.operations.logic.AndOp;
 import qdream.relay.operations.logic.EqOp;
 import qdream.relay.operations.logic.GtOp;
@@ -33,7 +31,7 @@ import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListSetOp;
 import qdream.relay.types.BooleanIota;
-import qdream.relay.types.ContainerIota;
+import qdream.relay.types.BlockEntityIota;
 import qdream.relay.types.EntityIota;
 import qdream.relay.types.ListIota;
 import qdream.relay.types.NullIota;
@@ -70,13 +68,13 @@ public class RelayOperations {
         OperationRegistry.register("relay:vector",
                 new OperationRegistry.DataEntry(() -> new VectorIota(new Vec3(0, 0, 0))));
         OperationRegistry.register("relay:entity",
-                new OperationRegistry.DataEntry(() -> EntityIota.fromUuid(new UUID(0, 0))));
+                new OperationRegistry.DataEntry(() -> new EntityIota(null, null, null)));
         OperationRegistry.register("relay:null",
                 new OperationRegistry.DataEntry(() -> NullIota.INSTANCE));
         OperationRegistry.register("relay:list",
                 new OperationRegistry.DataEntry(() -> new ListIota(new ArrayList<>())));
-        OperationRegistry.register("relay:container",
-                new OperationRegistry.DataEntry(() -> new ContainerIota(null)));
+        OperationRegistry.register("relay:block_entity",
+                new OperationRegistry.DataEntry(() -> new BlockEntityIota(null, null, null)));
     }
 
     private static void registerOperations() {

@@ -71,6 +71,13 @@ public class ShellTickHandler {
                 var stateMachine = container.getStateMachine();
                 stateMachine.setContext("worldInteractor", container.getInteractorStack());
                 stateMachine.setContext("shellContainer", container);
+                
+                // 获取世界引用并设置到上下文
+                if (container instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
+                    stateMachine.setContext("world", blockEntity.getLevel());
+                } else if (container instanceof net.minecraft.world.entity.Entity entity) {
+                    stateMachine.setContext("world", entity.level());
+                }
 
                 // 执行
                 stateMachine.run(coreCount);

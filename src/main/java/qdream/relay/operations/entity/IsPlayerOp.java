@@ -1,7 +1,8 @@
-package qdream.relay.operations.base;
+package qdream.relay.operations.entity;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
@@ -33,20 +34,23 @@ public class IsPlayerOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
+        // 从上下文获取世界
+        Level world = executor.getContext("world", Level.class);
+
         // 弹出实体
         var entityExe = executor.popData();
         if (entityExe == null) {
             executor.triggerMishap("无法弹出实体");
             return;
         }
-        
+
         if (!(entityExe instanceof EntityIota entityIota)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
 
-        // 获取实体引用
-        Entity entity = entityIota.getEntity();
+        // 获取实体引用（需要世界）
+        Entity entity = entityIota.getEntity(world);
 
         // 检查是否是玩家
         boolean isPlayer = (entity instanceof Player);

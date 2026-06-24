@@ -2,6 +2,7 @@ package qdream.relay.operations.communication;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 
 import qdream.relay.engine.StateMachine;
@@ -37,13 +38,16 @@ public class SendMessageOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
+        // 从上下文获取世界
+        Level world = executor.getContext("world", Level.class);
+
         // 弹出实体
         var entityExe = executor.popData();
         if (entityExe == null) {
             executor.triggerMishap("无法弹出实体");
             return;
         }
-        
+
         if (!(entityExe instanceof EntityIota entityIota)) {
             executor.triggerMishap("期望 entity 类型");
             return;
@@ -55,14 +59,14 @@ public class SendMessageOp extends Spell {
             executor.triggerMishap("无法弹出消息");
             return;
         }
-        
+
         if (!(msgExe instanceof StringIota stringIota)) {
             executor.triggerMishap("期望 string 类型");
             return;
         }
 
-        // 获取实体引用
-        Entity entity = entityIota.getEntity();
+        // 获取实体引用（需要世界）
+        Entity entity = entityIota.getEntity(world);
         String message = stringIota.asString();
 
         // 检查是否是玩家
