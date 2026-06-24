@@ -5,6 +5,8 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 状态机执行器
@@ -13,6 +15,7 @@ import java.util.Collections;
 public class StateMachine {
     private final Deque<Executable> programStack = new ArrayDeque<>();
     private final Deque<Executable> dataStack = new ArrayDeque<>();
+    private final Map<String, Object> context = new HashMap<>();
 
     private int remainingOps;
     private int maxStackSize;
@@ -102,6 +105,57 @@ public class StateMachine {
 
     public void setMishapHandler(MishapHandler handler) {
         this.mishapHandler = handler;
+    }
+
+    // ========== 上下文管理 ==========
+
+    /**
+     * 设置上下文数据
+     * @param key 键
+     * @param value 值（可以是任意对象，如 ItemStack、ServerLevel 等）
+     */
+    public void setContext(String key, Object value) {
+        context.put(key, value);
+    }
+
+    /**
+     * 获取上下文数据
+     * @param key 键
+     * @return 值，如果不存在返回 null
+     */
+    public Object getContext(String key) {
+        return context.get(key);
+    }
+
+    /**
+     * 获取上下文数据（类型安全版本）
+     * @param key 键
+     * @param type 期望的类型
+     * @return 值，如果不存在或类型不匹配返回 null
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getContext(String key, Class<T> type) {
+        Object value = context.get(key);
+        if (value == null) {
+            return null;
+        }
+        return type.cast(value);
+    }
+
+    /**
+     * 检查是否存在上下文数据
+     * @param key 键
+     * @return 是否存在
+     */
+    public boolean hasContext(String key) {
+        return context.containsKey(key);
+    }
+
+    /**
+     * 清空上下文
+     */
+    public void clearContext() {
+        context.clear();
     }
 
     // ========== 栈操作 ==========

@@ -8,6 +8,7 @@ import qdream.relay.operations.arithmetic.DivOp;
 import qdream.relay.operations.arithmetic.MulOp;
 import qdream.relay.operations.arithmetic.SubOp;
 import qdream.relay.operations.base.DupOp;
+import qdream.relay.operations.base.GetWorldInteractorOp;
 import qdream.relay.operations.base.PopOp;
 import qdream.relay.operations.base.SwapOp;
 import qdream.relay.operations.communication.PeekOp;
@@ -42,7 +43,8 @@ import java.util.ArrayList;
  */
 public class RelayOperations {
 
-    private RelayOperations() {}
+    private RelayOperations() {
+    }
 
     public static void register() {
         // ========== 注册数据类型 ==========
@@ -55,19 +57,19 @@ public class RelayOperations {
     private static void registerDataTypes() {
         // 基础类型 - 工厂方法创建默认值实例
         OperationRegistry.register("relay:number",
-            new OperationRegistry.DataEntry(() -> new NumberIota(0)));
+                new OperationRegistry.DataEntry(() -> new NumberIota(0)));
         OperationRegistry.register("relay:boolean",
-            new OperationRegistry.DataEntry(() -> new BooleanIota(false)));
+                new OperationRegistry.DataEntry(() -> new BooleanIota(false)));
         OperationRegistry.register("relay:string",
-            new OperationRegistry.DataEntry(() -> new StringIota("")));
+                new OperationRegistry.DataEntry(() -> new StringIota("")));
         OperationRegistry.register("relay:vector",
-            new OperationRegistry.DataEntry(() -> new VectorIota(new Vec3(0, 0, 0))));
+                new OperationRegistry.DataEntry(() -> new VectorIota(new Vec3(0, 0, 0))));
         OperationRegistry.register("relay:entity",
-            new OperationRegistry.DataEntry(() -> new EntityIota(new UUID(0, 0))));
+                new OperationRegistry.DataEntry(() -> new EntityIota(new UUID(0, 0))));
         OperationRegistry.register("relay:null",
-            new OperationRegistry.DataEntry(() -> NullIota.INSTANCE));
+                new OperationRegistry.DataEntry(() -> NullIota.INSTANCE));
         OperationRegistry.register("relay:list",
-            new OperationRegistry.DataEntry(() -> new ListIota(new ArrayList<>())));
+                new OperationRegistry.DataEntry(() -> new ListIota(new ArrayList<>())));
     }
 
     private static void registerOperations() {
@@ -75,6 +77,8 @@ public class RelayOperations {
         OperationRegistry.register("relay:pop", new OperationRegistry.OpEntry(new PopOp()));
         OperationRegistry.register("relay:dup", new OperationRegistry.OpEntry(new DupOp()));
         OperationRegistry.register("relay:swap", new OperationRegistry.OpEntry(new SwapOp()));
+        OperationRegistry.register("relay:get_world_interactor",
+                new OperationRegistry.OpEntry(new GetWorldInteractorOp()));
 
         // 算术操作
         OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new AddOp()));

@@ -128,7 +128,7 @@ public class RelayCommands {
                 )
                 .build();
 
-        // /relay run <hand|shell> [slot] [ops]
+        // /relay run <hand|shell> [ops] [withWorldInteractor]
         LiteralCommandNode<CommandSourceStack> run = Commands.literal("run")
                 .then(Commands.argument("target", StringArgumentType.word())
                         .suggests((ctx, builder) -> {
@@ -138,11 +138,27 @@ public class RelayCommands {
                         })
                         .then(Commands.argument("ops", IntegerArgumentType.integer(1, 10000))
                                 .executes(RelayCommands::runHand)
+                                .then(Commands.argument("withWorldInteractor", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> {
+                                            builder.suggest("true");
+                                            builder.suggest("false");
+                                            return builder.buildFuture();
+                                        })
+                                        .executes(RelayCommands::runHandWithInteractor)
+                                )
                         )
                         .then(Commands.literal("shell")
                                 .then(Commands.argument("pos", StringArgumentType.word())
                                         .then(Commands.argument("ops", IntegerArgumentType.integer(1, 10000))
                                                 .executes(RelayCommands::runShell)
+                                                .then(Commands.argument("withWorldInteractor", StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> {
+                                                            builder.suggest("true");
+                                                            builder.suggest("false");
+                                                            return builder.buildFuture();
+                                                        })
+                                                        .executes(RelayCommands::runShellWithInteractor)
+                                                )
                                         )
                                 )
                         )
@@ -303,6 +319,112 @@ public class RelayCommands {
 
         source.sendSuccess(() -> copyableText("法术程序 (§e" + program.size() + "§r 个指令): §f", programToString(program)), true);
         return program.size();
+    }
+
+    /**
+     * 运行手中的法术磁盘程序（带世界交互器选项）
+     */
+    private static int runHandWithInteractor(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        var player = source.getPlayerOrException();
+        ItemStack stack = player.getMainHandItem();
+
+        if (!(stack.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        int ops = IntegerArgumentType.getInteger(context, "ops");
+        String withInteractor = StringArgumentType.getString(context, "withWorldInteractor");
+        boolean useWorldInteractor = Boolean.parseBoolean(withInteractor);
+
+        List<Executable> program = SpellDiskItem.getProgram(stack);
+        if (program.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("法术磁盘为空，无法运行"), true);
+            return 0;
+        }
+
+        StateMachine machine = new StateMachine();
+        machine.setMishapHandler(reason -> {
+            try {
+                source.sendFailure(Component.literal("§c 事故：" + reason));
+            } catch (Exception e) {
+                // 忽略
+            }
+        });
+
+        // 如果启用世界交互器，设置上下文
+        if (useWorldInteractor) {
+            machine.setContext("worldInteractor", stack);
+        }
+
+        machine.loadProgram(program);
+        machine.run(ops);
+
+        List<Executable> dataStack = machine.getDataStackSnapshot();
+        StringBuilder result = new StringBuilder();
+        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        if (!dataStack.isEmpty()) {
+            result.append(", 数据栈：§f").append(dataStackToString(dataStack));
+        }
+
+        source.sendSuccess(() -> Component.literal(result.toString()), true);
+        return 1;
+    }
+
+    /**
+     * 运行外壳方块中的法术磁盘程序（带世界交互器选项）
+     */
+    private static int runShellWithInteractor(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        String posStr = StringArgumentType.getString(context, "pos");
+        int ops = IntegerArgumentType.getInteger(context, "ops");
+        String withInteractor = StringArgumentType.getString(context, "withWorldInteractor");
+        boolean useWorldInteractor = Boolean.parseBoolean(withInteractor);
+
+        var pos = parseBlockPos(posStr, source);
+        BlockEntity blockEntity = source.getLevel().getBlockEntity(pos);
+
+        if (!(blockEntity instanceof ShellContainer shell)) {
+            throw INVALID_SLOT.create();
+        }
+
+        ItemStack disk = shell.getDiskStack();
+        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+            throw NO_DISK.create();
+        }
+
+        List<Executable> program = SpellDiskItem.getProgram(disk);
+        if (program.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("法术磁盘为空，无法运行"), true);
+            return 0;
+        }
+
+        StateMachine machine = new StateMachine();
+        machine.setMishapHandler(reason -> {
+            try {
+                source.sendFailure(Component.literal("§c 事故：" + reason));
+            } catch (Exception e) {
+                // 忽略
+            }
+        });
+
+        // 如果启用世界交互器，设置上下文
+        if (useWorldInteractor) {
+            machine.setContext("worldInteractor", shell.getInteractorStack());
+        }
+
+        machine.loadProgram(program);
+        machine.run(ops);
+
+        List<Executable> dataStack = machine.getDataStackSnapshot();
+        StringBuilder result = new StringBuilder();
+        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        if (!dataStack.isEmpty()) {
+            result.append(", 数据栈：§f").append(dataStackToString(dataStack));
+        }
+
+        source.sendSuccess(() -> Component.literal(result.toString()), true);
+        return 1;
     }
 
     /**
