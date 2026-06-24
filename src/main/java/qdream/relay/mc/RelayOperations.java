@@ -8,12 +8,16 @@ import qdream.relay.operations.arithmetic.DivOp;
 import qdream.relay.operations.arithmetic.MulOp;
 import qdream.relay.operations.arithmetic.SubOp;
 import qdream.relay.operations.base.DupOp;
+import qdream.relay.operations.base.GetOwnerOp;
+import qdream.relay.operations.base.GetSelfOp;
 import qdream.relay.operations.base.GetWorldInteractorOp;
+import qdream.relay.operations.base.IsPlayerOp;
 import qdream.relay.operations.base.PopOp;
 import qdream.relay.operations.base.SwapOp;
 import qdream.relay.operations.communication.PeekOp;
 import qdream.relay.operations.communication.RecvOp;
 import qdream.relay.operations.communication.SendOp;
+import qdream.relay.operations.communication.SendMessageOp;
 import qdream.relay.operations.control.EvalOp;
 import qdream.relay.operations.control.IfOp;
 import qdream.relay.operations.control.StopOp;
@@ -29,6 +33,7 @@ import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListSetOp;
 import qdream.relay.types.BooleanIota;
+import qdream.relay.types.ContainerIota;
 import qdream.relay.types.EntityIota;
 import qdream.relay.types.ListIota;
 import qdream.relay.types.NullIota;
@@ -65,11 +70,13 @@ public class RelayOperations {
         OperationRegistry.register("relay:vector",
                 new OperationRegistry.DataEntry(() -> new VectorIota(new Vec3(0, 0, 0))));
         OperationRegistry.register("relay:entity",
-                new OperationRegistry.DataEntry(() -> new EntityIota(new UUID(0, 0))));
+                new OperationRegistry.DataEntry(() -> EntityIota.fromUuid(new UUID(0, 0))));
         OperationRegistry.register("relay:null",
                 new OperationRegistry.DataEntry(() -> NullIota.INSTANCE));
         OperationRegistry.register("relay:list",
                 new OperationRegistry.DataEntry(() -> new ListIota(new ArrayList<>())));
+        OperationRegistry.register("relay:container",
+                new OperationRegistry.DataEntry(() -> new ContainerIota(null)));
     }
 
     private static void registerOperations() {
@@ -79,6 +86,12 @@ public class RelayOperations {
         OperationRegistry.register("relay:swap", new OperationRegistry.OpEntry(new SwapOp()));
         OperationRegistry.register("relay:get_world_interactor",
                 new OperationRegistry.OpEntry(new GetWorldInteractorOp()));
+        OperationRegistry.register("relay:get_self",
+                new OperationRegistry.OpEntry(new GetSelfOp()));
+        OperationRegistry.register("relay:get_owner",
+                new OperationRegistry.OpEntry(new GetOwnerOp()));
+        OperationRegistry.register("relay:is_player",
+                new OperationRegistry.OpEntry(new IsPlayerOp()));
 
         // 算术操作
         OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new AddOp()));
@@ -105,6 +118,7 @@ public class RelayOperations {
         OperationRegistry.register("relay:send", new OperationRegistry.OpEntry(new SendOp()));
         OperationRegistry.register("relay:recv", new OperationRegistry.OpEntry(new RecvOp()));
         OperationRegistry.register("relay:peek", new OperationRegistry.OpEntry(new PeekOp()));
+        OperationRegistry.register("relay:send_message", new OperationRegistry.OpEntry(new SendMessageOp()));
 
         // 列表操作
         OperationRegistry.register("relay:list_append", new OperationRegistry.OpEntry(new ListAppendOp()));

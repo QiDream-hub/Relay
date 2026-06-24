@@ -356,6 +356,9 @@ public class RelayCommands {
         if (useWorldInteractor) {
             machine.setContext("worldInteractor", stack);
         }
+        
+        // 设置 shellContainer 上下文，支持 get_self、get_owner 等操作
+        machine.setContext("shellContainer", createHandContainer(stack));
 
         machine.loadProgram(program);
         machine.run(ops);
@@ -412,6 +415,9 @@ public class RelayCommands {
         if (useWorldInteractor) {
             machine.setContext("worldInteractor", shell.getInteractorStack());
         }
+        
+        // 设置 shellContainer 上下文，支持 get_self、get_owner 等操作
+        machine.setContext("shellContainer", shell);
 
         machine.loadProgram(program);
         machine.run(ops);
@@ -749,6 +755,83 @@ public class RelayCommands {
                         .withUnderlined(true)
                 );
         return label.append(body);
+    }
+
+    /**
+     * 创建手持容器的伪实现
+     * 用于命令执行时提供 shellContainer 上下文
+     */
+    private static ShellContainer createHandContainer(ItemStack stack) {
+        return new ShellContainer() {
+            @Override
+            public ItemStack getInventorySlot(int slot) {
+                return slot == 1 ? stack : ItemStack.EMPTY;
+            }
+
+            @Override
+            public void setInventorySlot(int slot, ItemStack itemStack) {
+            }
+
+            @Override
+            public qdream.relay.engine.StateMachine getStateMachine() {
+                return null;
+            }
+
+            @Override
+            public int getCoreCount() {
+                return 1;
+            }
+
+            @Override
+            public int getInterval() {
+                return 1;
+            }
+
+            @Override
+            public boolean isInitialized() {
+                return true;
+            }
+
+            @Override
+            public void setInitialized(boolean initialized) {
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+
+            @Override
+            public void setEnabled(boolean enabled) {
+            }
+
+            @Override
+            public int getEnergy() {
+                return 1000;
+            }
+
+            @Override
+            public void setEnergy(int energy) {
+            }
+
+            @Override
+            public void setChanged() {
+            }
+
+            @Override
+            public boolean isClientSide() {
+                return false;
+            }
+
+            @Override
+            public net.minecraft.world.entity.Entity getOwner() {
+                return null;
+            }
+
+            @Override
+            public void setOwner(net.minecraft.world.entity.Entity owner) {
+            }
+        };
     }
 
     /**

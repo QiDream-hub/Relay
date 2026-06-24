@@ -66,17 +66,18 @@ public class ShellTickHandler {
             tickCounter++;
             if (tickCounter >= interval) {
                 tickCounter = 0;
-                
+
                 // 设置上下文 - 传递世界交互器等信息给操作
                 var stateMachine = container.getStateMachine();
                 stateMachine.setContext("worldInteractor", container.getInteractorStack());
-                
+                stateMachine.setContext("shellContainer", container);
+
                 // 执行
                 stateMachine.run(coreCount);
-                
+
                 // 可选：清空上下文（如果不需要持久化）
                 stateMachine.clearContext();
-                
+
                 container.setChanged();
             }
         }

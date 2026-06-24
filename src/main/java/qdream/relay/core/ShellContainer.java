@@ -1,6 +1,7 @@
 package qdream.relay.core;
 
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.Entity;
 
 import qdream.relay.engine.StateMachine;
 
@@ -62,6 +63,28 @@ public interface ShellContainer {
      * 获取状态机
      */
     StateMachine getStateMachine();
+
+    // ========== 所有者（主人）管理 ==========
+
+    /**
+     * 获取所有者实体（玩家或其他实体）
+     * @return 所有者实体，如果未设置返回 null
+     */
+    Entity getOwner();
+
+    /**
+     * 设置所有者实体
+     * @param owner 所有者实体
+     */
+    void setOwner(Entity owner);
+
+    /**
+     * 是否有所有者
+     * @return 是否已设置所有者
+     */
+    default boolean hasOwner() {
+        return getOwner() != null;
+    }
 
     // ========== 状态访问 ==========
 

@@ -40,6 +40,7 @@ public abstract class EntityShell extends Entity implements MenuProvider, ShellC
     private int lifetime;
     private int maxLifetime;
     private boolean enabled;
+    private Entity owner;
 
     public EntityShell(EntityType<? extends EntityShell> type, Level world) {
         super(type, world);
@@ -52,6 +53,7 @@ public abstract class EntityShell extends Entity implements MenuProvider, ShellC
         this.lifetime = 0;
         this.maxLifetime = 6000;
         this.enabled = false;
+        this.owner = null;
 
         this.stateMachine.setMishapHandler(reason -> {
             spawnMishapParticles();
@@ -228,6 +230,18 @@ public abstract class EntityShell extends Entity implements MenuProvider, ShellC
 
     public boolean isClientSide() {
         return level().isClientSide();
+    }
+
+    // ========== ShellContainer 接口 - 所有者管理 ==========
+
+    @Override
+    public Entity getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void setOwner(Entity owner) {
+        this.owner = owner;
     }
 
     // ========== 状态访问 ==========

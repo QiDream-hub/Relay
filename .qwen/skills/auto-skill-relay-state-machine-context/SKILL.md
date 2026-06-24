@@ -77,6 +77,7 @@ public void tick(ShellContainer container) {
             // 设置上下文 - 传递世界交互器等信息给操作
             var stateMachine = container.getStateMachine();
             stateMachine.setContext("worldInteractor", container.getInteractorStack());
+            stateMachine.setContext("shellContainer", container);
             // 可以传递任意数据：stateMachine.setContext("level", serverLevel);
 
             // 执行
@@ -112,6 +113,54 @@ public void execute(StateMachine executor) {
 
     // 执行世界交互逻辑
     // ...
+}
+```
+
+### 4. 获取自身外壳容器（完整示例）
+
+```java
+// types/ContainerIota.java - 容器引用数据类型
+public class ContainerIota extends Data {
+    private final ShellContainer container;
+
+    public ContainerIota(ShellContainer container) {
+        super("relay:container", 0, DataSignature.builder()
+                .output("relay:container")
+                .build());
+        this.container = container;
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        executor.pushData(this);
+    }
+
+    public ShellContainer getContainer() {
+        return container;
+    }
+}
+
+// operations/base/GetSelfOp.java - 获取自身容器操作
+public class GetSelfOp extends Spell {
+    public GetSelfOp() {
+        super("relay:get_self", 1, 1, OperationSignature.builder()
+                .output("relay:container")
+                .build());
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        // 从上下文中获取 shellContainer
+        ShellContainer container = executor.getContext("shellContainer", ShellContainer.class);
+
+        if (container == null) {
+            executor.triggerMishap("无法获取自身容器：上下文缺失");
+            return;
+        }
+
+        // 将容器作为 ContainerIota 压入数据栈
+        executor.pushData(new ContainerIota(container));
+    }
 }
 ```
 
@@ -185,11 +234,14 @@ stateMachine.setContext("myMod:dimension", dimensionKey);
 2. **空值检查**：`getContext()` 可能返回 `null`，使用前检查
 3. **生命周期**：上下文在每次 `tick()` 时设置，执行后清空，避免数据污染
 4. **键命名**：使用命名空间前缀避免冲突（如 `myMod:key`）
+5. **运行时引用**：上下文中的数据（如 `ShellContainer`）是运行时引用，不会被序列化到磁盘
+6. **数据类型包装**：如果需要将上下文数据压入数据栈，创建专门的 Iota 类型（如 `ContainerIota`）包装
 
 ## 文件位置
 
 - `src/main/java/qdream/relay/engine/StateMachine.java` - 上下文存储
 - `src/main/java/qdream/relay/core/ShellTickHandler.java` - 上下文设置
+- `src/main/java/qdream/relay/types/ContainerIota.java` - 容器引用数据类型
 - 操作实现中通过 `executor.getContext()` 获取
 
 ## 相关技能

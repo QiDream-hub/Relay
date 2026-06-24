@@ -315,5 +315,14 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         public boolean isClientSide() {
             return true;
         }
+
+        @Override
+        public net.minecraft.world.entity.Entity getOwner() {
+            return null;
+        }
+
+        @Override
+        public void setOwner(net.minecraft.world.entity.Entity owner) {
+        }
     }
 }

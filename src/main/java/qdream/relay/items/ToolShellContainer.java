@@ -1,6 +1,7 @@
 package qdream.relay.items;
 
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.Entity;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.core.ShellContainer;
@@ -13,10 +14,12 @@ public class ToolShellContainer implements ShellContainer {
 
     private final ToolShellItem toolShell;
     private final ItemStack stack;
+    private Entity owner;
 
     public ToolShellContainer(ToolShellItem toolShell, ItemStack stack) {
         this.toolShell = toolShell;
         this.stack = stack;
+        this.owner = null;
     }
 
     @Override
@@ -82,5 +85,15 @@ public class ToolShellContainer implements ShellContainer {
     @Override
     public boolean isClientSide() {
         return false;
+    }
+
+    @Override
+    public Entity getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void setOwner(Entity owner) {
+        this.owner = owner;
     }
 }

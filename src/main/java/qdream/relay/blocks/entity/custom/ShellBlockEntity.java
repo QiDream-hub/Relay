@@ -4,6 +4,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -37,6 +38,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
 
     private int energy;
     private boolean enabled;
+    private Entity owner;
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
@@ -44,6 +46,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         this.tickHandler = new ShellTickHandler();
         this.energy = 0;
         this.enabled = false;
+        this.owner = null;
 
         // 设置事故回调
         this.stateMachine.setMishapHandler(reason -> {
@@ -162,6 +165,19 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         return level != null && level.isClientSide();
     }
 
+    // ========== ShellContainer 接口 - 所有者管理 ==========
+
+    @Override
+    public Entity getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void setOwner(Entity owner) {
+        this.owner = owner;
+        setChanged();
+    }
+
     // ========== NBT 序列化与反序列化 (26.1.2 ValueInput/ValueOutput) ==========
 
     @Override
@@ -180,6 +196,11 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
 
         // 保存开关状态
         output.putBoolean("enabled", enabled);
+
+        // 保存所有者信息
+        if (owner != null) {
+            output.putString("owner", owner.getUUID().toString());
+        }
 
         // 保存 TickHandler 状态
         output.putInt("tickCounter", tickHandler.getTickCounter());
@@ -205,6 +226,19 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
 
         // 加载开关状态
         enabled = input.getBooleanOr("enabled", false);
+
+        // 加载所有者信息
+        String uuidStr = input.getString("owner").orElse("");
+        if (!uuidStr.isEmpty()) {
+            try {
+                java.util.UUID uuid = java.util.UUID.fromString(uuidStr);
+                if (level != null && !level.isClientSide()) {
+                    owner = level.getEntity(uuid);
+                }
+            } catch (IllegalArgumentException e) {
+                // UUID 格式错误，忽略
+            }
+        }
 
         // 加载 TickHandler 状态
         tickHandler.setTickCounter(input.getIntOr("tickCounter", 0));
