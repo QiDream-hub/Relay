@@ -71,22 +71,22 @@ protected void loadAdditional(ValueInput input) {
 public void tick(ShellContainer container) {
     if (container.isClientSide()) return;
     if (!container.isEnabled()) return;
-    
+
     // ... 其他逻辑 ...
-    
+
     if (initialized && coreCount > 0 && container.getStateMachine().isRunning()) {
         tickCounter++;
         if (tickCounter >= interval) {
             tickCounter = 0;
-            
+
             // 设置上下文 - 传递世界交互器和 ShellContainer 给操作
             var stateMachine = container.getStateMachine();
             stateMachine.setContext("worldInteractor", container.getInteractorStack());
             stateMachine.setContext("shellContainer", container);
-            
+
             // 执行
             stateMachine.run(coreCount);
-            
+
             // 清空上下文
             stateMachine.clearContext();
         }
@@ -98,6 +98,115 @@ public void tick(ShellContainer container) {
 - 操作通过上下文访问 ShellContainer，保持 engine 层纯粹性
 - 每次 tick 前设置，tick 后清空，避免内存泄漏
 - 支持多种上下文数据（worldInteractor、shellContainer 等）
+
+### 3.1 命令中的上下文注入
+
+在命令执行时也必须设置 `shellContainer` 上下文，否则 `get_self`、`get_owner` 等操作会失败：
+
+```java
+// RelayCommands.java
+private static int runShellWithInteractor(CommandContext<CommandSourceStack> context) {
+    // ... 获取 shell ...
+    
+    StateMachine machine = new StateMachine();
+    
+    // 如果启用世界交互器，设置上下文
+    if (useWorldInteractor) {
+        machine.setContext("worldInteractor", shell.getInteractorStack());
+    }
+    
+    // 设置 shellContainer 上下文，支持 get_self、get_owner 等操作
+    machine.setContext("shellContainer", shell);
+    
+    machine.loadProgram(program);
+    machine.run(ops);
+}
+```
+
+**手持磁盘的伪容器实现**：
+
+对于手持磁盘运行命令，需要创建伪 `ShellContainer` 实现：
+
+```java
+// RelayCommands.java
+private static ShellContainer createHandContainer(ItemStack stack) {
+    return new ShellContainer() {
+        @Override
+        public ItemStack getInventorySlot(int slot) {
+            return slot == 1 ? stack : ItemStack.EMPTY;
+        }
+
+        @Override
+        public void setInventorySlot(int slot, ItemStack itemStack) {
+        }
+
+        @Override
+        public StateMachine getStateMachine() {
+            return null;
+        }
+
+        @Override
+        public int getCoreCount() {
+            return 1;
+        }
+
+        @Override
+        public int getInterval() {
+            return 1;
+        }
+
+        @Override
+        public boolean isInitialized() {
+            return true;
+        }
+
+        @Override
+        public void setInitialized(boolean initialized) {
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+        }
+
+        @Override
+        public int getEnergy() {
+            return 1000;
+        }
+
+        @Override
+        public void setEnergy(int energy) {
+        }
+
+        @Override
+        public void setChanged() {
+        }
+
+        @Override
+        public boolean isClientSide() {
+            return false;
+        }
+
+        @Override
+        public Entity getOwner() {
+            return null;  // 手持磁盘没有主人
+        }
+
+        @Override
+        public void setOwner(Entity owner) {
+        }
+    };
+}
+
+// 在 runHandWithInteractor 中使用
+machine.setContext("shellContainer", createHandContainer(stack));
+```
+
+**重要**：所有执行法术程序的入口点都必须设置 `shellContainer` 上下文！
 
 ### 4. EntityIota 通用实体类型改造
 
