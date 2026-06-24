@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -98,7 +99,7 @@ public class ProgramCompiler {
                 throw new CompilationException("JSON 程序必须是数组格式");
             }
             return fromJson(element.getAsJsonArray());
-        } catch (com.google.gson.JsonSyntaxException e) {
+        } catch (JsonSyntaxException e) {
             throw new CompilationException("JSON 解析失败: " + e.getMessage());
         }
     }
@@ -114,8 +115,11 @@ public class ProgramCompiler {
         List<Executable> program = new ArrayList<>();
         for (int i = 0; i < array.size(); i++) {
             JsonElement element = array.get(i);
+            if (element == null || element.isJsonNull()) {
+                continue;
+            }
             if (!element.isJsonObject()) {
-                throw new CompilationException("程序元素 #" + i + " 必须是 JSON 对象");
+                throw new CompilationException("程序元素 #" + i + " 必须是 JSON 对象"+"\n解析数据:"+array.toString());
             }
             JsonObject obj = element.getAsJsonObject();
             String id = obj.has("id") ? obj.get("id").getAsString() : "";

@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import qdream.relay.Relay;
 import qdream.relay.client.screen.widget.editor.JsonEditorWidget;
 import qdream.relay.client.screen.widget.editor.OperationListWidget;
 import qdream.relay.client.screen.widget.editor.TypeListWidget;
@@ -241,6 +242,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             saveButton.setMessage(Component.literal("已保存"));
         } catch (CompilationException e) {
             // 保存失败，显示错误
+            Relay.LOGGER.error("保存失败 出现错误:" + e.getMessage());
             saveButton.setMessage(Component.literal("保存失败"));
         }
     }
