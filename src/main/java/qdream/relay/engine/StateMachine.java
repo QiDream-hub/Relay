@@ -57,18 +57,19 @@ public class StateMachine {
 
     /**
      * 进行一次执行
-     * 
+     *
      * @param ops 本次执行可用的操作数
      */
     public void run(int ops) {
         remainingOps = ops;
 
         while (remainingOps > 0 && !programStack.isEmpty()) {
-            Executable executable = programStack.pop();
+            Executable executable = programStack.peek();  // 先 peek，检查 cost
             int cost = executable.getCost();
             if (cost > remainingOps) {
-                break;
+                break;  // cost 不足时不弹出，保留在栈顶等待下 tick
             }
+            programStack.pop();  // 确认可以执行后再弹出
             remainingOps -= cost;
             try {
                 executable.execute(this);

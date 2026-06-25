@@ -1,14 +1,6 @@
 package qdream.relay.core;
 
-import java.util.List;
-
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
-import qdream.relay.Component.RelayDataComponents;
-import qdream.relay.engine.Executable;
-import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.ProgramCompiler.CompilationException;
 
 /**
  * 外壳 Tick 处理器
@@ -30,6 +22,7 @@ public class ShellTickHandler {
 
     /**
      * 执行 tick
+     *
      * @param container 外壳容器
      */
     public void tick(ShellContainer container) {
@@ -48,18 +41,8 @@ public class ShellTickHandler {
         // 更新能量状态
         updateEnergy(container);
 
-        // 检查磁盘是否变更，如果变更则重置初始化状态
-        if (initialized && !container.getDiskStack().equals(lastDisk)) {
-            initialized = false;
-            container.setInitialized(false);
-            container.getStateMachine().clear();
-        }
-        lastDisk = container.getDiskStack().copy();
-
-        // 尝试初始化
-        if (!initialized) {
-            tryInitialize(container);
-        }
+        // 移除磁盘变更检测 - 程序加载后应该持续运行，直到手动停止
+        // 如果用户想更换程序，需要先关闭再重新初始化
 
         // 执行状态机
         if (initialized && coreCount > 0 && container.getStateMachine().isRunning()) {
@@ -71,7 +54,7 @@ public class ShellTickHandler {
                 var stateMachine = container.getStateMachine();
                 stateMachine.setContext("worldInteractor", container.getInteractorStack());
                 stateMachine.setContext("shellContainer", container);
-                
+
                 // 获取世界引用并设置到上下文
                 if (container instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
                     stateMachine.setContext("world", blockEntity.getLevel());
@@ -90,9 +73,6 @@ public class ShellTickHandler {
         }
     }
 
-    // 记录上一个磁盘，用于检测变更
-    private net.minecraft.world.item.ItemStack lastDisk = net.minecraft.world.item.ItemStack.EMPTY;
-
     /**
      * 更新核心状态
      */
@@ -101,7 +81,7 @@ public class ShellTickHandler {
         if (!coreStack.isEmpty()) {
             // 简单实现：单个核心，interval=1
             // 后续由 CoreGroup 处理合并逻辑
-            coreCount = 1;
+            coreCount = 10;
             interval = 1;
         } else {
             coreCount = 0;
@@ -119,32 +99,6 @@ public class ShellTickHandler {
             container.setEnergy(1000);
         } else {
             container.setEnergy(0);
-        }
-    }
-
-    /**
-     * 尝试初始化 - 从法术磁盘加载程序
-     */
-    private void tryInitialize(ShellContainer container) {
-        ItemStack diskStack = container.getDiskStack();
-        if (!diskStack.isEmpty()) {
-            CompoundTag compoundTag = diskStack.get(qdream.relay.Component.RelayDataComponents.SPELL_PROGRAM);
-            if (compoundTag != null) {
-                ListTag programTag = compoundTag.getList("program").orElse(null);
-                if (programTag != null && !programTag.isEmpty()) {
-                    List<Executable> fromNbt;
-                    try {
-                        fromNbt = qdream.relay.mc.ProgramCompiler.fromNbt(programTag);
-                    } catch (qdream.relay.mc.ProgramCompiler.CompilationException e) {
-                        fromNbt = List.of();
-                        e.printStackTrace();
-                    }
-                    container.getStateMachine().loadProgram(fromNbt);
-                    // 只有成功加载程序后才设置 initialized
-                    container.setInitialized(true);
-                    initialized = true;
-                }
-            }
         }
     }
 

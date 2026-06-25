@@ -7,7 +7,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.InteractionResult;
@@ -21,7 +23,6 @@ import com.mojang.serialization.MapCodec;
 
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.blocks.entity.custom.ShellBlockEntity;
-import qdream.relay.core.ShellRegistry;
 
 /**
  * 外壳方块
@@ -63,6 +64,17 @@ public class ShellBlock extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(world, pos, state, placer, stack);
+        if (!world.isClientSide()) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof ShellBlockEntity shell) {
+                shell.setOwner(placer);
+            }
+        }
     }
 
     @Override

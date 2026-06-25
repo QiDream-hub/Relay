@@ -59,7 +59,7 @@ public class RelayServerNetworking {
         // 注册 C2S_ToggleShellPayload
         PayloadTypeRegistry.serverboundPlay().register(C2S_ToggleShellPayload.TYPE, C2S_ToggleShellPayload.CODEC);
 
-        // 注册服务端接收处理器
+        // 注册服务端接收处理器 - 切换开关
         ServerPlayNetworking.registerGlobalReceiver(C2S_ToggleShellPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             if (player == null) return;
@@ -69,6 +69,24 @@ public class RelayServerNetworking {
                     ShellContainer container = handler.getContainer();
                     if (container != null) {
                         container.setEnabled(!container.isEnabled());
+                    }
+                }
+            });
+        });
+
+        // 注册 C2S_InitializeShellPayload - 复位外壳（清空双栈并从磁盘加载程序）
+        PayloadTypeRegistry.serverboundPlay().register(C2S_InitializeShellPayload.TYPE, C2S_InitializeShellPayload.CODEC);
+
+        // 注册服务端接收处理器 - 复位程序
+        ServerPlayNetworking.registerGlobalReceiver(C2S_InitializeShellPayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player == null) return;
+
+            context.server().execute(() -> {
+                if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                    ShellContainer container = handler.getContainer();
+                    if (container instanceof ShellBlockEntity shell) {
+                        shell.resetProgram();
                     }
                 }
             });

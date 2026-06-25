@@ -3,7 +3,6 @@ package qdream.relay.operations.entity;
 import java.util.Optional;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;

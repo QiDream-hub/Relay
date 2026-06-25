@@ -17,13 +17,17 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.ContainerHelper;
+import java.util.List;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Executable;
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.core.ShellRegistry;
+import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.items.SpellDiskItem;
 
 /**
  * 外壳方块实体
@@ -163,6 +167,38 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public boolean isClientSide() {
         return level != null && level.isClientSide();
+    }
+
+    /**
+     * 复位程序 - 清空双栈后从磁盘重新加载程序
+     * 点击复位按钮时调用
+     */
+    public void resetProgram() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+
+        ItemStack diskStack = getDiskStack();
+        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
+            return;
+        }
+
+        // 清空状态机双栈
+        stateMachine.clear();
+
+        // 从磁盘读取程序
+        List<Executable> program = SpellDiskItem.getProgram(diskStack);
+        if (program.isEmpty()) {
+            return;
+        }
+
+        // 加载到状态机
+        stateMachine.loadProgram(program);
+        setInitialized(true);
+        setChanged();
+
+        // 通知客户端同步
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
     // ========== ShellContainer 接口 - 所有者管理 ==========
