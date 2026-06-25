@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 状态机执行器
@@ -131,16 +132,12 @@ public class StateMachine {
      * 获取上下文数据（类型安全版本）
      * @param key 键
      * @param type 期望的类型
-     * @return 值，如果不存在或类型不匹配返回 null
+     * @return Optional<值>
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getContext(String key, Class<T> type) {
-        Object value = context.get(key);
-        if (value == null) {
-            return null;
-        }
-        return type.cast(value);
-    }
+    public <T> Optional<T> getContext(String key, Class<T> type) {
+    return Optional.ofNullable(context.get(key))
+                   .map(type::cast);
+}
 
     /**
      * 检查是否存在上下文数据

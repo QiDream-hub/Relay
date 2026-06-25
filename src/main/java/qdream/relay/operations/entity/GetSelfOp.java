@@ -1,7 +1,9 @@
 package qdream.relay.operations.entity;
 
+import java.util.List;
+import java.util.Optional;
+
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
@@ -29,28 +31,27 @@ public class GetSelfOp extends Spell {
 
     public GetSelfOp() {
         super("relay:get_self", 1, 1, OperationSignature.builder()
-                .output("relay:entity")  // 可能是 EntityIota 或 BlockEntityIota
+                .output(List.of("relay:entity", "relay:block_entity"))
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
         // 从上下文中获取 shellContainer 和 world
-        ShellContainer container = executor.getContext("shellContainer", ShellContainer.class);
-        Level world = executor.getContext("world", Level.class);
+        Optional<ShellContainer> container = executor.getContext("shellContainer", ShellContainer.class);
 
-        if (container == null) {
-            executor.triggerMishap("无法获取自身容器：上下文缺失");
+        if (!container.isPresent()) {
+            executor.triggerMishap("无法获取容器：上下文缺失");
             return;
         }
 
         // 根据容器类型获取对应的引用
-        if (container instanceof Entity entity) {
+        if (container.get() instanceof Entity entity) {
             // 实体外壳 - 返回 EntityIota
-            executor.pushData(EntityIota.from(entity, world));
-        } else if (container instanceof BlockEntity blockEntity) {
+            executor.pushData(EntityIota.from(entity, entity.level()));
+        } else if (container.get() instanceof BlockEntity blockEntity) {
             // 方块外壳 - 返回 BlockEntityIota
-            executor.pushData(BlockEntityIota.from(blockEntity, world));
+            executor.pushData(BlockEntityIota.from(blockEntity, blockEntity.getLevel()));
         }
         // 工具外壳在命令执行时处理，这里不会遇到
     }

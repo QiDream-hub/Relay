@@ -11,6 +11,8 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -27,19 +29,19 @@ import java.util.List;
 public class RunCommands {
 
     private static final SimpleCommandExceptionType NO_DISK = new SimpleCommandExceptionType(
-            Component.literal("手中没有法术磁盘")
-    );
+            Component.literal("手中没有法术磁盘"));
 
     private static final SimpleCommandExceptionType INVALID_SLOT = new SimpleCommandExceptionType(
-            Component.literal("无效的插槽位置")
-    );
+            Component.literal("无效的插槽位置"));
 
     /**
      * 创建手持容器的伪实现
      * 用于命令执行时提供 shellContainer 上下文
      */
-    private static ShellContainer createHandContainer(ItemStack stack) {
-        return new ShellContainer() {
+    private static ShellContainer createHandContainer(ItemStack stack, Player player) {
+        var shell = new ShellContainer() {
+            Entity owner;
+
             @Override
             public ItemStack getInventorySlot(int slot) {
                 return slot == 1 ? stack : ItemStack.EMPTY;
@@ -84,7 +86,7 @@ public class RunCommands {
 
             @Override
             public int getEnergy() {
-                return 1000;
+                return 99999;
             }
 
             @Override
@@ -101,20 +103,24 @@ public class RunCommands {
             }
 
             @Override
-            public net.minecraft.world.entity.Entity getOwner() {
-                return null;
+            public Entity getOwner() {
+                return owner;
             }
 
             @Override
-            public void setOwner(net.minecraft.world.entity.Entity owner) {
+            public void setOwner(Entity owner) {
+                this.owner = owner;
             }
         };
+        shell.setOwner(player);
+        return shell;
     }
 
     /**
      * 注册运行命令
      */
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, LiteralCommandNode<CommandSourceStack> root) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher,
+            LiteralCommandNode<CommandSourceStack> root) {
         // /relay run <hand|shell> [ops] [withWorldInteractor]
         LiteralCommandNode<CommandSourceStack> run = Commands.literal("run")
                 .then(Commands.argument("target", StringArgumentType.word())
@@ -131,25 +137,19 @@ public class RunCommands {
                                             builder.suggest("false");
                                             return builder.buildFuture();
                                         })
-                                        .executes(RunCommands::runHandWithInteractor)
-                                )
-                        )
+                                        .executes(RunCommands::runHandWithInteractor)))
                         .then(Commands.literal("shell")
                                 .then(Commands.argument("pos", StringArgumentType.word())
                                         .then(Commands.argument("ops", IntegerArgumentType.integer(1, 10000))
                                                 .executes(RunCommands::runShell)
-                                                .then(Commands.argument("withWorldInteractor", StringArgumentType.word())
+                                                .then(Commands
+                                                        .argument("withWorldInteractor", StringArgumentType.word())
                                                         .suggests((ctx, builder) -> {
                                                             builder.suggest("true");
                                                             builder.suggest("false");
                                                             return builder.buildFuture();
                                                         })
-                                                        .executes(RunCommands::runShellWithInteractor)
-                                                )
-                                        )
-                                )
-                        )
-                )
+                                                        .executes(RunCommands::runShellWithInteractor))))))
                 .build();
 
         root.addChild(run);
@@ -192,7 +192,7 @@ public class RunCommands {
         }
 
         // 设置 shellContainer 上下文，支持 get_self、get_owner 等操作
-        machine.setContext("shellContainer", createHandContainer(stack));
+        machine.setContext("shellContainer", createHandContainer(stack, player));
 
         machine.loadProgram(program);
         machine.run(ops);
@@ -211,7 +211,8 @@ public class RunCommands {
     /**
      * 运行外壳方块中的法术磁盘程序（带世界交互器选项）
      */
-    private static int runShellWithInteractor(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private static int runShellWithInteractor(CommandContext<CommandSourceStack> context)
+            throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         String posStr = StringArgumentType.getString(context, "pos");
         int ops = IntegerArgumentType.getInteger(context, "ops");

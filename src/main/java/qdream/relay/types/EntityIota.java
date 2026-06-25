@@ -2,8 +2,10 @@ package qdream.relay.types;
 
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
@@ -29,10 +31,10 @@ import java.util.UUID;
 public class EntityIota extends Data {
     // 实体 UUID
     private final UUID uuid;
-    
+
     // 世界 ID 字符串（例如 "minecraft:overworld"）
     private final String worldId;
-    
+
     // 运行时缓存，不序列化
     private transient Entity entityRef;
 
@@ -58,10 +60,12 @@ public class EntityIota extends Data {
     }
 
     /**
-     * 从 UUID 和世界 ID 创建 EntityIota（用于反序列化，不保持引用）
+     * 从 UUID 和世界 ID 创建 EntityIota
      */
     public static EntityIota fromUuid(UUID uuid, String worldId) {
-        return new EntityIota(uuid, worldId, null);
+        ServerLevel world = Relay.getWorld(worldId);
+        Entity entity = world.getEntity(uuid);
+        return new EntityIota(uuid, worldId, entity);
     }
 
     @Override
@@ -70,21 +74,17 @@ public class EntityIota extends Data {
     }
 
     /**
-     * 获取实体引用（通过世界查询）
+     * 获取实体引用
+     * 
      * @return 实体引用，如果实体不存在则返回 null
      */
-    public Entity getEntity(Level world) {
+    public Entity getEntity() {
         // 如果有缓存引用，先验证是否仍然有效
         if (entityRef != null && !entityRef.isRemoved()) {
             return entityRef;
         }
 
-        // 缓存失效，通过 UUID 查询
-        if (uuid == null || world == null) {
-            return null;
-        }
-
-        return world.getEntity(uuid);
+        return null;
     }
 
     /**
@@ -129,7 +129,7 @@ public class EntityIota extends Data {
         if (worldId != null) {
             valueTag.putString("world", worldId);
         }
-        
+
         if (uuid != null) {
             valueTag.putString("uuid", uuid.toString());
         } else {
@@ -154,11 +154,7 @@ public class EntityIota extends Data {
         if (valueTag.contains("uuid")) {
             String uuidStr = valueTag.getString("uuid").orElse("");
             if (!uuidStr.isEmpty()) {
-                try {
-                    uuid = UUID.fromString(uuidStr);
-                } catch (IllegalArgumentException e) {
-                    // UUID 格式错误，保持 null
-                }
+                uuid = UUID.fromString(uuidStr);
             }
         }
 
@@ -172,7 +168,7 @@ public class EntityIota extends Data {
         if (worldId != null) {
             valueObject.addProperty("world", worldId);
         }
-        
+
         if (uuid != null) {
             valueObject.addProperty("uuid", uuid.toString());
         } else {
@@ -185,17 +181,17 @@ public class EntityIota extends Data {
     public Data fromJson(JsonObject json) {
         if (json.has("value")) {
             JsonObject valueObject = json.get("value").getAsJsonObject();
-            
+
             String worldId = null;
             if (valueObject.has("world")) {
                 worldId = valueObject.get("world").getAsString();
             }
-            
+
             String uuidStr = valueObject.has("uuid") ? valueObject.get("uuid").getAsString() : "";
             if (uuidStr.isEmpty()) {
                 return new EntityIota(null, null, null);
             }
-            
+
             try {
                 UUID uuid = UUID.fromString(uuidStr);
                 return EntityIota.fromUuid(uuid, worldId);

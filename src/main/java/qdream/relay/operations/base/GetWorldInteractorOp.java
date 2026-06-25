@@ -1,5 +1,9 @@
 package qdream.relay.operations.base;
 
+import java.util.Optional;
+
+import org.jspecify.annotations.NonNull;
+
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.engine.StateMachine;
@@ -30,18 +34,13 @@ public class GetWorldInteractorOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 从上下文中检查是否有世界交互器
         if (!executor.hasContext("worldInteractor")) {
-            // 没有上下文，返回 false
             executor.pushData(new BooleanIota(false));
             return;
         }
 
-        // 获取世界交互器（类型安全获取）
-        ItemStack interactor = executor.getContext("worldInteractor", ItemStack.class);
-        
-        // 检查是否有效
-        boolean hasInteractor = (interactor != null && !interactor.isEmpty());
+        Optional<ItemStack> optional = executor.getContext("worldInteractor", ItemStack.class);
+        boolean hasInteractor = optional.isPresent() && !optional.get().isEmpty();
         executor.pushData(new BooleanIota(hasInteractor));
     }
 

@@ -1,5 +1,7 @@
 package qdream.relay.operations.entity;
 
+import java.util.Optional;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import qdream.relay.core.ShellContainer;
@@ -31,20 +33,19 @@ public class GetOwnerOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 从上下文中获取 shellContainer 和 world
-        ShellContainer container = executor.getContext("shellContainer", ShellContainer.class);
-        Level world = executor.getContext("world", Level.class);
+        Optional<ShellContainer> containerOpt = executor.getContext("shellContainer", ShellContainer.class);
 
-        if (container == null) {
+        if (!containerOpt.isPresent()) {
             executor.triggerMishap("无法获取容器：上下文缺失");
             return;
         }
 
-        // 获取所有者实体
+        ShellContainer container = containerOpt.get();
         Entity owner = container.getOwner();
-
-        // 将所有者作为 EntityIota 压入数据栈
-        // 如果没有主人，创建 null EntityIota
-        executor.pushData(EntityIota.from(owner, world));
+        if (owner == null) {
+            executor.triggerMishap("无法获取所属者");
+            return;
+        }
+        executor.pushData(EntityIota.from(owner, owner.level()));
     }
 }
