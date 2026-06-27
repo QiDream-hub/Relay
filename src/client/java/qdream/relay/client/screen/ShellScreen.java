@@ -152,7 +152,7 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         currentY += lineHeight;
 
         //  复位按钮 - 开关按钮左侧 能量
-        int energy = this.menu.getSyncedEnergy();
+        double energy = this.menu.getSyncedEnergy();
         String energyText = energy > 0 ? "§7能量: §e" + energy : "§7能量: §8无";
         graphics.text(this.font, energyText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;

@@ -49,7 +49,8 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     // 数据同步槽（服务端 → 客户端）
     private final DataSlot enabledSlot = DataSlot.standalone();
     private final DataSlot coreCountSlot = DataSlot.standalone();
-    private final DataSlot energySlot = DataSlot.standalone();
+    private final DataSlot energyHighSlot = DataSlot.standalone();
+    private final DataSlot energyLowSlot = DataSlot.standalone();
     private final DataSlot initializedSlot = DataSlot.standalone();
 
     /**
@@ -72,7 +73,8 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         // 注册数据同步槽
         this.addDataSlot(enabledSlot);
         this.addDataSlot(coreCountSlot);
-        this.addDataSlot(energySlot);
+        this.addDataSlot(energyHighSlot);
+        this.addDataSlot(energyLowSlot);
         this.addDataSlot(initializedSlot);
 
         // 外壳 4 个插槽（垂直排列）
@@ -148,7 +150,9 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         if (container != null) {
             enabledSlot.set(container.isEnabled() ? 1 : 0);
             coreCountSlot.set(container.getCoreCount());
-            energySlot.set((int)container.getEnergy());
+            long energyBits = Double.doubleToRawLongBits(container.getEnergy());
+            energyHighSlot.set((int) (energyBits >>> 32));
+            energyLowSlot.set((int) energyBits);
             initializedSlot.set(container.isInitialized() ? 1 : 0);
         }
     }
@@ -172,8 +176,11 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     }
 
     /** 获取同步的能量值 */
-    public int getSyncedEnergy() {
-        return energySlot.get();
+    public double getSyncedEnergy() {
+        long high = energyHighSlot.get() & 0xFFFFFFFFL;
+        long low = energyLowSlot.get() & 0xFFFFFFFFL;
+        long bits = (high << 32) | low;
+        return Double.longBitsToDouble(bits);
     }
 
     /** 获取同步的初始化状态 */

@@ -160,6 +160,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public void setEnergy(double energy) {
         this.energy = energy;
+        setChanged();
     }
 
     @Override

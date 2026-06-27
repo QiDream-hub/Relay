@@ -42,6 +42,28 @@ public class RelayDataComponents {
     );
 
     /**
+     * 计算核心间隔组件 - 存储为 Integer
+     * 用于 computing_core 物品存储执行间隔（tick 间隔）
+     */
+    public static final DataComponentType<Integer> INTERVAL = register(
+            "interval",
+            builder -> builder
+                    .persistent(Codec.INT)
+                    .networkSynchronized(createIntStreamCodec())
+    );
+
+    /**
+     * 计算核心能量消耗组件 - 存储为 Double
+     * 用于 computing_core 物品存储每次执行的能量消耗
+     */
+    public static final DataComponentType<Double> ENERGY_COST = register(
+            "energy_cost",
+            builder -> builder
+                    .persistent(Codec.DOUBLE)
+                    .networkSynchronized(createDoubleStreamCodec())
+    );
+
+    /**
      * 创建 Double 的网络同步 StreamCodec
      */
     private static StreamCodec<FriendlyByteBuf, Double> createDoubleStreamCodec() {
@@ -128,6 +150,8 @@ public class RelayDataComponents {
         // 访问任意组件即可触发类加载
         var _ = SPELL_PROGRAM;
         var __ = ENERGY;
+        var ___ = INTERVAL;
+        var ____ = ENERGY_COST;
     }
 
     /**

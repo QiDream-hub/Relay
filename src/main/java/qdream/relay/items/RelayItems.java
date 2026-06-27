@@ -16,12 +16,29 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import qdream.relay.Relay;
 import qdream.relay.blocks.RelayBlocks;
+import qdream.relay.items.ComputingCoreItem;
 
 /**
  * 物品注册表
  */
 public class RelayItems {
-    public static final Item COMPUTING_CORE = register("computing_core", Item::new, new Item.Properties());
+    // 计算核心系列 - 名称数字与 interval 成反比（名称 1→64，名称 64→1）
+    // 名称数字越大，性能越强（interval 越小，energyCost 越高）
+    public static final Item COMPUTING_CORE_1 = register("computing_core_1",
+            props -> new FixedIntervalCoreItem(props, 64), new Item.Properties());
+    public static final Item COMPUTING_CORE_2 = register("computing_core_2",
+            props -> new FixedIntervalCoreItem(props, 32), new Item.Properties());
+    public static final Item COMPUTING_CORE_4 = register("computing_core_4",
+            props -> new FixedIntervalCoreItem(props, 16), new Item.Properties());
+    public static final Item COMPUTING_CORE_8 = register("computing_core_8",
+            props -> new FixedIntervalCoreItem(props, 8), new Item.Properties());
+    public static final Item COMPUTING_CORE_16 = register("computing_core_16",
+            props -> new FixedIntervalCoreItem(props, 4), new Item.Properties());
+    public static final Item COMPUTING_CORE_32 = register("computing_core_32",
+            props -> new FixedIntervalCoreItem(props, 2), new Item.Properties());
+    public static final Item COMPUTING_CORE_64 = register("computing_core_64",
+            props -> new FixedIntervalCoreItem(props, 1), new Item.Properties());
+
     public static final Item SPELL_DISK = register("spell_disk", SpellDiskItem::new, new Item.Properties());
     public static final Item ENERGY_MODULE = register("energy_module", EnergyModuleItem::new, new Item.Properties());
 
@@ -32,6 +49,11 @@ public class RelayItems {
 
     public static <T extends Item> T register(String name, Function<Item.Properties, T> itemFactory,
             Item.Properties settings) {
+        return register(name, itemFactory, settings, 0);
+    }
+
+    public static <T extends Item> T register(String name, Function<Item.Properties, T> itemFactory,
+            Item.Properties settings, int interval) {
         // Create the item key.
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(Relay.MOD_ID, name));
@@ -48,11 +70,17 @@ public class RelayItems {
     public static final ResourceKey<CreativeModeTab> CUSTOM_CREATIVE_TAB_KEY = ResourceKey.create(
             BuiltInRegistries.CREATIVE_MODE_TAB.key(), Identifier.fromNamespaceAndPath(Relay.MOD_ID, "creative_tab"));
     public static final CreativeModeTab CUSTOM_CREATIVE_TAB = FabricCreativeModeTab.builder()
-            .icon(() -> new ItemStack(RelayItems.COMPUTING_CORE))
+            .icon(() -> new ItemStack(RelayItems.COMPUTING_CORE_64))
             .title(Component.translatable("Relay"))
             .displayItems((params, output) -> {
-                // 核心组件
-                output.accept(RelayItems.COMPUTING_CORE);
+                // 核心组件 - 计算核心系列（从低级到高级）
+                output.accept(RelayItems.COMPUTING_CORE_1);
+                output.accept(RelayItems.COMPUTING_CORE_2);
+                output.accept(RelayItems.COMPUTING_CORE_4);
+                output.accept(RelayItems.COMPUTING_CORE_8);
+                output.accept(RelayItems.COMPUTING_CORE_16);
+                output.accept(RelayItems.COMPUTING_CORE_32);
+                output.accept(RelayItems.COMPUTING_CORE_64);
                 output.accept(RelayItems.ENERGY_MODULE);
                 output.accept(RelayItems.SPELL_DISK);
 

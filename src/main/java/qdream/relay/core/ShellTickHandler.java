@@ -2,6 +2,7 @@ package qdream.relay.core;
 
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
+import qdream.relay.items.ComputingCoreItem;
 import qdream.relay.items.EnergyModuleItem;
 import qdream.relay.mc.base.Spell;
 
@@ -14,12 +15,14 @@ public class ShellTickHandler {
     private int tickCounter;
     private int interval;
     private int coreCount;
+    private double energyCost; // 核心能量消耗
     private boolean initialized;
 
     public ShellTickHandler() {
         this.tickCounter = 0;
         this.interval = 1;
         this.coreCount = 0;
+        this.energyCost = 0;
         this.initialized = false;
     }
 
@@ -45,7 +48,7 @@ public class ShellTickHandler {
         updateEnergy(container);
 
         // 执行状态机
-        if (initialized && coreCount > 0 && container.getStateMachine().isRunning()) {
+        if (initialized && coreCount > 0 && interval > 0 && container.getStateMachine().isRunning()) {
             tickCounter++;
             if (tickCounter >= interval) {
                 tickCounter = 0;
@@ -73,7 +76,7 @@ public class ShellTickHandler {
      * mc 层负责：控制每 tick 执行的操作数、扣除能量
      *
      * @param container 外壳容器
-     * @param maxOps 本 tick 最大可执行操作数（由核心数量决定）
+     * @param maxOps    本 tick 最大可执行操作数（由核心数量决定）
      */
     private void runTick(ShellContainer container, int maxOps) {
         var stateMachine = container.getStateMachine();
@@ -98,12 +101,12 @@ public class ShellTickHandler {
                 break; // cost 不足，等待下 tick
             }
 
-            // 检查并扣除能量
-            double required = 0;
+            // 检查并扣除能量（核心基础消耗 + 操作消耗）
+            double required = energyCost; // 核心基础消耗
             if (top instanceof Spell spell) {
-                required = spell.getEnergy();
+                required += spell.getEnergy(); // 加上操作消耗
             } else {
-                required = cost; // 非 Spell 操作按 cost 扣除
+                required += cost; // 非 Spell 操作按 cost 扣除
             }
 
             if (currentEnergy < required) {
@@ -132,10 +135,18 @@ public class ShellTickHandler {
         ItemStack coreStack = container.getCoreStack();
         if (!coreStack.isEmpty()) {
             coreCount = coreStack.count();
-            interval = 1;
+            // 从核心物品中读取 interval 和 energyCost 属性
+            if (coreStack.getItem() instanceof ComputingCoreItem coreItem) {
+                interval = coreItem.getInterval(coreStack);
+                energyCost = coreItem.getEnergyCost(coreStack);
+            } else {
+                interval = 0;
+                energyCost = 0;
+            }
         } else {
             coreCount = 0;
-            interval = 20;
+            interval = 0;
+            energyCost = 0;
         }
     }
 
@@ -176,6 +187,14 @@ public class ShellTickHandler {
 
     public void setCoreCount(int coreCount) {
         this.coreCount = coreCount;
+    }
+
+    public double getEnergyCost() {
+        return energyCost;
+    }
+
+    public void setEnergyCost(double energyCost) {
+        this.energyCost = energyCost;
     }
 
     public boolean isInitialized() {
