@@ -36,6 +36,9 @@ public class ShellTickHandler {
             return;
         }
 
+        // 更新能量状态（始终更新，无论是否启用，以便 GUI 显示）
+        updateEnergy(container);
+
         // 未启用时不执行
         if (!container.isEnabled()) {
             return;
@@ -43,9 +46,6 @@ public class ShellTickHandler {
 
         // 更新核心状态
         updateCoreState(container);
-
-        // 更新能量状态
-        updateEnergy(container);
 
         // 执行状态机
         if (initialized && coreCount > 0 && interval > 0 && container.getStateMachine().isRunning()) {

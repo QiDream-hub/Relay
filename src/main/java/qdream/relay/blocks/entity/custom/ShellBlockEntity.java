@@ -80,6 +80,11 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
      */
     public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
         entity.tickHandler.tick(entity);
+        
+        // 每 10 tick 同步一次能量到客户端
+        if (!world.isClientSide() && world.getGameTime() % 10 == 0) {
+            entity.syncEnergyToClient(world, pos);
+        }
     }
 
     // ========== MenuProvider 接口 ==========
@@ -374,5 +379,26 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     public void updateStatus() {
         tickHandler.updateCoreState(this);
         tickHandler.updateEnergy(this);
+    }
+
+    // ========== 网络同步 ==========
+    /**
+     * 同步能量值到客户端
+     */
+    public void syncEnergyToClient(Level world, BlockPos pos) {
+        if (world.isClientSide()) {
+            return;
+        }
+
+        double energy = getEnergy();
+        net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) world;
+        net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(pos);
+        serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
+            .forEach(player -> {
+                net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(
+                    player,
+                    new qdream.relay.networking.payloads.S2C_ShellEnergyPayload(energy)
+                );
+            });
     }
 }

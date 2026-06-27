@@ -12,6 +12,7 @@ import qdream.relay.client.screen.SpellEditorScreen;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.networking.payloads.S2C_ShellEnergyPayload;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 
 /**
@@ -38,6 +39,17 @@ public class RelayClientNetworking {
                     } catch (ProgramCompiler.CompilationException e) {
                         e.printStackTrace();
                     }
+                }
+            });
+        });
+
+        // 注册 S2C_ShellEnergyPayload 客户端接收器
+        ClientPlayNetworking.registerGlobalReceiver(S2C_ShellEnergyPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.player != null
+                        && mc.player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                    handler.setSyncedEnergy(payload.energy());
                 }
             });
         });

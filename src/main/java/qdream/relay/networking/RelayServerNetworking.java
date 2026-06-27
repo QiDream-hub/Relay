@@ -24,6 +24,9 @@ import qdream.relay.mc.ProgramCompiler;
 public class RelayServerNetworking {
 
     public static void register() {
+        // 注册 S2C_ShellEnergyPayload (服务端到客户端)
+        PayloadTypeRegistry.clientboundPlay().register(S2C_ShellEnergyPayload.TYPE, S2C_ShellEnergyPayload.CODEC);
+
         // 注册 S2C_SyncSpellDiskPayload (服务端到客户端)
         PayloadTypeRegistry.clientboundPlay().register(S2C_SyncSpellDiskPayload.TYPE, S2C_SyncSpellDiskPayload.CODEC);
 
