@@ -23,7 +23,7 @@ import qdream.relay.blocks.RelayBlocks;
 public class RelayItems {
     public static final Item COMPUTING_CORE = register("computing_core", Item::new, new Item.Properties());
     public static final Item SPELL_DISK = register("spell_disk", SpellDiskItem::new, new Item.Properties());
-    public static final Item ENERGY_MODULE = register("energy_module", Item::new, new Item.Properties());
+    public static final Item ENERGY_MODULE = register("energy_module", EnergyModuleItem::new, new Item.Properties());
 
     // 三种外壳物品
     public static final Item BLOCK_SHELL = register("block_shell", Item::new, new Item.Properties());

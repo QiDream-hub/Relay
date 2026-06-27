@@ -1,5 +1,6 @@
 package qdream.relay.Component;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +29,51 @@ public class RelayDataComponents {
                     .persistent(CompoundTag.CODEC)
                     .networkSynchronized(createNbtStreamCodec())
     );
+
+    /**
+     * 能量组件 - 存储为 Double
+     * 用于能量模块物品存储能量值
+     */
+    public static final DataComponentType<Double> ENERGY = register(
+            "energy",
+            builder -> builder
+                    .persistent(Codec.DOUBLE)
+                    .networkSynchronized(createDoubleStreamCodec())
+    );
+
+    /**
+     * 创建 Double 的网络同步 StreamCodec
+     */
+    private static StreamCodec<FriendlyByteBuf, Double> createDoubleStreamCodec() {
+        return new StreamCodec<FriendlyByteBuf, Double>() {
+            @Override
+            public Double decode(FriendlyByteBuf buf) {
+                return buf.readDouble();
+            }
+
+            @Override
+            public void encode(FriendlyByteBuf buf, Double value) {
+                buf.writeDouble(value);
+            }
+        };
+    }
+
+    /**
+     * 创建 Integer 的网络同步 StreamCodec
+     */
+    private static StreamCodec<FriendlyByteBuf, Integer> createIntStreamCodec() {
+        return new StreamCodec<FriendlyByteBuf, Integer>() {
+            @Override
+            public Integer decode(FriendlyByteBuf buf) {
+                return buf.readInt();
+            }
+
+            @Override
+            public void encode(FriendlyByteBuf buf, Integer value) {
+                buf.writeInt(value);
+            }
+        };
+    }
 
     /**
      * 创建 NBT CompoundTag 的网络同步 StreamCodec
@@ -81,6 +127,7 @@ public class RelayDataComponents {
         // 静态初始化时自动注册所有组件
         // 访问任意组件即可触发类加载
         var _ = SPELL_PROGRAM;
+        var __ = ENERGY;
     }
 
     /**
