@@ -6,10 +6,14 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.items.ShellContainerWrapper;
+import qdream.relay.items.ComputingCoreItem;
+import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.EnergyModuleItem;
 
 /**
  * 外壳 ScreenHandler
@@ -90,7 +94,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             this.addSlot(new Slot(this.wrapper, slotIndex, CONTAINER_SLOT_X, CONTAINER_SLOT_Y + i * SLOT_SPACING_Y) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    return true;
+                    return canPlaceItem(slotIndex, stack);
                 }
             });
         }
@@ -148,6 +152,28 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player player) {
         return this.wrapper.stillValid(player);
+    }
+
+    /**
+     * 根据插槽类型限制可放置的物品
+     * @param slot 插槽索引 (0-核心，1-磁盘，2-能量模块，3-世界交互器)
+     * @param stack 物品堆
+     * @return 是否允许放置
+     */
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+
+        Item item = stack.getItem();
+
+        return switch (slot) {
+            case ShellContainer.CORE_SLOT -> item instanceof ComputingCoreItem;
+            case ShellContainer.DISK_SLOT -> item instanceof SpellDiskItem;
+            case ShellContainer.ENERGY_SLOT -> item instanceof EnergyModuleItem;
+            case ShellContainer.INTERACTOR_SLOT -> true; // 世界交互器插槽允许任意物品
+            default -> false;
+        };
     }
 
     @Override

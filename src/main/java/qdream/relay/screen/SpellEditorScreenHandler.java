@@ -299,12 +299,15 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
         }
-        // 从玩家物品栏移到磁盘槽
+        // 从玩家物品栏移到磁盘槽（只允许磁盘）
         else {
             if (stack.getItem() instanceof SpellDiskItem) {
                 if (!this.moveItemStackTo(stack, DISK_SLOT, DISK_SLOT + 1, false)) {
                     return ItemStack.EMPTY;
                 }
+            } else {
+                // 非磁盘物品不允许移入磁盘槽，直接返回
+                return ItemStack.EMPTY;
             }
         }
 
@@ -318,6 +321,26 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
+        return true;
+    }
+
+    /**
+     * 检查指定插槽是否允许放置物品
+     * @param slot 插槽索引
+     * @param stack 物品堆
+     * @return 是否允许放置
+     */
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+
+        // 磁盘插槽只允许 SpellDiskItem
+        if (slot == DISK_SLOT) {
+            return stack.getItem() instanceof SpellDiskItem;
+        }
+
+        // 其他插槽（玩家物品栏）允许所有物品
         return true;
     }
 
