@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "relay:item/computing_core"
+    "layer0": "relay:item/computing_core_1"
   }
 }
