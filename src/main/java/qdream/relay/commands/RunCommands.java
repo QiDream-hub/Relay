@@ -20,6 +20,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.SpellDiskItem;
+import qdream.relay.mc.base.Operation;
 
 import java.util.List;
 
@@ -33,6 +34,44 @@ public class RunCommands {
 
     private static final SimpleCommandExceptionType INVALID_SLOT = new SimpleCommandExceptionType(
             Component.literal("无效的插槽位置"));
+
+    /**
+     * 模拟执行指定数量的操作
+     * 命令调试场景使用，不考虑能量消耗
+     *
+     * @param machine 状态机
+     * @param maxOps 最大执行操作数
+     * @return 实际执行的操作数
+     */
+    private static int executeOps(StateMachine machine, int maxOps) {
+        int executedCount = 0;
+        int usedCost = 0;
+
+        while (usedCost < maxOps && machine.isRunning()) {
+            Executable top = machine.peekProgram();
+            if (top == null) {
+                break;
+            }
+
+            int cost = 1;
+            if (top instanceof Operation op) {
+                cost = op.getCost();
+            }
+
+            if (usedCost + cost > maxOps) {
+                break;
+            }
+
+            if (!machine.step()) {
+                break;
+            }
+
+            executedCount++;
+            usedCost += cost;
+        }
+
+        return executedCount;
+    }
 
     /**
      * 创建手持容器的伪实现
@@ -85,12 +124,12 @@ public class RunCommands {
             }
 
             @Override
-            public int getEnergy() {
-                return 99999;
+            public double getEnergy() {
+                return 999999999;
             }
 
             @Override
-            public void setEnergy(int energy) {
+            public void setEnergy(double energy) {
             }
 
             @Override
@@ -195,11 +234,11 @@ public class RunCommands {
         machine.setContext("shellContainer", createHandContainer(stack, player));
 
         machine.loadProgram(program);
-        machine.run(ops);
+        int executedCount = executeOps(machine, ops);
 
         List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();
-        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        result.append("运行完成 (执行 §e").append(executedCount).append("§r 个操作)");
         if (!dataStack.isEmpty()) {
             result.append(", 数据栈：§f").append(CommandUtils.dataStackToString(dataStack));
         }
@@ -255,11 +294,11 @@ public class RunCommands {
         machine.setContext("shellContainer", shell);
 
         machine.loadProgram(program);
-        machine.run(ops);
+        int executedCount = executeOps(machine, ops);
 
         List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();
-        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        result.append("运行完成 (执行 §e").append(executedCount).append("§r 个操作)");
         if (!dataStack.isEmpty()) {
             result.append(", 数据栈：§f").append(CommandUtils.dataStackToString(dataStack));
         }
@@ -298,11 +337,11 @@ public class RunCommands {
         });
 
         machine.loadProgram(program);
-        machine.run(ops);
+        int executedCount = executeOps(machine, ops);
 
         List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();
-        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        result.append("运行完成 (执行 §e").append(executedCount).append("§r 个操作)");
         if (!dataStack.isEmpty()) {
             result.append(", 数据栈：§f").append(CommandUtils.dataStackToString(dataStack));
         }
@@ -347,11 +386,11 @@ public class RunCommands {
         });
 
         machine.loadProgram(program);
-        machine.run(ops);
+        int executedCount = executeOps(machine, ops);
 
         List<Executable> dataStack = machine.getDataStackSnapshot();
         StringBuilder result = new StringBuilder();
-        result.append("运行完成 (剩余 §e").append(machine.getRemainingOps()).append("§r 操作)");
+        result.append("运行完成 (执行 §e").append(executedCount).append("§r 个操作)");
         if (!dataStack.isEmpty()) {
             result.append(", 数据栈：§f").append(CommandUtils.dataStackToString(dataStack));
         }

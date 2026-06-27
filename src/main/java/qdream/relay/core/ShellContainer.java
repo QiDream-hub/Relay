@@ -121,12 +121,12 @@ public interface ShellContainer {
     /**
      * 获取当前能量
      */
-    int getEnergy();
+    double getEnergy();
 
     /**
      * 设置能量
      */
-    void setEnergy(int energy);
+    void setEnergy(double energy);
 
     /**
      * 是否有世界交互器

@@ -148,7 +148,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         if (container != null) {
             enabledSlot.set(container.isEnabled() ? 1 : 0);
             coreCountSlot.set(container.getCoreCount());
-            energySlot.set(container.getEnergy());
+            energySlot.set((int)container.getEnergy());
             initializedSlot.set(container.isInitialized() ? 1 : 0);
         }
     }
@@ -299,12 +299,12 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         }
 
         @Override
-        public int getEnergy() {
+        public double getEnergy() {
             return 0;
         }
 
         @Override
-        public void setEnergy(int energy) {
+        public void setEnergy(double energy) {
         }
 
         @Override

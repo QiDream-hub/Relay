@@ -41,7 +41,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     private final StateMachine stateMachine;
     private final ShellTickHandler tickHandler;
 
-    private int energy;
+    private double energy;
     private boolean enabled;
     private Entity owner;
     private java.util.UUID ownerUuid;
@@ -153,12 +153,12 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     }
 
     @Override
-    public int getEnergy() {
+    public double getEnergy() {
         return energy;
     }
 
     @Override
-    public void setEnergy(int energy) {
+    public void setEnergy(double energy) {
         this.energy = energy;
     }
 
@@ -305,7 +305,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         ContainerHelper.saveAllItems(output, this.inventory);
 
         // 保存能量
-        output.putInt("energy", energy);
+        output.putDouble("energy", energy);
 
         // 保存状态机状态 - 使用 CompoundTag.CODEC 序列化
         CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);

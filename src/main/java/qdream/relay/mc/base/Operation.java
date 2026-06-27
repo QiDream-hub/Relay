@@ -26,7 +26,9 @@ public abstract class Operation implements Executable {
         return id;
     }
 
-    @Override
+    /**
+     * 获取操作的成本（用于 mc 层执行调度）
+     */
     public int getCost() {
         return cost;
     }

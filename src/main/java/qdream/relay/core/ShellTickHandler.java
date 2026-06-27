@@ -1,6 +1,9 @@
 package qdream.relay.core;
 
 import net.minecraft.world.item.ItemStack;
+import qdream.relay.engine.Executable;
+import qdream.relay.items.EnergyModuleItem;
+import qdream.relay.mc.base.Spell;
 
 /**
  * 外壳 Tick 处理器
@@ -59,15 +62,67 @@ public class ShellTickHandler {
                     stateMachine.setContext("world", entity.level());
                 }
 
-                // 执行
-                stateMachine.run(coreCount);
-
-                // 可选：清空上下文（如果不需要持久化）
-                stateMachine.clearContext();
-
-                container.setChanged();
+                // 执行 tick - mc 层负责控制执行节奏和能量扣除
+                runTick(container, coreCount);
             }
         }
+    }
+
+    /**
+     * 执行一个 tick 的逻辑
+     * mc 层负责：控制每 tick 执行的操作数、扣除能量
+     *
+     * @param container 外壳容器
+     * @param maxOps 本 tick 最大可执行操作数（由核心数量决定）
+     */
+    private void runTick(ShellContainer container, int maxOps) {
+        var stateMachine = container.getStateMachine();
+        ItemStack energyStack = container.getEnergyStack();
+        double currentEnergy = EnergyModuleItem.getStoredEnergy(energyStack);
+
+        int usedCost = 0;
+
+        while (usedCost < maxOps && stateMachine.isRunning()) {
+            // 预检查栈顶操作的 cost
+            Executable top = stateMachine.peekProgram();
+            if (top == null) {
+                break;
+            }
+
+            int cost = 1; // 默认 cost
+            if (top instanceof qdream.relay.mc.base.Operation op) {
+                cost = op.getCost();
+            }
+
+            if (usedCost + cost > maxOps) {
+                break; // cost 不足，等待下 tick
+            }
+
+            // 检查并扣除能量
+            double required = 0;
+            if (top instanceof Spell spell) {
+                required = spell.getEnergy();
+            } else {
+                required = cost; // 非 Spell 操作按 cost 扣除
+            }
+
+            if (currentEnergy < required) {
+                stateMachine.triggerMishap("能量不足：需要 " + required + "，当前只有 " + currentEnergy);
+                return;
+            }
+
+            // 执行单个操作
+            if (!stateMachine.step()) {
+                break; // 执行失败
+            }
+
+            // 扣除能量
+            EnergyModuleItem.consumeEnergy(energyStack, required);
+            currentEnergy = EnergyModuleItem.getStoredEnergy(energyStack);
+            usedCost += cost;
+        }
+
+        container.setChanged();
     }
 
     /**
@@ -76,13 +131,11 @@ public class ShellTickHandler {
     private void updateCoreState(ShellContainer container) {
         ItemStack coreStack = container.getCoreStack();
         if (!coreStack.isEmpty()) {
-            // 简单实现：单个核心，interval=1
-            // 后续由 CoreGroup 处理合并逻辑
-            coreCount = 10;
+            coreCount = coreStack.count();
             interval = 1;
         } else {
             coreCount = 0;
-            interval = 1;
+            interval = 20;
         }
     }
 
@@ -92,8 +145,8 @@ public class ShellTickHandler {
     private void updateEnergy(ShellContainer container) {
         ItemStack energyStack = container.getEnergyStack();
         if (!energyStack.isEmpty()) {
-            // TODO: 从能量模块读取能量
-            container.setEnergy(1000);
+            double storedEnergy = EnergyModuleItem.getStoredEnergy(energyStack);
+            container.setEnergy(storedEnergy);
         } else {
             container.setEnergy(0);
         }

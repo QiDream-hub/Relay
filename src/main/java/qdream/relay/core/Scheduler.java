@@ -70,10 +70,9 @@ public class Scheduler {
                 scheduled.tickCounter++;
                 if (scheduled.tickCounter >= scheduled.shell.getInterval()) {
                     scheduled.tickCounter = 0;
-                    
-                    // 执行状态机 tick
-                    scheduled.shell.getStateMachine().run(scheduled.shell.getCoreCount());
-                    scheduled.shell.setChanged();
+
+                    // 执行状态机 tick - 由 ShellTickHandler 控制执行节奏和能量扣除
+                    ShellBlockEntity.tick(scheduled.shell.getLevel(), scheduled.pos, scheduled.shell.getBlockState(), scheduled.shell);
                 }
             }
         }

@@ -158,7 +158,7 @@ public class ShellContainerWrapper implements Container {
         }
     }
 
-    public int getEnergy() {
+    public double getEnergy() {
         if (delegate != null) {
             return delegate.getEnergy();
         }

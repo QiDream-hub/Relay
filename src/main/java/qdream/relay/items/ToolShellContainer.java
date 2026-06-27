@@ -68,12 +68,12 @@ public class ToolShellContainer implements ShellContainer {
     }
 
     @Override
-    public int getEnergy() {
+    public double getEnergy() {
         return 0;
     }
 
     @Override
-    public void setEnergy(int energy) {
+    public void setEnergy(double energy) {
         // 工具外壳的能量存储在 ItemStack 中
     }
 

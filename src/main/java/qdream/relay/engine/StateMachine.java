@@ -12,13 +12,13 @@ import java.util.Optional;
 /**
  * 状态机执行器
  * 维护双栈，执行操作
+ * engine 层保持最小化，只负责纯粹的栈管理和原子执行
  */
 public class StateMachine {
     private final Deque<Executable> programStack = new ArrayDeque<>();
     private final Deque<Executable> dataStack = new ArrayDeque<>();
     private final Map<String, Object> context = new HashMap<>();
 
-    private int remainingOps;
     private int maxStackSize;
 
     /**
@@ -36,7 +36,6 @@ public class StateMachine {
 
     public StateMachine(int maxStackSize) {
         this.maxStackSize = maxStackSize;
-        this.remainingOps = 0;
     }
 
     // ========== 程序加载 ==========
@@ -56,30 +55,25 @@ public class StateMachine {
     // ========== 执行 ==========
 
     /**
-     * 进行一次执行
+     * 执行栈顶单个操作
+     * <p>
+     * engine 层保持最小化，只负责原子执行。
      *
-     * @param ops 本次执行可用的操作数
+     * @return true 成功执行，false 需要中断（栈空或执行失败）
      */
-    public int run(int ops) {
-        remainingOps = ops;
-
-        while (remainingOps > 0 && !programStack.isEmpty()) {
-            Executable executable = programStack.peek();  // 先 peek，检查 cost
-            int cost = executable.getCost();
-            if (cost > remainingOps) {
-                break;  // cost 不足时不弹出，保留在栈顶等待下 tick
-            }
-            programStack.pop();  // 确认可以执行后再弹出
-            remainingOps -= cost;
-            try {
-                executable.execute(this);
-            } catch (Exception e) {
-                triggerMishap("未知错误:" + e.getMessage());
-                break;
-            }
+    public boolean step() {
+        if (programStack.isEmpty()) {
+            return false;
         }
 
-        return remainingOps;
+        Executable executable = programStack.pop();
+        try {
+            executable.execute(this);
+            return true;
+        } catch (Exception e) {
+            triggerMishap("未知错误:" + e.getMessage());
+            return false;
+        }
     }
 
     // ========== 事故处理 ==========
@@ -91,7 +85,6 @@ public class StateMachine {
     public void triggerMishap(String reason) {
         programStack.clear();
         dataStack.clear();
-        remainingOps = 0;
 
         if (mishapHandler != null) {
             mishapHandler.onMishap(reason);
@@ -104,7 +97,6 @@ public class StateMachine {
     public void clear() {
         programStack.clear();
         dataStack.clear();
-        remainingOps = 0;
     }
 
     public void setMishapHandler(MishapHandler handler) {
@@ -168,6 +160,13 @@ public class StateMachine {
     }
 
     /**
+     * 查看程序栈顶部（不弹出）
+     */
+    public Executable peekProgram() {
+        return programStack.peekFirst();
+    }
+
+    /**
      * 压入程序栈
      */
     public void pushProgram(Executable iota) {
@@ -226,10 +225,9 @@ public class StateMachine {
 
     // ========== 状态 ==========
 
-    public int getRemainingOps() {
-        return remainingOps;
-    }
-
+    /**
+     * 是否正在运行（程序栈非空）
+     */
     public boolean isRunning() {
         return !programStack.isEmpty();
     }
