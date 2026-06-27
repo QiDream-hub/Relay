@@ -16,17 +16,19 @@ import java.util.UUID;
 /**
  * 实体类型
  * 支持存储 Entity 引用，通过 UUID + 世界 ID 实现跨维度持久化
- * 
+ *
  * 设计原则：
  * 1. UUID 唯一标识实体
  * 2. entityRef 为运行时缓存，可能为 null（需要时通过世界查询）
- * 3. 序列化存储 UUID 和世界 ID，反序列化时延迟查询实体
- * 
+ * 3. 序列化存储 UUID 和世界 ID，反序列化时延迟加载实体
+ * 4. getEntity() 时懒加载：首次调用时才查询世界获取实体引用
+ *
  * 使用方式：
- * 1. 从实体创建：EntityIota.from(entity, world)
- * 2. 从 UUID 创建：EntityIota.fromUuid(uuid, worldId) - 用于反序列化
- * 3. 获取实体：getEntity(world) - 通过世界查询 UUID 获取实际引用
- * 4. 执行：execute() - 将自己压入数据栈
+ * 1. 从实体创建：EntityIota.from(entity, world) - 立即存储 UUID + worldId + 引用
+ * 2. 从 UUID 创建：EntityIota.fromUuid(uuid, worldId) - 立即解析实体（需要世界可用）
+ * 3. 从 NBT/JSON 创建：fromNbt()/fromJson() - 延迟加载，不立即解析实体
+ * 4. 获取实体：getEntity() - 懒加载，首次调用时查询世界
+ * 5. 执行：execute() - 将自己压入数据栈
  */
 public class EntityIota extends Data {
     // 实体 UUID
@@ -75,13 +77,22 @@ public class EntityIota extends Data {
 
     /**
      * 获取实体引用
-     * 
+     *
      * @return 实体引用，如果实体不存在则返回 null
      */
     public Entity getEntity() {
         // 如果有缓存引用，先验证是否仍然有效
         if (entityRef != null && !entityRef.isRemoved()) {
             return entityRef;
+        }
+
+        // 延迟加载：通过 UUID 和世界 ID 查询实体
+        if (uuid != null && worldId != null) {
+            ServerLevel world = Relay.getWorld(worldId);
+            if (world != null) {
+                entityRef = world.getEntity(uuid);
+                return entityRef;
+            }
         }
 
         return null;
@@ -154,11 +165,17 @@ public class EntityIota extends Data {
         if (valueTag.contains("uuid")) {
             String uuidStr = valueTag.getString("uuid").orElse("");
             if (!uuidStr.isEmpty()) {
-                uuid = UUID.fromString(uuidStr);
+                try {
+                    uuid = UUID.fromString(uuidStr);
+                } catch (IllegalArgumentException e) {
+                    // UUID 格式错误，返回 null
+                    return new EntityIota(null, null, null);
+                }
             }
         }
 
-        return EntityIota.fromUuid(uuid, worldId);
+        // 直接创建 EntityIota，不立即解析实体（延迟加载）
+        return new EntityIota(uuid, worldId, null);
     }
 
     @Override
@@ -194,7 +211,8 @@ public class EntityIota extends Data {
 
             try {
                 UUID uuid = UUID.fromString(uuidStr);
-                return EntityIota.fromUuid(uuid, worldId);
+                // 直接创建 EntityIota，不立即解析实体（延迟加载）
+                return new EntityIota(uuid, worldId, null);
             } catch (IllegalArgumentException e) {
                 return new EntityIota(null, null, null);
             }

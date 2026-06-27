@@ -60,7 +60,7 @@ public class StateMachine {
      *
      * @param ops 本次执行可用的操作数
      */
-    public void run(int ops) {
+    public int run(int ops) {
         remainingOps = ops;
 
         while (remainingOps > 0 && !programStack.isEmpty()) {
@@ -78,6 +78,8 @@ public class StateMachine {
                 break;
             }
         }
+
+        return remainingOps;
     }
 
     // ========== 事故处理 ==========

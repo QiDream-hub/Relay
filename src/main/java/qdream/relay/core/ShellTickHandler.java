@@ -41,9 +41,6 @@ public class ShellTickHandler {
         // 更新能量状态
         updateEnergy(container);
 
-        // 移除磁盘变更检测 - 程序加载后应该持续运行，直到手动停止
-        // 如果用户想更换程序，需要先关闭再重新初始化
-
         // 执行状态机
         if (initialized && coreCount > 0 && container.getStateMachine().isRunning()) {
             tickCounter++;

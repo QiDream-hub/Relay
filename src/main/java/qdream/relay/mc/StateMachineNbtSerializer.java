@@ -44,6 +44,7 @@ public class StateMachineNbtSerializer {
     }
 
     public void deserialize(StateMachine machine, CompoundTag tag) {
+        // 直接恢复程序栈 - 不调用 loadProgram()，因为那会清空现有栈
         ListTag programList = tag.getList("programStack").orElse(new ListTag());
         List<Executable> programStack = new ArrayList<>();
         for (Tag element : programList) {
@@ -55,10 +56,13 @@ public class StateMachineNbtSerializer {
                 });
             }
         }
-        // 反转后加载，保证执行顺序
+        // 反转后压入，保证执行顺序
         java.util.Collections.reverse(programStack);
-        machine.loadProgram(programStack);
+        for (Executable exe : programStack) {
+            machine.pushProgram(exe);
+        }
 
+        // 恢复数据栈
         ListTag dataList = tag.getList("dataStack").orElse(new ListTag());
         List<Executable> dataStack = new ArrayList<>();
         for (Tag element : dataList) {

@@ -17,6 +17,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Container;
 import java.util.List;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
@@ -33,7 +34,7 @@ import qdream.relay.items.SpellDiskItem;
  * 外壳方块实体
  * 维护状态机，执行 tick，处理持久化
  */
-public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer {
+public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer, Container {
 
     // 使用 NonNullList 替代数组，支持 ContainerHelper 序列化
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(4, ItemStack.EMPTY);
@@ -43,6 +44,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     private int energy;
     private boolean enabled;
     private Entity owner;
+    private java.util.UUID ownerUuid;
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
@@ -51,6 +53,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         this.energy = 0;
         this.enabled = false;
         this.owner = null;
+        this.ownerUuid = null;
 
         // 设置事故回调
         this.stateMachine.setMishapHandler(reason -> {
@@ -201,16 +204,94 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
+    // ========== Container 接口 ==========
+
+    @Override
+    public int getContainerSize() {
+        return inventory.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for (ItemStack stack : inventory) {
+            if (!stack.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack getItem(int slot) {
+        return getInventorySlot(slot);
+    }
+
+    @Override
+    public ItemStack removeItem(int slot, int amount) {
+        if (slot >= 0 && slot < inventory.size()) {
+            ItemStack stack = inventory.get(slot);
+            if (!stack.isEmpty()) {
+                ItemStack result = stack.split(amount);
+                setChanged();
+                return result;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot) {
+        if (slot >= 0 && slot < inventory.size()) {
+            ItemStack stack = inventory.get(slot);
+            if (!stack.isEmpty()) {
+                inventory.set(slot, ItemStack.EMPTY);
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack stack) {
+        setInventorySlot(slot, stack);
+    }
+
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        // 根据插槽类型限制可放置的物品
+        return true; // 允许所有物品，具体限制在 GUI 中处理
+    }
+
+    @Override
+    public void clearContent() {
+        inventory.clear();
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        if (this.level != null && this.level.getBlockEntity(this.worldPosition) != this) {
+            return false;
+        }
+        return true;
+    }
+
     // ========== ShellContainer 接口 - 所有者管理 ==========
 
     @Override
     public Entity getOwner() {
+        // 如果 owner 为空但有保存的 UUID，尝试延迟加载
+        if (owner == null && ownerUuid != null && level != null && !level.isClientSide()) {
+            owner = level.getEntity(ownerUuid);
+        }
         return owner;
     }
 
     @Override
     public void setOwner(Entity owner) {
         this.owner = owner;
+        if (owner != null) {
+            this.ownerUuid = owner.getUUID();
+        }
         setChanged();
     }
 
@@ -263,14 +344,12 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         // 加载开关状态
         enabled = input.getBooleanOr("enabled", false);
 
-        // 加载所有者信息
+        // 加载所有者信息 - 只保存 UUID，延迟加载实体
         String uuidStr = input.getString("owner").orElse("");
         if (!uuidStr.isEmpty()) {
             try {
-                java.util.UUID uuid = java.util.UUID.fromString(uuidStr);
-                if (level != null && !level.isClientSide()) {
-                    owner = level.getEntity(uuid);
-                }
+                ownerUuid = java.util.UUID.fromString(uuidStr);
+                // 不立即获取实体，等 getOwner() 时再延迟加载
             } catch (IllegalArgumentException e) {
                 // UUID 格式错误，忽略
             }

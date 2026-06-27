@@ -15,7 +15,7 @@ import qdream.relay.types.BooleanIota;
 public class IfOp extends Spell {
 
     public IfOp() {
-        super("relay:if",1, 1, OperationSignature.builder()
+        super("relay:if", 1, 1, OperationSignature.builder()
                 .input("boolean")
                 .input("any")
                 .input("any")
@@ -25,12 +25,7 @@ public class IfOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Operation falseBranchData = (Operation) executor.popData();
-        if (falseBranchData == null)
-            return;
-        Operation trueBranchData = (Operation) executor.popData();
-        if (trueBranchData == null)
-            return;
+
         Operation conditionData = (Operation) executor.popData();
         if (conditionData == null)
             return;
@@ -38,13 +33,19 @@ public class IfOp extends Spell {
             executor.triggerMishap("操作 relay:if 期望 boolean 类型，实际为：" + conditionData.getId());
             return;
         }
+        Operation trueBranchData = (Operation) executor.popProgram();
+        if (trueBranchData == null)
+            return;
+        Operation falseBranchData = (Operation) executor.popProgram();
+        if (falseBranchData == null)
+            return;
 
         // 根据条件选择分支
         Executable selected = condition.asBoolean()
                 ? trueBranchData
                 : falseBranchData;
 
-        executor.pushData(selected);
+        executor.pushProgram(selected);
     }
 
 }
