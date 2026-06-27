@@ -2,6 +2,8 @@
   "item.relay.computing_core": "运算核心",
   "item.relay.spell_disk": "法术磁盘",
   "item.relay.energy_module": "能量模块",
+  "item.relay.energy_module.energy": "能量：§e%s",
+  "item.relay.energy_module.charge": "§7Shift+ 右键：使用背包内紫水晶充能",
   "block.relay.shell_block": "外壳",
   "block.relay.shell_block.initialized": "外壳 (已初始化)",
   "block.relay.shell_block.active": "外壳 (运行中)",

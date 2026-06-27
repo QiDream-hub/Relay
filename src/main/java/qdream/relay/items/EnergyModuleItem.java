@@ -6,6 +6,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+
+import java.util.function.Consumer;
+
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import qdream.relay.Component.RelayDataComponents;
@@ -100,11 +106,6 @@ public class EnergyModuleItem extends Item {
                     player.sendSystemMessage(
                             Component.literal("§7背包内没有可充能的紫水晶"));
                 }
-            } else {
-                // 普通右键：显示当前能量
-                double energy = getStoredEnergy(stack);
-                player.sendSystemMessage(
-                        Component.literal("§7能量：§e" + String.format("%.1f", energy)));
             }
         }
 
@@ -144,5 +145,16 @@ public class EnergyModuleItem extends Item {
         }
 
         return addEnergyCount;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay displayComponent,
+            Consumer<Component> textConsumer, TooltipFlag type) {
+        double energy = getStoredEnergy(stack);
+        textConsumer.accept(
+                Component.translatable("item.relay.energy_module.energy", String.format("%.1f", energy))
+                        .withStyle(ChatFormatting.GOLD));
+        textConsumer.accept(
+                Component.translatable("item.relay.energy_module.charge").withStyle(ChatFormatting.GRAY));
     }
 }

@@ -2,6 +2,8 @@
   "item.relay.computing_core": "Computing Core",
   "item.relay.spell_disk": "Spell Disk",
   "item.relay.energy_module": "Energy Module",
+  "item.relay.energy_module.energy": "Energy: §e%s",
+  "item.relay.energy_module.charge": "§7Shift+Right-click: Charge with amethysts from inventory",
   "block.relay.shell_block": "Shell",
   "block.relay.shell_block.initialized": "Shell (Initialized)",
   "block.relay.shell_block.active": "Shell (Active)",
