@@ -5,7 +5,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.ListIota;
+import qdream.relay.types.ListType;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class EvalOp extends Spell {
         Operation listData = (Operation) executor.popData();
         if (listData == null)
             return;
-        if (!(listData instanceof ListIota list)) {
+        if (!(listData instanceof ListType list)) {
             executor.triggerMishap("操作 relay:eval 期望 list 类型，实际为：" + listData.getId());
             return;
         }

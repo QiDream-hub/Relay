@@ -10,7 +10,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.types.BlockEntityIota;
-import qdream.relay.types.EntityIota;
+import qdream.relay.types.EntityType;
 
 /**
  * GetSelf 操作 - 获取自身外壳对应的实体/方块实体
@@ -48,7 +48,7 @@ public class GetSelfOp extends Spell {
         // 根据容器类型获取对应的引用
         if (container.get() instanceof Entity entity) {
             // 实体外壳 - 返回 EntityIota
-            executor.pushData(EntityIota.from(entity, entity.level()));
+            executor.pushData(EntityType.from(entity, entity.level()));
         } else if (container.get() instanceof BlockEntity blockEntity) {
             // 方块外壳 - 返回 BlockEntityIota
             executor.pushData(BlockEntityIota.from(blockEntity, blockEntity.getLevel()));

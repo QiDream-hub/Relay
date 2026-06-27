@@ -10,10 +10,10 @@ import qdream.relay.mc.signature.DataSignature;
  * 空值类型
  * 执行时自动压入数据栈
  */
-public class NullIota extends Data {
-    public static final NullIota INSTANCE = new NullIota();
+public class NullIType extends Data {
+    public static final NullIType INSTANCE = new NullIType();
 
-    private NullIota() {
+    private NullIType() {
         super("relay:null", 0,
                 DataSignature.builder()
                         .output("relay:null")
@@ -24,7 +24,7 @@ public class NullIota extends Data {
      * 创建 NullIota 实例
      * 注意：优先使用 INSTANCE 单例
      */
-    public NullIota(int ignored) {
+    public NullIType(int ignored) {
         // 兼容工厂方法调用，实际使用单例
         this();
     }

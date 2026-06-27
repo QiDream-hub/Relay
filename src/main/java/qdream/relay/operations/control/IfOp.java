@@ -5,7 +5,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanIota;
+import qdream.relay.types.BooleanType;
 
 /**
  * If 操作 - 条件分支
@@ -29,7 +29,7 @@ public class IfOp extends Spell {
         Operation conditionData = (Operation) executor.popData();
         if (conditionData == null)
             return;
-        if (!(conditionData instanceof BooleanIota condition)) {
+        if (!(conditionData instanceof BooleanType condition)) {
             executor.triggerMishap("操作 relay:if 期望 boolean 类型，实际为：" + conditionData.getId());
             return;
         }

@@ -8,8 +8,8 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.ListIota;
-import qdream.relay.types.NumberIota;
+import qdream.relay.types.ListType;
+import qdream.relay.types.NumberType;
 
 public class ListCreatOp extends Spell{
     public ListCreatOp() {
@@ -23,7 +23,7 @@ public class ListCreatOp extends Spell{
         Operation numberIota = (Operation) executor.popData();
         if (numberIota == null)
             return;
-        if (!(numberIota instanceof NumberIota index)) {
+        if (!(numberIota instanceof NumberType index)) {
             executor.triggerMishap("操作 relay:list_creat 期望 number 类型，实际为：" + numberIota.getId());
             return;
         }
@@ -35,7 +35,7 @@ public class ListCreatOp extends Spell{
         for (int i = 0; i < index.getValue(); i++) {
             list.add(executor.popData());
         }
-        executor.pushData(new ListIota(list));
+        executor.pushData(new ListType(list));
     }
 
 }

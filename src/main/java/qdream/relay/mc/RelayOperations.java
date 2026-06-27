@@ -30,14 +30,14 @@ import qdream.relay.operations.list.ListCreatOp;
 import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListSetOp;
-import qdream.relay.types.BooleanIota;
+import qdream.relay.types.BooleanType;
 import qdream.relay.types.BlockEntityIota;
-import qdream.relay.types.EntityIota;
-import qdream.relay.types.ListIota;
-import qdream.relay.types.NullIota;
-import qdream.relay.types.NumberIota;
-import qdream.relay.types.StringIota;
-import qdream.relay.types.VectorIota;
+import qdream.relay.types.EntityType;
+import qdream.relay.types.ListType;
+import qdream.relay.types.NullIType;
+import qdream.relay.types.NumberType;
+import qdream.relay.types.StringType;
+import qdream.relay.types.VectorType;
 
 import java.util.ArrayList;
 
@@ -60,19 +60,19 @@ public class RelayOperations {
     private static void registerDataTypes() {
         // 基础类型 - 工厂方法创建默认值实例
         OperationRegistry.register("relay:number",
-                new OperationRegistry.DataEntry(() -> new NumberIota(0)));
+                new OperationRegistry.DataEntry(() -> new NumberType(0)));
         OperationRegistry.register("relay:boolean",
-                new OperationRegistry.DataEntry(() -> new BooleanIota(false)));
+                new OperationRegistry.DataEntry(() -> new BooleanType(false)));
         OperationRegistry.register("relay:string",
-                new OperationRegistry.DataEntry(() -> new StringIota("")));
+                new OperationRegistry.DataEntry(() -> new StringType("")));
         OperationRegistry.register("relay:vector",
-                new OperationRegistry.DataEntry(() -> new VectorIota(new Vec3(0, 0, 0))));
+                new OperationRegistry.DataEntry(() -> new VectorType(new Vec3(0, 0, 0))));
         OperationRegistry.register("relay:entity",
-                new OperationRegistry.DataEntry(() -> new EntityIota(null, null, null)));
+                new OperationRegistry.DataEntry(() -> new EntityType(null, null, null)));
         OperationRegistry.register("relay:null",
-                new OperationRegistry.DataEntry(() -> NullIota.INSTANCE));
+                new OperationRegistry.DataEntry(() -> NullIType.INSTANCE));
         OperationRegistry.register("relay:list",
-                new OperationRegistry.DataEntry(() -> new ListIota(new ArrayList<>())));
+                new OperationRegistry.DataEntry(() -> new ListType(new ArrayList<>())));
         OperationRegistry.register("relay:block_entity",
                 new OperationRegistry.DataEntry(() -> new BlockEntityIota(null, null, null)));
     }

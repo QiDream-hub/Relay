@@ -8,9 +8,9 @@ import net.minecraft.network.chat.Component;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityIota;
-import qdream.relay.types.StringIota;
-import qdream.relay.types.BooleanIota;
+import qdream.relay.types.EntityType;
+import qdream.relay.types.StringType;
+import qdream.relay.types.BooleanType;
 
 /**
  * SendMessageOp 操作 - 向玩家实体发送聊天消息
@@ -45,7 +45,7 @@ public class SendMessageOp extends Spell {
             return;
         }
 
-        if (!(entityExe instanceof EntityIota entityIota)) {
+        if (!(entityExe instanceof EntityType entityIota)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
@@ -57,7 +57,7 @@ public class SendMessageOp extends Spell {
             return;
         }
 
-        if (!(msgExe instanceof StringIota stringIota)) {
+        if (!(msgExe instanceof StringType stringIota)) {
             executor.triggerMishap("期望 string 类型");
             return;
         }
@@ -69,10 +69,10 @@ public class SendMessageOp extends Spell {
         // 检查是否是玩家
         if (entity instanceof Player player) {
             player.sendSystemMessage(Component.literal(message));
-            executor.pushData(new BooleanIota(true));
+            executor.pushData(new BooleanType(true));
         } else {
             // 不是玩家或实体不存在，返回 false
-            executor.pushData(new BooleanIota(false));
+            executor.pushData(new BooleanType(false));
         }
     }
 }

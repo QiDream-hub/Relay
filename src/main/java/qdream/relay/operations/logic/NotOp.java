@@ -1,6 +1,6 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.types.BooleanIota;
+import qdream.relay.types.BooleanType;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
@@ -23,13 +23,13 @@ public class NotOp extends Spell {
         Operation aData = (Operation) executor.popData();
         if (aData == null)
             return;
-        if (!(aData instanceof BooleanIota a)) {
+        if (!(aData instanceof BooleanType a)) {
             executor.triggerMishap("操作 relay:not 期望 boolean 类型，实际为：" + aData.getId());
             return;
         }
 
         boolean result = !a.asBoolean();
-        executor.pushData(new BooleanIota(result));
+        executor.pushData(new BooleanType(result));
     }
 
 }

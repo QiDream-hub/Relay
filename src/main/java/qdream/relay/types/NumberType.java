@@ -8,17 +8,17 @@ import qdream.relay.mc.signature.DataSignature;
 import qdream.relay.mc.signature.SignatureName;
 
 /**
- * 字符串类型
+ * 数字类型
  * 执行时自动压入数据栈
  */
-public class StringIota extends Data {
-    private final String value;
+public class NumberType extends Data {
+    private final double value;
 
-    public StringIota(String value) {
-        super("relay:string", 0,
+    public NumberType(double value) {
+        super("relay:number", 0,
                 DataSignature.builder()
-                        .output("relay:string")
-                        .input(SignatureName.builder().setName("string").setType("String").build())
+                        .output("relay:number")
+                        .input(SignatureName.builder().setName("number").setType("Number").build())
                         .build());
         this.value = value;
     }
@@ -28,38 +28,50 @@ public class StringIota extends Data {
         executor.pushData(this);
     }
 
-    public String asString() {
+    public double asDouble() {
         return value;
+    }
+
+    public int asInt() {
+        return (int) value;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public boolean isInteger() {
+        return value == (int) value;
     }
 
     @Override
     public void toNbt(CompoundTag tag) {
         super.toNbt(tag);
         CompoundTag value = new CompoundTag();
-        value.putString("string", this.value != null ? this.value : "");
+        value.putString("number", String.valueOf(this.value));
         tag.put("value", value);
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
-        String string = tag.getCompound("value").flatMap(ct -> ct.getString("string")).orElse("");
-        return new StringIota(string);
+        String value = tag.getCompound("value")
+                .flatMap(ct -> ct.getString("number"))
+                .orElse("0.0");
+        return new NumberType(Double.parseDouble(value));
     }
 
     @Override
     public void toJson(JsonObject json) {
         super.toJson(json);
         JsonObject value = new JsonObject();
-        value.addProperty("string", this.value);
+        value.addProperty("number", this.value);
         json.add("value", value);
     }
 
     @Override
     public Data fromJson(JsonObject json) {
-        if (json.has("value")) {
-            JsonObject value = json.get("value").getAsJsonObject();
-            return new StringIota(value.get("string").getAsString());
-        }
-        return new StringIota("");
+        String value = json.get("value").getAsJsonObject()
+                .get("number").getAsString();
+        return new NumberType(Double.parseDouble(value));
     }
 }

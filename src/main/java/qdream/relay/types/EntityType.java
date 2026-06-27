@@ -30,7 +30,7 @@ import java.util.UUID;
  * 4. 获取实体：getEntity() - 懒加载，首次调用时查询世界
  * 5. 执行：execute() - 将自己压入数据栈
  */
-public class EntityIota extends Data {
+public class EntityType extends Data {
     // 实体 UUID
     private final UUID uuid;
 
@@ -40,7 +40,7 @@ public class EntityIota extends Data {
     // 运行时缓存，不序列化
     private transient Entity entityRef;
 
-    public EntityIota(UUID uuid, String worldId, Entity entityRef) {
+    public EntityType(UUID uuid, String worldId, Entity entityRef) {
         super("relay:entity", 0, DataSignature.builder()
                 .output("relay:entity")
                 .input(SignatureName.builder().setName("uuid").setType("String").build())
@@ -53,21 +53,21 @@ public class EntityIota extends Data {
     /**
      * 从 Entity 创建 EntityIota（存储 UUID + 世界 ID + 引用）
      */
-    public static EntityIota from(Entity entity, Level world) {
+    public static EntityType from(Entity entity, Level world) {
         if (entity == null) {
-            return new EntityIota(null, null, null);
+            return new EntityType(null, null, null);
         }
         String worldId = entity.level().dimension().registry().toString();
-        return new EntityIota(entity.getUUID(), worldId, entity);
+        return new EntityType(entity.getUUID(), worldId, entity);
     }
 
     /**
      * 从 UUID 和世界 ID 创建 EntityIota
      */
-    public static EntityIota fromUuid(UUID uuid, String worldId) {
+    public static EntityType fromUuid(UUID uuid, String worldId) {
         ServerLevel world = Relay.getWorld(worldId);
         Entity entity = world.getEntity(uuid);
-        return new EntityIota(uuid, worldId, entity);
+        return new EntityType(uuid, worldId, entity);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class EntityIota extends Data {
     public Data fromNbt(CompoundTag tag) {
         CompoundTag valueTag = tag.getCompound("value").orElse(null);
         if (valueTag == null) {
-            return new EntityIota(null, null, null);
+            return new EntityType(null, null, null);
         }
 
         String worldId = null;
@@ -169,13 +169,13 @@ public class EntityIota extends Data {
                     uuid = UUID.fromString(uuidStr);
                 } catch (IllegalArgumentException e) {
                     // UUID 格式错误，返回 null
-                    return new EntityIota(null, null, null);
+                    return new EntityType(null, null, null);
                 }
             }
         }
 
         // 直接创建 EntityIota，不立即解析实体（延迟加载）
-        return new EntityIota(uuid, worldId, null);
+        return new EntityType(uuid, worldId, null);
     }
 
     @Override
@@ -206,17 +206,17 @@ public class EntityIota extends Data {
 
             String uuidStr = valueObject.has("uuid") ? valueObject.get("uuid").getAsString() : "";
             if (uuidStr.isEmpty()) {
-                return new EntityIota(null, null, null);
+                return new EntityType(null, null, null);
             }
 
             try {
                 UUID uuid = UUID.fromString(uuidStr);
                 // 直接创建 EntityIota，不立即解析实体（延迟加载）
-                return new EntityIota(uuid, worldId, null);
+                return new EntityType(uuid, worldId, null);
             } catch (IllegalArgumentException e) {
-                return new EntityIota(null, null, null);
+                return new EntityType(null, null, null);
             }
         }
-        return new EntityIota(null, null, null);
+        return new EntityType(null, null, null);
     }
 }

@@ -5,7 +5,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.ListIota;
+import qdream.relay.types.ListType;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class ListAppendOp extends Spell {
         Operation listData = (Operation) executor.popData();
         if (listData == null)
             return;
-        if (!(listData instanceof ListIota list)) {
+        if (!(listData instanceof ListType list)) {
             executor.triggerMishap("操作 relay:list_append 期望 list 类型，实际为：" + listData.getId());
             return;
         }
@@ -41,7 +41,7 @@ public class ListAppendOp extends Spell {
         // 创建新列表并添加原列表元素
         List<Executable> newList = list.getValue();
         newList.add(valueData);
-        executor.pushData(new ListIota(newList));
+        executor.pushData(new ListType(newList));
     }
 
 }

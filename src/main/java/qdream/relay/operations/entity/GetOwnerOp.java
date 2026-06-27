@@ -7,7 +7,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityIota;
+import qdream.relay.types.EntityType;
 
 /**
  * GetOwner 操作 - 获取 Shell 的所有者（主人）
@@ -45,6 +45,6 @@ public class GetOwnerOp extends Spell {
             executor.triggerMishap("无法获取所属者");
             return;
         }
-        executor.pushData(EntityIota.from(owner, owner.level()));
+        executor.pushData(EntityType.from(owner, owner.level()));
     }
 }

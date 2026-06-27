@@ -1,7 +1,7 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.types.BooleanIota;
-import qdream.relay.types.NumberIota;
+import qdream.relay.types.BooleanType;
+import qdream.relay.types.NumberType;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
@@ -25,20 +25,20 @@ public class LtOp extends Spell {
         Operation bData = (Operation) executor.popData();
         if (bData == null)
             return;
-        if (!(bData instanceof NumberIota b)) {
+        if (!(bData instanceof NumberType b)) {
             executor.triggerMishap("操作 relay:lt 期望 number 类型，实际为：" + bData.getId());
             return;
         }
         Operation aData = (Operation) executor.popData();
         if (aData == null)
             return;
-        if (!(aData instanceof NumberIota a)) {
+        if (!(aData instanceof NumberType a)) {
             executor.triggerMishap("操作 relay:lt 期望 number 类型，实际为：" + aData.getId());
             return;
         }
 
         boolean result = a.asDouble() < b.asDouble();
-        executor.pushData(new BooleanIota(result));
+        executor.pushData(new BooleanType(result));
     }
 
 }

@@ -12,10 +12,10 @@ import qdream.relay.mc.signature.SignatureName;
  * 向量类型
  * 执行时自动压入数据栈
  */
-public class VectorIota extends Data {
+public class VectorType extends Data {
     private final Vec3 vec3;
 
-    public VectorIota(Vec3 vec3) {
+    public VectorType(Vec3 vec3) {
         super("relay:vector", 0,
                 DataSignature.builder()
                         .output("relay:vector")
@@ -58,7 +58,7 @@ public class VectorIota extends Data {
                         ct.getDouble("z").orElse(0.0)))
                 .orElse(new Vec3(0, 0, 0));
 
-        return new VectorIota(vec);
+        return new VectorType(vec);
     }
 
     @Override
@@ -83,6 +83,6 @@ public class VectorIota extends Data {
                     vecJson.has("z") ? vecJson.get("z").getAsDouble() : 0.0);
         }
 
-        return new VectorIota(vec);
+        return new VectorType(vec);
     }
 }
