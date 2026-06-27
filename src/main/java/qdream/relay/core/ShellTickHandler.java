@@ -131,7 +131,7 @@ public class ShellTickHandler {
     /**
      * 更新核心状态
      */
-    private void updateCoreState(ShellContainer container) {
+    public void updateCoreState(ShellContainer container) {
         ItemStack coreStack = container.getCoreStack();
         if (!coreStack.isEmpty()) {
             coreCount = coreStack.count();
@@ -153,7 +153,7 @@ public class ShellTickHandler {
     /**
      * 更新能量状态
      */
-    private void updateEnergy(ShellContainer container) {
+    public void updateEnergy(ShellContainer container) {
         ItemStack energyStack = container.getEnergyStack();
         if (!energyStack.isEmpty()) {
             double storedEnergy = EnergyModuleItem.getStoredEnergy(energyStack);

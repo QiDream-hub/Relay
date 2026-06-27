@@ -370,13 +370,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         return saveWithoutMetadata(registryLookup);
     }
 
-    // ========== 状态访问（兼容旧代码） ==========
-
-    public int getTickCounter() {
-        return tickHandler.getTickCounter();
-    }
-
-    public void setTickCounter(int tickCounter) {
-        tickHandler.setTickCounter(tickCounter);
+    // ========== 状态访问 ==========
+    public void updateStatus() {
+        tickHandler.updateCoreState(this);
+        tickHandler.updateEnergy(this);
     }
 }
