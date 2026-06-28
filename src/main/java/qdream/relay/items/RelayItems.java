@@ -43,8 +43,10 @@ public class RelayItems {
     public static final Item ENERGY_MODULE = register("energy_module", EnergyModuleItem::new, new Item.Properties());
 
     // 三种外壳物品
-    public static final Item BLOCK_SHELL = register("block_shell", Item::new, new Item.Properties());
-    public static final Item ENTITY_SHELL = register("entity_shell", Item::new, new Item.Properties());
+    // block_shell = 方块外壳，可以放置成方块（使用 BlockItem）
+    // entity_shell = 实体外壳，使用后生成实体
+    // tool_shell = 工具外壳，手持使用的工具
+    public static final Item BLOCK_SHELL = RelayBlocks.BLOCK_SHELL_BLOCK.asItem();
     public static final Item TOOL_SHELL = register("tool_shell", ToolShellItem::new, new Item.Properties());
 
     public static <T extends Item> T register(String name, Function<Item.Properties, T> itemFactory,
@@ -84,11 +86,10 @@ public class RelayItems {
                 output.accept(RelayItems.ENERGY_MODULE);
                 output.accept(RelayItems.SPELL_DISK);
 
-                // 方块
+                // 方块和外壳
+                output.accept(RelayBlocks.BLOCK_SHELL_BLOCK);  // 方块外壳
+                output.accept(RelayItems.TOOL_SHELL);          // 工具外壳
                 output.accept(RelayBlocks.SPELL_EDITOR_BLOCK);
-                output.accept(RelayBlocks.SHELL_BLOCK);
-                output.accept(RelayItems.ENTITY_SHELL);
-                output.accept(RelayItems.TOOL_SHELL);
             })
             .build();
 

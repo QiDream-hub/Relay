@@ -21,7 +21,7 @@ public class RelayModelProvider extends FabricModelProvider {
     @Override
     public void generateBlockStateModels(BlockModelGenerators gen) {
         // 生成简单的立方体方块模型
-        gen.createTrivialCube(RelayBlocks.SHELL_BLOCK);
+        gen.createTrivialCube(RelayBlocks.BLOCK_SHELL_BLOCK);
         gen.createTrivialCube(RelayBlocks.SPELL_EDITOR_BLOCK);
     }
 
@@ -35,16 +35,17 @@ public class RelayModelProvider extends FabricModelProvider {
         gen.generateFlatItem(RelayItems.COMPUTING_CORE_16, ModelTemplates.FLAT_ITEM);
         gen.generateFlatItem(RelayItems.COMPUTING_CORE_32, ModelTemplates.FLAT_ITEM);
         gen.generateFlatItem(RelayItems.COMPUTING_CORE_64, ModelTemplates.FLAT_ITEM);
-        
+
         // 法术磁盘
         gen.generateFlatItem(RelayItems.SPELL_DISK, ModelTemplates.FLAT_ITEM);
-        
+
         // 能量模块
         gen.generateFlatItem(RelayItems.ENERGY_MODULE, ModelTemplates.FLAT_ITEM);
-        
-        // 外壳物品
-        gen.generateFlatItem(RelayItems.BLOCK_SHELL, ModelTemplates.FLAT_ITEM);
-        gen.generateFlatItem(RelayItems.ENTITY_SHELL, ModelTemplates.FLAT_ITEM);
+
+        // 方块外壳 - 物品模型手动创建在 resources/assets/relay/items/ 目录
+        // 因为需要引用方块模型而非物品纹理
+
+        // 工具外壳使用物品纹理
         gen.generateFlatItem(RelayItems.TOOL_SHELL, ModelTemplates.FLAT_ITEM);
     }
 }

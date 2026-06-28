@@ -28,17 +28,17 @@ import qdream.relay.blocks.entity.custom.ShellBlockEntity;
  * 外壳方块
  * 容器，决定形态为方块
  */
-public class ShellBlock extends BaseEntityBlock {
+public class BlockShell extends BaseEntityBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    public ShellBlock(Block.Properties settings) {
+    public BlockShell(Block.Properties settings) {
         super(settings);
         registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH));
     }
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
-        return simpleCodec(ShellBlock::new);
+        return simpleCodec(BlockShell::new);
     }
 
     @Override

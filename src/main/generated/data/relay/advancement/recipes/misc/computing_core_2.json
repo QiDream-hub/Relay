@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_redstone": {
+    "has_computing_core_1": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:redstone"
+            "items": "relay:computing_core_1"
           }
         ]
       },
@@ -21,7 +21,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_redstone"
+      "has_computing_core_1"
     ]
   ],
   "rewards": {

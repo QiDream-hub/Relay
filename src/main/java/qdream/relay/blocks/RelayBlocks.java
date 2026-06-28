@@ -14,7 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import qdream.relay.Relay;
-import qdream.relay.blocks.custom.ShellBlock;
+import qdream.relay.blocks.custom.BlockShell;
 import qdream.relay.blocks.custom.SpellEditorBlock;
 
 /**
@@ -22,8 +22,10 @@ import qdream.relay.blocks.custom.SpellEditorBlock;
  */
 public class RelayBlocks {
 
-    public static final Block SHELL_BLOCK = register("shell_block", ShellBlock::new,
-            BlockBehaviour.Properties.of().sound(SoundType.STONE), true);
+    // 方块外壳 - 可以放置成方块的形态
+    public static final Block BLOCK_SHELL_BLOCK = register("block_shell", BlockShell::new,
+            BlockBehaviour.Properties.of().sound(SoundType.METAL), true);
+
     public static final Block SPELL_EDITOR_BLOCK = register("spell_editor_block", SpellEditorBlock::new,
             BlockBehaviour.Properties.of(), true);
 

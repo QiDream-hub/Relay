@@ -19,7 +19,7 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
 public class RelayBlockEntities {
 
     public static final BlockEntityType<ShellBlockEntity> SHELL_BLOCK_ENTITY =
-            register("shell", ShellBlockEntity::new, RelayBlocks.SHELL_BLOCK);
+            register("shell", ShellBlockEntity::new, RelayBlocks.BLOCK_SHELL_BLOCK);
     public static final BlockEntityType<SpellEditorBlockEntity> SPELL_EDITOR_BLOCK_ENTITY =
             register("spell_editor", SpellEditorBlockEntity::new, RelayBlocks.SPELL_EDITOR_BLOCK);
 

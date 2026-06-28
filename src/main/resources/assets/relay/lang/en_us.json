@@ -14,9 +14,11 @@
   "item.relay.computing_core.tps": "Frequency: §e%s TPS",
   "item.relay.computing_core.energy_cost": "Energy Cost: §c%s energy/op",
   "item.relay.computing_core.desc": "§8High-speed cores consume more energy",
-  "block.relay.shell_block": "Shell",
-  "block.relay.shell_block.initialized": "Shell (Initialized)",
-  "block.relay.shell_block.active": "Shell (Active)",
+  "block.relay.block_shell": "Shell",
+  "block.relay.block_shell.initialized": "Shell (Initialized)",
+  "block.relay.block_shell.active": "Shell (Active)",
+  "block.relay.spell_editor_block": "Spell Editor",
   "itemGroup.relay.creative_tab": "Relay",
-  "container.relay.shell": "Shell"
+  "container.relay.shell": "Shell",
+  "item.relay.tool_shell": "Tool Shell"
 }

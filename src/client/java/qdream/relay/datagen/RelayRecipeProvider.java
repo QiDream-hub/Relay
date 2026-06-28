@@ -32,76 +32,84 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
             @Override
             public void buildRecipes() {
                 HolderLookup.RegistryLookup<Item> itemLookup = registries.lookupOrThrow(Registries.ITEM);
-                
-                // ===== 计算核心系列 =====
+
+                // ===== 计算核心系列 - 升级链 =====
+                // 基础核心：3 铁锭 + 2 红石 + 1 绿宝石
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_1, 1)
                     .pattern("III")
                     .pattern("RER")
-                    .pattern("III")
+                    .pattern("   ")
                     .define('I', Items.IRON_INGOT)
                     .define('R', Items.REDSTONE)
                     .define('E', Items.EMERALD)
                     .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
                     .save(output);
-                
+
+                // 升级配方：3 个低级核心 + 配料 = 1 个高级核心
+                // CORE_1 (64tick) -> CORE_2 (32tick): 3 个 CORE_1 + 2 红石 + 1 青金石
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_2, 1)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" L ")
+                    .define('C', RelayItems.COMPUTING_CORE_1)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
-                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .define('L', Items.LAPIS_LAZULI)
+                    .unlockedBy(getHasName(RelayItems.COMPUTING_CORE_1), has(RelayItems.COMPUTING_CORE_1))
                     .save(output);
-                
+
+                // CORE_2 (32tick) -> CORE_4 (16tick): 3 个 CORE_2 + 2 红石 + 1 黄金锭
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_4, 1)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" G ")
+                    .define('C', RelayItems.COMPUTING_CORE_2)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
-                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .define('G', Items.GOLD_INGOT)
+                    .unlockedBy(getHasName(RelayItems.COMPUTING_CORE_2), has(RelayItems.COMPUTING_CORE_2))
                     .save(output);
-                
+
+                // CORE_4 (16tick) -> CORE_8 (8tick): 3 个 CORE_4 + 2 红石 + 1 下界石英
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_8, 1)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" Q ")
+                    .define('C', RelayItems.COMPUTING_CORE_4)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
-                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .define('Q', Items.QUARTZ)
+                    .unlockedBy(getHasName(RelayItems.COMPUTING_CORE_4), has(RelayItems.COMPUTING_CORE_4))
                     .save(output);
-                
+
+                // CORE_8 (8tick) -> CORE_16 (4tick): 3 个 CORE_8 + 2 红石 + 1 末影珍珠
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_16, 1)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" E ")
+                    .define('C', RelayItems.COMPUTING_CORE_8)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
-                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .define('E', Items.ENDER_PEARL)
+                    .unlockedBy(getHasName(RelayItems.COMPUTING_CORE_8), has(RelayItems.COMPUTING_CORE_8))
                     .save(output);
-                
+
+                // CORE_16 (4tick) -> CORE_32 (2tick): 3 个 CORE_16 + 2 红石 + 1 烈焰棒
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_32, 1)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" B ")
+                    .define('C', RelayItems.COMPUTING_CORE_16)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
-                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .define('B', Items.BLAZE_ROD)
+                    .unlockedBy(getHasName(RelayItems.COMPUTING_CORE_16), has(RelayItems.COMPUTING_CORE_16))
                     .save(output);
-                
+
+                // CORE_32 (2tick) -> CORE_64 (1tick): 3 个 CORE_32 + 2 红石 + 1 下界之星
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_64, 1)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" S ")
+                    .define('C', RelayItems.COMPUTING_CORE_32)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
-                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .define('S', Items.NETHER_STAR)
+                    .unlockedBy(getHasName(RelayItems.COMPUTING_CORE_32), has(RelayItems.COMPUTING_CORE_32))
                     .save(output);
                 
                 // ===== 法术磁盘 =====
@@ -126,26 +134,17 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
                     .save(output);
                 
                 // ===== 外壳物品 =====
-                // 方块外壳
+                // 方块外壳：4 铁锭 + 4 紫水晶 + 2 红石 + 1 钻石
                 shapedRecipe(itemLookup, RelayItems.BLOCK_SHELL, 1)
-                    .pattern("III")
-                    .pattern("I I")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
-                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
-                    .save(output);
-                
-                // 实体外壳
-                shapedRecipe(itemLookup, RelayItems.ENTITY_SHELL, 1)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
-                    .define('I', Items.IRON_INGOT)
+                    .pattern("ARA")
+                    .pattern("RDR")
+                    .pattern("AAA")
+                    .define('A', Items.AMETHYST_SHARD)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.AMETHYST_SHARD)
-                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .define('D', Items.DIAMOND)
+                    .unlockedBy(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD))
                     .save(output);
-                
+
                 // 工具外壳
                 shapedRecipe(itemLookup, RelayItems.TOOL_SHELL, 1)
                     .pattern("  G")

@@ -2,14 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "E": "minecraft:emerald",
-    "I": "minecraft:iron_ingot",
+    "B": "minecraft:blaze_rod",
+    "C": "relay:computing_core_16",
     "R": "minecraft:redstone"
   },
   "pattern": [
-    "III",
-    "RER",
-    "III"
+    " C ",
+    "RCR",
+    " B "
   ],
   "result": {
     "id": "relay:computing_core_32"
