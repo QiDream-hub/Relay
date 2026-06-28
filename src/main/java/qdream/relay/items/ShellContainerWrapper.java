@@ -180,7 +180,7 @@ public class ShellContainerWrapper implements Container {
         return 0;
     }
 
-    public void setEnergy(int energy) {
+    public void setEnergy(double energy) {
         if (delegate != null) {
             delegate.setEnergy(energy);
         }

@@ -15,49 +15,51 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Container;
 import java.util.List;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.blocks.entity.RelayBlockEntities;
-import qdream.relay.core.ShellContainer;
+import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
+import qdream.relay.core.ShellContainer;
 import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.types.BlockEntityType;
-import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.core.ShellRegistry;
-import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.items.SpellDiskItem;
+import qdream.relay.mc.StateMachineNbtSerializer;
 
 /**
  * 外壳方块实体
- * 维护状态机，执行 tick，处理持久化
+ * 
+ * <p>使用 {@link ShellStateManager} 管理物品栏、StateMachine、Owner 状态</p>
+ * 
+ * <h3>职责</h3>
+ * <ul>
+ *   <li>实现 Container 接口（物品栏插槽访问）</li>
+ *   <li>实现 MenuProvider（GUI 支持）</li>
+ *   <li>实现 ShellContainer（外壳容器接口）</li>
+ *   <li>Tick 逻辑（通过 ShellTickHandler）</li>
+ *   <li>NBT 持久化（ValueInput/ValueOutput）</li>
+ * </ul>
  */
-public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer, Container {
+public class ShellBlockEntity extends BlockEntity implements MenuProvider, Container, ShellContainer {
 
-    // 使用 NonNullList 替代数组，支持 ContainerHelper 序列化
-    private final NonNullList<ItemStack> inventory = NonNullList.withSize(4, ItemStack.EMPTY);
-    private final StateMachine stateMachine;
+    private final ShellStateManager stateManager;
     private final ShellTickHandler tickHandler;
-
     private double energy;
     private boolean enabled;
-    private Entity owner;
-    private java.util.UUID ownerUuid;
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
-        this.stateMachine = new StateMachine(1024);
+        this.stateManager = new ShellStateManager();
         this.tickHandler = new ShellTickHandler();
         this.energy = 0;
         this.enabled = false;
-        this.owner = null;
-        this.ownerUuid = null;
 
         // 设置事故回调
-        this.stateMachine.setMishapHandler(reason -> {
+        stateManager.getStateMachine().setMishapHandler(reason -> {
             if (level != null && !level.isClientSide()) {
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
@@ -72,7 +74,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public void setRemoved() {
         super.setRemoved();
-        // 从 ShellRegistry 注销
         ShellRegistry.unregister(this);
     }
 
@@ -81,7 +82,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
      */
     public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
         entity.tickHandler.tick(entity);
-        entity.stateMachine.setContext("self",
+        entity.stateManager.getStateMachine().setContext("self",
                 new BlockEntityType(pos, world.dimension().identifier().toString(), world.getBlockEntity(pos)));
 
         // 每 10 tick 同步一次能量到客户端
@@ -102,27 +103,108 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         return new ShellScreenHandler(syncId, inv, this);
     }
 
-    // ========== ShellContainer 接口 ==========
+    // ========== Container 接口 ==========
 
     @Override
-    public ItemStack getInventorySlot(int slot) {
-        if (slot >= 0 && slot < inventory.size()) {
-            return inventory.get(slot);
+    public int getContainerSize() {
+        return 4;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for (int i = 0; i < 4; i++) {
+            if (!stateManager.getInventorySlot(i).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack getItem(int slot) {
+        return stateManager.getInventorySlot(slot);
+    }
+
+    @Override
+    public ItemStack removeItem(int slot, int amount) {
+        ItemStack stack = stateManager.getInventorySlot(slot);
+        if (!stack.isEmpty()) {
+            ItemStack result = stack.split(amount);
+            setChanged();
+            return result;
         }
         return ItemStack.EMPTY;
     }
 
     @Override
-    public void setInventorySlot(int slot, ItemStack stack) {
-        if (slot >= 0 && slot < inventory.size()) {
-            inventory.set(slot, stack);
+    public ItemStack removeItemNoUpdate(int slot) {
+        ItemStack stack = stateManager.getInventorySlot(slot);
+        if (!stack.isEmpty()) {
+            stateManager.setInventorySlot(slot, ItemStack.EMPTY);
             setChanged();
+            return stack;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack stack) {
+        stateManager.setInventorySlot(slot, stack);
+        setChanged();
+    }
+
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public void clearContent() {
+        for (int i = 0; i < 4; i++) {
+            stateManager.setInventorySlot(i, ItemStack.EMPTY);
         }
     }
 
     @Override
+    public boolean stillValid(Player player) {
+        if (this.level != null && this.level.getBlockEntity(this.worldPosition) != this) {
+            return false;
+        }
+        return true;
+    }
+
+    // ========== ShellContainer 接口 ==========
+
+    @Override
     public StateMachine getStateMachine() {
-        return stateMachine;
+        return stateManager.getStateMachine();
+    }
+
+    @Override
+    public ItemStack getInventorySlot(int slot) {
+        return stateManager.getInventorySlot(slot);
+    }
+
+    @Override
+    public void setInventorySlot(int slot, ItemStack stack) {
+        stateManager.setInventorySlot(slot, stack);
+        setChanged();
+    }
+
+    @Override
+    public Entity getOwner() {
+        // 延迟加载 Owner
+        if (stateManager.getOwner() == null && stateManager.getOwnerUuid() != null && level != null && !level.isClientSide()) {
+            Entity owner = level.getEntity(stateManager.getOwnerUuid());
+            stateManager.setOwner(owner);
+        }
+        return stateManager.getOwner();
+    }
+
+    @Override
+    public void setOwner(Entity owner) {
+        stateManager.setOwner(owner);
+        setChanged();
     }
 
     @Override
@@ -154,7 +236,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         setChanged();
-        // 通知客户端同步
         if (level != null && !level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
@@ -172,18 +253,12 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     }
 
     @Override
-    public void setChanged() {
-        super.setChanged();
-    }
-
-    @Override
     public boolean isClientSide() {
         return level != null && level.isClientSide();
     }
 
     /**
      * 复位程序 - 清空双栈后从磁盘重新加载程序
-     * 点击复位按钮时调用
      */
     public void resetProgram() {
         if (level == null || level.isClientSide()) {
@@ -195,137 +270,38 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
             return;
         }
 
-        // 清空状态机双栈
-        stateMachine.clear();
-
-        // 从磁盘读取程序
+        stateManager.getStateMachine().clear();
         List<Executable> program = SpellDiskItem.getProgram(diskStack);
-        if (program.isEmpty()) {
-            return;
+        if (!program.isEmpty()) {
+            stateManager.getStateMachine().loadProgram(program);
+            setInitialized(true);
+            setChanged();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
-
-        // 加载到状态机
-        stateMachine.loadProgram(program);
-        setInitialized(true);
-        setChanged();
-
-        // 通知客户端同步
-        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
-    // ========== Container 接口 ==========
-
-    @Override
-    public int getContainerSize() {
-        return inventory.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        for (ItemStack stack : inventory) {
-            if (!stack.isEmpty()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public ItemStack getItem(int slot) {
-        return getInventorySlot(slot);
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int amount) {
-        if (slot >= 0 && slot < inventory.size()) {
-            ItemStack stack = inventory.get(slot);
-            if (!stack.isEmpty()) {
-                ItemStack result = stack.split(amount);
-                setChanged();
-                return result;
-            }
-        }
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public ItemStack removeItemNoUpdate(int slot) {
-        if (slot >= 0 && slot < inventory.size()) {
-            ItemStack stack = inventory.get(slot);
-            if (!stack.isEmpty()) {
-                inventory.set(slot, ItemStack.EMPTY);
-                return stack;
-            }
-        }
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack stack) {
-        setInventorySlot(slot, stack);
-    }
-
-    @Override
-    public boolean canPlaceItem(int slot, ItemStack stack) {
-        // 根据插槽类型限制可放置的物品
-        return true; // 允许所有物品，具体限制在 GUI 中处理
-    }
-
-    @Override
-    public void clearContent() {
-        inventory.clear();
-    }
-
-    @Override
-    public boolean stillValid(Player player) {
-        if (this.level != null && this.level.getBlockEntity(this.worldPosition) != this) {
-            return false;
-        }
-        return true;
-    }
-
-    // ========== ShellContainer 接口 - 所有者管理 ==========
-
-    @Override
-    public Entity getOwner() {
-        // 如果 owner 为空但有保存的 UUID，尝试延迟加载
-        if (owner == null && ownerUuid != null && level != null && !level.isClientSide()) {
-            owner = level.getEntity(ownerUuid);
-        }
-        return owner;
-    }
-
-    @Override
-    public void setOwner(Entity owner) {
-        this.owner = owner;
-        if (owner != null) {
-            this.ownerUuid = owner.getUUID();
-        }
-        setChanged();
-    }
-
-    // ========== NBT 序列化与反序列化 (26.1.2 ValueInput/ValueOutput) ==========
+    // ========== NBT 序列化与反序列化 ==========
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
 
         // 保存物品栏 - 使用 ContainerHelper 处理 DataComponent 系统
-        ContainerHelper.saveAllItems(output, this.inventory);
+        ContainerHelper.saveAllItems(output, stateManager.getInventory());
 
         // 保存能量
         output.putDouble("energy", energy);
 
-        // 保存状态机状态 - 使用 CompoundTag.CODEC 序列化
-        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
+        // 保存状态机状态
+        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateManager.getStateMachine());
         output.store("stateMachine", CompoundTag.CODEC, machineTag);
 
         // 保存开关状态
         output.putBoolean("enabled", enabled);
 
         // 保存所有者信息
-        if (owner != null) {
-            output.putString("owner", owner.getUUID().toString());
+        if (stateManager.getOwner() != null) {
+            output.putString("owner", stateManager.getOwner().getUUID().toString());
         }
 
         // 保存 TickHandler 状态
@@ -339,26 +315,26 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
 
-        // 加载物品栏 - 使用 ContainerHelper 处理 DataComponent 系统
-        ContainerHelper.loadAllItems(input, this.inventory);
+        // 加载物品栏
+        ContainerHelper.loadAllItems(input, stateManager.getInventory());
 
         // 加载能量
         energy = input.getIntOr("energy", 0);
 
         // 加载状态机状态
         input.read("stateMachine", CompoundTag.CODEC).ifPresent(machineTag -> {
-            StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, (CompoundTag) machineTag);
+            StateMachineNbtSerializer.INSTANCE.deserialize(stateManager.getStateMachine(), (CompoundTag) machineTag);
         });
 
         // 加载开关状态
         enabled = input.getBooleanOr("enabled", false);
 
-        // 加载所有者信息 - 只保存 UUID，延迟加载实体
+        // 加载所有者信息
         String uuidStr = input.getString("owner").orElse("");
         if (!uuidStr.isEmpty()) {
             try {
-                ownerUuid = java.util.UUID.fromString(uuidStr);
-                // 不立即获取实体，等 getOwner() 时再延迟加载
+                java.util.UUID ownerUuid = java.util.UUID.fromString(uuidStr);
+                stateManager.setOwnerUuid(ownerUuid);
             } catch (IllegalArgumentException e) {
                 // UUID 格式错误，忽略
             }
@@ -371,20 +347,13 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         tickHandler.setInitialized(input.getBooleanOr("initialized", false));
     }
 
-    // ========== 同步数据包 ==========
+    // ========== 网络同步 ==========
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
         return saveWithoutMetadata(registryLookup);
     }
 
-    // ========== 状态访问 ==========
-    public void updateStatus() {
-        tickHandler.updateCoreState(this);
-        tickHandler.updateEnergy(this);
-    }
-
-    // ========== 网络同步 ==========
     /**
      * 同步能量值到客户端
      */

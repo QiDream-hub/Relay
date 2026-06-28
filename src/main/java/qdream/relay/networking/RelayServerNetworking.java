@@ -94,7 +94,7 @@ public class RelayServerNetworking {
                     ShellContainer container = handler.getContainer();
                     if (container instanceof ShellBlockEntity shell) {
                         shell.resetProgram();
-                        shell.updateStatus();
+                        // updateStatus() 已移除，核心状态由 ShellTickHandler 在 tick 时自动更新
                     }
                 }
             });
