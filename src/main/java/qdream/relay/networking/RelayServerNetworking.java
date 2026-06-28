@@ -160,6 +160,28 @@ public class RelayServerNetworking {
                 }
             });
         });
+
+        // 注册 C2S_OpenToolShellPayload
+        PayloadTypeRegistry.serverboundPlay().register(C2S_OpenToolShellPayload.TYPE, C2S_OpenToolShellPayload.CODEC);
+
+        // 注册服务端接收处理器 - 打开工具外壳 GUI
+        ServerPlayNetworking.registerGlobalReceiver(C2S_OpenToolShellPayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player == null)
+                return;
+
+            context.server().execute(() -> {
+                // 检查玩家手持物品
+                ItemStack mainHand = player.getMainHandItem();
+                ItemStack offHand = player.getOffhandItem();
+
+                if (mainHand.getItem() instanceof qdream.relay.items.ToolShellItem toolShellItem) {
+                    player.openMenu(new qdream.relay.items.ToolShellMenuProvider(mainHand));
+                } else if (offHand.getItem() instanceof qdream.relay.items.ToolShellItem toolShellItem) {
+                    player.openMenu(new qdream.relay.items.ToolShellMenuProvider(offHand));
+                }
+            });
+        });
     }
 
     /**

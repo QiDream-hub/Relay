@@ -6,37 +6,33 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.Container;
 
 /**
  * 工具外壳的 MenuProvider
+ * 用于手持工具外壳时打开 GUI
  */
 public class ToolShellMenuProvider implements MenuProvider {
 
     private final ItemStack toolShell;
-    private final InteractionHand hand;
 
-    public ToolShellMenuProvider(ItemStack toolShell, InteractionHand hand) {
+    public ToolShellMenuProvider(ItemStack toolShell) {
         this.toolShell = toolShell;
-        this.hand = hand;
     }
 
     public ItemStack getToolShell() {
         return toolShell;
     }
 
-    public InteractionHand getHand() {
-        return hand;
-    }
-
     @Override
     public Component getDisplayName() {
-        return Component.literal("工具外壳");
+        return Component.translatable("container.relay.tool_shell");
     }
 
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-        // TODO: 返回 ShellScreenHandler
-        return null;
+        ToolShellItem toolShellItem = (ToolShellItem) toolShell.getItem();
+        ToolShellContainer container = new ToolShellContainer(toolShellItem, toolShell);
+        return new ToolShellScreenHandler(syncId, inv, container, toolShell);
     }
 }

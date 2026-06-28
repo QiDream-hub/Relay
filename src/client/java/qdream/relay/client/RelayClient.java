@@ -12,6 +12,9 @@ public class RelayClient implements ClientModInitializer {
         RelayScreenHandlersClient.init();
         RelayEntityRenderers.register();
 
+        // 注册按键绑定
+        RelayKeyBindings.register();
+
         // 注册网络处理
         qdream.relay.client.networking.RelayClientNetworking.register();
     }

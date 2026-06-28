@@ -64,6 +64,30 @@ public class RelayDataComponents {
     );
 
     /**
+     * 工具外壳物品栏组件 - 存储为 CompoundTag
+     * 用于 tool_shell 物品存储 4 个插槽的物品和 StateMachine 状态
+     * 结构：{ inventory: [...], stateMachine: {...} }
+     */
+    public static final DataComponentType<CompoundTag> TOOL_SHELL_DATA = register(
+            "tool_shell_data",
+            builder -> builder
+                    .persistent(CompoundTag.CODEC)
+                    .networkSynchronized(createNbtStreamCodec())
+    );
+
+    /**
+     * 工具外壳配置组件 - 存储为 CompoundTag
+     * 用于 tool_shell 物品存储配置选项
+     * 结构：{ useInventoryEnergy: boolean }
+     */
+    public static final DataComponentType<CompoundTag> TOOL_SHELL_CONFIG = register(
+            "tool_shell_config",
+            builder -> builder
+                    .persistent(CompoundTag.CODEC)
+                    .networkSynchronized(createNbtStreamCodec())
+    );
+
+    /**
      * 创建 Double 的网络同步 StreamCodec
      */
     private static StreamCodec<FriendlyByteBuf, Double> createDoubleStreamCodec() {
@@ -152,6 +176,8 @@ public class RelayDataComponents {
         var __ = ENERGY;
         var ___ = INTERVAL;
         var ____ = ENERGY_COST;
+        var _____ = TOOL_SHELL_DATA;
+        var ______ = TOOL_SHELL_CONFIG;
     }
 
     /**

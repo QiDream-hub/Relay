@@ -1,58 +1,174 @@
 package qdream.relay.items;
 
+import java.util.List;
+import java.util.Optional;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.NonNullList;
 
+import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Executable;
+import qdream.relay.mc.StateMachineNbtSerializer;
 
 /**
  * 工具外壳（手持物品形态）
  * 手持右键激活程序，在物品栏中持续运行
- * 注意：26.1.2 使用 DataComponent 系统，这里暂时简化实现
+ * StateMachine 为运行状态的绝对权威 - 程序栈非空 = 运行中
  */
 public class ToolShellItem extends Item {
+
+    // 插槽索引常量（与 ShellContainer 保持一致）
+    public static final int CORE_SLOT = 0;
+    public static final int DISK_SLOT = 1;
+    public static final int ENERGY_SLOT = 2;
+    public static final int INTERACTOR_SLOT = 3;
+    private static final int SLOT_COUNT = 4;
 
     public ToolShellItem(Properties properties) {
         super(properties.stacksTo(1));
     }
 
-    // inventoryTick 在 26.1.2 中可能不是 @Override，暂时移除注解
-    public void inventoryTick(ItemStack stack, Level world, net.minecraft.world.entity.Entity entity, int slot, boolean selected) {
-        // 简化实现：工具外壳暂时不自动执行
-        // 完整实现需要使用 DataComponent 系统
-    }
+    // ========== 右键交互逻辑 ==========
 
-    // interact 在 26.1.2 中方法签名可能不同
-    public InteractionResult interact(Level world, Player player, InteractionHand hand) {
+    @Override
+    public InteractionResult use(Level world, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
 
-        if (!world.isClientSide()) {
-            // 右键打开 GUI
-            player.openMenu(new ToolShellMenuProvider(stack, hand));
+        if (world.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+
+        StateMachine machine = getStateMachine(stack);
+
+        // Shift+ 右键：停止程序（清空双栈）
+        if (player.isShiftKeyDown()) {
+            machine.clear();
+            saveStateMachine(stack, machine);
+            player.sendSystemMessage(Component.literal("§c[工具外壳] 程序已停止"));
+            return InteractionResult.SUCCESS;
+        }
+
+        // 普通右键：加载磁盘程序并运行（清空双栈，加载磁盘，开始运行）
+        ItemStack diskStack = getInventorySlot(stack, DISK_SLOT);
+        if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
+            List<Executable> program = SpellDiskItem.getProgram(diskStack);
+            if (!program.isEmpty()) {
+                // 清空双栈后加载新程序
+                machine.clear();
+                machine.loadProgram(program);
+                saveStateMachine(stack, machine);
+                player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
+            } else {
+                player.sendSystemMessage(Component.literal("§e[工具外壳] 磁盘为空，无法启动"));
+            }
+        } else {
+            player.sendSystemMessage(Component.literal("§e[工具外壳] 未插入法术磁盘"));
         }
 
         return InteractionResult.SUCCESS;
     }
 
-    // ========== 物品栏插槽（临时实现） ==========
+    // ========== 物品栏插槽访问（使用 Codec 序列化） ==========
 
-    public static final int CORE_SLOT = 0;
-    public static final int DISK_SLOT = 1;
-    public static final int ENERGY_SLOT = 2;
-    public static final int INTERACTOR_SLOT = 3;
-
+    /**
+     * 获取指定插槽的物品
+     */
     public ItemStack getInventorySlot(ItemStack shell, int slot) {
-        // TODO: 使用 DataComponent 实现
+        CompoundTag dataTag = shell.get(RelayDataComponents.TOOL_SHELL_DATA);
+        if (dataTag == null) {
+            return ItemStack.EMPTY;
+        }
+
+        // 使用 NonNullList 存储物品栏
+        NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
+        loadInventory(dataTag, inventory);
+
+        if (slot >= 0 && slot < inventory.size()) {
+            return inventory.get(slot);
+        }
         return ItemStack.EMPTY;
     }
 
+    /**
+     * 设置指定插槽的物品
+     */
     public void setInventorySlot(ItemStack shell, int slot, ItemStack stack) {
-        // TODO: 使用 DataComponent 实现
+        CompoundTag dataTag = shell.getOrDefault(RelayDataComponents.TOOL_SHELL_DATA, new CompoundTag());
+
+        // 加载现有物品栏
+        NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
+        loadInventory(dataTag, inventory);
+
+        // 设置插槽物品
+        if (slot >= 0 && slot < inventory.size()) {
+            inventory.set(slot, stack);
+        }
+
+        // 保存物品栏
+        saveInventory(dataTag, inventory);
+        shell.set(RelayDataComponents.TOOL_SHELL_DATA, dataTag);
     }
+
+    /**
+     * 从 NBT 加载物品栏
+     */
+    private void loadInventory(CompoundTag tag, NonNullList<ItemStack> inventory) {
+        ListTag listTag = tag.getList("inventory").orElse(null);
+        if (listTag == null) {
+            return;
+        }
+
+        // 先解析所有物品到临时数组
+        ItemStack[] parsed = new ItemStack[inventory.size()];
+        for (int i = 0; i < Math.min(parsed.length, listTag.size()); i++) {
+            Tag element = listTag.get(i);
+            if (element instanceof CompoundTag compoundTag) {
+                // 使用 Codec 解析 ItemStack
+                var result = ItemStack.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, compoundTag);
+                parsed[i] = result.result().orElse(ItemStack.EMPTY);
+            }
+        }
+
+        // 然后复制到 inventory
+        for (int i = 0; i < parsed.length; i++) {
+            if (parsed[i] != null) {
+                inventory.set(i, parsed[i]);
+            }
+        }
+    }
+
+    /**
+     * 保存物品栏到 NBT
+     */
+    private void saveInventory(CompoundTag tag, NonNullList<ItemStack> inventory) {
+        ListTag listTag = new ListTag();
+
+        for (ItemStack stack : inventory) {
+            if (!stack.isEmpty()) {
+                // 使用 Codec 序列化 ItemStack
+                ItemStack.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, stack)
+                    .result()
+                    .ifPresent(listTag::add);
+            } else {
+                // 空物品存储为空 CompoundTag
+                listTag.add(new CompoundTag());
+            }
+        }
+
+        tag.put("inventory", listTag);
+    }
+
+    // ========== 快捷访问方法 ==========
 
     public ItemStack getCoreStack(ItemStack shell) {
         return getInventorySlot(shell, CORE_SLOT);
@@ -70,26 +186,96 @@ public class ToolShellItem extends Item {
         return getInventorySlot(shell, INTERACTOR_SLOT);
     }
 
-    // ========== ToolShellContainer 需要的方法 ==========
+    // ========== StateMachine 持久化 ==========
 
+    /**
+     * 获取 StateMachine（从 DataComponent 加载）
+     */
     public StateMachine getStateMachine(ItemStack shell) {
-        return new StateMachine(1024);
+        StateMachine machine = new StateMachine(1024);
+        CompoundTag dataTag = shell.get(RelayDataComponents.TOOL_SHELL_DATA);
+
+        if (dataTag != null) {
+            // 加载状态机状态
+            CompoundTag machineTag = dataTag.getCompound("stateMachine").orElse(null);
+            if (machineTag != null) {
+                StateMachineNbtSerializer.INSTANCE.deserialize(machine, machineTag);
+            }
+        }
+
+        return machine;
     }
 
+    /**
+     * 保存 StateMachine 到 DataComponent
+     */
+    public void saveStateMachine(ItemStack shell, StateMachine machine) {
+        CompoundTag dataTag = shell.getOrDefault(RelayDataComponents.TOOL_SHELL_DATA, new CompoundTag());
+
+        // 保存状态机状态
+        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(machine);
+        dataTag.put("stateMachine", machineTag);
+
+        shell.set(RelayDataComponents.TOOL_SHELL_DATA, dataTag);
+    }
+
+    // ========== 状态查询 ==========
+
+    /**
+     * 检查是否正在运行（程序栈非空）
+     */
+    public boolean isRunning(ItemStack shell) {
+        StateMachine machine = getStateMachine(shell);
+        return machine.isRunning();
+    }
+
+    /**
+     * 检查是否已初始化（至少有一个插槽有物品）
+     */
     public boolean isInitialized(ItemStack shell) {
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            if (!getInventorySlot(shell, i).isEmpty()) {
+                return true;
+            }
+        }
         return false;
     }
 
     public void setInitialized(ItemStack shell, boolean initialized) {
-        // TODO: 使用 DataComponent 实现
+        // 不需要显式初始化标记，有物品即表示已初始化
     }
 
     public boolean isEnabled(ItemStack shell) {
-        // TODO: 使用 DataComponent 实现
-        return false;
+        return isRunning(shell);
     }
 
     public void setEnabled(ItemStack shell, boolean enabled) {
-        // TODO: 使用 DataComponent 实现
+        if (!enabled) {
+            StateMachine machine = getStateMachine(shell);
+            machine.clear();
+            saveStateMachine(shell, machine);
+        }
+    }
+
+    // ========== 配置项 ==========
+
+    /**
+     * 获取是否使用背包内的能量模块
+     */
+    public boolean isUseInventoryEnergyModule(ItemStack shell) {
+        CompoundTag configTag = shell.get(RelayDataComponents.TOOL_SHELL_CONFIG);
+        if (configTag == null) {
+            return false;
+        }
+        return configTag.getBoolean("useInventoryEnergyModule").orElse(false);
+    }
+
+    /**
+     * 设置是否使用背包内的能量模块
+     */
+    public void setUseInventoryEnergyModule(ItemStack shell, boolean use) {
+        CompoundTag configTag = shell.getOrDefault(RelayDataComponents.TOOL_SHELL_CONFIG, new CompoundTag());
+        configTag.putBoolean("useInventoryEnergyModule", use);
+        shell.set(RelayDataComponents.TOOL_SHELL_CONFIG, configTag);
     }
 }

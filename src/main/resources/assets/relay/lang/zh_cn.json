@@ -20,5 +20,8 @@
   "block.relay.spell_editor_block": "法术编辑器",
   "itemGroup.relay.creative_tab": "Relay",
   "container.relay.shell": "外壳",
-  "item.relay.tool_shell": "工具外壳"
+  "container.relay.tool_shell": "工具外壳",
+  "item.relay.tool_shell": "工具外壳",
+  "key.relay.open_tool_shell_config": "打开工具外壳配置",
+  "key.category.relay.relay": "Relay"
 }

@@ -14,12 +14,25 @@ import qdream.relay.core.ShellContainer;
 public class ShellContainerWrapper implements Container {
 
     private final ShellContainer delegate;
+    private final ToolShellItem toolShell;
+    private final ItemStack stack;
 
     /**
      * 用于工具外壳的包装器
      */
     public ShellContainerWrapper(ToolShellItem toolShell, ItemStack stack) {
+        this.toolShell = toolShell;
+        this.stack = stack;
         this.delegate = new ToolShellContainer(toolShell, stack);
+    }
+
+    /**
+     * 用于工具外壳容器的包装器（直接复用现有容器）
+     */
+    public ShellContainerWrapper(ToolShellContainer container) {
+        this.toolShell = container.toolShell;
+        this.stack = container.stack;
+        this.delegate = container;
     }
 
     /**
@@ -27,6 +40,8 @@ public class ShellContainerWrapper implements Container {
      */
     public ShellContainerWrapper(ShellContainer delegate) {
         this.delegate = delegate;
+        this.toolShell = null;
+        this.stack = null;
     }
 
     // Container 接口方法
