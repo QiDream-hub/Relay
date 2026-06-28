@@ -6,11 +6,14 @@ import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.core.ShellContainer;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BlockEntityIota;
+import qdream.relay.types.BlockEntityType;
 import qdream.relay.types.EntityType;
+import qdream.relay.types.NullType;
 
 /**
  * GetSelf 操作 - 获取自身外壳对应的实体/方块实体
@@ -38,21 +41,16 @@ public class GetSelfOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 从上下文中获取 shellContainer 和 world
-        Optional<ShellContainer> container = executor.getContext("shellContainer", ShellContainer.class);
+        Optional<EntityType> container = executor.getContext("self", EntityType.class);
 
         if (!container.isPresent()) {
             executor.triggerMishap("无法获取容器：上下文缺失");
             return;
         }
-
-        // 根据容器类型获取对应的引用
-        if (container.get() instanceof Entity entity) {
-            // 实体外壳 - 返回 EntityIota
-            executor.pushData(EntityType.from(entity, entity.level()));
-        } else if (container.get() instanceof BlockEntity blockEntity) {
-            // 方块外壳 - 返回 BlockEntityIota
-            executor.pushData(BlockEntityIota.from(blockEntity, blockEntity.getLevel()));
+        if (container.get() == null) {
+            executor.pushData(NullType.INSTANCE);
         }
-        // 工具外壳在命令执行时处理，这里不会遇到
+        executor.pushData(container.get());
+
     }
 }

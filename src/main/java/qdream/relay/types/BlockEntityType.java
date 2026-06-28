@@ -24,7 +24,7 @@ import qdream.relay.mc.signature.SignatureName;
  * 2. 获取方块实体：getBlockEntity(world) - 通过世界查询位置获取实际引用
  * 3. 执行：execute() - 将自己压入数据栈
  */
-public class BlockEntityIota extends Data {
+public class BlockEntityType extends Data {
     // 方块位置
     private final BlockPos blockPos;
     
@@ -34,7 +34,7 @@ public class BlockEntityIota extends Data {
     // 运行时缓存，不序列化
     private transient BlockEntity blockEntityRef;
 
-    public BlockEntityIota(BlockPos blockPos, String worldId, BlockEntity blockEntityRef) {
+    public BlockEntityType(BlockPos blockPos, String worldId, BlockEntity blockEntityRef) {
         super("relay:block_entity", 0, DataSignature.builder()
                 .output("relay:block_entity")
                 .input(SignatureName.builder().setName("pos").setType("BlockPos").build())
@@ -47,20 +47,20 @@ public class BlockEntityIota extends Data {
     /**
      * 从 BlockEntity 创建 BlockEntityIota（存储 BlockPos + 世界 ID + 引用）
      */
-    public static BlockEntityIota from(BlockEntity blockEntity, Level world) {
+    public static BlockEntityType from(BlockEntity blockEntity, Level world) {
         if (blockEntity == null) {
-            return new BlockEntityIota(null, null, null);
+            return new BlockEntityType(null, null, null);
         }
         String worldId = blockEntity.getLevel().dimension().registry().toString();
         BlockPos pos = blockEntity.getBlockPos().immutable();
-        return new BlockEntityIota(pos, worldId, blockEntity);
+        return new BlockEntityType(pos, worldId, blockEntity);
     }
 
     /**
      * 从 BlockPos 和世界 ID 创建 BlockEntityIota（用于反序列化，不保持引用）
      */
-    public static BlockEntityIota fromBlockPos(BlockPos blockPos, String worldId) {
-        return new BlockEntityIota(blockPos, worldId, null);
+    public static BlockEntityType fromBlockPos(BlockPos blockPos, String worldId) {
+        return new BlockEntityType(blockPos, worldId, null);
     }
 
     @Override
@@ -143,7 +143,7 @@ public class BlockEntityIota extends Data {
     public Data fromNbt(CompoundTag tag) {
         CompoundTag valueTag = tag.getCompound("value").orElse(null);
         if (valueTag == null) {
-            return new BlockEntityIota(null, null, null);
+            return new BlockEntityType(null, null, null);
         }
 
         String worldId = null;
@@ -159,7 +159,7 @@ public class BlockEntityIota extends Data {
             blockPos = new BlockPos(x, y, z);
         }
 
-        return BlockEntityIota.fromBlockPos(blockPos, worldId);
+        return BlockEntityType.fromBlockPos(blockPos, worldId);
     }
 
     @Override
@@ -196,8 +196,8 @@ public class BlockEntityIota extends Data {
                 blockPos = new BlockPos(x, y, z);
             }
             
-            return BlockEntityIota.fromBlockPos(blockPos, worldId);
+            return BlockEntityType.fromBlockPos(blockPos, worldId);
         }
-        return new BlockEntityIota(null, null, null);
+        return new BlockEntityType(null, null, null);
     }
 }

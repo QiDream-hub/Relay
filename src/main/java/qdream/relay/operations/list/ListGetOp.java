@@ -7,7 +7,7 @@ import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.types.ListType;
-import qdream.relay.types.NullIType;
+import qdream.relay.types.NullType;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class ListGetOp extends Spell {
         List<Executable> value = list.getValue();
         int idx = (int) index.asDouble();
         if (idx < 0 || idx >= value.size()) {
-            executor.pushData(NullIType.INSTANCE);
+            executor.pushData(NullType.INSTANCE);
             return;
         }
         executor.pushData(value.get(idx));

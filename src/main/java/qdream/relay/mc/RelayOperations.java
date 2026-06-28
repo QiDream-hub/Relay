@@ -31,10 +31,10 @@ import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListSetOp;
 import qdream.relay.types.BooleanType;
-import qdream.relay.types.BlockEntityIota;
+import qdream.relay.types.BlockEntityType;
 import qdream.relay.types.EntityType;
 import qdream.relay.types.ListType;
-import qdream.relay.types.NullIType;
+import qdream.relay.types.NullType;
 import qdream.relay.types.NumberType;
 import qdream.relay.types.StringType;
 import qdream.relay.types.VectorType;
@@ -70,11 +70,11 @@ public class RelayOperations {
         OperationRegistry.register("relay:entity",
                 new OperationRegistry.DataEntry(() -> new EntityType(null, null, null)));
         OperationRegistry.register("relay:null",
-                new OperationRegistry.DataEntry(() -> NullIType.INSTANCE));
+                new OperationRegistry.DataEntry(() -> NullType.INSTANCE));
         OperationRegistry.register("relay:list",
                 new OperationRegistry.DataEntry(() -> new ListType(new ArrayList<>())));
         OperationRegistry.register("relay:block_entity",
-                new OperationRegistry.DataEntry(() -> new BlockEntityIota(null, null, null)));
+                new OperationRegistry.DataEntry(() -> new BlockEntityType(null, null, null)));
     }
 
     private static void registerOperations() {

@@ -40,7 +40,7 @@ public class RunCommands {
      * 命令调试场景使用，不考虑能量消耗
      *
      * @param machine 状态机
-     * @param maxOps 最大执行操作数
+     * @param maxOps  最大执行操作数
      * @return 实际执行的操作数
      */
     private static int executeOps(StateMachine machine, int maxOps) {
@@ -97,7 +97,7 @@ public class RunCommands {
 
             @Override
             public int getCoreCount() {
-                return 1;
+                return 9999;
             }
 
             @Override
@@ -292,6 +292,7 @@ public class RunCommands {
 
         // 设置 shellContainer 上下文，支持 get_self、get_owner 等操作
         machine.setContext("shellContainer", shell);
+        machine.setContext("self", context.getSource().getPlayer());
 
         machine.loadProgram(program);
         int executedCount = executeOps(machine, ops);

@@ -25,6 +25,7 @@ import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.screen.ShellScreenHandler;
+import qdream.relay.types.BlockEntityType;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.core.ShellRegistry;
 import qdream.relay.mc.ProgramCompiler;
@@ -80,7 +81,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
      */
     public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
         entity.tickHandler.tick(entity);
-        
+        entity.stateMachine.setContext("self",
+                new BlockEntityType(pos, world.dimension().identifier().toString(), world.getBlockEntity(pos)));
+
         // 每 10 tick 同步一次能量到客户端
         if (!world.isClientSide() && world.getGameTime() % 10 == 0) {
             entity.syncEnergyToClient(world, pos);
@@ -394,11 +397,10 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
         net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) world;
         net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(pos);
         serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
-            .forEach(player -> {
-                net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(
-                    player,
-                    new qdream.relay.networking.payloads.S2C_ShellEnergyPayload(energy)
-                );
-            });
+                .forEach(player -> {
+                    net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(
+                            player,
+                            new qdream.relay.networking.payloads.S2C_ShellEnergyPayload(energy));
+                });
     }
 }

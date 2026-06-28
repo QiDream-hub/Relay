@@ -6,6 +6,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 
 import qdream.relay.engine.StateMachine;
+import qdream.relay.types.EntityType;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 
@@ -61,9 +62,9 @@ public class ToolShellContainer implements ShellContainer {
      * 执行 tick 逻辑
      * 需要在玩家 inventory tick 时调用
      */
-    public void tick(Level world, Entity owner) {
+    public void tick(Level world, Entity player) {
         // 设置 owner
-        this.owner = owner;
+        this.owner = player;
 
         // 设置 enabled 状态（从 StateMachine 运行状态推导）
         StateMachine machine = getStateMachine();
@@ -76,7 +77,8 @@ public class ToolShellContainer implements ShellContainer {
             machine.setContext("worldInteractor", getInteractorStack());
             machine.setContext("shellContainer", this);
             machine.setContext("world", world);
-            machine.setContext("owner", owner);
+            machine.setContext("self",
+                    new EntityType(player.getUUID(), player.level().dimension().identifier().toString(), player));
         }
 
         // 使用 ShellTickHandler 执行 tick
