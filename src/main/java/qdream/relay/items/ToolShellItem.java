@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.core.NonNullList;
 
 import qdream.relay.Component.RelayDataComponents;
+import qdream.relay.commands.CommandUtils;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.StateMachineNbtSerializer;
@@ -58,22 +59,37 @@ public class ToolShellItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        // 普通右键：加载磁盘程序并运行（清空双栈，加载磁盘，开始运行）
-        ItemStack diskStack = getInventorySlot(stack, DISK_SLOT);
-        if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
-            List<Executable> program = SpellDiskItem.getProgram(diskStack);
-            if (!program.isEmpty()) {
-                // 清空双栈后加载新程序
-                machine.clear();
-                machine.loadProgram(program);
-                saveStateMachine(stack, machine);
-                player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
-            } else {
-                player.sendSystemMessage(Component.literal("§e[工具外壳] 磁盘为空，无法启动"));
-            }
+        // 普通右键：检查运行状态
+        if (machine.isRunning()) {
+            // 正在运行中，提示用户
+            player.sendSystemMessage(Component.literal("§e[工具外壳] 程序正在运行中"));
+            player.sendSystemMessage(
+                    Component.literal("§e[程序栈] " + CommandUtils.dataStackToString(machine.getProgramStackSnapshot())));
+            player.sendSystemMessage(
+                    Component.literal("§e[数据序栈] " + CommandUtils.dataStackToString(machine.getDataStackSnapshot())));
         } else {
-            player.sendSystemMessage(Component.literal("§e[工具外壳] 未插入法术磁盘"));
+            // 已停止，加载磁盘程序并运行
+            ItemStack diskStack = getInventorySlot(stack, DISK_SLOT);
+            if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
+                List<Executable> program = SpellDiskItem.getProgram(diskStack);
+                if (!program.isEmpty()) {
+                    // 清空双栈后加载新程序
+                    machine.clear();
+                    machine.loadProgram(program);
+                    saveStateMachine(stack, machine);
+                    // 设置初始化状态（与 ShellBlockEntity 保持一致）
+                    setInitialized(stack, true);
+                    player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
+                } else {
+                    player.sendSystemMessage(Component.literal("§e[工具外壳] 磁盘为空，无法启动"));
+                }
+            } else {
+                player.sendSystemMessage(Component.literal("§e[工具外壳] 未插入法术磁盘"));
+            }
         }
+
+        // 设置 Owner（每次右键时更新）
+        setOwner(stack, player);
 
         return InteractionResult.SUCCESS;
     }
@@ -157,8 +173,8 @@ public class ToolShellItem extends Item {
             if (!stack.isEmpty()) {
                 // 使用 Codec 序列化 ItemStack
                 ItemStack.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, stack)
-                    .result()
-                    .ifPresent(listTag::add);
+                        .result()
+                        .ifPresent(listTag::add);
             } else {
                 // 空物品存储为空 CompoundTag
                 listTag.add(new CompoundTag());
@@ -231,8 +247,9 @@ public class ToolShellItem extends Item {
 
     /**
      * 检查是否已初始化（至少有一个插槽有物品）
+     * 注意：此方法用于检查物品栏是否已配置，而非执行器的 initialized 状态
      */
-    public boolean isInitialized(ItemStack shell) {
+    public boolean hasInventoryItems(ItemStack shell) {
         for (int i = 0; i < SLOT_COUNT; i++) {
             if (!getInventorySlot(shell, i).isEmpty()) {
                 return true;
@@ -241,8 +258,21 @@ public class ToolShellItem extends Item {
         return false;
     }
 
+    /**
+     * 获取执行器的 initialized 状态（从 tick 状态中读取）
+     */
+    public boolean isInitialized(ItemStack shell) {
+        CompoundTag stateTag = getTickState(shell);
+        return stateTag.getBoolean("initialized").orElse(false);
+    }
+
+    /**
+     * 设置执行器的 initialized 状态
+     */
     public void setInitialized(ItemStack shell, boolean initialized) {
-        // 不需要显式初始化标记，有物品即表示已初始化
+        CompoundTag stateTag = getTickState(shell);
+        stateTag.putBoolean("initialized", initialized);
+        shell.set(RelayDataComponents.TOOL_SHELL_TICK_STATE, stateTag);
     }
 
     public boolean isEnabled(ItemStack shell) {
@@ -254,6 +284,44 @@ public class ToolShellItem extends Item {
             StateMachine machine = getStateMachine(shell);
             machine.clear();
             saveStateMachine(shell, machine);
+        }
+    }
+
+    // ========== Owner 管理 ==========
+
+    /**
+     * 设置工具外壳的拥有者
+     */
+    public void setOwner(ItemStack shell, net.minecraft.world.entity.Entity owner) {
+        CompoundTag dataTag = shell.getOrDefault(RelayDataComponents.TOOL_SHELL_DATA, new CompoundTag());
+
+        if (owner != null) {
+            dataTag.putString("owner", owner.getUUID().toString());
+        }
+
+        shell.set(RelayDataComponents.TOOL_SHELL_DATA, dataTag);
+    }
+
+    /**
+     * 获取工具外壳的拥有者
+     */
+    public net.minecraft.world.entity.Entity getOwner(ItemStack shell, Level world) {
+        CompoundTag dataTag = shell.get(RelayDataComponents.TOOL_SHELL_DATA);
+        if (dataTag == null) {
+            return null;
+        }
+
+        String uuidStr = dataTag.getString("owner").orElse("");
+        if (uuidStr.isEmpty() || world == null) {
+            return null;
+        }
+
+        try {
+            java.util.UUID ownerUuid = java.util.UUID.fromString(uuidStr);
+            // 延迟加载实体
+            return world.getEntity(ownerUuid);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 
@@ -277,5 +345,49 @@ public class ToolShellItem extends Item {
         CompoundTag configTag = shell.getOrDefault(RelayDataComponents.TOOL_SHELL_CONFIG, new CompoundTag());
         configTag.putBoolean("useInventoryEnergyModule", use);
         shell.set(RelayDataComponents.TOOL_SHELL_CONFIG, configTag);
+    }
+
+    // ========== Tick 状态管理 ==========
+
+    /**
+     * 获取 Tick 状态（tickCounter, initialized）
+     */
+    public CompoundTag getTickState(ItemStack shell) {
+        CompoundTag stateTag = shell.get(RelayDataComponents.TOOL_SHELL_TICK_STATE);
+        if (stateTag == null) {
+            CompoundTag newState = new CompoundTag();
+            newState.putInt("tickCounter", 0);
+            newState.putBoolean("initialized", false);
+            shell.set(RelayDataComponents.TOOL_SHELL_TICK_STATE, newState);
+            return newState;
+        }
+        return stateTag;
+    }
+
+    /**
+     * 保存 Tick 状态
+     */
+    public void saveTickState(ItemStack shell, int tickCounter, boolean initialized) {
+        CompoundTag stateTag = shell.getOrDefault(RelayDataComponents.TOOL_SHELL_TICK_STATE, new CompoundTag());
+        stateTag.putInt("tickCounter", tickCounter);
+        stateTag.putBoolean("initialized", initialized);
+        shell.set(RelayDataComponents.TOOL_SHELL_TICK_STATE, stateTag);
+    }
+
+    /**
+     * 获取 tick 计数器
+     */
+    public int getTickCounter(ItemStack shell) {
+        CompoundTag stateTag = getTickState(shell);
+        return stateTag.getInt("tickCounter").orElse(0);
+    }
+
+    /**
+     * 设置 tick 计数器
+     */
+    public void setTickCounter(ItemStack shell, int counter) {
+        CompoundTag stateTag = getTickState(shell);
+        stateTag.putInt("tickCounter", counter);
+        shell.set(RelayDataComponents.TOOL_SHELL_TICK_STATE, stateTag);
     }
 }

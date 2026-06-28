@@ -1,6 +1,7 @@
 package qdream.relay.core;
 
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.ComputingCoreItem;
 import qdream.relay.items.EnergyModuleItem;
@@ -60,7 +61,7 @@ public class ShellTickHandler {
                 stateMachine.setContext("shellContainer", container);
 
                 // 获取世界引用并设置到上下文
-                if (container instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
+                if (container instanceof BlockEntity blockEntity) {
                     stateMachine.setContext("world", blockEntity.getLevel());
                 } else if (container instanceof net.minecraft.world.entity.Entity entity) {
                     stateMachine.setContext("world", entity.level());

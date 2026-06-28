@@ -88,6 +88,18 @@ public class RelayDataComponents {
     );
 
     /**
+     * 工具外壳 Tick 状态组件 - 存储为 CompoundTag
+     * 用于 tool_shell 物品存储 ShellTickHandler 的状态
+     * 结构：{ tickCounter: int, initialized: boolean }
+     */
+    public static final DataComponentType<CompoundTag> TOOL_SHELL_TICK_STATE = register(
+            "tool_shell_tick_state",
+            builder -> builder
+                    .persistent(CompoundTag.CODEC)
+                    .networkSynchronized(createNbtStreamCodec())
+    );
+
+    /**
      * 创建 Double 的网络同步 StreamCodec
      */
     private static StreamCodec<FriendlyByteBuf, Double> createDoubleStreamCodec() {
@@ -178,6 +190,7 @@ public class RelayDataComponents {
         var ____ = ENERGY_COST;
         var _____ = TOOL_SHELL_DATA;
         var ______ = TOOL_SHELL_CONFIG;
+        var _______ = TOOL_SHELL_TICK_STATE;
     }
 
     /**

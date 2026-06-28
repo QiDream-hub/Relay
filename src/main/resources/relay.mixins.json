@@ -3,7 +3,8 @@
 	"package": "qdream.relay.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"ExampleMixin"
+		"ExampleMixin",
+		"ServerPlayerTickMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
