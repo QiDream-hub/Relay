@@ -20,6 +20,9 @@
 		],
 		"client": [
 			"qdream.relay.client.RelayClient"
+		],
+		"fabric-datagen": [
+			"qdream.relay.datagen.RelayDataGenerator"
 		]
 	},
 	"mixins": [
