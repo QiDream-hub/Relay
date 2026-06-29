@@ -4,7 +4,10 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"ExampleMixin",
-		"ServerPlayerTickMixin"
+		"ServerPlayerTickMixin",
+		"PlayerShellDataMixin",
+		"ServerPlayerDisconnectMixin",
+		"ServerPlayerJoinMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

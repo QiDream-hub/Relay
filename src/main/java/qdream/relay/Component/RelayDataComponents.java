@@ -100,6 +100,18 @@ public class RelayDataComponents {
     );
 
     /**
+     * 工具外壳会话 ID 组件 - 存储为 String (UUID)
+     * 用于 tool_shell 物品存储当前会话的唯一标识符
+     * 右键时生成，用于 PlayerShellData 的 Map key
+     */
+    public static final DataComponentType<String> TOOL_SHELL_SESSION_ID = register(
+            "tool_shell_session_id",
+            builder -> builder
+                    .persistent(Codec.STRING)
+                    .networkSynchronized(createStringStreamCodec())
+    );
+
+    /**
      * 创建 Double 的网络同步 StreamCodec
      */
     private static StreamCodec<FriendlyByteBuf, Double> createDoubleStreamCodec() {
@@ -159,6 +171,23 @@ public class RelayDataComponents {
     }
 
     /**
+     * 创建 String 的网络同步 StreamCodec
+     */
+    private static StreamCodec<FriendlyByteBuf, String> createStringStreamCodec() {
+        return new StreamCodec<FriendlyByteBuf, String>() {
+            @Override
+            public String decode(FriendlyByteBuf buf) {
+                return buf.readUtf(36); // UUID 字符串最大长度
+            }
+
+            @Override
+            public void encode(FriendlyByteBuf buf, String value) {
+                buf.writeUtf(value, 36);
+            }
+        };
+    }
+
+    /**
      * 注册 DataComponentType
      * @param name 组件名称
      * @param builderOperator 构建器操作符，用于配置持久化和网络同步
@@ -191,6 +220,7 @@ public class RelayDataComponents {
         var _____ = TOOL_SHELL_DATA;
         var ______ = TOOL_SHELL_CONFIG;
         var _______ = TOOL_SHELL_TICK_STATE;
+        var ________ = TOOL_SHELL_SESSION_ID;
     }
 
     /**

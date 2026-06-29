@@ -7,6 +7,8 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.core.ShellContainer;
 
+import java.util.UUID;
+
 /**
  * ShellContainer 的包装器，实现 Container 接口用于 GUI 插槽
  * 注意：26.1.2 使用 DataComponent 系统，这里暂时简化实现
@@ -23,7 +25,8 @@ public class ShellContainerWrapper implements Container {
     public ShellContainerWrapper(ToolShellItem toolShell, ItemStack stack) {
         this.toolShell = toolShell;
         this.stack = stack;
-        this.delegate = new ToolShellContainer(toolShell, stack);
+        // 生成临时会话 ID（仅用于 GUI 包装器，不加入 PlayerShellData 缓存）
+        this.delegate = new ToolShellContainer(toolShell, stack, UUID.randomUUID());
     }
 
     /**

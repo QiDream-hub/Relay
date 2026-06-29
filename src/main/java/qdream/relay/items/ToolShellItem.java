@@ -12,20 +12,20 @@ import net.minecraft.network.chat.Component;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
-import qdream.relay.mc.StateMachineNbtSerializer;
+import qdream.relay.core.PlayerShellDataAccessor;
 
 /**
  * 工具外壳（手持物品形态）
- * 
+ *
  * <p>简化设计：ToolShellItem 仅负责右键交互逻辑，所有状态管理委托给 ToolShellContainer</p>
- * 
+ *
  * <h3>右键行为</h3>
  * <ul>
- *   <li>Shift+ 右键：停止程序（清空双栈）</li>
+ *   <li>Shift+ 右键：停止程序（清空双栈并从玩家缓存移除）</li>
  *   <li>普通右键：
  *     <ul>
  *       <li>运行中：显示状态（程序栈、数据栈）</li>
- *       <li>已停止：从磁盘加载程序并运行</li>
+ *       <li>已停止：创建 ToolShellContainer 并加入玩家缓存，加载磁盘程序并运行</li>
  *     </ul>
  *   </li>
  * </ul>
@@ -44,19 +44,27 @@ public class ToolShellItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        // 获取容器（状态管理的权威来源）
-        ToolShellContainer container = new ToolShellContainer(this, stack);
-        StateMachine machine = container.getStateMachine();
+        // 获取玩家的 PlayerShellData
+        if (!(player instanceof PlayerShellDataAccessor accessor)) {
+            return InteractionResult.FAIL;
+        }
+        var shellData = accessor.relay$getShellData();
 
         // Shift+ 右键：停止程序
         if (player.isShiftKeyDown()) {
-            machine.clear();
-            container.saveStateMachine();
+            shellData.stopContainer(stack);
             player.sendSystemMessage(Component.literal("§c[工具外壳] 程序已停止"));
             return InteractionResult.SUCCESS;
         }
 
-        // 普通右键：检查运行状态
+        // 普通右键：获取或创建 Container
+        ToolShellContainer container = shellData.getOrCreateContainer(stack);
+        StateMachine machine = container.getStateMachine();
+
+        // 设置 Owner
+        container.setOwner(player);
+
+        // 检查运行状态
         if (machine.isRunning()) {
             // 正在运行中，显示状态
             player.sendSystemMessage(Component.literal("§e[工具外壳] 程序正在运行中"));
@@ -73,8 +81,8 @@ public class ToolShellItem extends Item {
                     // 清空双栈后加载新程序
                     machine.clear();
                     machine.loadProgram(program);
-                    container.saveStateMachine();
                     container.setInitialized(true);
+                    // 不立即保存，让 tick 管理
                     player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
                 } else {
                     player.sendSystemMessage(Component.literal("§e[工具外壳] 磁盘为空，无法启动"));
@@ -84,17 +92,16 @@ public class ToolShellItem extends Item {
             }
         }
 
-        // 设置 Owner
-        container.setOwner(player);
-
         return InteractionResult.SUCCESS;
     }
 
     /**
      * 获取工具外壳容器（状态管理的权威来源）
+     * <p>仅用于检查状态，不加入 PlayerShellData 缓存</p>
      */
     public ToolShellContainer getContainer(ItemStack stack) {
-        return new ToolShellContainer(this, stack);
+        // 临时会话 ID，仅用于临时检查
+        return new ToolShellContainer(this, stack, java.util.UUID.randomUUID());
     }
 
     /**

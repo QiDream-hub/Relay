@@ -8,15 +8,18 @@ import net.minecraft.nbt.CompoundTag;
 
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.types.EntityType;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
 
+import java.util.UUID;
+
 /**
  * 工具外壳的 ShellContainer 实现
- * 
+ *
  * <p>使用 {@link ShellStateManager} 统一管理物品栏、StateMachine、Owner 状态</p>
- * 
+ *
  * <h3>存储结构</h3>
  * <pre>
  * TOOL_SHELL_DATA: {
@@ -31,6 +34,9 @@ import qdream.relay.core.ShellTickHandler;
  * TOOL_SHELL_CONFIG: {
  *   "useInventoryEnergyModule": boolean
  * }
+ * TOOL_SHELL_SESSION_ID: {
+ *   "session-id-string"             // 会话 ID（UUID 字符串）
+ * }
  * </pre>
  */
 public class ToolShellContainer implements ShellContainer {
@@ -42,16 +48,18 @@ public class ToolShellContainer implements ShellContainer {
 
     final ToolShellItem toolShell; // package-private for ShellContainerWrapper
     final ItemStack stack; // package-private for ShellContainerWrapper
+    private final UUID sessionId; // 会话 ID
     private final ShellStateManager stateManager;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
     private Entity owner;
 
-    public ToolShellContainer(ToolShellItem toolShell, ItemStack stack) {
+    public ToolShellContainer(ToolShellItem toolShell, ItemStack stack, UUID sessionId) {
         this.toolShell = toolShell;
         this.stack = stack;
+        this.sessionId = sessionId;
         this.stateManager = new ShellStateManager();
         this.owner = null;
-        
+
         loadAllState();
 
         // 设置事故回调
@@ -61,6 +69,20 @@ public class ToolShellContainer implements ShellContainer {
                 player.sendSystemMessage(Component.literal("§c[工具外壳] 事故：" + reason));
             }
         });
+    }
+
+    /**
+     * 获取 ItemStack
+     */
+    public ItemStack getStack() {
+        return stack;
+    }
+
+    /**
+     * 获取会话 ID
+     */
+    public UUID getSessionId() {
+        return sessionId;
     }
 
     // ========== 状态加载/保存 ==========
@@ -83,8 +105,9 @@ public class ToolShellContainer implements ShellContainer {
 
     /**
      * 保存所有状态
+     * <p>公开访问，供 PlayerShellData 调用</p>
      */
-    private void saveAllState() {
+    public void saveAllState() {
         // 保存物品栏、StateMachine、Owner 到 TOOL_SHELL_DATA
         CompoundTag dataTag = stateManager.saveToTag();
         
@@ -126,6 +149,7 @@ public class ToolShellContainer implements ShellContainer {
 
     /**
      * 执行 tick 逻辑
+     * <p>不再每 tick 保存状态，由 PlayerShellData 管理保存时机</p>
      */
     public void tick(Level world, Entity player) {
         this.owner = player;
@@ -142,14 +166,11 @@ public class ToolShellContainer implements ShellContainer {
             machine.setContext("shellContainer", this);
             machine.setContext("world", world);
             machine.setContext("self",
-                    new qdream.relay.types.EntityType(player.getUUID(), player.level().dimension().identifier().toString(), player));
+                    new EntityType(player.getUUID(), player.level().dimension().identifier().toString(), player));
         }
 
         // 执行 tick
         tickHandler.tick(this);
-
-        // 保存状态
-        saveAllState();
     }
 
     // ========== ShellContainer 接口 ==========

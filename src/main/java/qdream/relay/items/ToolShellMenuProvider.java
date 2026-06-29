@@ -32,7 +32,8 @@ public class ToolShellMenuProvider implements MenuProvider {
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
         ToolShellItem toolShellItem = (ToolShellItem) toolShell.getItem();
-        ToolShellContainer container = new ToolShellContainer(toolShellItem, toolShell);
+        // 临时会话 ID，仅用于 GUI 容器
+        ToolShellContainer container = new ToolShellContainer(toolShellItem, toolShell, java.util.UUID.randomUUID());
         return new ToolShellScreenHandler(syncId, inv, container, toolShell);
     }
 }

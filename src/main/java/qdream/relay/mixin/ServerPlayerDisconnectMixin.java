@@ -10,23 +10,23 @@ import net.minecraft.server.level.ServerPlayer;
 import qdream.relay.core.PlayerShellDataAccessor;
 
 /**
- * 注入到 ServerPlayer.tick() 中，调用 PlayerShellData.tickAll()
- * 批量 tick 所有活跃的工具外壳容器
+ * 注入到 ServerPlayer.disconnect() 中，调用 PlayerShellData.clear()
+ * 玩家下线时停止所有运行中的程序并保存状态
  */
 @Mixin(ServerPlayer.class)
-public class ServerPlayerTickMixin {
+public class ServerPlayerDisconnectMixin {
 
-    @Inject(at = @At("TAIL"), method = "tick")
-    private void relay$tickToolShells(CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "disconnect")
+    private void relay$clearToolShells(CallbackInfo ci) {
         ServerPlayer player = (ServerPlayer) (Object) this;
 
         if (player.level().isClientSide()) {
             return;
         }
 
-        // 获取玩家的 PlayerShellData 并 tick 所有容器
+        // 获取玩家的 PlayerShellData 并清空所有容器
         if (player instanceof PlayerShellDataAccessor accessor) {
-            accessor.relay$getShellData().tickAll();
+            accessor.relay$getShellData().clear();
         }
     }
 }

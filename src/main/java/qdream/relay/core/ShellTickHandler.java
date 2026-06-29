@@ -1,10 +1,12 @@
 package qdream.relay.core;
 
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.ComputingCoreItem;
 import qdream.relay.items.EnergyModuleItem;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 
 /**
@@ -37,7 +39,6 @@ public class ShellTickHandler {
             return;
         }
 
-
         // 未启用时不执行
         if (!container.isEnabled()) {
             return;
@@ -48,6 +49,9 @@ public class ShellTickHandler {
 
         // 更新核心状态
         updateCoreState(container);
+
+        // 从 container 同步 initialized 状态（关键修复：每次 tick 使用 container 的状态）
+        this.initialized = container.isInitialized();
 
         // 执行状态机
         if (initialized && coreCount > 0 && interval > 0 && container.getStateMachine().isRunning()) {
@@ -63,7 +67,7 @@ public class ShellTickHandler {
                 // 获取世界引用并设置到上下文
                 if (container instanceof BlockEntity blockEntity) {
                     stateMachine.setContext("world", blockEntity.getLevel());
-                } else if (container instanceof net.minecraft.world.entity.Entity entity) {
+                } else if (container instanceof Entity entity) {
                     stateMachine.setContext("world", entity.level());
                 }
 
@@ -95,7 +99,7 @@ public class ShellTickHandler {
             }
 
             int cost = 1; // 默认 cost
-            if (top instanceof qdream.relay.mc.base.Operation op) {
+            if (top instanceof Operation op) {
                 cost = op.getCost();
             }
 
@@ -125,6 +129,12 @@ public class ShellTickHandler {
             EnergyModuleItem.consumeEnergy(energyStack, required);
             currentEnergy = EnergyModuleItem.getStoredEnergy(energyStack);
             usedCost += cost;
+        }
+
+        // 程序执行完毕后，清空数据栈（避免下次运行时使用遗留数据）
+        if (!stateMachine.isRunning()) {
+            stateMachine.clear();
+            container.setInitialized(false);
         }
 
         container.setChanged();
