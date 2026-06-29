@@ -97,18 +97,31 @@ public class ToolShellItem extends Item {
 
     /**
      * 获取工具外壳容器（状态管理的权威来源）
-     * <p>仅用于检查状态，不加入 PlayerShellData 缓存</p>
+     * <p>从 PlayerShellData 获取缓存的 Container</p>
+     *
+     * @param stack ItemStack
+     * @param player 玩家实体（用于获取 PlayerShellData）
+     * @return ToolShellContainer 实例，不存在返回 null
      */
-    public ToolShellContainer getContainer(ItemStack stack) {
-        // 临时会话 ID，仅用于临时检查
-        return new ToolShellContainer(this, stack, java.util.UUID.randomUUID());
+    public ToolShellContainer getContainer(ItemStack stack, net.minecraft.world.entity.player.Player player) {
+        if (player instanceof PlayerShellDataAccessor accessor) {
+            return accessor.relay$getShellData().getContainer(stack);
+        }
+        return null;
     }
 
     /**
      * 检查是否正在运行
+     *
+     * @param stack ItemStack
+     * @param player 玩家实体（用于获取 PlayerShellData）
+     * @return 是否正在运行
      */
-    public boolean isRunning(ItemStack stack) {
-        ToolShellContainer container = getContainer(stack);
+    public boolean isRunning(ItemStack stack, net.minecraft.world.entity.player.Player player) {
+        ToolShellContainer container = getContainer(stack, player);
+        if (container == null) {
+            return false;
+        }
         return container.getStateMachine().isRunning();
     }
 }

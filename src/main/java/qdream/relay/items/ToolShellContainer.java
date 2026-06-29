@@ -47,7 +47,7 @@ public class ToolShellContainer implements ShellContainer {
     public static final int INTERACTOR_SLOT = 3;
 
     final ToolShellItem toolShell; // package-private for ShellContainerWrapper
-    final ItemStack stack; // package-private for ShellContainerWrapper
+    ItemStack stack; // package-private for ShellContainerWrapper - 非 final 以支持引用更新
     private final UUID sessionId; // 会话 ID
     private final ShellStateManager stateManager;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
@@ -76,6 +76,20 @@ public class ToolShellContainer implements ShellContainer {
      */
     public ItemStack getStack() {
         return stack;
+    }
+
+    /**
+     * 更新持有的 ItemStack 引用
+     * <p>当物品在玩家物品栏中移动时，Minecraft 会创建新的 ItemStack 实例，
+     * 但 DataComponent 会被复制。此方法确保 Container 持有最新的 ItemStack 引用，
+     * 避免状态保存到错误的 ItemStack。</p>
+     *
+     * @param newStack 新的 ItemStack 引用（当前玩家持有的实例）
+     */
+    public void updateStackReference(ItemStack newStack) {
+        // 只更新引用，不重新加载状态
+        // 因为状态已经通过 DataComponent 同步到新 ItemStack
+        this.stack = newStack;
     }
 
     /**
@@ -152,8 +166,6 @@ public class ToolShellContainer implements ShellContainer {
      * <p>不再每 tick 保存状态，由 PlayerShellData 管理保存时机</p>
      */
     public void tick(Level world, Entity player) {
-        this.owner = player;
-
         // 设置 enabled 状态
         StateMachine machine = getStateMachine();
         if (machine.isRunning() && !isEnabled()) {
@@ -223,16 +235,19 @@ public class ToolShellContainer implements ShellContainer {
         if (stateTag == null) {
             return false;
         }
-        return stateTag.getBoolean("initialized").orElse(false);
+        return stateTag.getBoolean("enabled").orElse(false);
     }
 
     @Override
     public void setEnabled(boolean enabled) {
+        CompoundTag stateTag = stack.getOrDefault(RelayDataComponents.TOOL_SHELL_TICK_STATE, new CompoundTag());
+        stateTag.putBoolean("enabled", enabled);
         if (!enabled) {
             StateMachine machine = getStateMachine();
             machine.clear();
-            saveStateMachine();
         }
+        stack.set(RelayDataComponents.TOOL_SHELL_TICK_STATE, stateTag);
+        saveTickState();
     }
 
     @Override

@@ -106,22 +106,45 @@ public class PlayerShellData {
     }
 
     /**
-     * 获取或创建 ToolShellContainer
+     * 获取 ToolShellContainer（不创建新的）
      *
      * @param stack 工具外壳 ItemStack
+     * @return ToolShellContainer 实例，不存在返回 null
+     */
+    public ToolShellContainer getContainer(ItemStack stack) {
+        UUID sessionId = getSessionId(stack);
+        if (sessionId != null) {
+            return activeShells.get(sessionId);
+        }
+        return null;
+    }
+
+    /**
+     * 获取或创建 ToolShellContainer
+     *
+     * <p>当 ItemStack 被移动时（如物品栏内移动），Minecraft 会创建新的 ItemStack 实例，
+     * 但 DataComponent 会被复制。此时 sessionId 相同，但 Container 持有的仍是旧引用。</p>
+     *
+     * <p>此方法会更新现有 Container 的 ItemStack 引用，确保状态保存到正确的 ItemStack。</p>
+     *
+     * @param stack 工具外壳 ItemStack（当前最新的引用）
      * @return ToolShellContainer 实例
      */
     public ToolShellContainer getOrCreateContainer(ItemStack stack) {
         UUID sessionId = getSessionId(stack);
-        
-        // 已有会话 ID，直接从 Map 获取
+
+        // 已有会话 ID，从 Map 获取
         if (sessionId != null) {
             ToolShellContainer existing = activeShells.get(sessionId);
             if (existing != null) {
+                // 更新 Container 持有的 ItemStack 引用
+                // 这是因为物品移动后，Minecraft 会创建新的 ItemStack 实例
+                // 但 sessionId 通过 DataComponent 被复制到新实例
+                existing.updateStackReference(stack);
                 return existing;
             }
         }
-        
+
         // 没有会话 ID 或 Map 中不存在，创建新的
         if (stack.getItem() instanceof ToolShellItem toolShell) {
             // 生成新会话 ID
@@ -178,6 +201,7 @@ public class PlayerShellData {
     /**
      * Tick 所有活跃的 Container
      * <p>程序执行完毕的 Container 会自动从 Map 移除并保存</p>
+     * <p>每 tick 检查 ItemStack 引用一致性，如果物品被移动导致引用失效，会尝试从玩家物品栏重新获取</p>
      */
     public void tickAll() {
         if (player.level().isClientSide()) {
@@ -191,12 +215,25 @@ public class PlayerShellData {
         for (var entry : activeShells.entrySet()) {
             UUID sessionId = entry.getKey();
             ToolShellContainer container = entry.getValue();
-            ItemStack stack = container.getStack();
+            ItemStack containerStack = container.getStack();
 
             // 检查物品是否仍然有效（未被丢弃）
-            if (stack.isEmpty() || !(stack.getItem() instanceof ToolShellItem)) {
+            if (containerStack.isEmpty() || !(containerStack.getItem() instanceof ToolShellItem)) {
                 toRemove.add(sessionId);
                 continue;
+            }
+
+            // 检查 ItemStack 引用是否仍然在玩家物品栏中
+            // 如果不在，说明物品被移动了，Container 持有的是旧引用
+            ItemStack actualStack = findMatchingStackInInventory(containerStack);
+            if (actualStack == null) {
+                // 物品不在物品栏中，可能是被丢弃或移动到未知位置
+                toRemove.add(sessionId);
+                continue;
+            } else if (actualStack != containerStack) {
+                // 物品在物品栏中，但引用不同，说明被移动过
+                // 更新 Container 的引用
+                container.updateStackReference(actualStack);
             }
 
             // 执行 tick
@@ -220,6 +257,32 @@ public class PlayerShellData {
     }
 
     /**
+     * 在玩家物品栏中查找匹配的 ItemStack
+     * <p>通过 sessionId 匹配，因为物品移动后会创建新的 ItemStack 实例</p>
+     *
+     * @param referenceStack 参考 ItemStack（用于获取 sessionId）
+     * @return 玩家物品栏中匹配的 ItemStack，找不到返回 null
+     */
+    private ItemStack findMatchingStackInInventory(ItemStack referenceStack) {
+        UUID referenceSessionId = getSessionId(referenceStack);
+        if (referenceSessionId == null) {
+            return null;
+        }
+
+        // 遍历玩家物品栏查找匹配的 sessionId
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (!stack.isEmpty() && stack.getItem() instanceof ToolShellItem) {
+                UUID sessionId = getSessionId(stack);
+                if (referenceSessionId.equals(sessionId)) {
+                    return stack;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 清空所有 Container（玩家下线时调用）
      * <p>停止所有运行中的程序并保存状态</p>
      */
@@ -227,8 +290,6 @@ public class PlayerShellData {
         // 停止所有运行中的程序
         for (ToolShellContainer container : activeShells.values()) {
             container.saveAllState();
-            // 清除 ItemStack 中的会话 ID
-            // container.getStack().remove(RelayDataComponents.TOOL_SHELL_SESSION_ID);
         }
         activeShells.clear();
     }
