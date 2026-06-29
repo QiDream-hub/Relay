@@ -16,7 +16,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import qdream.relay.Relay;
 import qdream.relay.blocks.RelayBlocks;
-import qdream.relay.items.ComputingCoreItem;
 
 /**
  * 物品注册表
@@ -41,6 +40,22 @@ public class RelayItems {
 
     public static final Item SPELL_DISK = register("spell_disk", SpellDiskItem::new, new Item.Properties());
     public static final Item ENERGY_MODULE = register("energy_module", EnergyModuleItem::new, new Item.Properties());
+
+    // 世界交互器系列 - 品阶 1-64（品阶数字越大，交互距离越远，能量消耗越高）
+    public static final Item WORLD_INTERACTOR_1 = register("world_interactor_1",
+            props -> new WorldInteractorItem(props, 1), new Item.Properties());
+    public static final Item WORLD_INTERACTOR_2 = register("world_interactor_2",
+            props -> new WorldInteractorItem(props, 2), new Item.Properties());
+    public static final Item WORLD_INTERACTOR_4 = register("world_interactor_4",
+            props -> new WorldInteractorItem(props, 4), new Item.Properties());
+    public static final Item WORLD_INTERACTOR_8 = register("world_interactor_8",
+            props -> new WorldInteractorItem(props, 8), new Item.Properties());
+    public static final Item WORLD_INTERACTOR_16 = register("world_interactor_16",
+            props -> new WorldInteractorItem(props, 16), new Item.Properties());
+    public static final Item WORLD_INTERACTOR_32 = register("world_interactor_32",
+            props -> new WorldInteractorItem(props, 32), new Item.Properties());
+    public static final Item WORLD_INTERACTOR_64 = register("world_interactor_64",
+            props -> new WorldInteractorItem(props, 64), new Item.Properties());
 
     // 三种外壳物品
     // block_shell = 方块外壳，可以放置成方块（使用 BlockItem）
@@ -85,6 +100,15 @@ public class RelayItems {
                 output.accept(RelayItems.COMPUTING_CORE_64);
                 output.accept(RelayItems.ENERGY_MODULE);
                 output.accept(RelayItems.SPELL_DISK);
+
+                // 世界交互器系列（从低级到高级）
+                output.accept(RelayItems.WORLD_INTERACTOR_1);
+                output.accept(RelayItems.WORLD_INTERACTOR_2);
+                output.accept(RelayItems.WORLD_INTERACTOR_4);
+                output.accept(RelayItems.WORLD_INTERACTOR_8);
+                output.accept(RelayItems.WORLD_INTERACTOR_16);
+                output.accept(RelayItems.WORLD_INTERACTOR_32);
+                output.accept(RelayItems.WORLD_INTERACTOR_64);
 
                 // 方块和外壳
                 output.accept(RelayBlocks.BLOCK_SHELL_BLOCK);  // 方块外壳

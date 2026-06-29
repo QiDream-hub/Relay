@@ -42,6 +42,15 @@ public class RelayModelProvider extends FabricModelProvider {
         // 能量模块
         gen.generateFlatItem(RelayItems.ENERGY_MODULE, ModelTemplates.FLAT_ITEM);
 
+        // 世界交互器系列
+        gen.generateFlatItem(RelayItems.WORLD_INTERACTOR_1, ModelTemplates.FLAT_ITEM);
+        gen.generateFlatItem(RelayItems.WORLD_INTERACTOR_2, ModelTemplates.FLAT_ITEM);
+        gen.generateFlatItem(RelayItems.WORLD_INTERACTOR_4, ModelTemplates.FLAT_ITEM);
+        gen.generateFlatItem(RelayItems.WORLD_INTERACTOR_8, ModelTemplates.FLAT_ITEM);
+        gen.generateFlatItem(RelayItems.WORLD_INTERACTOR_16, ModelTemplates.FLAT_ITEM);
+        gen.generateFlatItem(RelayItems.WORLD_INTERACTOR_32, ModelTemplates.FLAT_ITEM);
+        gen.generateFlatItem(RelayItems.WORLD_INTERACTOR_64, ModelTemplates.FLAT_ITEM);
+
         // 方块外壳 - 物品模型手动创建在 resources/assets/relay/items/ 目录
         // 因为需要引用方块模型而非物品纹理
 

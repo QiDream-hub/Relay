@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "relay:world_interactor_4",
+    "Q": "minecraft:quartz",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    " C ",
+    "RCR",
+    " Q "
+  ],
+  "result": {
+    "id": "relay:world_interactor_8"
+  }
+}

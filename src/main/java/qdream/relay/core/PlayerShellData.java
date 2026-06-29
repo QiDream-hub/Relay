@@ -1,5 +1,6 @@
 package qdream.relay.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -210,7 +211,7 @@ public class PlayerShellData {
 
         // 收集需要移除的会话 ID（程序已执行的）
         // 不能直接在循环中 remove，会 ConcurrentModificationException
-        var toRemove = new java.util.ArrayList<UUID>();
+        var toRemove = new ArrayList<UUID>();
 
         for (var entry : activeShells.entrySet()) {
             UUID sessionId = entry.getKey();

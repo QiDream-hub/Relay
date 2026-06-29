@@ -154,6 +154,85 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
                     .define('I', Items.IRON_INGOT)
                     .unlockedBy(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD))
                     .save(output);
+
+                // ===== 世界交互器系列 =====
+                // 基础配方：末影珍珠 + 运算核心 1 + 紫水晶
+                shapedRecipe(itemLookup, RelayItems.WORLD_INTERACTOR_1, 1)
+                    .pattern(" E ")
+                    .pattern("PCP")
+                    .pattern("   ")
+                    .define('E', Items.ENDER_PEARL)
+                    .define('P', Items.AMETHYST_SHARD)
+                    .define('C', RelayItems.COMPUTING_CORE_1)
+                    .unlockedBy(getHasName(Items.ENDER_PEARL), has(Items.ENDER_PEARL))
+                    .save(output);
+
+                // 升级配方：2 个低阶 + 配料 = 1 个高阶
+                // INTERACTOR_1 -> INTERACTOR_2: 2 个 INTERACTOR_1 + 2 红石 + 1 青金石
+                shapedRecipe(itemLookup, RelayItems.WORLD_INTERACTOR_2, 1)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" L ")
+                    .define('C', RelayItems.WORLD_INTERACTOR_1)
+                    .define('R', Items.REDSTONE)
+                    .define('L', Items.LAPIS_LAZULI)
+                    .unlockedBy(getHasName(RelayItems.WORLD_INTERACTOR_1), has(RelayItems.WORLD_INTERACTOR_1))
+                    .save(output);
+
+                // INTERACTOR_2 -> INTERACTOR_4: 2 个 INTERACTOR_2 + 2 红石 + 1 黄金锭
+                shapedRecipe(itemLookup, RelayItems.WORLD_INTERACTOR_4, 1)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" G ")
+                    .define('C', RelayItems.WORLD_INTERACTOR_2)
+                    .define('R', Items.REDSTONE)
+                    .define('G', Items.GOLD_INGOT)
+                    .unlockedBy(getHasName(RelayItems.WORLD_INTERACTOR_2), has(RelayItems.WORLD_INTERACTOR_2))
+                    .save(output);
+
+                // INTERACTOR_4 -> INTERACTOR_8: 2 个 INTERACTOR_4 + 2 红石 + 1 下界石英
+                shapedRecipe(itemLookup, RelayItems.WORLD_INTERACTOR_8, 1)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" Q ")
+                    .define('C', RelayItems.WORLD_INTERACTOR_4)
+                    .define('R', Items.REDSTONE)
+                    .define('Q', Items.QUARTZ)
+                    .unlockedBy(getHasName(RelayItems.WORLD_INTERACTOR_4), has(RelayItems.WORLD_INTERACTOR_4))
+                    .save(output);
+
+                // INTERACTOR_8 -> INTERACTOR_16: 2 个 INTERACTOR_8 + 2 红石 + 1 末影珍珠
+                shapedRecipe(itemLookup, RelayItems.WORLD_INTERACTOR_16, 1)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" E ")
+                    .define('C', RelayItems.WORLD_INTERACTOR_8)
+                    .define('R', Items.REDSTONE)
+                    .define('E', Items.ENDER_PEARL)
+                    .unlockedBy(getHasName(RelayItems.WORLD_INTERACTOR_8), has(RelayItems.WORLD_INTERACTOR_8))
+                    .save(output);
+
+                // INTERACTOR_16 -> INTERACTOR_32: 2 个 INTERACTOR_16 + 2 红石 + 1 烈焰棒
+                shapedRecipe(itemLookup, RelayItems.WORLD_INTERACTOR_32, 1)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" B ")
+                    .define('C', RelayItems.WORLD_INTERACTOR_16)
+                    .define('R', Items.REDSTONE)
+                    .define('B', Items.BLAZE_ROD)
+                    .unlockedBy(getHasName(RelayItems.WORLD_INTERACTOR_16), has(RelayItems.WORLD_INTERACTOR_16))
+                    .save(output);
+
+                // INTERACTOR_32 -> INTERACTOR_64: 2 个 INTERACTOR_32 + 2 红石 + 1 下界之星
+                shapedRecipe(itemLookup, RelayItems.WORLD_INTERACTOR_64, 1)
+                    .pattern(" C ")
+                    .pattern("RCR")
+                    .pattern(" S ")
+                    .define('C', RelayItems.WORLD_INTERACTOR_32)
+                    .define('R', Items.REDSTONE)
+                    .define('S', Items.NETHER_STAR)
+                    .unlockedBy(getHasName(RelayItems.WORLD_INTERACTOR_32), has(RelayItems.WORLD_INTERACTOR_32))
+                    .save(output);
             }
             
             private ShapedRecipeBuilder shapedRecipe(HolderLookup.RegistryLookup<Item> itemLookup, Item result, int count) {

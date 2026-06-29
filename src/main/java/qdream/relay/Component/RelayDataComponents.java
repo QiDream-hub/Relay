@@ -112,6 +112,28 @@ public class RelayDataComponents {
     );
 
     /**
+     * 世界交互器品阶组件 - 存储为 Integer
+     * 用于 world_interactor 物品存储品阶（1-64）
+     */
+    public static final DataComponentType<Integer> WORLD_INTERACTOR_TIER = register(
+            "world_interactor_tier",
+            builder -> builder
+                    .persistent(Codec.INT)
+                    .networkSynchronized(createIntStreamCodec())
+    );
+
+    /**
+     * 世界交互器交互距离组件 - 存储为 Double
+     * 用于 world_interactor 物品存储交互距离（方块单位）
+     */
+    public static final DataComponentType<Double> WORLD_INTERACTION_RANGE = register(
+            "world_interaction_range",
+            builder -> builder
+                    .persistent(Codec.DOUBLE)
+                    .networkSynchronized(createDoubleStreamCodec())
+    );
+
+    /**
      * 创建 Double 的网络同步 StreamCodec
      */
     private static StreamCodec<FriendlyByteBuf, Double> createDoubleStreamCodec() {
@@ -221,6 +243,8 @@ public class RelayDataComponents {
         var ______ = TOOL_SHELL_CONFIG;
         var _______ = TOOL_SHELL_TICK_STATE;
         var ________ = TOOL_SHELL_SESSION_ID;
+        var _________ = WORLD_INTERACTOR_TIER;
+        var __________ = WORLD_INTERACTION_RANGE;
     }
 
     /**

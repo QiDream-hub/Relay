@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "relay:world_interactor_8",
+    "E": "minecraft:ender_pearl",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    " C ",
+    "RCR",
+    " E "
+  ],
+  "result": {
+    "id": "relay:world_interactor_16"
+  }
+}

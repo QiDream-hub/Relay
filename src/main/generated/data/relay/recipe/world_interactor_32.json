@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:blaze_rod",
+    "C": "relay:world_interactor_16",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    " C ",
+    "RCR",
+    " B "
+  ],
+  "result": {
+    "id": "relay:world_interactor_32"
+  }
+}

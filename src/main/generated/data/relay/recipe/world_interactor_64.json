@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "relay:world_interactor_32",
+    "R": "minecraft:redstone",
+    "S": "minecraft:nether_star"
+  },
+  "pattern": [
+    " C ",
+    "RCR",
+    " S "
+  ],
+  "result": {
+    "id": "relay:world_interactor_64"
+  }
+}

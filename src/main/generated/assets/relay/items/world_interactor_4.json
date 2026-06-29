@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "relay:block/block_shell"
+    "model": "relay:item/world_interactor_4"
   }
 }

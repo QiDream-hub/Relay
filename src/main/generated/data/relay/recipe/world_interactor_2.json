@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "relay:world_interactor_1",
+    "L": "minecraft:lapis_lazuli",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    " C ",
+    "RCR",
+    " L "
+  ],
+  "result": {
+    "id": "relay:world_interactor_2"
+  }
+}

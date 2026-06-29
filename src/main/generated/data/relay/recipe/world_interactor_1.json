@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "relay:computing_core_1",
+    "E": "minecraft:ender_pearl",
+    "P": "minecraft:amethyst_shard"
+  },
+  "pattern": [
+    " E ",
+    "PCP",
+    "   "
+  ],
+  "result": {
+    "id": "relay:world_interactor_1"
+  }
+}
