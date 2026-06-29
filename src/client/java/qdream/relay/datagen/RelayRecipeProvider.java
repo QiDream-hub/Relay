@@ -147,12 +147,12 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
 
                 // 工具外壳
                 shapedRecipe(itemLookup, RelayItems.TOOL_SHELL, 1)
-                    .pattern("  G")
+                    .pattern("  A")
                     .pattern(" II")
                     .pattern("II ")
-                    .define('G', Items.GOLD_INGOT)
+                    .define('A', Items.AMETHYST_SHARD)
                     .define('I', Items.IRON_INGOT)
-                    .unlockedBy(getHasName(Items.GOLD_INGOT), has(Items.GOLD_INGOT))
+                    .unlockedBy(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD))
                     .save(output);
             }
             
