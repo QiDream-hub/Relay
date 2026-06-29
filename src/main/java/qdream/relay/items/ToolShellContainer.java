@@ -177,8 +177,7 @@ public class ToolShellContainer implements ShellContainer {
             machine.setContext("worldInteractor", getInteractorStack());
             machine.setContext("shellContainer", this);
             machine.setContext("world", world);
-            machine.setContext("self",
-                    new EntityType(player.getUUID(), player.level().dimension().identifier().toString(), player));
+            machine.setContext("self", player);
         }
 
         // 执行 tick

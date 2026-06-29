@@ -19,6 +19,26 @@ import qdream.relay.operations.control.StopOp;
 import qdream.relay.operations.entity.GetOwnerOp;
 import qdream.relay.operations.entity.GetSelfOp;
 import qdream.relay.operations.entity.IsPlayerOp;
+import qdream.relay.operations.vector.BlockRaycastOp;
+import qdream.relay.operations.vector.BreakBlockFortuneOp;
+import qdream.relay.operations.vector.BreakBlockOp;
+import qdream.relay.operations.vector.BreakBlockSilkTouchOp;
+import qdream.relay.operations.vector.DetectBlockOp;
+import qdream.relay.operations.vector.DetectEntityOp;
+import qdream.relay.operations.vector.EntityRaycastOp;
+import qdream.relay.operations.vector.GetEntityLookOp;
+import qdream.relay.operations.vector.GetLookVectorOp;
+import qdream.relay.operations.vector.PushVectorOp;
+import qdream.relay.operations.vector.RaycastOp;
+import qdream.relay.operations.vector.SetEntityLookOp;
+import qdream.relay.operations.vector.VectorAddOp;
+import qdream.relay.operations.vector.VectorCrossOp;
+import qdream.relay.operations.vector.VectorDistanceOp;
+import qdream.relay.operations.vector.VectorDotOp;
+import qdream.relay.operations.vector.VectorLengthOp;
+import qdream.relay.operations.vector.VectorMulOp;
+import qdream.relay.operations.vector.VectorNormalizeOp;
+import qdream.relay.operations.vector.VectorSubOp;
 import qdream.relay.operations.logic.AndOp;
 import qdream.relay.operations.logic.EqOp;
 import qdream.relay.operations.logic.GtOp;
@@ -124,5 +144,35 @@ public class RelayOperations {
         OperationRegistry.register("relay:list_set", new OperationRegistry.OpEntry(new ListSetOp()));
         OperationRegistry.register("relay:list_length", new OperationRegistry.OpEntry(new ListLengthOp()));
         OperationRegistry.register("relay:list_creat", new OperationRegistry.OpEntry(new ListCreatOp()));
+
+        // 向量操作
+        OperationRegistry.register("relay:vector_add", new OperationRegistry.OpEntry(new VectorAddOp()));
+        OperationRegistry.register("relay:vector_sub", new OperationRegistry.OpEntry(new VectorSubOp()));
+        OperationRegistry.register("relay:vector_mul", new OperationRegistry.OpEntry(new VectorMulOp()));
+        OperationRegistry.register("relay:vector_dot", new OperationRegistry.OpEntry(new VectorDotOp()));
+        OperationRegistry.register("relay:vector_cross", new OperationRegistry.OpEntry(new VectorCrossOp()));
+        OperationRegistry.register("relay:vector_normalize", new OperationRegistry.OpEntry(new VectorNormalizeOp()));
+        OperationRegistry.register("relay:vector_length", new OperationRegistry.OpEntry(new VectorLengthOp()));
+        OperationRegistry.register("relay:vector_distance", new OperationRegistry.OpEntry(new VectorDistanceOp()));
+
+        // 世界交互操作（需要世界交互器）
+        OperationRegistry.register("relay:raycast", new OperationRegistry.OpEntry(new RaycastOp()));
+        OperationRegistry.register("relay:detect_block", new OperationRegistry.OpEntry(new DetectBlockOp()));
+        OperationRegistry.register("relay:detect_entity", new OperationRegistry.OpEntry(new DetectEntityOp()));
+        OperationRegistry.register("relay:push_vector", new OperationRegistry.OpEntry(new PushVectorOp()));
+        OperationRegistry.register("relay:get_look_vector", new OperationRegistry.OpEntry(new GetLookVectorOp()));
+
+        // 实体朝向操作
+        OperationRegistry.register("relay:set_entity_look", new OperationRegistry.OpEntry(new SetEntityLookOp()));
+        OperationRegistry.register("relay:get_entity_look", new OperationRegistry.OpEntry(new GetEntityLookOp()));
+
+        // 挖掘方块操作
+        OperationRegistry.register("relay:break_block", new OperationRegistry.OpEntry(new BreakBlockOp()));
+        OperationRegistry.register("relay:break_block_fortune", new OperationRegistry.OpEntry(new BreakBlockFortuneOp()));
+        OperationRegistry.register("relay:break_block_silk", new OperationRegistry.OpEntry(new BreakBlockSilkTouchOp()));
+
+        // 视线追踪操作
+        OperationRegistry.register("relay:entity_raycast", new OperationRegistry.OpEntry(new EntityRaycastOp()));
+        OperationRegistry.register("relay:block_raycast", new OperationRegistry.OpEntry(new BlockRaycastOp()));
     }
 }

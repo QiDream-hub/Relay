@@ -40,17 +40,25 @@ public class GetSelfOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 从上下文中获取 shellContainer 和 world
-        Optional<EntityType> container = executor.getContext("self", EntityType.class);
+        // 尝试从上下文中获取 self 实体（Entity 或 BlockEntity）
+        Optional<Object> selfObj = executor.getContext("self", Object.class);
 
-        if (!container.isPresent()) {
-            executor.triggerMishap("无法获取容器：上下文缺失");
+        if (!selfObj.isPresent() || selfObj.get() == null) {
+            executor.pushData(NullType.INSTANCE);
             return;
         }
-        if (container.get() == null) {
+        
+        Object self = selfObj.get();
+        
+        // 根据类型创建对应的 Iota
+        if (self instanceof Entity entity) {
+            EntityType entityType = EntityType.from(entity, entity.level());
+            executor.pushData(entityType);
+        } else if (self instanceof BlockEntity blockEntity) {
+            BlockEntityType blockEntityType = BlockEntityType.from(blockEntity, blockEntity.getLevel());
+            executor.pushData(blockEntityType);
+        } else {
             executor.pushData(NullType.INSTANCE);
         }
-        executor.pushData(container.get());
-
     }
 }
