@@ -262,5 +262,22 @@
   "operation.relay:push_vector.name": "Push Entity",
   "operation.relay:push_vector.description": "Apply push force to an entity",
   "operation.relay:push_vector.param.0": "Entity",
-  "operation.relay:push_vector.param.1": "Push vector"
+  "operation.relay:push_vector.param.1": "Push vector",
+
+  "type.relay:number.name": "Number",
+  "type.relay:number.description": "Numeric type, supports integer and decimal operations",
+  "type.relay:boolean.name": "Boolean",
+  "type.relay:boolean.description": "Logical type, value is true or false",
+  "type.relay:vector.name": "Vector",
+  "type.relay:vector.description": "3D vector, used for position and direction",
+  "type.relay:string.name": "String",
+  "type.relay:string.description": "Text type, used for displaying messages",
+  "type.relay:entity.name": "Entity",
+  "type.relay:entity.description": "Entity reference, can access entity properties",
+  "type.relay:list.name": "List",
+  "type.relay:list.description": "Element list, can store any type",
+  "type.relay:null.name": "Null",
+  "type.relay:null.description": "Null type, represents no data",
+  "type.relay:program.name": "Program",
+  "type.relay:program.description": "Program block, contains executable instruction sequence"
 }

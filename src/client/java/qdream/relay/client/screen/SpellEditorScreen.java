@@ -22,11 +22,15 @@ import qdream.relay.Relay;
 import qdream.relay.client.screen.widget.editor.JsonEditorWidget;
 import qdream.relay.client.screen.widget.editor.OperationListWidget;
 import qdream.relay.client.screen.widget.editor.TypeListWidget;
+import qdream.relay.client.screen.widget.info.HoverInfoWidget;
+import qdream.relay.client.screen.widget.info.HoverInfoWidget.InfoContent;
+import qdream.relay.client.screen.widget.info.InfoUtils;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
 import qdream.relay.screen.SpellEditorScreenHandler;
@@ -66,6 +70,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     private static final int BORDER_COLOR = 0xFF404040;
     private static final int SEPARATOR_COLOR = 0xFF404040;
     private static final int INVENTORY_SEPARATOR_COLOR = 0xFF505050;
+    private static final int TITLE_COLOR = 0xFF00FF00;
 
     // 自定义 Widget
     private OperationListWidget operationListWidget;
@@ -74,6 +79,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     private Button saveButton;
     private Button loadButton;
     private Button formatButton;
+    private HoverInfoWidget hoverInfoWidget;
 
     public SpellEditorScreen(SpellEditorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -109,6 +115,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
                 listWidth, OPS_LIST_HEIGHT,
                 this.font, this.menu.getAvailableOperations());
         operationListWidget.setOnOperationClicked(this::onOperationClicked);
+        operationListWidget.setOnHover(this::onOperationHovered);
         this.addRenderableWidget(operationListWidget);
 
         // 类型列表
@@ -118,6 +125,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
                 listWidth, TYPE_LIST_HEIGHT,
                 this.font, this.menu.getAvailableDataTypes());
         typeListWidget.setOnTypeClicked(this::onTypeClicked);
+        typeListWidget.setOnHover(this::onTypeHovered);
         this.addRenderableWidget(typeListWidget);
 
         // ===== 右侧面板：JSON 编辑器 =====
@@ -149,6 +157,12 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
                 .build();
         this.addRenderableWidget(saveButton);
 
+        // 悬停信息 Widget（初始隐藏在右侧角落）
+        hoverInfoWidget = new HoverInfoWidget(
+                editorX + editorWidth - 150, editorY + BUTTON_HEIGHT + LIST_GAP,
+                150, 100, this.font);
+        this.addRenderableWidget(hoverInfoWidget);
+
         // 初始加载程序
         loadProgramFromServer();
     }
@@ -169,6 +183,25 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     }
 
     /**
+     * 获取操作悬停信息
+     */
+    private InfoContent getOperationInfo(String opId) {
+        return OperationRegistry.get(opId).map(op -> {
+            qdream.relay.mc.base.Operation operation = (qdream.relay.mc.base.Operation) op;
+            var signature = operation.getSignature();
+            return InfoUtils.buildOperationInfo(opId, 
+                signature instanceof qdream.relay.mc.signature.OperationSignature opSig ? opSig : null);
+        }).orElse(null);
+    }
+
+    /**
+     * 获取类型悬停信息
+     */
+    private InfoContent getTypeInfo(String typeId) {
+        return InfoUtils.buildTypeInfo(typeId);
+    }
+
+    /**
      * 点击类型列表时，在光标位置插入数据类型 JSON
      * 插入后自动追加逗号，不选中内容
      */
@@ -176,9 +209,43 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         // 从注册表获取数据类型实例（默认值）
         OperationRegistry.get(typeId).ifPresent(data -> {
             JsonObject json = new JsonObject();
-            ((qdream.relay.mc.base.Operation) data).toJson(json);
+            ((Operation) data).toJson(json);
             jsonEditorWidget.insertWithComma(json.toString());
         });
+    }
+    
+    /**
+     * 操作悬停回调
+     */
+    private void onOperationHovered(String opId) {
+        if (opId != null) {
+            InfoContent content = getOperationInfo(opId);
+            if (content != null) {
+                hoverInfoWidget.setContent(content);
+                hoverInfoWidget.visible = true;
+            } else {
+                hoverInfoWidget.visible = false;
+            }
+        } else {
+            hoverInfoWidget.visible = false;
+        }
+    }
+    
+    /**
+     * 类型悬停回调
+     */
+    private void onTypeHovered(String typeId) {
+        if (typeId != null) {
+            InfoContent content = getTypeInfo(typeId);
+            if (content != null) {
+                hoverInfoWidget.setContent(content);
+                hoverInfoWidget.visible = true;
+            } else {
+                hoverInfoWidget.visible = false;
+            }
+        } else {
+            hoverInfoWidget.visible = false;
+        }
     }
 
     // ==================== 按键处理 - 阻止按 E 关闭 GUI ====================
@@ -298,7 +365,6 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, INVENTORY_SEPARATOR_COLOR);
 
         graphics.text(this.font, "JSON 编辑器", left + PANEL_WIDTH + PANEL_PADDING, top + 5, 0xFFFFFF00);
-
     }
 
     // ==================== 事件转发 ====================

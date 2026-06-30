@@ -7,7 +7,9 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -21,7 +23,7 @@ public class TypeListWidget extends AbstractWidget {
     private static final int LINE_HEIGHT = 11;
     private static final int PADDING = 3;
     private static final int HEADER_HEIGHT = 16;
-    
+
     private static final int BG_COLOR = 0xFF1E1E1E;
     private static final int HEADER_BG = 0xFF252525;
     private static final int BORDER_COLOR = 0xFF3A3A3A;
@@ -36,6 +38,12 @@ public class TypeListWidget extends AbstractWidget {
     private final Font font;
     private final List<String> dataTypes;
     private Consumer<String> onTypeClicked;
+    
+    /** 悬停回调：当悬停在某个类型上时调用，参数为类型 ID */
+    private Consumer<String> onHover;
+    
+    /** 缓存类型 ID 到显示名称的映射 */
+    private final Map<String, String> displayNameCache = new HashMap<>();
 
     /** 悬停索引 */
     private int hoveredIndex = -1;
@@ -49,6 +57,20 @@ public class TypeListWidget extends AbstractWidget {
     /** 滚动条悬停状态 */
     private boolean scrollbarHovered = false;
 
+    /**
+     * 获取滚动偏移量
+     */
+    public int getScrollOffset() {
+        return scrollOffset;
+    }
+
+    /**
+     * 获取类型列表
+     */
+    public List<String> getTypes() {
+        return dataTypes;
+    }
+
     public TypeListWidget(int x, int y, int width, int height, Font font, List<String> dataTypes) {
         super(x, y, width, height, Component.empty());
         this.font = font;
@@ -57,6 +79,24 @@ public class TypeListWidget extends AbstractWidget {
 
     public void setOnTypeClicked(Consumer<String> callback) {
         this.onTypeClicked = callback;
+    }
+    
+    /**
+     * 设置悬停回调
+     */
+    public void setOnHover(Consumer<String> callback) {
+        this.onHover = callback;
+    }
+    
+    /**
+     * 获取类型的显示名称（从语言文件）
+     */
+    private String getDisplayName(String typeId) {
+        return displayNameCache.computeIfAbsent(typeId, id -> {
+            String key = "type." + id + ".name";
+            String name = Component.translatable(key).getString();
+            return name.equals(key) ? id : name;
+        });
     }
 
     /** 获取可视区域内可显示的最大行数 */
@@ -140,8 +180,18 @@ public class TypeListWidget extends AbstractWidget {
         graphics.horizontalLine(x, x + this.width, y + HEADER_HEIGHT, BORDER_COLOR);
 
         // 更新悬停索引
+        int oldHoveredIndex = hoveredIndex;
         hoveredIndex = getEntryAt(mouseX, mouseY);
         scrollbarHovered = isMouseOnScrollbar(mouseX, mouseY);
+        
+        // 触发悬停回调
+        if (hoveredIndex != oldHoveredIndex && onHover != null) {
+            if (hoveredIndex >= 0 && hoveredIndex < dataTypes.size()) {
+                onHover.accept(dataTypes.get(hoveredIndex));
+            } else {
+                onHover.accept(null);
+            }
+        }
 
         // 启用裁剪区域（底部留出计数提示的空间）
         int contentBottom = y + this.height - LINE_HEIGHT - 4;
@@ -155,6 +205,7 @@ public class TypeListWidget extends AbstractWidget {
         for (int i = 0; i < visibleLines && (i + scrollOffset) < dataTypes.size(); i++) {
             int dataIndex = i + scrollOffset;
             String typeId = dataTypes.get(dataIndex);
+            String displayName = getDisplayName(typeId);
             int entryY = textY + i * LINE_HEIGHT;
 
             boolean isHovered = (dataIndex == hoveredIndex);
@@ -168,7 +219,7 @@ public class TypeListWidget extends AbstractWidget {
             }
 
             int color = isHovered ? HOVER_COLOR : TEXT_COLOR;
-            graphics.text(this.font, typeId, textX, entryY, color);
+            graphics.text(this.font, displayName, textX, entryY, color);
         }
 
         graphics.disableScissor();

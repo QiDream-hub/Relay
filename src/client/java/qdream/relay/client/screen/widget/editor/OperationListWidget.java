@@ -7,8 +7,11 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 可用操作列表 Widget
@@ -20,7 +23,7 @@ public class OperationListWidget extends AbstractWidget {
     private static final int LINE_HEIGHT = 11;
     private static final int PADDING = 3;
     private static final int HEADER_HEIGHT = 16;
-    
+
     private static final int BG_COLOR = 0xFF1E1E1E;
     private static final int HEADER_BG = 0xFF252525;
     private static final int BORDER_COLOR = 0xFF3A3A3A;
@@ -35,6 +38,12 @@ public class OperationListWidget extends AbstractWidget {
     private final Font font;
     private final List<String> operations;
     private Consumer<String> onOperationClicked;
+    
+    /** 悬停回调：当悬停在某个操作上时调用，参数为操作 ID */
+    private Consumer<String> onHover;
+    
+    /** 缓存操作 ID 到显示名称的映射 */
+    private final Map<String, String> displayNameCache = new HashMap<>();
 
     /** 滚动偏移量（以行为单位） */
     private int scrollOffset = 0;
@@ -48,6 +57,20 @@ public class OperationListWidget extends AbstractWidget {
     /** 滚动条悬停状态 */
     private boolean scrollbarHovered = false;
 
+    /**
+     * 获取滚动偏移量
+     */
+    public int getScrollOffset() {
+        return scrollOffset;
+    }
+
+    /**
+     * 获取操作列表
+     */
+    public List<String> getOperations() {
+        return operations;
+    }
+
     public OperationListWidget(int x, int y, int width, int height, Font font, List<String> operations) {
         super(x, y, width, height, Component.empty());
         this.font = font;
@@ -56,6 +79,24 @@ public class OperationListWidget extends AbstractWidget {
 
     public void setOnOperationClicked(Consumer<String> callback) {
         this.onOperationClicked = callback;
+    }
+    
+    /**
+     * 设置悬停回调
+     */
+    public void setOnHover(Consumer<String> callback) {
+        this.onHover = callback;
+    }
+    
+    /**
+     * 获取操作的显示名称（从语言文件）
+     */
+    private String getDisplayName(String opId) {
+        return displayNameCache.computeIfAbsent(opId, id -> {
+            String key = "operation." + id + ".name";
+            String name = Component.translatable(key).getString();
+            return name.equals(key) ? id : name;
+        });
     }
 
     /** 获取可视区域内可显示的最大行数 */
@@ -138,8 +179,18 @@ public class OperationListWidget extends AbstractWidget {
         graphics.horizontalLine(x, x + this.width, y + HEADER_HEIGHT, BORDER_COLOR);
 
         // 更新悬停索引
+        int oldHoveredIndex = hoveredIndex;
         hoveredIndex = getEntryAt(mouseX, mouseY);
         scrollbarHovered = isMouseOnScrollbar(mouseX, mouseY);
+        
+        // 触发悬停回调
+        if (hoveredIndex != oldHoveredIndex && onHover != null) {
+            if (hoveredIndex >= 0 && hoveredIndex < operations.size()) {
+                onHover.accept(operations.get(hoveredIndex));
+            } else {
+                onHover.accept(null);
+            }
+        }
 
         // 启用裁剪区域（底部留出计数提示的空间）
         int contentBottom = y + this.height - LINE_HEIGHT - 4;
@@ -152,7 +203,8 @@ public class OperationListWidget extends AbstractWidget {
         
         for (int i = 0; i < visibleLines && (i + scrollOffset) < operations.size(); i++) {
             int dataIndex = i + scrollOffset;
-            String op = operations.get(dataIndex);
+            String opId = operations.get(dataIndex);
+            String displayName = getDisplayName(opId);
             int entryY = textY + i * LINE_HEIGHT;
 
             boolean isHovered = (dataIndex == hoveredIndex);
@@ -166,7 +218,7 @@ public class OperationListWidget extends AbstractWidget {
             }
 
             int color = isHovered ? HOVER_COLOR : TEXT_COLOR;
-            graphics.text(this.font, op, textX, entryY, color);
+            graphics.text(this.font, displayName, textX, entryY, color);
         }
 
         graphics.disableScissor();

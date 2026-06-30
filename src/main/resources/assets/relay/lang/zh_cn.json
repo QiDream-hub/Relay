@@ -262,5 +262,22 @@
   "operation.relay:push_vector.name": "推动实体",
   "operation.relay:push_vector.description": "向实体施加推力",
   "operation.relay:push_vector.param.0": "实体",
-  "operation.relay:push_vector.param.1": "推力向量"
+  "operation.relay:push_vector.param.1": "推力向量",
+
+  "type.relay:number.name": "数字",
+  "type.relay:number.description": "数值类型，支持整数和小数运算",
+  "type.relay:boolean.name": "布尔",
+  "type.relay:boolean.description": "逻辑类型，值为 true 或 false",
+  "type.relay:vector.name": "向量",
+  "type.relay:vector.description": "三维向量，用于表示位置和方向",
+  "type.relay:string.name": "字符串",
+  "type.relay:string.description": "文本类型，用于显示消息",
+  "type.relay:entity.name": "实体",
+  "type.relay:entity.description": "实体引用，可获取实体属性",
+  "type.relay:list.name": "列表",
+  "type.relay:list.description": "元素列表，可存储任意类型",
+  "type.relay:null.name": "空值",
+  "type.relay:null.description": "空值类型，表示无数据",
+  "type.relay:program.name": "程序",
+  "type.relay:program.description": "程序块，包含可执行的指令序列"
 }
