@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.SignatureName;
+import qdream.relay.mc.signature.ParameterName;
 
 /**
  * 布尔类型
@@ -18,7 +18,7 @@ public class BooleanType extends Data {
         super("relay:boolean", 0,
                 DataSignature.builder()
                         .output("relay:boolean")
-                        .input(SignatureName.builder().setName("boolean").setType("Boolean").build())
+                        .input(ParameterName.builder().setName("boolean").setType("Boolean").build())
                         .build());
         this.value = value;
     }

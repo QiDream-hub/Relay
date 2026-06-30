@@ -3,11 +3,11 @@ package qdream.relay.mc.signature;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SignatureName {
+public class ParameterName {
     private String name;
     private List<String> type;
 
-    public SignatureName(List<String> type, String name) {
+    public ParameterName(List<String> type, String name) {
         this.name = name;
         this.type = type;
     }
@@ -37,8 +37,8 @@ public class SignatureName {
             return this;
         }
 
-        public SignatureName build() {
-            return new SignatureName(this.type, this.name);
+        public ParameterName build() {
+            return new ParameterName(this.type, this.name);
         }
     }
 }

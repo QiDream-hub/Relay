@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.SignatureName;
+import qdream.relay.mc.signature.ParameterName;
 
 /**
  * 方块实体类型
@@ -37,7 +37,7 @@ public class BlockEntityType extends Data {
     public BlockEntityType(BlockPos blockPos, String worldId, BlockEntity blockEntityRef) {
         super("relay:block_entity", 0, DataSignature.builder()
                 .output("relay:block_entity")
-                .input(SignatureName.builder().setName("pos").setType("BlockPos").build())
+                .input(ParameterName.builder().setName("pos").setType("BlockPos").build())
                 .build());
         this.blockPos = blockPos;
         this.worldId = worldId;

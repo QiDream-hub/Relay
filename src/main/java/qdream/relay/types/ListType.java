@@ -16,7 +16,7 @@ import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.SignatureName;
+import qdream.relay.mc.signature.ParameterName;
 
 /**
  * 列表类型
@@ -28,7 +28,7 @@ public class ListType extends Data {
         super("relay:list", 0,
                 DataSignature.builder()
                         .output("relay:list")
-                        .input(SignatureName.builder().setName("list").setType("relay:list").build())
+                        .input(ParameterName.builder().setName("list").setType("relay:list").build())
                         .build());
         this.value = value != null ? new ArrayList<>(value) : new ArrayList<>();
     }

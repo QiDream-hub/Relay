@@ -9,11 +9,11 @@ import java.util.List;
  * 用于描述数据构建时的输入和输出类型
  * 使用字符串表示类型，使 engine 包不依赖具体类型定义
  */
-public class DataSignature implements Signature<SignatureName, List<String>> {
-    private final List<SignatureName> inputs;
+public class DataSignature implements Signature<ParameterName, List<String>> {
+    private final List<ParameterName> inputs;
     private final List<List<String>> outputs;
 
-    public DataSignature(List<SignatureName> inputs, List<List<String>> outputs) {
+    public DataSignature(List<ParameterName> inputs, List<List<String>> outputs) {
         this.inputs = Collections.unmodifiableList(new ArrayList<>(inputs));
         this.outputs = Collections.unmodifiableList(new ArrayList<>(outputs));
     }
@@ -23,7 +23,7 @@ public class DataSignature implements Signature<SignatureName, List<String>> {
     }
 
     @Override
-    public List<SignatureName> getInputs() {
+    public List<ParameterName> getInputs() {
         return inputs;
     }
 
@@ -47,10 +47,10 @@ public class DataSignature implements Signature<SignatureName, List<String>> {
     }
 
     public static class Builder {
-        private final List<SignatureName> inputs = new ArrayList<>();
+        private final List<ParameterName> inputs = new ArrayList<>();
         private final List<List<String>> outputs = new ArrayList<>();
 
-        public Builder input(SignatureName type) {
+        public Builder input(ParameterName type) {
             inputs.add(type);
             return this;
         }

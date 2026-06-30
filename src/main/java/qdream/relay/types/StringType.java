@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.SignatureName;
+import qdream.relay.mc.signature.ParameterName;
 
 /**
  * 字符串类型
@@ -18,7 +18,7 @@ public class StringType extends Data {
         super("relay:string", 0,
                 DataSignature.builder()
                         .output("relay:string")
-                        .input(SignatureName.builder().setName("string").setType("String").build())
+                        .input(ParameterName.builder().setName("string").setType("String").build())
                         .build());
         this.value = value;
     }
