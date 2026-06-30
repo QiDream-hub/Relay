@@ -14,9 +14,9 @@ public class GtOp extends Spell {
 
     public GtOp() {
         super("relay:gt", 1, 1, OperationSignature.builder()
-                .input("number")
-                .input("number")
-                .output("relay:boolean")
+                .consumesFromData("number")
+                .consumesFromData("number")
+                .producesToData("relay:boolean")
                 .build());
     }
 

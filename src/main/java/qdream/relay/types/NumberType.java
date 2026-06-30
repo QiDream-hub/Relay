@@ -5,7 +5,6 @@ import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.ParameterName;
 
 /**
  * 数字类型
@@ -18,7 +17,7 @@ public class NumberType extends Data {
         super("relay:number", 0,
                 DataSignature.builder()
                         .output("relay:number")
-                        .input(ParameterName.builder().setName("number").setType("Number").build())
+                        .field("number", "Number")
                         .build());
         this.value = value;
     }

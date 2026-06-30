@@ -17,8 +17,8 @@ public class RecvOp extends Spell {
 
     public RecvOp() {
         super("relay:recv", 1, 1, OperationSignature.builder()
-                .input("number")
-                .output("any")
+                .consumesFromData("number")
+                .producesToData("any")
                 .build());
     }
 

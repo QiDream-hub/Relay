@@ -32,9 +32,9 @@ public class BreakBlockFortuneOp extends Spell {
 
     public BreakBlockFortuneOp() {
         super("relay:break_block_fortune", 2, 1, OperationSignature.builder()
-                .input("relay:number")
-                .input("relay:vector")
-                .output("relay:boolean")
+                .consumesFromData("relay:number")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:boolean")
                 .build());
     }
 

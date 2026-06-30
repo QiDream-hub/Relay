@@ -9,7 +9,6 @@ import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.ParameterName;
 
 import java.util.UUID;
 
@@ -43,8 +42,8 @@ public class EntityType extends Data {
     public EntityType(UUID uuid, String worldId, Entity entityRef) {
         super("relay:entity", 0, DataSignature.builder()
                 .output("relay:entity")
-                .input(ParameterName.builder().setName("uuid").setType("String").build())
-                .input(ParameterName.builder().setName("world").setType("String").build())
+                .field("world", "String")
+                .field("uuid", "String")
                 .build());
         this.uuid = uuid;
         this.worldId = worldId;

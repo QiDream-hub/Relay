@@ -29,8 +29,8 @@ public class BreakBlockOp extends Spell {
 
     public BreakBlockOp() {
         super("relay:break_block", 1, 1, OperationSignature.builder()
-                .input("relay:vector")
-                .output("relay:boolean")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:boolean")
                 .build());
     }
 

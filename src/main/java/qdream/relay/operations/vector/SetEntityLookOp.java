@@ -29,8 +29,8 @@ public class SetEntityLookOp extends Spell {
 
     public SetEntityLookOp() {
         super("relay:set_entity_look", 2, 0, OperationSignature.builder()
-                .input("relay:entity")
-                .input("relay:vector")
+                .consumesFromData("relay:entity")
+                .consumesFromData("relay:vector")
                 .build());
     }
 

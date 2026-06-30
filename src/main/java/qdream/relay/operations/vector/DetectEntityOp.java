@@ -30,9 +30,9 @@ public class DetectEntityOp extends Spell {
 
     public DetectEntityOp() {
         super("relay:detect_entity", 3, 2, OperationSignature.builder()
-                .input("relay:number")
-                .input("relay:vector")
-                .output("relay:boolean")
+                .consumesFromData("relay:number")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:boolean")
                 .build());
     }
 

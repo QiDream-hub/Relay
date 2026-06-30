@@ -13,9 +13,9 @@ public class SubOp extends Spell {
 
     public SubOp() {
         super("relay:sub", 1, 1, OperationSignature.builder()
-                .input("number")
-                .input("number")
-                .output("relay:number")
+                .consumesFromData("number")
+                .consumesFromData("number")
+                .producesToData("relay:number")
                 .build());
     }
 

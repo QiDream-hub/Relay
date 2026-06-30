@@ -6,7 +6,6 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
-import qdream.relay.mc.signature.ParameterName;
 
 /**
  * 向量类型
@@ -19,9 +18,9 @@ public class VectorType extends Data {
         super("relay:vector", 0,
                 DataSignature.builder()
                         .output("relay:vector")
-                        .input(ParameterName.builder().setName("x").setType("Number").build())
-                        .input(ParameterName.builder().setName("y").setType("Number").build())
-                        .input(ParameterName.builder().setName("z").setType("Number").build())
+                        .field("x", "Number")
+                        .field("y", "Number")
+                        .field("z", "Number")
                         .build());
         this.vec3 = vec3 != null ? vec3 : new Vec3(0, 0, 0);
     }

@@ -18,9 +18,9 @@ public class VectorSubOp extends Spell {
 
     public VectorSubOp() {
         super("relay:vector_sub", 1, 2, OperationSignature.builder()
-                .input("relay:vector")
-                .input("relay:vector")
-                .output("relay:vector")
+                .consumesFromData("relay:vector")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:vector")
                 .build());
     }
 

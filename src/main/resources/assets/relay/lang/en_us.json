@@ -31,5 +31,236 @@
   "block.relay.spell_editor_block": "Spell Editor",
   "itemGroup.relay.creative_tab": "Relay",
   "container.relay.shell": "Shell",
-  "item.relay.tool_shell": "Tool Shell"
+  "container.relay.tool_shell": "Tool Shell",
+  "item.relay.tool_shell": "Tool Shell",
+  "key.relay.open_tool_shell_config": "Open Tool Shell Config",
+  "key.category.relay.relay": "Relay",
+
+  "operation.relay:pop.name": "Pop",
+  "operation.relay:pop.description": "Pop top element from data stack",
+  "operation.relay:pop.param.0": "Value to pop",
+
+  "operation.relay:dup.name": "Duplicate",
+  "operation.relay:dup.description": "Duplicate top element of data stack",
+  "operation.relay:dup.param.0": "Value to duplicate",
+
+  "operation.relay:swap.name": "Swap",
+  "operation.relay:swap.description": "Swap top two elements of data stack",
+  "operation.relay:swap.param.0": "First value",
+  "operation.relay:swap.param.1": "Second value",
+
+  "operation.relay:add.name": "Add",
+  "operation.relay:add.description": "Calculate sum of two numbers",
+  "operation.relay:add.param.0": "Augend",
+  "operation.relay:add.param.1": "Addend",
+
+  "operation.relay:sub.name": "Subtract",
+  "operation.relay:sub.description": "Calculate difference of two numbers",
+  "operation.relay:sub.param.0": "Minuend",
+  "operation.relay:sub.param.1": "Subtrahend",
+
+  "operation.relay:mul.name": "Multiply",
+  "operation.relay:mul.description": "Calculate product of two numbers",
+  "operation.relay:mul.param.0": "Multiplier",
+  "operation.relay:mul.param.1": "Multiplicand",
+
+  "operation.relay:div.name": "Divide",
+  "operation.relay:div.description": "Calculate quotient of two numbers",
+  "operation.relay:div.param.0": "Dividend",
+  "operation.relay:div.param.1": "Divisor",
+
+  "operation.relay:and.name": "Logical AND",
+  "operation.relay:and.description": "Calculate logical AND of two booleans",
+  "operation.relay:and.param.0": "First boolean",
+  "operation.relay:and.param.1": "Second boolean",
+
+  "operation.relay:or.name": "Logical OR",
+  "operation.relay:or.description": "Calculate logical OR of two booleans",
+  "operation.relay:or.param.0": "First boolean",
+  "operation.relay:or.param.1": "Second boolean",
+
+  "operation.relay:not.name": "Logical NOT",
+  "operation.relay:not.description": "Calculate logical NOT of a boolean",
+  "operation.relay:not.param.0": "Boolean to negate",
+
+  "operation.relay:eq.name": "Equals",
+  "operation.relay:eq.description": "Compare if two values are equal",
+  "operation.relay:eq.param.0": "First value",
+  "operation.relay:eq.param.1": "Second value",
+
+  "operation.relay:lt.name": "Less Than",
+  "operation.relay:lt.description": "Compare if first number is less than second",
+  "operation.relay:lt.param.0": "First number",
+  "operation.relay:lt.param.1": "Second number",
+
+  "operation.relay:gt.name": "Greater Than",
+  "operation.relay:gt.description": "Compare if first number is greater than second",
+  "operation.relay:gt.param.0": "First number",
+  "operation.relay:gt.param.1": "Second number",
+
+  "operation.relay:if.name": "Conditional Branch",
+  "operation.relay:if.description": "Execute true or false branch based on condition",
+  "operation.relay:if.param.0": "Condition value",
+  "operation.relay:if.param.1": "True branch program",
+  "operation.relay:if.param.2": "False branch program",
+
+  "operation.relay:eval.name": "Evaluate Subprogram",
+  "operation.relay:eval.description": "Execute a list as a program",
+  "operation.relay:eval.param.0": "Program list to execute",
+
+  "operation.relay:stop.name": "Stop",
+  "operation.relay:stop.description": "Stop program execution",
+
+  "operation.relay:send.name": "Send",
+  "operation.relay:send.description": "Send data to a communication channel",
+  "operation.relay:send.param.0": "Channel number",
+  "operation.relay:send.param.1": "Data to send",
+
+  "operation.relay:recv.name": "Receive",
+  "operation.relay:recv.description": "Receive data from a communication channel",
+  "operation.relay:recv.param.0": "Channel number",
+
+  "operation.relay:peek.name": "Peek",
+  "operation.relay:peek.description": "Peek top data from channel without removing",
+  "operation.relay:peek.param.0": "Channel number",
+
+  "operation.relay:send_message.name": "Send Message",
+  "operation.relay:send_message.description": "Send chat message to a player",
+  "operation.relay:send_message.param.0": "Target player",
+  "operation.relay:send_message.param.1": "Message content",
+
+  "operation.relay:list_append.name": "List Append",
+  "operation.relay:list_append.description": "Append element to a list",
+  "operation.relay:list_append.param.0": "List",
+  "operation.relay:list_append.param.1": "Element to append",
+
+  "operation.relay:list_get.name": "List Get",
+  "operation.relay:list_get.description": "Get element at specified index in list",
+  "operation.relay:list_get.param.0": "List",
+  "operation.relay:list_get.param.1": "Index",
+
+  "operation.relay:list_set.name": "List Set",
+  "operation.relay:list_set.description": "Set element at specified index in list",
+  "operation.relay:list_set.param.0": "List",
+  "operation.relay:list_set.param.1": "Index",
+  "operation.relay:list_set.param.2": "New element",
+
+  "operation.relay:list_length.name": "List Length",
+  "operation.relay:list_length.description": "Get the length of a list",
+  "operation.relay:list_length.param.0": "List",
+
+  "operation.relay:list_creat.name": "Create List",
+  "operation.relay:list_creat.description": "Create an empty list of specified length",
+  "operation.relay:list_creat.param.0": "List length",
+
+  "operation.relay:is_player.name": "Is Player",
+  "operation.relay:is_player.description": "Check if an entity is a player",
+  "operation.relay:is_player.param.0": "Entity to check",
+
+  "operation.relay:get_owner.name": "Get Owner",
+  "operation.relay:get_owner.description": "Get the owner of an entity",
+  "operation.relay:get_owner.param.0": "Entity",
+
+  "operation.relay:get_self.name": "Get Self",
+  "operation.relay:get_self.description": "Get self entity or block entity",
+
+  "operation.relay:get_world_interactor.name": "Get World Interactor",
+  "operation.relay:get_world_interactor.description": "Get the currently active world interactor",
+
+  "operation.relay:vector_add.name": "Vector Add",
+  "operation.relay:vector_add.description": "Calculate sum of two vectors",
+  "operation.relay:vector_add.param.0": "First vector",
+  "operation.relay:vector_add.param.1": "Second vector",
+
+  "operation.relay:vector_sub.name": "Vector Subtract",
+  "operation.relay:vector_sub.description": "Calculate difference of two vectors",
+  "operation.relay:vector_sub.param.0": "First vector",
+  "operation.relay:vector_sub.param.1": "Second vector",
+
+  "operation.relay:vector_mul.name": "Vector Scalar Multiply",
+  "operation.relay:vector_mul.description": "Calculate product of scalar and vector",
+  "operation.relay:vector_mul.param.0": "Scalar",
+  "operation.relay:vector_mul.param.1": "Vector",
+
+  "operation.relay:vector_dot.name": "Vector Dot Product",
+  "operation.relay:vector_dot.description": "Calculate dot product of two vectors",
+  "operation.relay:vector_dot.param.0": "First vector",
+  "operation.relay:vector_dot.param.1": "Second vector",
+
+  "operation.relay:vector_cross.name": "Vector Cross Product",
+  "operation.relay:vector_cross.description": "Calculate cross product of two vectors",
+  "operation.relay:vector_cross.param.0": "First vector",
+  "operation.relay:vector_cross.param.1": "Second vector",
+
+  "operation.relay:vector_normalize.name": "Vector Normalize",
+  "operation.relay:vector_normalize.description": "Normalize a vector to unit length",
+  "operation.relay:vector_normalize.param.0": "Vector to normalize",
+
+  "operation.relay:vector_length.name": "Vector Length",
+  "operation.relay:vector_length.description": "Calculate the length of a vector",
+  "operation.relay:vector_length.param.0": "Vector",
+
+  "operation.relay:vector_distance.name": "Vector Distance",
+  "operation.relay:vector_distance.description": "Calculate distance between two points",
+  "operation.relay:vector_distance.param.0": "First point",
+  "operation.relay:vector_distance.param.1": "Second point",
+
+  "operation.relay:raycast.name": "Raycast",
+  "operation.relay:raycast.description": "Cast a ray from origin along direction, return hit block position",
+  "operation.relay:raycast.param.0": "Max distance",
+  "operation.relay:raycast.param.1": "Origin",
+  "operation.relay:raycast.param.2": "Direction",
+
+  "operation.relay:block_raycast.name": "Block Raycast",
+  "operation.relay:block_raycast.description": "Cast a ray from origin along direction, return hit block position",
+  "operation.relay:block_raycast.param.0": "Max distance",
+  "operation.relay:block_raycast.param.1": "Origin",
+  "operation.relay:block_raycast.param.2": "Direction",
+
+  "operation.relay:entity_raycast.name": "Entity Raycast",
+  "operation.relay:entity_raycast.description": "Cast a ray from origin along direction, return hit entity",
+  "operation.relay:entity_raycast.param.0": "Max distance",
+  "operation.relay:entity_raycast.param.1": "Origin",
+  "operation.relay:entity_raycast.param.2": "Direction",
+  "operation.relay:entity_raycast.param.3": "Entity to exclude",
+
+  "operation.relay:detect_block.name": "Detect Block",
+  "operation.relay:detect_block.description": "Check if there is a block at specified position",
+  "operation.relay:detect_block.param.0": "Position",
+
+  "operation.relay:detect_entity.name": "Detect Entity",
+  "operation.relay:detect_entity.description": "Check if there is an entity within specified range",
+  "operation.relay:detect_entity.param.0": "Range",
+  "operation.relay:detect_entity.param.1": "Position",
+
+  "operation.relay:break_block.name": "Break Block",
+  "operation.relay:break_block.description": "Break block at specified position",
+  "operation.relay:break_block.param.0": "Position",
+
+  "operation.relay:break_block_fortune.name": "Break Block with Fortune",
+  "operation.relay:break_block_fortune.description": "Break block at specified position with fortune level",
+  "operation.relay:break_block_fortune.param.0": "Fortune level",
+  "operation.relay:break_block_fortune.param.1": "Position",
+
+  "operation.relay:break_block_silk_touch.name": "Break Block with Silk Touch",
+  "operation.relay:break_block_silk_touch.description": "Break block at specified position with silk touch",
+  "operation.relay:break_block_silk_touch.param.0": "Position",
+
+  "operation.relay:set_entity_look.name": "Set Entity Look",
+  "operation.relay:set_entity_look.description": "Set entity to look at specified direction",
+  "operation.relay:set_entity_look.param.0": "Entity",
+  "operation.relay:set_entity_look.param.1": "Target direction",
+
+  "operation.relay:get_entity_look.name": "Get Entity Look",
+  "operation.relay:get_entity_look.description": "Get the look direction of an entity",
+  "operation.relay:get_entity_look.param.0": "Entity",
+
+  "operation.relay:get_look_vector.name": "Get Look Vector",
+  "operation.relay:get_look_vector.description": "Get the look vector of an entity",
+  "operation.relay:get_look_vector.param.0": "Entity",
+
+  "operation.relay:push_vector.name": "Push Entity",
+  "operation.relay:push_vector.description": "Apply push force to an entity",
+  "operation.relay:push_vector.param.0": "Entity",
+  "operation.relay:push_vector.param.1": "Push vector"
 }

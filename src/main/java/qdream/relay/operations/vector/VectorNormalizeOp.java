@@ -19,8 +19,8 @@ public class VectorNormalizeOp extends Spell {
 
     public VectorNormalizeOp() {
         super("relay:vector_normalize", 1, 1, OperationSignature.builder()
-                .input("relay:vector")
-                .output("relay:vector")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:vector")
                 .build());
     }
 

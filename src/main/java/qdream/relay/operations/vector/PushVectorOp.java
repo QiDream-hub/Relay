@@ -30,9 +30,9 @@ public class PushVectorOp extends Spell {
 
     public PushVectorOp() {
         super("relay:push_vector", 1, 5, OperationSignature.builder()
-                .input("relay:entity")
-                .input("relay:vector")
-                .output("relay:boolean")
+                .consumesFromData("relay:entity")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:boolean")
                 .build());
     }
 

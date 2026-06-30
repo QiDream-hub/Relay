@@ -12,10 +12,10 @@ public class SwapOp extends Spell {
 
     public SwapOp() {
         super("relay:swap", 1, 1, OperationSignature.builder()
-                .input("any")
-                .input("any")
-                .output("any")
-                .output("any")
+                .consumesFromData("any")
+                .consumesFromData("any")
+                .producesToData("any")
+                .producesToData("any")
                 .build());
     }
 

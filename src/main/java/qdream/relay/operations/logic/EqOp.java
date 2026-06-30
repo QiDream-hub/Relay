@@ -13,9 +13,9 @@ public class EqOp extends Spell {
 
     public EqOp() {
         super("relay:eq", 1, 1, OperationSignature.builder()
-                .input("any")
-                .input("any")
-                .output("relay:boolean")
+                .consumesFromData("any")
+                .consumesFromData("any")
+                .producesToData("relay:boolean")
                 .build());
     }
 

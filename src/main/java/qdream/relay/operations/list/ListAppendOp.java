@@ -19,9 +19,9 @@ public class ListAppendOp extends Spell {
 
     public ListAppendOp() {
         super("relay:list_append", 2, 1, OperationSignature.builder()
-                .input("relay:list")
-                .input("any")
-                .output("relay:list")
+                .consumesFromData("relay:list")
+                .consumesFromData("any")
+                .producesToData("relay:list")
                 .build());
     }
 

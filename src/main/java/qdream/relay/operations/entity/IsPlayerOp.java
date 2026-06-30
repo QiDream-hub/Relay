@@ -27,8 +27,8 @@ public class IsPlayerOp extends Spell {
 
     public IsPlayerOp() {
         super("relay:is_player", 1, 1, OperationSignature.builder()
-                .input("relay:entity")
-                .output("relay:boolean")
+                .consumesFromData("relay:entity")
+                .producesToData("relay:boolean")
                 .build());
     }
 

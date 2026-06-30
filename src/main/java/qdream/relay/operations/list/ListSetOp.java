@@ -20,10 +20,10 @@ public class ListSetOp extends Spell {
 
     public ListSetOp() {
         super("relay:list_set", 1, 1, OperationSignature.builder()
-                .input("relay:list")
-                .input("number")
-                .input("any")
-                .output("relay:list")
+                .consumesFromData("relay:list")
+                .consumesFromData("number")
+                .consumesFromData("any")
+                .producesToData("relay:list")
                 .build());
     }
 

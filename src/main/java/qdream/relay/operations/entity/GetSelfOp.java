@@ -1,6 +1,5 @@
 package qdream.relay.operations.entity;
 
-import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.world.entity.Entity;
@@ -34,7 +33,8 @@ public class GetSelfOp extends Spell {
 
     public GetSelfOp() {
         super("relay:get_self", 1, 1, OperationSignature.builder()
-                .output(List.of("relay:entity", "relay:block_entity"))
+                .producesToData("relay:entity")
+                .producesToData("relay:block_entity")
                 .build());
     }
 

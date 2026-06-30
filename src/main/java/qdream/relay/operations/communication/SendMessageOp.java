@@ -30,9 +30,9 @@ public class SendMessageOp extends Spell {
 
     public SendMessageOp() {
         super("relay:send_message", 2, 1, OperationSignature.builder()
-                .input("relay:entity")
-                .input("relay:string")
-                .output("relay:boolean")
+                .consumesFromData("relay:entity")
+                .consumesFromData("relay:string")
+                .producesToData("relay:boolean")
                 .build());
     }
 

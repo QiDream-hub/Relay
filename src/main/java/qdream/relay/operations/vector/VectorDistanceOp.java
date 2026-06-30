@@ -20,9 +20,9 @@ public class VectorDistanceOp extends Spell {
 
     public VectorDistanceOp() {
         super("relay:vector_distance", 1, 2, OperationSignature.builder()
-                .input("relay:vector")
-                .input("relay:vector")
-                .output("relay:number")
+                .consumesFromData("relay:vector")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:number")
                 .build());
     }
 

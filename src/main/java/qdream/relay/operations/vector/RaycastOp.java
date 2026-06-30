@@ -34,10 +34,11 @@ public class RaycastOp extends Spell {
 
     public RaycastOp() {
         super("relay:raycast", 5, 3, OperationSignature.builder()
-                .input("relay:number")
-                .input("relay:vector")
-                .input("relay:vector")
-                .output(List.of("relay:vector", "relay:null"))
+                .consumesFromData("relay:number")
+                .consumesFromData("relay:vector")
+                .consumesFromData("relay:vector")
+                .producesToData("relay:vector")
+                .producesToData("relay:null")
                 .build());
     }
 

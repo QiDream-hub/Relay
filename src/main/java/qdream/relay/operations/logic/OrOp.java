@@ -15,9 +15,9 @@ public class OrOp extends Spell {
 
     public OrOp() {
         super("relay:or",1, 1, OperationSignature.builder()
-                .input("boolean")
-                .input("boolean")
-                .output("relay:boolean")
+                .consumesFromData("boolean")
+                .consumesFromData("boolean")
+                .producesToData("relay:boolean")
                 .build());
     }
 
