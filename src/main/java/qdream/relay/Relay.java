@@ -20,6 +20,7 @@ import qdream.relay.commands.RelayCommands;
 import qdream.relay.items.RelayItems;
 import qdream.relay.mc.RelayOperations;
 import qdream.relay.networking.RelayServerNetworking;
+import qdream.relay.screen.RelayScreenHandlers;
 
 public class Relay implements ModInitializer {
 	public static final String MOD_ID = "relay";
@@ -82,6 +83,9 @@ public class Relay implements ModInitializer {
 
 		// 注册自定义 DataComponent
 		RelayDataComponents.register();
+
+		// 注册 ScreenHandler (必须在注册表冻结前调用)
+		RelayScreenHandlers.init();
 
 		// 注册网络
 		RelayServerNetworking.register();

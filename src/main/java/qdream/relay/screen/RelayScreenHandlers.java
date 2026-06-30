@@ -14,11 +14,22 @@ import qdream.relay.items.ToolShellScreenHandler;
  */
 public class RelayScreenHandlers {
 
-    public static final MenuType<ShellScreenHandler> SHELL_SCREEN_HANDLER;
-    public static final MenuType<SpellEditorScreenHandler> SPELL_EDITOR_SCREEN_HANDLER;
-    public static final MenuType<ToolShellScreenHandler> TOOL_SHELL_SCREEN_HANDLER;
+    public static MenuType<ShellScreenHandler> SHELL_SCREEN_HANDLER;
+    public static MenuType<SpellEditorScreenHandler> SPELL_EDITOR_SCREEN_HANDLER;
+    public static MenuType<ToolShellScreenHandler> TOOL_SHELL_SCREEN_HANDLER;
 
-    static {
+    private static boolean initialized = false;
+
+    /**
+     * 初始化并注册所有 MenuType
+     * 必须在游戏初始化阶段调用，确保注册表未冻结
+     */
+    public static void init() {
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+
         SHELL_SCREEN_HANDLER = new MenuType<>((syncId, inventory) -> new ShellScreenHandler(syncId, inventory), FeatureFlags.VANILLA_SET);
         Identifier id = Identifier.fromNamespaceAndPath(Relay.MOD_ID, "shell");
         Registry.register(BuiltInRegistries.MENU, id, SHELL_SCREEN_HANDLER);
@@ -31,6 +42,4 @@ public class RelayScreenHandlers {
         Identifier toolId = Identifier.fromNamespaceAndPath(Relay.MOD_ID, "tool_shell");
         Registry.register(BuiltInRegistries.MENU, toolId, TOOL_SHELL_SCREEN_HANDLER);
     }
-
-    public static void init() {}
 }
