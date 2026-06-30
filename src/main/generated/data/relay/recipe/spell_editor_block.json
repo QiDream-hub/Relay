@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": "minecraft:amethyst_shard",
-    "I": "minecraft:iron_ingot",
+    "C": "relay:computing_core_1",
+    "G": "minecraft:gold_ingot",
     "R": "minecraft:redstone"
   },
   "pattern": [
-    "III",
-    "RAR",
-    "   "
+    " G ",
+    "GCG",
+    " R "
   ],
   "result": {
-    "id": "relay:computing_core_1"
+    "id": "relay:spell_editor_block"
   }
 }

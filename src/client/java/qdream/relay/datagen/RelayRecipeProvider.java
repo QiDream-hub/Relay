@@ -37,11 +37,11 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
                 // 基础核心：3 铁锭 + 2 红石 + 1 绿宝石
                 shapedRecipe(itemLookup, RelayItems.COMPUTING_CORE_1, 1)
                     .pattern("III")
-                    .pattern("RER")
+                    .pattern("RAR")
                     .pattern("   ")
                     .define('I', Items.IRON_INGOT)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
+                    .define('A', Items.AMETHYST_SHARD)
                     .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
                     .save(output);
 
@@ -114,15 +114,22 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
                 
                 // ===== 法术磁盘 =====
                 shapedRecipe(itemLookup, RelayItems.SPELL_DISK, 4)
-                    .pattern("III")
-                    .pattern("RER")
-                    .pattern("III")
+                    .pattern("IAI")
+                    .pattern("IRI")
+                    .pattern("   ")
+                    .define('A', Items.AMETHYST_SHARD)
                     .define('I', Items.IRON_INGOT)
                     .define('R', Items.REDSTONE)
-                    .define('E', Items.EMERALD)
                     .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
                     .save(output);
-                
+
+                // 磁盘清空配方：1 个磁盘合成 1 个空磁盘（清除 DataComponent）
+                shapedRecipe(itemLookup, RelayItems.SPELL_DISK, 1)
+                    .pattern("D ")
+                    .define('D', RelayItems.SPELL_DISK)
+                    .unlockedBy(getHasName(RelayItems.SPELL_DISK), has(RelayItems.SPELL_DISK))
+                    .save(output, "spell_disk_clear");
+
                 // ===== 能量模块 =====
                 shapedRecipe(itemLookup, RelayItems.ENERGY_MODULE, 1)
                     .pattern(" G ")
@@ -232,6 +239,18 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
                     .define('R', Items.REDSTONE)
                     .define('S', Items.NETHER_STAR)
                     .unlockedBy(getHasName(RelayItems.WORLD_INTERACTOR_32), has(RelayItems.WORLD_INTERACTOR_32))
+                    .save(output);
+
+                // ===== 法术编辑器 =====
+                // 法术编辑器方块：4 金锭 + 2 红石 + 2 紫水晶 + 1 运算核心 1
+                shapedRecipe(itemLookup, RelayBlocks.SPELL_EDITOR_BLOCK.asItem(), 1)
+                    .pattern(" G ")
+                    .pattern("GCG")
+                    .pattern(" R ")
+                    .define('G', Items.GOLD_INGOT)
+                    .define('C', RelayItems.COMPUTING_CORE_1)
+                    .define('R', Items.REDSTONE)
+                    .unlockedBy(getHasName(RelayItems.SPELL_DISK), has(RelayItems.SPELL_DISK))
                     .save(output);
             }
             

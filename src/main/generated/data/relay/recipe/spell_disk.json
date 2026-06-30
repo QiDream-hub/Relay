@@ -2,14 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "E": "minecraft:emerald",
+    "A": "minecraft:amethyst_shard",
     "I": "minecraft:iron_ingot",
     "R": "minecraft:redstone"
   },
   "pattern": [
-    "III",
-    "RER",
-    "III"
+    "IAI",
+    "IRI",
+    "   "
   ],
   "result": {
     "count": 4,
