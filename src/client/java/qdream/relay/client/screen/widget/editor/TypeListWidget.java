@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import qdream.relay.client.screen.widget.info.InfoUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,42 @@ public class TypeListWidget extends AbstractWidget {
         return dataTypes;
     }
 
+    /**
+     * 获取当前选中的类型索引，-1 表示无选中
+     */
+    public int getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    /**
+     * 获取当前选中的类型 ID
+     * @return 选中的类型 ID，无选中时返回 null
+     */
+    public String getSelectedType() {
+        if (selectedIndex >= 0 && selectedIndex < dataTypes.size()) {
+            return dataTypes.get(selectedIndex);
+        }
+        return null;
+    }
+
+    /**
+     * 获取当前悬停的类型索引，-1 表示无悬停
+     */
+    public int getHoveredIndex() {
+        return hoveredIndex;
+    }
+
+    /**
+     * 获取当前悬停的类型 ID
+     * @return 悬停的类型 ID，无悬停时返回 null
+     */
+    public String getHoveredType() {
+        if (hoveredIndex >= 0 && hoveredIndex < dataTypes.size()) {
+            return dataTypes.get(hoveredIndex);
+        }
+        return null;
+    }
+
     public TypeListWidget(int x, int y, int width, int height, Font font, List<String> dataTypes) {
         super(x, y, width, height, Component.empty());
         this.font = font;
@@ -92,11 +129,7 @@ public class TypeListWidget extends AbstractWidget {
      * 获取类型的显示名称（从语言文件）
      */
     private String getDisplayName(String typeId) {
-        return displayNameCache.computeIfAbsent(typeId, id -> {
-            String key = "type." + id + ".name";
-            String name = Component.translatable(key).getString();
-            return name.equals(key) ? id : name;
-        });
+        return displayNameCache.computeIfAbsent(typeId, InfoUtils::getTypeDisplayName);
     }
 
     /** 获取可视区域内可显示的最大行数 */

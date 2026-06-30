@@ -33,8 +33,7 @@ public class GetSelfOp extends Spell {
 
     public GetSelfOp() {
         super("relay:get_self", 1, 1, OperationSignature.builder()
-                .producesToData("relay:entity")
-                .producesToData("relay:block_entity")
+                .producesToData("relay:entity", "relay:block_entity")
                 .build());
     }
 
@@ -47,9 +46,9 @@ public class GetSelfOp extends Spell {
             executor.pushData(NullType.INSTANCE);
             return;
         }
-        
+
         Object self = selfObj.get();
-        
+
         // 根据类型创建对应的 Iota
         if (self instanceof Entity entity) {
             EntityType entityType = EntityType.from(entity, entity.level());

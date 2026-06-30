@@ -13,7 +13,7 @@ public class NotOp extends Spell {
 
     public NotOp() {
         super("relay:not", 1, 1, OperationSignature.builder()
-                .consumesFromData("boolean")
+                .consumesFromData("relay:boolean")
                 .producesToData("relay:boolean")
                 .build());
     }

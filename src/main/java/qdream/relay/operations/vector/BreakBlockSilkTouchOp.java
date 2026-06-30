@@ -28,7 +28,7 @@ import qdream.relay.types.VectorType;
 public class BreakBlockSilkTouchOp extends Spell {
 
     public BreakBlockSilkTouchOp() {
-        super("relay:break_block_silk", 1, 1, OperationSignature.builder()
+        super("relay:break_block_silk_touch", 1, 1, OperationSignature.builder()
                 .consumesFromData("relay:vector")
                 .producesToData("relay:boolean")
                 .build());
@@ -38,7 +38,7 @@ public class BreakBlockSilkTouchOp extends Spell {
     public void execute(StateMachine executor) {
         // 检查世界交互器
         if (!executor.hasContext("worldInteractor")) {
-            executor.triggerMishap("break_block_silk 需要世界交互器");
+            executor.triggerMishap("break_block_silk_touch 需要世界交互器");
             return;
         }
 

@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import qdream.relay.client.screen.widget.info.InfoUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,42 @@ public class OperationListWidget extends AbstractWidget {
         return operations;
     }
 
+    /**
+     * 获取当前选中的操作 ID，-1 表示无选中
+     */
+    public int getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    /**
+     * 获取当前选中的操作 ID
+     * @return 选中的操作 ID，无选中时返回 null
+     */
+    public String getSelectedOperation() {
+        if (selectedIndex >= 0 && selectedIndex < operations.size()) {
+            return operations.get(selectedIndex);
+        }
+        return null;
+    }
+
+    /**
+     * 获取当前悬停的操作 ID，-1 表示无悬停
+     */
+    public int getHoveredIndex() {
+        return hoveredIndex;
+    }
+
+    /**
+     * 获取当前悬停的操作 ID
+     * @return 悬停的操作 ID，无悬停时返回 null
+     */
+    public String getHoveredOperation() {
+        if (hoveredIndex >= 0 && hoveredIndex < operations.size()) {
+            return operations.get(hoveredIndex);
+        }
+        return null;
+    }
+
     public OperationListWidget(int x, int y, int width, int height, Font font, List<String> operations) {
         super(x, y, width, height, Component.empty());
         this.font = font;
@@ -92,11 +129,7 @@ public class OperationListWidget extends AbstractWidget {
      * 获取操作的显示名称（从语言文件）
      */
     private String getDisplayName(String opId) {
-        return displayNameCache.computeIfAbsent(opId, id -> {
-            String key = "operation." + id + ".name";
-            String name = Component.translatable(key).getString();
-            return name.equals(key) ? id : name;
-        });
+        return displayNameCache.computeIfAbsent(opId, InfoUtils::getOperationDisplayName);
     }
 
     /** 获取可视区域内可显示的最大行数 */

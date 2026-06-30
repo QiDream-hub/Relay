@@ -13,8 +13,8 @@ public class DivOp extends Spell {
 
     public DivOp() {
         super("relay:div", 1, 1, OperationSignature.builder()
-                .consumesFromData("number")
-                .consumesFromData("number")
+                .consumesFromData("relay:number")
+                .consumesFromData("relay:number")
                 .producesToData("relay:number")
                 .build());
     }

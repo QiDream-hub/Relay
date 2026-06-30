@@ -14,8 +14,8 @@ public class LtOp extends Spell {
 
     public LtOp() {
         super("relay:lt", 1, 1, OperationSignature.builder()
-                .consumesFromData("number")
-                .consumesFromData("number")
+                .consumesFromData("relay:number")
+                .consumesFromData("relay:number")
                 .producesToData("relay:boolean")
                 .build());
     }

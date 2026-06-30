@@ -33,236 +33,158 @@
   "container.relay.shell": "外壳",
   "container.relay.tool_shell": "工具外壳",
   "item.relay.tool_shell": "工具外壳",
+  "item.relay.tool_shell.usage_right": "§7右键：§e加载/运行程序",
+  "item.relay.tool_shell.usage_shift": "§7Shift+ 右键：§c停止程序",
+  "item.relay.tool_shell.usage_gui": "§7%1$s：§b打开配置 GUI",
   "key.relay.open_tool_shell_config": "打开工具外壳配置",
   "key.category.relay.relay": "Relay",
 
   "operation.relay:pop.name": "弹出",
   "operation.relay:pop.description": "弹出数据栈顶部元素",
-  "operation.relay:pop.param.0": "要弹出的值",
 
   "operation.relay:dup.name": "复制",
   "operation.relay:dup.description": "复制数据栈顶部元素",
-  "operation.relay:dup.param.0": "要复制的值",
 
   "operation.relay:swap.name": "交换",
   "operation.relay:swap.description": "交换数据栈顶部两个元素",
-  "operation.relay:swap.param.0": "第一个值",
-  "operation.relay:swap.param.1": "第二个值",
 
   "operation.relay:add.name": "加法",
   "operation.relay:add.description": "计算两个数的和",
-  "operation.relay:add.param.0": "被加数",
-  "operation.relay:add.param.1": "加数",
 
   "operation.relay:sub.name": "减法",
   "operation.relay:sub.description": "计算两个数的差",
-  "operation.relay:sub.param.0": "被减数",
-  "operation.relay:sub.param.1": "减数",
 
   "operation.relay:mul.name": "乘法",
   "operation.relay:mul.description": "计算两个数的积",
-  "operation.relay:mul.param.0": "被乘数",
-  "operation.relay:mul.param.1": "乘数",
 
   "operation.relay:div.name": "除法",
   "operation.relay:div.description": "计算两个数的商",
-  "operation.relay:div.param.0": "被除数",
-  "operation.relay:div.param.1": "除数",
 
   "operation.relay:and.name": "逻辑与",
   "operation.relay:and.description": "计算两个布尔值的逻辑与",
-  "operation.relay:and.param.0": "第一个布尔值",
-  "operation.relay:and.param.1": "第二个布尔值",
 
   "operation.relay:or.name": "逻辑或",
   "operation.relay:or.description": "计算两个布尔值的逻辑或",
-  "operation.relay:or.param.0": "第一个布尔值",
-  "operation.relay:or.param.1": "第二个布尔值",
 
   "operation.relay:not.name": "逻辑非",
   "operation.relay:not.description": "计算布尔值的逻辑非",
-  "operation.relay:not.param.0": "要取反的布尔值",
 
   "operation.relay:eq.name": "等于",
   "operation.relay:eq.description": "比较两个值是否相等",
-  "operation.relay:eq.param.0": "第一个值",
-  "operation.relay:eq.param.1": "第二个值",
 
   "operation.relay:lt.name": "小于",
   "operation.relay:lt.description": "比较第一个数是否小于第二个数",
-  "operation.relay:lt.param.0": "第一个数",
-  "operation.relay:lt.param.1": "第二个数",
 
   "operation.relay:gt.name": "大于",
   "operation.relay:gt.description": "比较第一个数是否大于第二个数",
-  "operation.relay:gt.param.0": "第一个数",
-  "operation.relay:gt.param.1": "第二个数",
 
   "operation.relay:if.name": "条件分支",
   "operation.relay:if.description": "根据条件值选择执行真分支或假分支",
-  "operation.relay:if.param.0": "条件值",
-  "operation.relay:if.param.1": "真分支程序",
-  "operation.relay:if.param.2": "假分支程序",
 
   "operation.relay:eval.name": "执行子程序",
   "operation.relay:eval.description": "将列表作为程序执行",
-  "operation.relay:eval.param.0": "要执行的程序列表",
 
   "operation.relay:stop.name": "停止",
   "operation.relay:stop.description": "停止程序执行",
 
   "operation.relay:send.name": "发送",
   "operation.relay:send.description": "向通信频道发送数据",
-  "operation.relay:send.param.0": "频道号",
-  "operation.relay:send.param.1": "要发送的数据",
 
   "operation.relay:recv.name": "接收",
   "operation.relay:recv.description": "从通信频道接收数据",
-  "operation.relay:recv.param.0": "频道号",
 
   "operation.relay:peek.name": "查看",
   "operation.relay:peek.description": "查看通信频道顶部数据但不移除",
-  "operation.relay:peek.param.0": "频道号",
 
   "operation.relay:send_message.name": "发送消息",
   "operation.relay:send_message.description": "向玩家发送聊天消息",
-  "operation.relay:send_message.param.0": "目标玩家",
-  "operation.relay:send_message.param.1": "消息内容",
 
   "operation.relay:list_append.name": "列表追加",
   "operation.relay:list_append.description": "向列表追加元素",
-  "operation.relay:list_append.param.0": "列表",
-  "operation.relay:list_append.param.1": "要追加的元素",
 
   "operation.relay:list_get.name": "列表获取",
   "operation.relay:list_get.description": "获取列表指定位置的元素",
-  "operation.relay:list_get.param.0": "列表",
-  "operation.relay:list_get.param.1": "索引",
 
   "operation.relay:list_set.name": "列表设置",
   "operation.relay:list_set.description": "设置列表指定位置的元素",
-  "operation.relay:list_set.param.0": "列表",
-  "operation.relay:list_set.param.1": "索引",
-  "operation.relay:list_set.param.2": "新元素",
 
   "operation.relay:list_length.name": "列表长度",
   "operation.relay:list_length.description": "获取列表的长度",
-  "operation.relay:list_length.param.0": "列表",
 
   "operation.relay:list_creat.name": "创建列表",
   "operation.relay:list_creat.description": "创建指定长度的空列表",
-  "operation.relay:list_creat.param.0": "列表长度",
 
   "operation.relay:is_player.name": "是玩家",
   "operation.relay:is_player.description": "检查实体是否为玩家",
-  "operation.relay:is_player.param.0": "要检查的实体",
 
-  "operation.relay:get_owner.name": "获取主人",
-  "operation.relay:get_owner.description": "获取实体的主人",
-  "operation.relay:get_owner.param.0": "实体",
+  "operation.relay:get_owner.name": "获取运行体所属者",
+  "operation.relay:get_owner.description": "获取运行体所属者",
 
   "operation.relay:get_self.name": "获取自身",
   "operation.relay:get_self.description": "获取自身实体或方块实体",
 
-  "operation.relay:get_world_interactor.name": "获取世界交互器",
-  "operation.relay:get_world_interactor.description": "获取当前激活的世界交互器",
+  "operation.relay:get_entity_pos.name": "获取实体坐标",
+  "operation.relay:get_entity_pos.description": "获取实体当前的位置坐标",
+
+  "operation.relay:get_world_interactor.name": "检查世界交互器",
+  "operation.relay:get_world_interactor.description": "检查是否有世界交互器",
 
   "operation.relay:vector_add.name": "向量加法",
   "operation.relay:vector_add.description": "计算两个向量的和",
-  "operation.relay:vector_add.param.0": "第一个向量",
-  "operation.relay:vector_add.param.1": "第二个向量",
 
   "operation.relay:vector_sub.name": "向量减法",
   "operation.relay:vector_sub.description": "计算两个向量的差",
-  "operation.relay:vector_sub.param.0": "第一个向量",
-  "operation.relay:vector_sub.param.1": "第二个向量",
 
   "operation.relay:vector_mul.name": "向量数乘",
   "operation.relay:vector_mul.description": "计算向量与数的乘积",
-  "operation.relay:vector_mul.param.0": "数",
-  "operation.relay:vector_mul.param.1": "向量",
 
   "operation.relay:vector_dot.name": "向量点积",
   "operation.relay:vector_dot.description": "计算两个向量的点积",
-  "operation.relay:vector_dot.param.0": "第一个向量",
-  "operation.relay:vector_dot.param.1": "第二个向量",
 
   "operation.relay:vector_cross.name": "向量叉积",
   "operation.relay:vector_cross.description": "计算两个向量的叉积",
-  "operation.relay:vector_cross.param.0": "第一个向量",
-  "operation.relay:vector_cross.param.1": "第二个向量",
 
   "operation.relay:vector_normalize.name": "向量归一化",
   "operation.relay:vector_normalize.description": "将向量归一化为单位向量",
-  "operation.relay:vector_normalize.param.0": "要归一化的向量",
 
   "operation.relay:vector_length.name": "向量长度",
   "operation.relay:vector_length.description": "计算向量的长度",
-  "operation.relay:vector_length.param.0": "向量",
 
   "operation.relay:vector_distance.name": "向量距离",
   "operation.relay:vector_distance.description": "计算两个向量之间的距离",
-  "operation.relay:vector_distance.param.0": "第一个点",
-  "operation.relay:vector_distance.param.1": "第二个点",
 
   "operation.relay:raycast.name": "射线追踪",
   "operation.relay:raycast.description": "从起点沿方向发射射线，返回命中的方块位置",
-  "operation.relay:raycast.param.0": "最大距离",
-  "operation.relay:raycast.param.1": "起点",
-  "operation.relay:raycast.param.2": "方向",
 
   "operation.relay:block_raycast.name": "方块射线追踪",
   "operation.relay:block_raycast.description": "从起点沿方向发射射线，返回命中的方块位置",
-  "operation.relay:block_raycast.param.0": "最大距离",
-  "operation.relay:block_raycast.param.1": "起点",
-  "operation.relay:block_raycast.param.2": "方向",
 
   "operation.relay:entity_raycast.name": "实体射线追踪",
   "operation.relay:entity_raycast.description": "从起点沿方向发射射线，返回命中的实体",
-  "operation.relay:entity_raycast.param.0": "最大距离",
-  "operation.relay:entity_raycast.param.1": "起点",
-  "operation.relay:entity_raycast.param.2": "方向",
-  "operation.relay:entity_raycast.param.3": "排除的实体",
 
   "operation.relay:detect_block.name": "检测方块",
   "operation.relay:detect_block.description": "检测指定位置是否有方块",
-  "operation.relay:detect_block.param.0": "位置",
 
   "operation.relay:detect_entity.name": "检测实体",
   "operation.relay:detect_entity.description": "检测指定范围内是否有实体",
-  "operation.relay:detect_entity.param.0": "范围",
-  "operation.relay:detect_entity.param.1": "位置",
 
   "operation.relay:break_block.name": "破坏方块",
   "operation.relay:break_block.description": "破坏指定位置的方块",
-  "operation.relay:break_block.param.0": "位置",
 
-  "operation.relay:break_block_fortune.name": "精准破坏方块",
+  "operation.relay:break_block_fortune.name": "时运破坏方块",
   "operation.relay:break_block_fortune.description": "使用幸运等级破坏指定位置的方块",
-  "operation.relay:break_block_fortune.param.0": "幸运等级",
-  "operation.relay:break_block_fortune.param.1": "位置",
 
-  "operation.relay:break_block_silk_touch.name": "丝触破坏方块",
-  "operation.relay:break_block_silk_touch.description": "使用丝触破坏指定位置的方块",
-  "operation.relay:break_block_silk_touch.param.0": "位置",
+  "operation.relay:break_block_silk_touch.name": "精准破坏方块",
+  "operation.relay:break_block_silk_touch.description": "精准破坏指定位置的方块",
 
   "operation.relay:set_entity_look.name": "设置实体朝向",
   "operation.relay:set_entity_look.description": "设置实体朝向指定方向",
-  "operation.relay:set_entity_look.param.0": "实体",
-  "operation.relay:set_entity_look.param.1": "目标方向",
-
-  "operation.relay:get_entity_look.name": "获取实体朝向",
-  "operation.relay:get_entity_look.description": "获取实体朝向",
-  "operation.relay:get_entity_look.param.0": "实体",
 
   "operation.relay:get_look_vector.name": "获取朝向向量",
   "operation.relay:get_look_vector.description": "获取实体的朝向向量",
-  "operation.relay:get_look_vector.param.0": "实体",
 
   "operation.relay:push_vector.name": "推动实体",
   "operation.relay:push_vector.description": "向实体施加推力",
-  "operation.relay:push_vector.param.0": "实体",
-  "operation.relay:push_vector.param.1": "推力向量",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
@@ -274,6 +196,8 @@
   "type.relay:string.description": "文本类型，用于显示消息",
   "type.relay:entity.name": "实体",
   "type.relay:entity.description": "实体引用，可获取实体属性",
+  "type.relay:block_entity.name": "方块实体",
+  "type.relay:block_entity.description": "方块实体引用，可获取方块实体属性",
   "type.relay:list.name": "列表",
   "type.relay:list.description": "元素列表，可存储任意类型",
   "type.relay:null.name": "空值",

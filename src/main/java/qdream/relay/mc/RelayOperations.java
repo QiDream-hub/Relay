@@ -16,6 +16,7 @@ import qdream.relay.operations.communication.SendMessageOp;
 import qdream.relay.operations.control.EvalOp;
 import qdream.relay.operations.control.IfOp;
 import qdream.relay.operations.control.StopOp;
+import qdream.relay.operations.entity.GetEntityPosOp;
 import qdream.relay.operations.entity.GetOwnerOp;
 import qdream.relay.operations.entity.GetSelfOp;
 import qdream.relay.operations.entity.IsPlayerOp;
@@ -26,7 +27,6 @@ import qdream.relay.operations.vector.BreakBlockSilkTouchOp;
 import qdream.relay.operations.vector.DetectBlockOp;
 import qdream.relay.operations.vector.DetectEntityOp;
 import qdream.relay.operations.vector.EntityRaycastOp;
-import qdream.relay.operations.vector.GetEntityLookOp;
 import qdream.relay.operations.vector.GetLookVectorOp;
 import qdream.relay.operations.vector.PushVectorOp;
 import qdream.relay.operations.vector.RaycastOp;
@@ -106,6 +106,8 @@ public class RelayOperations {
                 new OperationRegistry.OpEntry(new GetWorldInteractorOp()));
         OperationRegistry.register("relay:get_self",
                 new OperationRegistry.OpEntry(new GetSelfOp()));
+        OperationRegistry.register("relay:get_entity_pos",
+                new OperationRegistry.OpEntry(new GetEntityPosOp()));
         OperationRegistry.register("relay:get_owner",
                 new OperationRegistry.OpEntry(new GetOwnerOp()));
         OperationRegistry.register("relay:is_player",
@@ -164,12 +166,11 @@ public class RelayOperations {
 
         // 实体朝向操作
         OperationRegistry.register("relay:set_entity_look", new OperationRegistry.OpEntry(new SetEntityLookOp()));
-        OperationRegistry.register("relay:get_entity_look", new OperationRegistry.OpEntry(new GetEntityLookOp()));
 
         // 挖掘方块操作
         OperationRegistry.register("relay:break_block", new OperationRegistry.OpEntry(new BreakBlockOp()));
         OperationRegistry.register("relay:break_block_fortune", new OperationRegistry.OpEntry(new BreakBlockFortuneOp()));
-        OperationRegistry.register("relay:break_block_silk", new OperationRegistry.OpEntry(new BreakBlockSilkTouchOp()));
+        OperationRegistry.register("relay:break_block_silk_touch", new OperationRegistry.OpEntry(new BreakBlockSilkTouchOp()));
 
         // 视线追踪操作
         OperationRegistry.register("relay:entity_raycast", new OperationRegistry.OpEntry(new EntityRaycastOp()));

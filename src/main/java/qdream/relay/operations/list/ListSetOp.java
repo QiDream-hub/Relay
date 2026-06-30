@@ -21,7 +21,7 @@ public class ListSetOp extends Spell {
     public ListSetOp() {
         super("relay:list_set", 1, 1, OperationSignature.builder()
                 .consumesFromData("relay:list")
-                .consumesFromData("number")
+                .consumesFromData("relay:number")
                 .consumesFromData("any")
                 .producesToData("relay:list")
                 .build());

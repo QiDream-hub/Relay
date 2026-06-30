@@ -17,7 +17,7 @@ public class EvalOp extends Spell {
 
     public EvalOp() {
         super("relay:eval", 1, 1, OperationSignature.builder()
-                .consumesFromData("list")
+                .consumesFromData("relay:list")
                 .producesToProgram("...any")
                 .build());
     }

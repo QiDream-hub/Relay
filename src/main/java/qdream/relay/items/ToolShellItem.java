@@ -1,6 +1,7 @@
 package qdream.relay.items;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -9,6 +10,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.ChatFormatting;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
@@ -34,6 +38,21 @@ public class ToolShellItem extends Item {
 
     public ToolShellItem(Properties properties) {
         super(properties.stacksTo(1));
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay displayComponent,
+            Consumer<Component> textConsumer, TooltipFlag type) {
+        // 基础提示（服务端侧）
+        textConsumer.accept(
+                Component.translatable("item.relay.tool_shell.usage_right").withStyle(ChatFormatting.GRAY));
+        textConsumer.accept(
+                Component.translatable("item.relay.tool_shell.usage_shift").withStyle(ChatFormatting.GRAY));
+        // GUI 按键提示 - 使用 Component.keybind 动态显示按键绑定
+        textConsumer.accept(
+                Component.translatable("item.relay.tool_shell.usage_gui",
+                        Component.keybind("key.relay.open_tool_shell_config"))
+                        .withStyle(ChatFormatting.GRAY));
     }
 
     @Override
@@ -83,7 +102,7 @@ public class ToolShellItem extends Item {
                     machine.loadProgram(program);
                     container.setInitialized(true);
                     // 不立即保存，让 tick 管理
-                    player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
+                    // player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
                 } else {
                     player.sendSystemMessage(Component.literal("§e[工具外壳] 磁盘为空，无法启动"));
                 }

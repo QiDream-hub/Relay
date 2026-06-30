@@ -37,8 +37,7 @@ public class RaycastOp extends Spell {
                 .consumesFromData("relay:number")
                 .consumesFromData("relay:vector")
                 .consumesFromData("relay:vector")
-                .producesToData("relay:vector")
-                .producesToData("relay:null")
+                .producesToData("relay:vector", "relay:null")
                 .build());
     }
 
@@ -49,60 +48,59 @@ public class RaycastOp extends Spell {
             executor.triggerMishap("raycast 需要世界交互器");
             return;
         }
-        
+
         Optional<ItemStack> interactorOpt = executor.getContext("worldInteractor", ItemStack.class);
         if (interactorOpt.isEmpty() || interactorOpt.get().isEmpty()) {
             executor.triggerMishap("世界交互器无效");
             return;
         }
-        
+
         ItemStack interactor = interactorOpt.get();
-        
+
         // 弹出参数
         Executable maxDistExe = executor.popData();
         Executable dirExe = executor.popData();
         Executable startExe = executor.popData();
-        
+
         if (maxDistExe == null || dirExe == null || startExe == null) {
             executor.triggerMishap("数据栈不足，需要 number, vector, vector");
             return;
         }
-        
-        if (!(maxDistExe instanceof NumberType maxDistEx) || 
-            !(dirExe instanceof VectorType dirEx) || 
-            !(startExe instanceof VectorType startEx)) {
+
+        if (!(maxDistExe instanceof NumberType maxDistEx) ||
+                !(dirExe instanceof VectorType dirEx) ||
+                !(startExe instanceof VectorType startEx)) {
             executor.triggerMishap("期望 number, vector, vector 类型");
             return;
         }
-        
+
         double maxDist = maxDistEx.asDouble();
         Vec3 direction = dirEx.asVector().normalize();
         Vec3 start = startEx.asVector();
         Vec3 end = start.add(direction.scale(maxDist));
-        
+
         // 检查范围
         if (!WorldInteractorItem.isInRange(interactor, start, end)) {
             executor.triggerMishap("目标超出世界交互器范围");
             return;
         }
-        
+
         // 获取 Level 上下文
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty()) {
             executor.triggerMishap("无法获取世界");
             return;
         }
-        
+
         Level level = levelOpt.get();
-        
+
         // 执行射线追踪
         BlockHitResult hitResult = level.clip(new ClipContext(
-            start, end,
-            ClipContext.Block.COLLIDER,
-            ClipContext.Fluid.NONE,
-            CollisionContext.empty()
-        ));
-        
+                start, end,
+                ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE,
+                CollisionContext.empty()));
+
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             executor.pushData(new VectorType(hitResult.getLocation()));
         } else {

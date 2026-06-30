@@ -15,6 +15,7 @@ public class ListCreatOp extends Spell{
     public ListCreatOp() {
         super("relay:list_creat", 1, 1, OperationSignature.builder()
                 .consumesFromData("Number")
+                .consumesFromData("...any")
                 .producesToData("relay:list")
                 .build());
     }

@@ -13,8 +13,8 @@ public class AndOp extends Spell {
 
     public AndOp() {
         super("relay:and", 1, 1, OperationSignature.builder()
-                .consumesFromData("boolean")
-                .consumesFromData("boolean")
+                .consumesFromData("relay:boolean")
+                .consumesFromData("relay:boolean")
                 .producesToData("relay:boolean")
                 .build());
     }

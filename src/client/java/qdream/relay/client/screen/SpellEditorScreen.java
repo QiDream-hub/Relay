@@ -31,6 +31,7 @@ import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
 import qdream.relay.screen.SpellEditorScreenHandler;
@@ -159,8 +160,8 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // 悬停信息 Widget（初始隐藏在右侧角落）
         hoverInfoWidget = new HoverInfoWidget(
-                editorX + editorWidth - 150, editorY + BUTTON_HEIGHT + LIST_GAP,
-                150, 100, this.font);
+                0 + PANEL_PADDING, editorY + BUTTON_HEIGHT + LIST_GAP,
+                150, 160, this.font);
         this.addRenderableWidget(hoverInfoWidget);
 
         // 初始加载程序
@@ -177,7 +178,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         // 从注册表获取操作实例
         OperationRegistry.get(opId).ifPresent(op -> {
             JsonObject json = new JsonObject();
-            ((qdream.relay.mc.base.Operation) op).toJson(json);
+            ((Operation) op).toJson(json);
             jsonEditorWidget.insertWithComma(json.toString());
         });
     }
@@ -187,10 +188,10 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
      */
     private InfoContent getOperationInfo(String opId) {
         return OperationRegistry.get(opId).map(op -> {
-            qdream.relay.mc.base.Operation operation = (qdream.relay.mc.base.Operation) op;
+            Operation operation = (Operation) op;
             var signature = operation.getSignature();
-            return InfoUtils.buildOperationInfo(opId, 
-                signature instanceof qdream.relay.mc.signature.OperationSignature opSig ? opSig : null);
+            return InfoUtils.buildOperationInfo(opId,
+                    signature instanceof OperationSignature opSig ? opSig : null);
         }).orElse(null);
     }
 
@@ -213,7 +214,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             jsonEditorWidget.insertWithComma(json.toString());
         });
     }
-    
+
     /**
      * 操作悬停回调
      */
@@ -230,7 +231,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             hoverInfoWidget.visible = false;
         }
     }
-    
+
     /**
      * 类型悬停回调
      */
@@ -389,8 +390,10 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             }
         }
 
-        // 转发给其他自定义 Widget
-        for (var widget : this.children()) {
+        // 转发给其他自定义 Widget（按渲染顺序逆序，后渲染的优先接收事件）
+        var children = this.children();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            var widget = children.get(i);
             if (widget instanceof net.minecraft.client.gui.components.AbstractWidget aw
                     && aw.visible
                     && event.x() >= aw.getX() && event.x() < aw.getX() + aw.getWidth()
@@ -418,8 +421,10 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             }
         }
 
-        // 转发给其他自定义 Widget
-        for (var widget : this.children()) {
+        // 转发给其他自定义 Widget（按渲染顺序逆序，后渲染的优先接收事件）
+        var children = this.children();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            var widget = children.get(i);
             if (widget instanceof net.minecraft.client.gui.components.AbstractWidget aw
                     && aw.visible
                     && event.x() >= aw.getX() && event.x() < aw.getX() + aw.getWidth()
@@ -437,8 +442,13 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        for (var widget : this.children()) {
+        // 按渲染顺序的逆序检查 Widget（后渲染的优先接收事件）
+        // 这样可以确保类型列表在操作列表下方时，鼠标在类型列表区域时事件正确转发
+        var children = this.children();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            var widget = children.get(i);
             if (widget instanceof net.minecraft.client.gui.components.AbstractWidget aw
+                    && aw.visible
                     && mouseX >= aw.getX() && mouseX < aw.getX() + aw.getWidth()
                     && mouseY >= aw.getY() && mouseY < aw.getY() + aw.getHeight()) {
                 if (aw.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {

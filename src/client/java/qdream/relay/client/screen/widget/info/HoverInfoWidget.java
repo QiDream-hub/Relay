@@ -3,23 +3,33 @@ package qdream.relay.client.screen.widget.info;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+
 /**
  * 悬停信息提示 Widget
  * 用于在鼠标悬停时显示操作或类型的详细信息
+ * 布局分为两部分：
+ * - 第一部分：标题 + 描述
+ * - 第二部分：输入/输出签名
  */
 public class HoverInfoWidget extends net.minecraft.client.gui.components.AbstractWidget {
 
     private static final int BG_COLOR = 0xFF1E1E1E;
     private static final int BORDER_COLOR = 0xFF3A3A3A;
-    private static final int TEXT_COLOR = 0xFFCCCCCC;
+    private static final int TITLE_COLOR = 0xFF00FF00;
+    private static final int DESC_COLOR = 0xFFCCCCCC;
+    private static final int LABEL_COLOR = 0xFFAAAAAA;
+    private static final int TYPE_COLOR = 0xFF55FF55;
 
-    private final net.minecraft.client.gui.Font font;
+    private final Font font;
 
     /** 要显示的信息行 */
     private InfoContent content;
 
-    public HoverInfoWidget(int x, int y, int width, int height, net.minecraft.client.gui.Font font) {
-        super(x, y, width, height, net.minecraft.network.chat.Component.empty());
+    public HoverInfoWidget(int x, int y, int width, int height, Font font) {
+        super(x, y, width, height, Component.empty());
         this.font = font;
         this.content = null;
     }
@@ -42,12 +52,12 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
      * 检查是否有内容
      */
     public boolean hasContent() {
-        return content != null && !content.lines.isEmpty();
+        return content != null;
     }
 
     @Override
-    protected void extractWidgetRenderState(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        if (content == null || content.lines.isEmpty()) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        if (content == null) {
             return;
         }
 
@@ -60,15 +70,43 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
         // 外边框
         graphics.outline(x, y, this.width, this.height, BORDER_COLOR);
 
-        // 渲染内容行
+        // 渲染内容
         int textX = x + 6;
         int textY = y + 6;
         int lineHeight = 10;
 
-        for (InfoLine line : content.lines) {
-            int color = line.color != null ? line.color : TEXT_COLOR;
-            graphics.text(this.font, line.text, textX, textY, color);
-            textY += lineHeight + 2;
+        // 第一部分：标题
+        if (content.title != null && !content.title.isEmpty()) {
+            graphics.text(this.font, content.title, textX, textY, TITLE_COLOR);
+            textY += lineHeight + 4;
+        }
+
+        // 第二部分：描述
+        if (content.description != null && !content.description.isEmpty()) {
+            // 描述文字自动换行
+            var wrappedLines = font.split(
+                net.minecraft.network.chat.Component.literal(content.description),
+                this.width - 12
+            );
+            for (var line : wrappedLines) {
+                graphics.text(this.font, line, textX, textY, DESC_COLOR);
+                textY += lineHeight + 1;
+            }
+            textY += 2; // 描述后额外间距
+        }
+
+        // 第三部分：输入/输出签名
+        if (content.lines != null && !content.lines.isEmpty()) {
+            // 在描述和签名之间添加分隔线
+            int separatorY = textY - 2;
+            graphics.horizontalLine(x + 4, x + this.width - 4, separatorY, BORDER_COLOR);
+            textY += 4;
+
+            for (InfoLine line : content.lines) {
+                int color = line.color != null ? line.color : DESC_COLOR;
+                graphics.text(this.font, line.text, textX, textY, color);
+                textY += lineHeight + 2;
+            }
         }
     }
 
@@ -81,7 +119,7 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
      * 信息内容
      * @param title 标题
      * @param description 描述
-     * @param lines 内容行列表
+     * @param lines 内容行列表（输入/输出签名）
      */
     public record InfoContent(String title, String description, List<InfoLine> lines) {
         public InfoContent(String title, String description) {

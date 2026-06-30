@@ -13,8 +13,8 @@ public class MulOp extends Spell {
 
     public MulOp() {
         super("relay:mul", 1, 1, OperationSignature.builder()
-                .consumesFromData("number")
-                .consumesFromData("number")
+                .consumesFromData("relay:number")
+                .consumesFromData("relay:number")
                 .producesToData("relay:number")
                 .build());
     }

@@ -1,10 +1,14 @@
 package qdream.relay.client.screen.widget.info;
 
 import net.minecraft.network.chat.Component;
+import qdream.relay.mc.base.Data;
+import qdream.relay.mc.signature.DataFieldDescriptor;
+import qdream.relay.mc.signature.DataSignature;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.mc.signature.ParameterDescriptor;
 import qdream.relay.mc.signature.ParameterSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,26 +18,29 @@ import java.util.List;
 public class InfoUtils {
 
     private static final int TITLE_COLOR = 0xFF00FF00;
+    private static final int LABEL_COLOR = 0xFFAAAAAA;
     private static final int TEXT_COLOR = 0xFFCCCCCC;
+    private static final int TYPE_COLOR = 0xFF55FF55;
+    private static final int FIELD_NAME_COLOR = 0xFF55FFFF;
 
     /**
      * 生成操作的语言文件 Key
-     * @param operationId 操作 ID（如 "pop", "add"）
+     * @param operationId 操作 ID（如 "relay:pop", "relay:add"）
      * @param keyType Key 类型（如 "name", "description", "param.0"）
      * @return 完整的语言文件 Key
      */
     public static String makeOperationKey(String operationId, String keyType) {
-        return "operation.relay:" + operationId + "." + keyType;
+        return "operation." + operationId + "." + keyType;
     }
 
     /**
      * 生成类型的语言文件 Key
-     * @param typeId 类型 ID（如 "number", "vector"）
+     * @param typeId 类型 ID（如 "relay:number", "relay:vector"）
      * @param keyType Key 类型（如 "name", "description"）
      * @return 完整的语言文件 Key
      */
     public static String makeTypeKey(String typeId, String keyType) {
-        return "type.relay:" + typeId + "." + keyType;
+        return "type." + typeId + "." + keyType;
     }
 
     /**
@@ -46,7 +53,29 @@ public class InfoUtils {
     }
 
     /**
+     * 获取操作的显示名称（从语言文件）
+     * @param operationId 操作 ID（如 "relay:pop", "relay:add"）
+     * @return 显示名称，如果语言文件不存在则返回 ID
+     */
+    public static String getOperationDisplayName(String operationId) {
+        String key = makeOperationKey(operationId, "name");
+        return getLanguageText(key, operationId);
+    }
+
+    /**
+     * 获取类型的显示名称（从语言文件）
+     * @param typeId 类型 ID（如 "relay:number", "relay:vector"）
+     * @return 显示名称，如果语言文件不存在则返回 ID
+     */
+    public static String getTypeDisplayName(String typeId) {
+        String key = makeTypeKey(typeId, "name");
+        return getLanguageText(key, typeId);
+    }
+
+    /**
      * 构建操作的悬停信息内容
+     * 第一部分：输入和输出的签名
+     * 第二部分：语言文件中的描述
      * @param operationId 操作 ID
      * @param signature 操作签名
      * @return InfoContent 内容
@@ -64,51 +93,43 @@ public class InfoUtils {
             return content;
         }
 
-        // 输入参数（从数据栈消费）
-        List<ParameterDescriptor> consumesFromData = signature.getConsumesFromData();
-        if (!consumesFromData.isEmpty()) {
-            content.addLine("输入:", TITLE_COLOR);
-            for (int i = 0; i < consumesFromData.size(); i++) {
-                String paramKey = makeOperationKey(operationId, "param." + i);
-                String paramDesc = getLanguageText(paramKey, formatParameter(consumesFromData.get(i)));
-                content.addLine("  • " + paramDesc);
+        // 第一部分：输入签名
+        List<String> inputTypes = new ArrayList<>();
+        
+        // 从数据栈消费的参数
+        for (ParameterDescriptor descriptor : signature.getConsumesFromData()) {
+            inputTypes.add(formatTypes(descriptor.getTypes()));
+        }
+        
+        // 从程序栈消费的参数
+        for (ParameterDescriptor descriptor : signature.getConsumesFromProgram()) {
+            inputTypes.add(formatTypes(descriptor.getTypes()) + " (程序)");
+        }
+
+        if (!inputTypes.isEmpty()) {
+            content.addLine("输入：", LABEL_COLOR);
+            for (String inputType : inputTypes) {
+                content.addLine("  " + inputType, TYPE_COLOR);
             }
         }
 
-        // 输入参数（从程序栈消费）
-        List<ParameterDescriptor> consumesFromProgram = signature.getConsumesFromProgram();
-        if (!consumesFromProgram.isEmpty()) {
-            if (consumesFromData.isEmpty()) {
-                content.addLine("输入:", TITLE_COLOR);
-            }
-            for (int i = 0; i < consumesFromProgram.size(); i++) {
-                String paramKey = makeOperationKey(operationId, "param." + (consumesFromData.size() + i));
-                String paramDesc = getLanguageText(paramKey, formatParameter(consumesFromProgram.get(i)) + " (程序)");
-                content.addLine("  • " + paramDesc);
-            }
+        // 第一部分：输出签名
+        List<String> outputTypes = new ArrayList<>();
+        
+        // 向数据栈生产的参数
+        for (ParameterDescriptor descriptor : signature.getProducesToData()) {
+            outputTypes.add(formatTypes(descriptor.getTypes()));
+        }
+        
+        // 向程序栈生产的参数
+        for (ParameterDescriptor descriptor : signature.getProducesToProgram()) {
+            outputTypes.add(formatTypes(descriptor.getTypes()) + " [程序]");
         }
 
-        // 输出参数（向数据栈生产）
-        List<ParameterDescriptor> producesToData = signature.getProducesToData();
-        if (!producesToData.isEmpty()) {
-            content.addLine("输出:", TITLE_COLOR);
-            for (int i = 0; i < producesToData.size(); i++) {
-                String outputKey = makeOperationKey(operationId, "output." + i);
-                String outputDesc = getLanguageText(outputKey, formatTypes(producesToData.get(i).getTypes()));
-                content.addLine("  • " + outputDesc);
-            }
-        }
-
-        // 输出参数（向程序栈生产）
-        List<ParameterDescriptor> producesToProgram = signature.getProducesToProgram();
-        if (!producesToProgram.isEmpty()) {
-            if (producesToData.isEmpty()) {
-                content.addLine("输出:", TITLE_COLOR);
-            }
-            for (int i = 0; i < producesToProgram.size(); i++) {
-                String outputKey = makeOperationKey(operationId, "output." + (producesToData.size() + i));
-                String outputDesc = getLanguageText(outputKey, formatTypes(producesToProgram.get(i).getTypes()) + " (程序)");
-                content.addLine("  • " + outputDesc);
+        if (!outputTypes.isEmpty()) {
+            content.addLine("输出：", LABEL_COLOR);
+            for (String outputType : outputTypes) {
+                content.addLine("  " + outputType, TYPE_COLOR);
             }
         }
 
@@ -117,6 +138,8 @@ public class InfoUtils {
 
     /**
      * 构建类型的悬停信息内容
+     * 第一部分：输入字段（构建该类型需要的字段）
+     * 第二部分：语言文件中的描述
      * @param typeId 类型 ID
      * @return InfoContent 内容
      */
@@ -129,79 +152,79 @@ public class InfoUtils {
 
         HoverInfoWidget.InfoContent content = HoverInfoWidget.InfoContent.of(name, desc);
 
-        // 类型特性
-        content.addLine("特性:", TITLE_COLOR);
-        switch (typeId) {
-            case "number" -> {
-                content.addLine("  • 支持整数和小数");
-                content.addLine("  • 可参与算术运算");
+        // 从注册表获取数据类型实例以获取签名
+        qdream.relay.mc.OperationRegistry.getEntry(typeId).ifPresent(entry -> {
+            if (entry.isDataType()) {
+                var executable = entry.create();
+                if (executable instanceof Data data) {
+                    DataSignature signature = data.getSignature();
+                    
+                    // 显示输入字段（构建该类型需要的字段）
+                    List<DataFieldDescriptor> inputs = signature.getInputs();
+                    if (!inputs.isEmpty()) {
+                        content.addLine("输入：", LABEL_COLOR);
+                        for (DataFieldDescriptor field : inputs) {
+                            // 格式化字段：字段名：类型|类型
+                            String fieldStr = formatDataField(field);
+                            content.addLine("  " + fieldStr, FIELD_NAME_COLOR);
+                        }
+                    }
+
+                    // 显示输出类型
+                    List<String> outputs = signature.getOutputs();
+                    if (!outputs.isEmpty()) {
+                        content.addLine("输出：", LABEL_COLOR);
+                        for (String output : outputs) {
+                            String displayName = getTypeDisplayName(output);
+                            content.addLine("  " + displayName, TYPE_COLOR);
+                        }
+                    }
+                }
             }
-            case "boolean" -> {
-                content.addLine("  • true 或 false");
-                content.addLine("  • 可参与逻辑运算");
-            }
-            case "vector" -> {
-                content.addLine("  • 三维向量 (x, y, z)");
-                content.addLine("  • 可参与向量运算");
-            }
-            case "string" -> {
-                content.addLine("  • 文本字符串");
-                content.addLine("  • 可用于消息显示");
-            }
-            case "entity" -> {
-                content.addLine("  • 实体引用");
-                content.addLine("  • 可获取实体属性");
-            }
-            case "list" -> {
-                content.addLine("  • 元素列表");
-                content.addLine("  • 可存储任意类型");
-            }
-            case "null" -> {
-                content.addLine("  • 空值");
-                content.addLine("  • 表示无数据");
-            }
-            case "program" -> {
-                content.addLine("  • 程序块");
-                content.addLine("  • 包含可执行指令");
-            }
-            default -> content.addLine("  • 数据类型");
-        }
+        });
 
         return content;
     }
 
     /**
-     * 格式化参数描述为可读字符串
-     * @param descriptor 参数描述
-     * @return 格式化后的字符串
+     * 格式化数据字段描述符
+     * @param field 字段描述符
+     * @return 格式化后的字符串（如 "x: Number|String"）
      */
-    public static String formatParameter(ParameterDescriptor descriptor) {
-        StringBuilder sb = new StringBuilder();
+    public static String formatDataField(DataFieldDescriptor field) {
+        String fieldName = field.getName();
+        List<String> types = field.getTypes();
 
-        // 类型
-        if (descriptor.getTypes().isEmpty()) {
-            sb.append("任意类型");
-        } else {
-            sb.append(String.join(" 或 ", descriptor.getTypes()));
+        if (types.isEmpty()) {
+            return fieldName;
         }
 
-        // 来源
-        ParameterSource source = descriptor.getSource();
-        if (source == ParameterSource.PROGRAM_STACK) {
-            sb.append(" (程序)");
+        // 将每个类型转换为显示名称（从语言文件）
+        List<String> displayTypes = new ArrayList<>();
+        for (String type : types) {
+            displayTypes.add(getTypeDisplayName(type));
         }
 
-        return sb.toString();
+        return fieldName + ": " + String.join(" | ", displayTypes);
     }
 
     /**
-     * 格式化类型列表为可读字符串
+     * 格式化类型列表为可读字符串，使用 | 拼接
+     * @param types 类型列表
+     * @return 格式化后的字符串（如 "Number|String"）
      */
-    private static String formatTypes(List<String> types) {
+    public static String formatTypes(List<String> types) {
         if (types.isEmpty()) {
             return "任意类型";
         }
-        return String.join(" 或 ", types);
+
+        // 将每个类型转换为显示名称（从语言文件）
+        List<String> displayTypes = new ArrayList<>();
+        for (String type : types) {
+            displayTypes.add(getTypeDisplayName(type));
+        }
+
+        return String.join("|", displayTypes);
     }
 
     /**
