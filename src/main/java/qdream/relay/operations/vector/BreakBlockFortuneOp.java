@@ -3,6 +3,7 @@ package qdream.relay.operations.vector;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -71,13 +72,20 @@ public class BreakBlockFortuneOp extends Spell {
 
         int fortuneLevel = (int) fortuneEx.asDouble();
         Vec3 posVec = posEx.asVector();
-        BlockPos pos = new BlockPos((int) posVec.x, (int) posVec.y, (int) posVec.z);
+        // 使用 containing 正确处理负数坐标（向下取整而非向零取整）
+        BlockPos pos = BlockPos.containing(posVec);
 
-        // 获取世界交互器位置（从上下文或默认原点）
+        // 从 self 获取执行者位置作为源位置（self 可能是 Entity 或 BlockEntity）
         Vec3 sourcePos = new Vec3(0, 0, 0);
-        Optional<Vec3> sourceOpt = executor.getContext("sourcePos", Vec3.class);
-        if (sourceOpt.isPresent()) {
-            sourcePos = sourceOpt.get();
+        var selfOpt = executor.getContext("self", Object.class);
+        if (selfOpt.isPresent()) {
+            Object self = selfOpt.get();
+            if (self instanceof net.minecraft.world.entity.Entity entity) {
+                sourcePos = new Vec3(entity.getX(), entity.getY(), entity.getZ());
+            } else if (self instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
+                net.minecraft.core.BlockPos blockPos = blockEntity.getBlockPos();
+                sourcePos = new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
+            }
         }
 
         // 检查范围
@@ -102,9 +110,26 @@ public class BreakBlockFortuneOp extends Spell {
             return;
         }
 
-        // 破坏方块，应用时运附魔
-        // 使用破坏方块并掉落物品的方式
-        boolean destroyed = level.destroyBlock(pos, true, null, fortuneLevel);
-        executor.pushData(new BooleanType(destroyed));
+        // 破坏方块并应用时运附魔
+        // 1. 先破坏方块
+        boolean destroyed = level.destroyBlock(pos, false, null, 512);  // dropResources=false，手动处理掉落
+        if (!destroyed) {
+            executor.pushData(new BooleanType(false));
+            return;
+        }
+
+        // 2. 创建带时运附魔的假工具（使用 enchant 方法）
+        ItemStack fortuneTool = new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE);
+        // 使用 Registry 获取附魔 - 通过 lookup 获取 HolderGetter
+        var fortuneKey = net.minecraft.world.item.enchantment.Enchantments.FORTUNE;
+        var holderGetter = level.registryAccess().lookup(net.minecraft.core.registries.Registries.ENCHANTMENT);
+        holderGetter.ifPresent(getter -> getter.get(fortuneKey).ifPresent(holder -> 
+            fortuneTool.enchant(holder, fortuneLevel)
+        ));
+
+        // 3. 手动掉落物品（应用时运）
+        net.minecraft.world.level.block.Block.dropResources(state, level, pos, null, null, fortuneTool);
+
+        executor.pushData(new BooleanType(true));
     }
 }

@@ -176,7 +176,7 @@ public class ToolShellContainer implements ShellContainer {
         if (machine.isRunning()) {
             machine.setContext("worldInteractor", getInteractorStack());
             machine.setContext("shellContainer", this);
-            machine.setContext("world", world);
+            machine.setContext("level", world);  // 使用 "level" 键，与操作中的 getContext 一致
             machine.setContext("self", player);
         }
 

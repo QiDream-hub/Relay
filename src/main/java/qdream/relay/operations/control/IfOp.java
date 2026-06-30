@@ -17,8 +17,9 @@ public class IfOp extends Spell {
 
     public IfOp() {
         super("relay:if", 1, 1, OperationSignature.builder()
-                .consumesFromData("boolean")
-                .consumesFromProgram("list", "list")
+                .consumesFromData("relay:boolean")
+                .consumesFromProgram("any")
+                .consumesFromProgram("any")
                 .producesToProgram("any")
                 .build());
     }

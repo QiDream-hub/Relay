@@ -69,14 +69,20 @@ public class DetectEntityOp extends Spell {
         
         double radius = radiusEx.asDouble();
         Vec3 center = centerEx.asVector();
-        
-        // 获取世界交互器位置（从上下文或默认原点）
+
+        // 从 self 获取执行者位置作为源位置（self 可能是 Entity 或 BlockEntity）
         Vec3 sourcePos = new Vec3(0, 0, 0);
-        Optional<Vec3> sourceOpt = executor.getContext("sourcePos", Vec3.class);
-        if (sourceOpt.isPresent()) {
-            sourcePos = sourceOpt.get();
+        var selfOpt = executor.getContext("self", Object.class);
+        if (selfOpt.isPresent()) {
+            Object self = selfOpt.get();
+            if (self instanceof net.minecraft.world.entity.Entity entity) {
+                sourcePos = new Vec3(entity.getX(), entity.getY(), entity.getZ());
+            } else if (self instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
+                net.minecraft.core.BlockPos blockPos = blockEntity.getBlockPos();
+                sourcePos = new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
+            }
         }
-        
+
         // 检查范围（检测搜索区域的边界）
         Vec3 searchEdge = center.add(new Vec3(radius, radius, radius));
         if (!WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {

@@ -126,6 +126,9 @@
   "operation.relay:get_entity_pos.name": "Get Entity Position",
   "operation.relay:get_entity_pos.description": "Get the current position of an entity",
 
+  "operation.relay:get_entity_eye_pos.name": "Get Entity Eye Position",
+  "operation.relay:get_entity_eye_pos.description": "Get the current eye position of an entity (for raycast and vision-related operations)",
+
   "operation.relay:get_world_interactor.name": "Get World Interactor",
   "operation.relay:get_world_interactor.description": "Get the currently active world interactor",
 

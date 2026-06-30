@@ -61,16 +61,10 @@ public class ShellTickHandler {
                 tickCounter = 0;
 
                 // 设置上下文 - 传递世界交互器等信息给操作
+                // 注意：level 和 self 由各 Shell 实现自行设置（ToolShellContainer、ShellBlockEntity 等）
                 var stateMachine = container.getStateMachine();
                 stateMachine.setContext("worldInteractor", container.getInteractorStack());
                 stateMachine.setContext("shellContainer", container);
-
-                // 获取世界引用并设置到上下文
-                if (container instanceof BlockEntity blockEntity) {
-                    stateMachine.setContext("world", blockEntity.getLevel());
-                } else if (container instanceof Entity entity) {
-                    stateMachine.setContext("world", entity.level());
-                }
 
                 // 执行 tick - mc 层负责控制执行节奏和能量扣除
                 runTick(container, coreCount);

@@ -81,8 +81,15 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
      * Tick 方法
      */
     public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
+        // 在 tick 前设置上下文（level 和 self）
+        var machine = entity.stateManager.getStateMachine();
+        if (machine.isRunning()) {
+            machine.setContext("level", world);
+            // self 可能是 Entity（工具外壳/实体外壳）或 BlockEntity（方块外壳）
+            machine.setContext("self", entity);
+        }
+
         entity.tickHandler.tick(entity);
-        entity.stateManager.getStateMachine().setContext("self", world.getBlockEntity(pos));
 
         // 每 10 tick 同步一次能量到客户端
         if (!world.isClientSide() && world.getGameTime() % 10 == 0) {

@@ -17,6 +17,7 @@ import qdream.relay.operations.control.EvalOp;
 import qdream.relay.operations.control.IfOp;
 import qdream.relay.operations.control.StopOp;
 import qdream.relay.operations.entity.GetEntityPosOp;
+import qdream.relay.operations.entity.GetEntityEyePosOp;
 import qdream.relay.operations.entity.GetOwnerOp;
 import qdream.relay.operations.entity.GetSelfOp;
 import qdream.relay.operations.entity.IsPlayerOp;
@@ -108,6 +109,8 @@ public class RelayOperations {
                 new OperationRegistry.OpEntry(new GetSelfOp()));
         OperationRegistry.register("relay:get_entity_pos",
                 new OperationRegistry.OpEntry(new GetEntityPosOp()));
+        OperationRegistry.register("relay:get_entity_eye_pos",
+                new OperationRegistry.OpEntry(new GetEntityEyePosOp()));
         OperationRegistry.register("relay:get_owner",
                 new OperationRegistry.OpEntry(new GetOwnerOp()));
         OperationRegistry.register("relay:is_player",

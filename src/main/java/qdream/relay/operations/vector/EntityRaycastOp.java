@@ -79,12 +79,6 @@ public class EntityRaycastOp extends Spell {
         Vec3 start = startEx.asVector();
         Vec3 end = start.add(direction.scale(maxDist));
 
-        // 检查范围
-        if (!WorldInteractorItem.isInRange(interactor, start, end)) {
-            executor.pushData(NullType.INSTANCE);
-            return;
-        }
-
         // 获取 Level 上下文
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty()) {
@@ -97,40 +91,61 @@ public class EntityRaycastOp extends Spell {
         // 获取要排除的实体（通常是施法者自己）
         Entity excludeEntity = excludeEx.getEntity();
 
-        // 执行实体射线追踪 - 遍历射线上的所有实体
-        Entity closestEntity = null;
-        double closestDistance = Double.MAX_VALUE;
+        // 执行射线追踪 - 使用 Minecraft 内置的实体射线检测
+        Entity hitEntity = null;
+        double hitDistSq = maxDist * maxDist;  // 使用距离平方避免开方
+        Vec3 hitPos = null;
 
-        // 计算搜索盒
-        AABB searchBox = new AABB(start, end).inflate(1.0);
-        
         // 获取搜索盒内的所有实体
+        AABB searchBox = new AABB(start, end).inflate(1.0);
         for (Entity entity : level.getEntitiesOfClass(Entity.class, searchBox)) {
             // 跳过排除的实体
-            if (excludeEntity != null && entity == excludeEntity) {
+            if (entity == excludeEntity) {
                 continue;
             }
 
-            // 计算实体到射线的最近距离
-            Vec3 entityPos = entity.position();
+            // 跳过施法者骑乘的载具（参考 Hexcasting）
+            if (excludeEntity != null && 
+                entity.getRootVehicle() == excludeEntity.getRootVehicle()) {
+                continue;
+            }
+
+            // 使用实体的碰撞箱 + pickRadius 进行射线检测（参考 Hexcasting）
+            AABB entityBox = entity.getBoundingBox().inflate(entity.getPickRadius());
             
-            // 使用简单的距离检查（可以改进为更精确的射线 - 实体相交检测）
-            double dist = start.distanceTo(entityPos);
-            if (dist <= maxDist && dist < closestDistance) {
-                // 检查实体是否在射线方向上
-                Vec3 toEntity = entityPos.subtract(start).normalize();
-                double dot = toEntity.dot(direction);
-                
-                // 如果点积接近 1，说明实体在射线方向上
-                if (dot > 0.9) {
-                    closestDistance = dist;
-                    closestEntity = entity;
+            // 计算射线与实体碰撞箱的交点
+            java.util.Optional<Vec3> optionalHitPos = entityBox.clip(start, end);
+            if (optionalHitPos.isEmpty()) {
+                continue;
+            }
+
+            Vec3 currentHitPos = optionalHitPos.get();
+            
+            // 处理起点在碰撞箱内的情况（参考 Hexcasting）
+            if (entityBox.contains(start)) {
+                if (hitDistSq >= 0) {
+                    hitEntity = entity;
+                    hitPos = currentHitPos;
+                    hitDistSq = 0;
+                }
+            } else {
+                // 使用距离平方比较（性能优化）
+                double distSq = start.distanceToSqr(currentHitPos);
+                if (distSq < hitDistSq || hitDistSq == 0.0) {
+                    hitEntity = entity;
+                    hitPos = currentHitPos;
+                    hitDistSq = distSq;
                 }
             }
         }
 
-        if (closestEntity != null) {
-            executor.pushData(EntityType.from(closestEntity, level));
+        // 检查击中的实体是否在范围内（参考 Hexcasting）
+        if (hitEntity != null && hitPos != null) {
+            if (!WorldInteractorItem.isInRange(interactor, start, hitPos)) {
+                executor.pushData(NullType.INSTANCE);
+                return;
+            }
+            executor.pushData(EntityType.from(hitEntity, level));
         } else {
             executor.pushData(NullType.INSTANCE);
         }

@@ -126,6 +126,9 @@
   "operation.relay:get_entity_pos.name": "获取实体坐标",
   "operation.relay:get_entity_pos.description": "获取实体当前的位置坐标",
 
+  "operation.relay:get_entity_eye_pos.name": "获取实体眼睛位置",
+  "operation.relay:get_entity_eye_pos.description": "获取实体当前的眼睛位置坐标（用于射线追踪等视线相关操作）",
+
   "operation.relay:get_world_interactor.name": "检查世界交互器",
   "operation.relay:get_world_interactor.description": "检查是否有世界交互器",
 

@@ -2,6 +2,7 @@ package qdream.relay.operations.vector;
 
 import java.util.Optional;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext;
@@ -77,12 +78,6 @@ public class BlockRaycastOp extends Spell {
         Vec3 start = startEx.asVector();
         Vec3 end = start.add(direction.scale(maxDist));
 
-        // 检查范围
-        if (!WorldInteractorItem.isInRange(interactor, start, end)) {
-            executor.pushData(NullType.INSTANCE);
-            return;
-        }
-
         // 获取 Level 上下文
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty()) {
@@ -101,8 +96,14 @@ public class BlockRaycastOp extends Spell {
         ));
 
         if (hitResult.getType() == HitResult.Type.BLOCK) {
-            // 返回击中的方块坐标
-            executor.pushData(new VectorType(hitResult.getLocation()));
+            // 检查击中方块在范围内（参考 Hexcasting）
+            Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
+            if (!WorldInteractorItem.isInRange(interactor, start, blockCenter)) {
+                executor.pushData(NullType.INSTANCE);
+                return;
+            }
+            // 返回击中的方块坐标（方块中心）
+            executor.pushData(new VectorType(blockCenter));
         } else {
             executor.pushData(NullType.INSTANCE);
         }
