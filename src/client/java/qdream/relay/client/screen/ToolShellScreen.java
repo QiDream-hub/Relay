@@ -1,12 +1,17 @@
 package qdream.relay.client.screen;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 import qdream.relay.items.ToolShellScreenHandler;
+import qdream.relay.networking.payloads.C2S_ToolShellConfigPayload;
 
 /**
  * 工具外壳屏幕
@@ -42,13 +47,14 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         super.init();
 
         // 配置按钮：是否使用背包内能量模块
-        int buttonWidth = 100;
+        int buttonWidth = 70;
         int buttonHeight = 20;
         int buttonX = this.leftPos + GUI_WIDTH - buttonWidth - 8;
-        int buttonY = this.topPos + 8;
+        int buttonY = this.topPos + 16;
 
+        // 初始化时使用默认文本，extractRenderState 会每帧同步实际状态
         useInventoryEnergyButton = Button.builder(
-            getButtonText(),
+            getUseInventoryEnergyLabel(),
             btn -> toggleUseInventoryEnergy()
         )
         .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
@@ -57,10 +63,7 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         this.addRenderableWidget(useInventoryEnergyButton);
     }
 
-    /**
-     * 获取按钮文本
-     */
-    private Component getButtonText() {
+    private Component getUseInventoryEnergyLabel() {
         boolean useInventory = this.menu.isUseInventoryEnergyModule();
         return Component.literal(useInventory ? "§a 使用背包能量" : "§7 使用插槽能量");
     }
@@ -70,8 +73,10 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
      */
     private void toggleUseInventoryEnergy() {
         boolean newValue = !this.menu.isUseInventoryEnergyModule();
+        // 发送网络包到服务端
+        ClientPlayNetworking.send(new C2S_ToolShellConfigPayload(newValue));
+        // 立即更新本地 UI（不等待服务端同步）
         this.menu.setUseInventoryEnergyModule(newValue);
-        useInventoryEnergyButton.setMessage(getButtonText());
     }
 
     @Override
@@ -90,6 +95,16 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
             int labelY = top + LABEL_START_Y + i * LABEL_SPACING_Y + 4;
             graphics.text(this.font, SLOT_LABELS[i], left + LABEL_X, labelY, SLOT_LABEL_COLORS[i]);
         }
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        // 每帧更新按钮文本，确保与服务端同步
+        if (useInventoryEnergyButton != null) {
+            useInventoryEnergyButton.setMessage(getUseInventoryEnergyLabel());
+        }
+
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
     }
 
     @Override

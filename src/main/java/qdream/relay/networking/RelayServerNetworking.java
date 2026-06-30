@@ -182,6 +182,22 @@ public class RelayServerNetworking {
                 }
             });
         });
+
+        // 注册 C2S_ToolShellConfigPayload
+        PayloadTypeRegistry.serverboundPlay().register(C2S_ToolShellConfigPayload.TYPE, C2S_ToolShellConfigPayload.CODEC);
+
+        // 注册服务端接收处理器 - 工具外壳配置更新
+        ServerPlayNetworking.registerGlobalReceiver(C2S_ToolShellConfigPayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player == null)
+                return;
+
+            context.server().execute(() -> {
+                if (player.containerMenu instanceof qdream.relay.items.ToolShellScreenHandler handler) {
+                    handler.setUseInventoryEnergyModule(payload.useInventoryEnergyModule());
+                }
+            });
+        });
     }
 
     /**

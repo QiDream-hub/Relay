@@ -224,6 +224,8 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         if (container instanceof ToolShellContainer tc) {
             tc.setUseInventoryEnergyModule(use);
             useInventoryEnergySlot.set(use ? 1 : 0);
+            // 触发 container 的 setChanged 来促使 broadcastChanges 被调用
+            tc.setChanged();
         }
     }
 

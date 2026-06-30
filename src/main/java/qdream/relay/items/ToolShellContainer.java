@@ -255,8 +255,17 @@ public class ToolShellContainer implements ShellContainer {
         if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleItem) {
             return EnergyModuleItem.getStoredEnergy(energyStack);
         }
-        if (isUseInventoryEnergyModule()) {
-            // TODO: 实现背包能量模块检查
+        // 如果启用背包能量模块且插槽为空，检查背包
+        if (isUseInventoryEnergyModule() && owner instanceof net.minecraft.world.entity.player.Player player) {
+            double totalEnergy = 0.0;
+            var inv = player.getInventory();
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                ItemStack slot = inv.getItem(i);
+                if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleItem) {
+                    totalEnergy += EnergyModuleItem.getStoredEnergy(slot);
+                }
+            }
+            return totalEnergy;
         }
         return 0;
     }
@@ -267,6 +276,43 @@ public class ToolShellContainer implements ShellContainer {
         if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleItem) {
             EnergyModuleItem.setStoredEnergy(energyStack, energy);
         }
+        // 使用背包能量模块时，不直接设置能量值，而是通过 consumeEnergy/addEnergy 管理
+    }
+
+    /**
+     * 消耗能量
+     * @param amount 需要消耗的能量
+     * @return 实际消耗的能量
+     */
+    public double consumeEnergy(double amount) {
+        ItemStack energyStack = getEnergyStack();
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleItem) {
+            return EnergyModuleItem.consumeEnergy(energyStack, amount);
+        }
+        // 如果启用背包能量模块，从背包内的能量模块扣除
+        if (isUseInventoryEnergyModule() && owner instanceof net.minecraft.world.entity.player.Player player) {
+            double remaining = amount;
+            var inv = player.getInventory();
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                ItemStack slot = inv.getItem(i);
+                if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleItem) {
+                    double consumed = EnergyModuleItem.consumeEnergy(slot, remaining);
+                    remaining -= consumed;
+                    if (remaining <= 0) {
+                        return amount;
+                    }
+                }
+            }
+            return amount - remaining;
+        }
+        return 0;
+    }
+
+    /**
+     * 检查是否有足够能量
+     */
+    public boolean hasEnoughEnergy(double amount) {
+        return getEnergy() >= amount;
     }
 
     @Override

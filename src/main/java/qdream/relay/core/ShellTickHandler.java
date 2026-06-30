@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.ComputingCoreItem;
 import qdream.relay.items.EnergyModuleItem;
+import qdream.relay.items.ToolShellContainer;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 
@@ -86,8 +87,7 @@ public class ShellTickHandler {
      */
     private void runTick(ShellContainer container, int maxOps) {
         var stateMachine = container.getStateMachine();
-        ItemStack energyStack = container.getEnergyStack();
-        double currentEnergy = EnergyModuleItem.getStoredEnergy(energyStack);
+        double currentEnergy = container.getEnergy();
 
         int usedCost = 0;
 
@@ -125,9 +125,15 @@ public class ShellTickHandler {
                 break; // 执行失败
             }
 
-            // 扣除能量
-            EnergyModuleItem.consumeEnergy(energyStack, required);
-            currentEnergy = EnergyModuleItem.getStoredEnergy(energyStack);
+            // 扣除能量 - 使用 container 的方法，支持背包能量模块
+            double consumed = 0;
+            if (container instanceof ToolShellContainer toolShell) {
+                consumed = toolShell.consumeEnergy(required);
+            } else {
+                ItemStack energyStack = container.getEnergyStack();
+                consumed = EnergyModuleItem.consumeEnergy(energyStack, required);
+            }
+            currentEnergy = container.getEnergy();
             usedCost += cost;
         }
 
