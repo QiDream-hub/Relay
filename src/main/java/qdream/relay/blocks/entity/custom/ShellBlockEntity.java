@@ -91,8 +91,8 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
         entity.tickHandler.tick(entity);
 
-        // 每 10 tick 同步一次能量到客户端
-        if (!world.isClientSide() && world.getGameTime() % 10 == 0) {
+        // 每 20 tick 同步一次能量到客户端（兜底同步）
+        if (!world.isClientSide() && world.getGameTime() % 20 == 0) {
             entity.syncEnergyToClient(world, pos);
         }
     }
@@ -199,10 +199,16 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public Entity getOwner() {
-        // 延迟加载 Owner
-        if (stateManager.getOwner() == null && stateManager.getOwnerUuid() != null && level != null && !level.isClientSide()) {
+        // 优先返回直接持有的 owner 字段
+        if (stateManager.getOwner() != null) {
+            return stateManager.getOwner();
+        }
+        // 延迟加载作为兜底
+        if (stateManager.getOwnerUuid() != null && level != null && !level.isClientSide()) {
             Entity owner = level.getEntity(stateManager.getOwnerUuid());
-            stateManager.setOwner(owner);
+            if (owner != null) {
+                stateManager.setOwner(owner);
+            }
         }
         return stateManager.getOwner();
     }
@@ -256,6 +262,10 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     public void setEnergy(double energy) {
         this.energy = energy;
         setChanged();
+        // 事件驱动：能量变化时立即同步到客户端
+        if (level != null && !level.isClientSide()) {
+            syncEnergyToClient(level, worldPosition);
+        }
     }
 
     @Override

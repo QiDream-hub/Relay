@@ -5,6 +5,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.StateMachine;
@@ -39,15 +41,15 @@ import java.util.UUID;
  * }
  * </pre>
  */
-public class ToolShellContainer implements ShellContainer {
+public class ToolShellContainer implements ShellContainer, Container {
 
     public static final int CORE_SLOT = 0;
     public static final int DISK_SLOT = 1;
     public static final int ENERGY_SLOT = 2;
     public static final int INTERACTOR_SLOT = 3;
 
-    final ToolShellItem toolShell; // package-private for ShellContainerWrapper
-    ItemStack stack; // package-private for ShellContainerWrapper - 非 final 以支持引用更新
+    final ToolShellItem toolShell; // package-private for direct access
+    ItemStack stack; // package-private - 非 final 以支持引用更新
     private final UUID sessionId; // 会话 ID
     private final ShellStateManager stateManager;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
@@ -383,5 +385,68 @@ public class ToolShellContainer implements ShellContainer {
 
     public ItemStack getInteractorStack() {
         return getInventorySlot(INTERACTOR_SLOT);
+    }
+
+    // ========== Container 接口实现 ==========
+
+    @Override
+    public int getContainerSize() {
+        return 4;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for (int i = 0; i < 4; i++) {
+            if (!stateManager.getInventorySlot(i).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack getItem(int slot) {
+        return stateManager.getInventorySlot(slot);
+    }
+
+    @Override
+    public ItemStack removeItem(int slot, int amount) {
+        ItemStack stack = stateManager.getInventorySlot(slot);
+        if (!stack.isEmpty()) {
+            ItemStack result = stack.split(amount);
+            setInventorySlot(slot, stack);
+            setChanged();
+            return result;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot) {
+        ItemStack stack = stateManager.getInventorySlot(slot);
+        if (!stack.isEmpty()) {
+            stateManager.setInventorySlot(slot, ItemStack.EMPTY);
+            setChanged();
+            return stack;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack stack) {
+        stateManager.setInventorySlot(slot, stack);
+        setChanged();
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return true;
+    }
+
+    @Override
+    public void clearContent() {
+        for (int i = 0; i < 4; i++) {
+            stateManager.setInventorySlot(i, ItemStack.EMPTY);
+        }
     }
 }

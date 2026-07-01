@@ -30,6 +30,9 @@ public class Relay implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	// ✅ StateMachine 默认最大程序栈数量
+	public static final int DEFAULT_MAX_PROGRAM_STACK_SIZE = 4096;
+
 	// ✅ 全局 Server 引用
 	private static MinecraftServer SERVER_INSTANCE = null;
 

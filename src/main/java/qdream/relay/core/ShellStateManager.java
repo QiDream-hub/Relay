@@ -7,6 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
 
+import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.StateMachineNbtSerializer;
 
@@ -31,7 +32,7 @@ public class ShellStateManager {
     private static final int SLOT_COUNT = 4;
 
     protected final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    protected final StateMachine stateMachine = new StateMachine(1024);
+    protected final StateMachine stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
     protected Entity owner;
     private java.util.UUID ownerUuid;
 

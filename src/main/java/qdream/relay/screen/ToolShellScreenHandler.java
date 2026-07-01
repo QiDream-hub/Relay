@@ -9,12 +9,12 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import qdream.relay.Relay;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.items.ComputingCoreItem;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.items.ToolShellContainer;
 import qdream.relay.items.EnergyModuleItem;
-import qdream.relay.items.ShellContainerWrapper;
 
 /**
  * 工具外壳 ScreenHandler
@@ -72,7 +72,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
 
     /**
      * 服务端构造方法（有实际容器）
-     * 
+     *
      * @param toolShell 工具外壳物品堆
      */
     public ToolShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container,
@@ -80,8 +80,8 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         super(RelayScreenHandlers.TOOL_SHELL_SCREEN_HANDLER, syncId);
         this.container = container;
         this.toolShell = toolShell;
-        // 使用 ToolShellItem 特定的构造函数
-        this.wrapper = container != null ? new ShellContainerWrapper((ToolShellContainer) container)
+        // ToolShellContainer 已实现 Container，直接使用；客户端使用空容器
+        this.wrapper = container != null ? (Container) container
                 : new EmptyToolShellContainer();
 
         checkContainerSize(this.wrapper, CONTAINER_SLOT_COUNT);
@@ -272,20 +272,26 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
 
     /**
      * 空容器实现（用于客户端）
+     * 持有独立的物品数组，Minecraft 会通过同步包更新内容
      */
-    private static class EmptyToolShellContainer extends ShellContainerWrapper {
-        private final ItemStack[] emptyInventory = new ItemStack[CONTAINER_SLOT_COUNT];
+    private static class EmptyToolShellContainer implements Container {
+        private final ItemStack[] items = new ItemStack[CONTAINER_SLOT_COUNT];
 
         public EmptyToolShellContainer() {
-            super(new DummyToolShellContainer());
+            // 初始化所有插槽为空
             for (int i = 0; i < CONTAINER_SLOT_COUNT; i++) {
-                emptyInventory[i] = ItemStack.EMPTY;
+                items[i] = ItemStack.EMPTY;
             }
         }
 
         @Override
+        public int getContainerSize() {
+            return CONTAINER_SLOT_COUNT;
+        }
+
+        @Override
         public ItemStack getItem(int slot) {
-            return slot >= 0 && slot < CONTAINER_SLOT_COUNT ? emptyInventory[slot] : ItemStack.EMPTY;
+            return slot >= 0 && slot < CONTAINER_SLOT_COUNT ? items[slot] : ItemStack.EMPTY;
         }
 
         @Override
@@ -293,7 +299,9 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
             ItemStack stack = getItem(slot);
             if (!stack.isEmpty()) {
                 ItemStack result = stack.split(amount);
-                setItem(slot, stack);
+                if (!result.isEmpty()) {
+                    setItem(slot, stack);
+                }
                 return result;
             }
             return ItemStack.EMPTY;
@@ -303,7 +311,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         public ItemStack removeItemNoUpdate(int slot) {
             ItemStack stack = getItem(slot);
             if (!stack.isEmpty()) {
-                setItem(slot, ItemStack.EMPTY);
+                items[slot] = ItemStack.EMPTY;
                 return stack;
             }
             return ItemStack.EMPTY;
@@ -312,13 +320,13 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         @Override
         public void setItem(int slot, ItemStack stack) {
             if (slot >= 0 && slot < CONTAINER_SLOT_COUNT) {
-                emptyInventory[slot] = stack;
+                items[slot] = stack;
             }
         }
 
         @Override
         public boolean isEmpty() {
-            for (ItemStack stack : emptyInventory) {
+            for (ItemStack stack : items) {
                 if (!stack.isEmpty()) {
                     return false;
                 }
@@ -329,82 +337,18 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         @Override
         public void clearContent() {
             for (int i = 0; i < CONTAINER_SLOT_COUNT; i++) {
-                emptyInventory[i] = ItemStack.EMPTY;
+                items[i] = ItemStack.EMPTY;
             }
         }
-    }
-
-    /**
-     * 伪容器用于 EmptyToolShellContainer 的构造
-     */
-    private static class DummyToolShellContainer implements ShellContainer {
-        @Override
-        public ItemStack getInventorySlot(int slot) {
-            return ItemStack.EMPTY;
-        }
 
         @Override
-        public void setInventorySlot(int slot, ItemStack stack) {
-        }
-
-        @Override
-        public qdream.relay.engine.StateMachine getStateMachine() {
-            return new qdream.relay.engine.StateMachine(1024);
-        }
-
-        @Override
-        public int getCoreCount() {
-            return 0;
-        }
-
-        @Override
-        public int getInterval() {
-            return 1;
-        }
-
-        @Override
-        public boolean isInitialized() {
-            return false;
-        }
-
-        @Override
-        public void setInitialized(boolean initialized) {
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return false;
-        }
-
-        @Override
-        public void setEnabled(boolean enabled) {
-        }
-
-        @Override
-        public double getEnergy() {
-            return 0;
-        }
-
-        @Override
-        public void setEnergy(double energy) {
+        public boolean stillValid(Player player) {
+            return true;
         }
 
         @Override
         public void setChanged() {
         }
-
-        @Override
-        public boolean isClientSide() {
-            return true;
-        }
-
-        @Override
-        public net.minecraft.world.entity.Entity getOwner() {
-            return null;
-        }
-
-        @Override
-        public void setOwner(net.minecraft.world.entity.Entity owner) {
-        }
     }
+
 }
