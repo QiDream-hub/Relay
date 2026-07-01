@@ -10,11 +10,14 @@ public class RelayDataGenerator implements DataGeneratorEntrypoint {
     @Override
     public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
         FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
-        
+
         // 注册配方生成器
         pack.addProvider(RelayRecipeProvider::new);
-        
+
         // 注册模型生成器
         pack.addProvider(RelayModelProvider::new);
+
+        // 注册战利品表生成器
+        pack.addProvider(RelayLootTableProvider::new);
     }
 }

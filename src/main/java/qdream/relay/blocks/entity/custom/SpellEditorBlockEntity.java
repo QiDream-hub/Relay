@@ -199,7 +199,7 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
 
-        // 保存物品栏 - 使用 ContainerHelper 处理 DataComponent 系统
+        // 保存物品栏
         ContainerHelper.saveAllItems(output, this.inventory);
 
         // 保存程序列表 - 使用 CompoundTag.CODEC 序列化
@@ -217,7 +217,7 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
 
-        // 加载物品栏 - 使用 ContainerHelper 处理 DataComponent 系统
+        // 加载物品栏
         ContainerHelper.loadAllItems(input, this.inventory);
 
         // 加载程序列表
@@ -233,5 +233,12 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
                 e.printStackTrace();
             }
         });
+    }
+
+    // ========== 网络同步 ==========
+
+    @Override
+    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registryLookup) {
+        return saveWithoutMetadata(registryLookup);
     }
 }

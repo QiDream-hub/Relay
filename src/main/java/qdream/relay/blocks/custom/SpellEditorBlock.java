@@ -28,7 +28,7 @@ public class SpellEditorBlock extends BaseEntityBlock {
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null;
+        return simpleCodec(SpellEditorBlock::new);
     }
 
     @Override

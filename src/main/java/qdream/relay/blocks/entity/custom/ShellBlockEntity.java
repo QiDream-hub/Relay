@@ -292,7 +292,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
 
-        // 保存物品栏 - 使用 ContainerHelper 处理 DataComponent 系统
+        // 保存物品栏
         ContainerHelper.saveAllItems(output, stateManager.getInventory());
 
         // 保存能量
