@@ -132,10 +132,10 @@ public class RelayRecipeProvider extends FabricRecipeProvider {
 
                 // ===== 能量模块 =====
                 shapedRecipe(itemLookup, RelayItems.ENERGY_MODULE, 1)
-                    .pattern(" G ")
-                    .pattern("GRG")
-                    .pattern(" G ")
-                    .define('G', Items.GOLD_INGOT)
+                    .pattern(" C ")
+                    .pattern("CRC")
+                    .pattern(" C ")
+                    .define('C', Items.COPPER_INGOT)
                     .define('R', Items.REDSTONE)
                     .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
                     .save(output);

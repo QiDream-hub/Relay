@@ -16,21 +16,20 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.core.EnergySystem;
+import qdream.relay.mc.component.EnergyModuleComponent;
 
 /**
  * 能量模块物品
- * Shift+右键自动充能背包内的紫水晶，右键显示当前能量
+ * Shift+ 右键自动充能背包内的紫水晶，右键显示当前能量
  */
-public class EnergyModuleItem extends Item {
+public class EnergyModuleItem extends Item implements EnergyModuleComponent {
 
     public EnergyModuleItem(Properties properties) {
         super(properties.stacksTo(1));
     }
 
-    /**
-     * 获取当前存储的能量
-     */
-    public static double getStoredEnergy(ItemStack stack) {
+    @Override
+    public double getStoredEnergy(ItemStack stack) {
         if (stack.isEmpty() || !(stack.getItem() instanceof EnergyModuleItem)) {
             return 0;
         }
@@ -38,22 +37,16 @@ public class EnergyModuleItem extends Item {
         return energy != null ? energy : 0.0;
     }
 
-    /**
-     * 设置能量值
-     */
-    public static void setStoredEnergy(ItemStack stack, double energy) {
+    @Override
+    public void setStoredEnergy(ItemStack stack, double energy) {
         if (stack.isEmpty() || !(stack.getItem() instanceof EnergyModuleItem)) {
             return;
         }
         stack.set(RelayDataComponents.ENERGY, Math.max(0, energy));
     }
 
-    /**
-     * 添加能量
-     * 
-     * @return 实际添加的能量值
-     */
-    public static double addEnergy(ItemStack stack, double amount) {
+    @Override
+    public double addEnergy(ItemStack stack, double amount) {
         if (stack.isEmpty() || !(stack.getItem() instanceof EnergyModuleItem)) {
             return 0;
         }
@@ -63,12 +56,8 @@ public class EnergyModuleItem extends Item {
         return amount;
     }
 
-    /**
-     * 消耗能量
-     * 
-     * @return 实际消耗的能量值
-     */
-    public static double consumeEnergy(ItemStack stack, double amount) {
+    @Override
+    public double consumeEnergy(ItemStack stack, double amount) {
         if (stack.isEmpty() || !(stack.getItem() instanceof EnergyModuleItem)) {
             return 0;
         }
@@ -80,15 +69,13 @@ public class EnergyModuleItem extends Item {
         return toConsume;
     }
 
-    /**
-     * 检查是否有足够能量
-     */
-    public static boolean hasEnergy(ItemStack stack, double amount) {
+    @Override
+    public boolean hasEnergy(ItemStack stack, double amount) {
         return getStoredEnergy(stack) >= amount;
     }
 
     /**
-     * Shift+右键自动充能背包内的紫水晶
+     * Shift+ 右键自动充能背包内的紫水晶
      */
     @Override
     public InteractionResult use(Level world, Player player, InteractionHand hand) {
@@ -96,15 +83,15 @@ public class EnergyModuleItem extends Item {
 
         if (!world.isClientSide()) {
             if (player.isShiftKeyDown()) {
-                // Shift+右键：扫描背包自动充能
+                // Shift+ 右键：扫描背包自动充能
                 double addEnergy = chargeFromInventory(player, stack);
                 if (addEnergy > 0) {
                     player.sendSystemMessage(
-                            Component.literal("§a已充能 §e" + addEnergy + " §a，当前能量：§e"
+                            Component.literal("§a 已充能 §e" + addEnergy + " §a，当前能量：§e"
                                     + String.format("%.1f", getStoredEnergy(stack))));
                 } else {
                     player.sendSystemMessage(
-                            Component.literal("§7背包内没有可充能的紫水晶"));
+                            Component.literal("§7 背包内没有可充能的紫水晶"));
                 }
             }
         }
@@ -114,7 +101,7 @@ public class EnergyModuleItem extends Item {
 
     /**
      * 从玩家物品栏中吸收紫水晶能量
-     * 
+     *
      * @return 充能的紫水晶数量
      */
     public static double chargeFromInventory(Player player, ItemStack module) {
@@ -137,7 +124,10 @@ public class EnergyModuleItem extends Item {
             }
 
             double energyValue = EnergySystem.getEnergyValue(slot);
-            addEnergy(module, energyValue);
+            // 使用实例方法
+            if (module.getItem() instanceof EnergyModuleItem emi) {
+                emi.addEnergy(module, energyValue);
+            }
             addEnergyCount += energyValue;
 
             // 移除物品

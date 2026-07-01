@@ -4,8 +4,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.Executable;
-import qdream.relay.items.ComputingCoreItem;
-import qdream.relay.items.EnergyModuleItem;
+import qdream.relay.mc.component.ComputingCoreComponent;
+import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.items.ToolShellContainer;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
@@ -125,7 +125,9 @@ public class ShellTickHandler {
                 consumed = toolShell.consumeEnergy(required);
             } else {
                 ItemStack energyStack = container.getEnergyStack();
-                consumed = EnergyModuleItem.consumeEnergy(energyStack, required);
+                if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+                    consumed = emi.consumeEnergy(energyStack, required);
+                }
             }
             currentEnergy = container.getEnergy();
             usedCost += cost;
@@ -148,9 +150,9 @@ public class ShellTickHandler {
         if (!coreStack.isEmpty()) {
             coreCount = coreStack.count();
             // 从核心物品中读取 interval 和 energyCost 属性
-            if (coreStack.getItem() instanceof ComputingCoreItem coreItem) {
-                interval = coreItem.getInterval(coreStack);
-                energyCost = coreItem.getEnergyCost(coreStack);
+            if (coreStack.getItem() instanceof ComputingCoreComponent core) {
+                interval = core.getInterval(coreStack);
+                energyCost = core.getEnergyCost(coreStack);
             } else {
                 interval = 0;
                 energyCost = 0;
@@ -167,8 +169,8 @@ public class ShellTickHandler {
      */
     public void updateEnergy(ShellContainer container) {
         ItemStack energyStack = container.getEnergyStack();
-        if (!energyStack.isEmpty()) {
-            double storedEnergy = EnergyModuleItem.getStoredEnergy(energyStack);
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            double storedEnergy = emi.getStoredEnergy(energyStack);
             container.setEnergy(storedEnergy);
         } else {
             container.setEnergy(0);

@@ -25,7 +25,6 @@ import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.screen.ShellScreenHandler;
-import qdream.relay.types.BlockEntityType;
 import qdream.relay.core.ShellRegistry;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.StateMachineNbtSerializer;

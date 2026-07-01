@@ -103,7 +103,7 @@ public class InfoUtils {
         
         // 从程序栈消费的参数
         for (ParameterDescriptor descriptor : signature.getConsumesFromProgram()) {
-            inputTypes.add(formatTypes(descriptor.getTypes()) + " (程序)");
+            inputTypes.add(formatTypes(descriptor.getTypes()) + " [程序]");
         }
 
         if (!inputTypes.isEmpty()) {

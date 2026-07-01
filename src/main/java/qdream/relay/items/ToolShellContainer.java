@@ -14,6 +14,8 @@ import qdream.relay.types.EntityType;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
+import qdream.relay.mc.component.ComputingCoreComponent;
+import qdream.relay.mc.component.EnergyModuleComponent;
 
 import java.util.UUID;
 
@@ -213,8 +215,8 @@ public class ToolShellContainer implements ShellContainer, Container {
     @Override
     public int getInterval() {
         ItemStack coreStack = getCoreStack();
-        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreItem coreItem) {
-            return coreItem.getInterval(coreStack);
+        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+            return core.getInterval(coreStack);
         }
         return 0;
     }
@@ -254,8 +256,8 @@ public class ToolShellContainer implements ShellContainer, Container {
     @Override
     public double getEnergy() {
         ItemStack energyStack = getEnergyStack();
-        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleItem) {
-            return EnergyModuleItem.getStoredEnergy(energyStack);
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            return emi.getStoredEnergy(energyStack);
         }
         // 如果启用背包能量模块且插槽为空，检查背包
         if (isUseInventoryEnergyModule() && owner instanceof net.minecraft.world.entity.player.Player player) {
@@ -263,8 +265,8 @@ public class ToolShellContainer implements ShellContainer, Container {
             var inv = player.getInventory();
             for (int i = 0; i < inv.getContainerSize(); i++) {
                 ItemStack slot = inv.getItem(i);
-                if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleItem) {
-                    totalEnergy += EnergyModuleItem.getStoredEnergy(slot);
+                if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {
+                    totalEnergy += emiSlot.getStoredEnergy(slot);
                 }
             }
             return totalEnergy;
@@ -275,8 +277,8 @@ public class ToolShellContainer implements ShellContainer, Container {
     @Override
     public void setEnergy(double energy) {
         ItemStack energyStack = getEnergyStack();
-        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleItem) {
-            EnergyModuleItem.setStoredEnergy(energyStack, energy);
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            emi.setStoredEnergy(energyStack, energy);
         }
         // 使用背包能量模块时，不直接设置能量值，而是通过 consumeEnergy/addEnergy 管理
     }
@@ -288,8 +290,8 @@ public class ToolShellContainer implements ShellContainer, Container {
      */
     public double consumeEnergy(double amount) {
         ItemStack energyStack = getEnergyStack();
-        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleItem) {
-            return EnergyModuleItem.consumeEnergy(energyStack, amount);
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            return emi.consumeEnergy(energyStack, amount);
         }
         // 如果启用背包能量模块，从背包内的能量模块扣除
         if (isUseInventoryEnergyModule() && owner instanceof net.minecraft.world.entity.player.Player player) {
@@ -297,8 +299,8 @@ public class ToolShellContainer implements ShellContainer, Container {
             var inv = player.getInventory();
             for (int i = 0; i < inv.getContainerSize(); i++) {
                 ItemStack slot = inv.getItem(i);
-                if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleItem) {
-                    double consumed = EnergyModuleItem.consumeEnergy(slot, remaining);
+                if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {
+                    double consumed = emiSlot.consumeEnergy(slot, remaining);
                     remaining -= consumed;
                     if (remaining <= 0) {
                         return amount;

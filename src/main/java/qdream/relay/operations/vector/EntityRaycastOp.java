@@ -25,12 +25,16 @@ import qdream.relay.types.VectorType;
  * 弹出：entity (排除的实体，通常是施法者), vector (方向), vector (起点), number (最大距离)
  * 压入：entity (击中的实体) 或 null (未击中)
  *
+ * 语义说明：
+ * - 未击中任何实体时返回 null（这是正常行为，不是错误）
+ * - 击中但超出世界交互器范围时返回 null（这是正常行为，不是错误）
+ *
  * 需要世界交互器，并检查范围
  */
 public class EntityRaycastOp extends Spell {
 
     public EntityRaycastOp() {
-        super("relay:entity_raycast", 5, 3, OperationSignature.builder()
+        super("relay:entity_raycast", 3, 5, OperationSignature.builder()
                 .consumesFromData("relay:number")
                 .consumesFromData("relay:vector")
                 .consumesFromData("relay:vector")
@@ -93,7 +97,7 @@ public class EntityRaycastOp extends Spell {
 
         // 执行射线追踪 - 使用 Minecraft 内置的实体射线检测
         Entity hitEntity = null;
-        double hitDistSq = maxDist * maxDist;  // 使用距离平方避免开方
+        double hitDistSq = maxDist * maxDist;
         Vec3 hitPos = null;
 
         // 获取搜索盒内的所有实体
@@ -114,7 +118,7 @@ public class EntityRaycastOp extends Spell {
             AABB entityBox = entity.getBoundingBox().inflate(entity.getPickRadius());
             
             // 计算射线与实体碰撞箱的交点
-            java.util.Optional<Vec3> optionalHitPos = entityBox.clip(start, end);
+            Optional<Vec3> optionalHitPos = entityBox.clip(start, end);
             if (optionalHitPos.isEmpty()) {
                 continue;
             }

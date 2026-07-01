@@ -11,9 +11,9 @@ import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.Relay;
 import qdream.relay.core.ShellContainer;
-import qdream.relay.items.ComputingCoreItem;
+import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.SpellDiskItem;
-import qdream.relay.items.EnergyModuleItem;
+import qdream.relay.mc.component.EnergyModuleComponent;
 
 /**
  * 外壳 ScreenHandler
@@ -169,9 +169,9 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         Item item = stack.getItem();
 
         return switch (slot) {
-            case ShellContainer.CORE_SLOT -> item instanceof ComputingCoreItem;
+            case ShellContainer.CORE_SLOT -> item instanceof ComputingCoreComponent;
             case ShellContainer.DISK_SLOT -> item instanceof SpellDiskItem;
-            case ShellContainer.ENERGY_SLOT -> item instanceof EnergyModuleItem;
+            case ShellContainer.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
             case ShellContainer.INTERACTOR_SLOT -> true; // 世界交互器插槽允许任意物品
             default -> false;
         };

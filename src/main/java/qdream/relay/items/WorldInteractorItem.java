@@ -11,17 +11,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.Component.RelayDataComponents;
+import qdream.relay.mc.component.WorldInteractorComponent;
 
 /**
  * 世界交互器物品
  * 提供世界交互能力（方块放置/破坏、实体交互等）
- * 
+ *
  * 特性：
  * - 64 个品阶（1-64），品阶数字越大，交互距离越远，能量消耗越高
  * - 需要持续消耗能量才能工作
  * - 与运算核心共享能量模块
  */
-public class WorldInteractorItem extends Item {
+public class WorldInteractorItem extends Item implements WorldInteractorComponent {
 
     /**
      * 基础交互距离（品阶 1）
@@ -56,6 +57,7 @@ public class WorldInteractorItem extends Item {
      * @param stack 物品堆
      * @return 品阶值（1-64）
      */
+    @Override
     public int getTier(ItemStack stack) {
         Integer tier = stack.get(RelayDataComponents.WORLD_INTERACTOR_TIER);
         return tier != null ? tier : fixedTier;
@@ -68,6 +70,7 @@ public class WorldInteractorItem extends Item {
      * @param tier  品阶值（1-64）
      * @return 是否设置成功（固定品阶返回 false）
      */
+    @Override
     public boolean setTier(ItemStack stack, int tier) {
         return false;
     }
@@ -78,6 +81,7 @@ public class WorldInteractorItem extends Item {
      * @param stack 物品堆
      * @return 交互距离（方块单位）
      */
+    @Override
     public double getRange(ItemStack stack) {
         Double range = stack.get(RelayDataComponents.WORLD_INTERACTION_RANGE);
         return range != null ? range : (BASE_RANGE + fixedTier * 0.5);
@@ -90,6 +94,7 @@ public class WorldInteractorItem extends Item {
      * @param range 交互距离
      * @return 是否设置成功（固定距离返回 false）
      */
+    @Override
     public boolean setRange(ItemStack stack, double range) {
         return false;
     }
@@ -100,6 +105,7 @@ public class WorldInteractorItem extends Item {
      * @param stack 物品堆
      * @return 每次交互消耗的能量
      */
+    @Override
     public double getEnergyCost(ItemStack stack) {
         Double energyCost = stack.get(RelayDataComponents.ENERGY_COST);
         return energyCost != null ? energyCost : fixedEnergyCost;
@@ -112,6 +118,7 @@ public class WorldInteractorItem extends Item {
      * @param energyCost 能量消耗值
      * @return 是否设置成功（固定能量消耗返回 false）
      */
+    @Override
     public boolean setEnergyCost(ItemStack stack, double energyCost) {
         return false;
     }
