@@ -21,17 +21,19 @@ import qdream.relay.core.PlayerShellDataAccessor;
 /**
  * 工具外壳（手持物品形态）
  *
- * <p>简化设计：ToolShellItem 仅负责右键交互逻辑，所有状态管理委托给 ToolShellContainer</p>
+ * <p>
+ * 简化设计：ToolShellItem 仅负责右键交互逻辑，所有状态管理委托给 ToolShellContainer
+ * </p>
  *
  * <h3>右键行为</h3>
  * <ul>
- *   <li>Shift+ 右键：停止程序（清空双栈并从玩家缓存移除）</li>
- *   <li>普通右键：
- *     <ul>
- *       <li>运行中：显示状态（程序栈、数据栈）</li>
- *       <li>已停止：创建 ToolShellContainer 并加入玩家缓存，加载磁盘程序并运行</li>
- *     </ul>
- *   </li>
+ * <li>Shift+ 右键：停止程序（清空双栈并从玩家缓存移除）</li>
+ * <li>普通右键：
+ * <ul>
+ * <li>运行中：显示状态（程序栈、数据栈）</li>
+ * <li>已停止：创建 ToolShellContainer 并加入玩家缓存，加载磁盘程序并运行</li>
+ * </ul>
+ * </li>
  * </ul>
  */
 public class ToolShellItem extends Item {
@@ -85,12 +87,19 @@ public class ToolShellItem extends Item {
 
         // 检查运行状态
         if (machine.isRunning()) {
-            // 正在运行中，显示状态
-            player.sendSystemMessage(Component.literal("§e[工具外壳] 程序正在运行中"));
-            player.sendSystemMessage(
-                    Component.literal("§e[程序栈] " + qdream.relay.commands.CommandUtils.dataStackToString(machine.getProgramStackSnapshot())));
-            player.sendSystemMessage(
-                    Component.literal("§e[数据序栈] " + qdream.relay.commands.CommandUtils.dataStackToString(machine.getDataStackSnapshot())));
+            // 正在运行中
+            // 开启调试输出时，显示程序栈和数据栈
+            if (container.isDebugOutputEnabled()) {
+                player.sendSystemMessage(Component.literal("§e[工具外壳] 程序正在运行中"));
+                player.sendSystemMessage(
+                        Component.literal("§e[程序栈] "
+                                + qdream.relay.commands.CommandUtils
+                                        .dataStackToString(machine.getProgramStackSnapshot())));
+                player.sendSystemMessage(
+                        Component.literal("§e[数据序栈] "
+                                + qdream.relay.commands.CommandUtils
+                                        .dataStackToString(machine.getDataStackSnapshot())));
+            }
         } else {
             // 已停止，加载磁盘程序并运行
             ItemStack diskStack = container.getDiskStack();
@@ -102,7 +111,9 @@ public class ToolShellItem extends Item {
                     machine.loadProgram(program);
                     container.setInitialized(true);
                     // 不立即保存，让 tick 管理
-                    // player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
+                    if (container.isDebugOutputEnabled()) {
+                        player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
+                    }
                 } else {
                     player.sendSystemMessage(Component.literal("§e[工具外壳] 磁盘为空，无法启动"));
                 }
@@ -116,9 +127,11 @@ public class ToolShellItem extends Item {
 
     /**
      * 获取工具外壳容器（状态管理的权威来源）
-     * <p>从 PlayerShellData 获取缓存的 Container</p>
+     * <p>
+     * 从 PlayerShellData 获取缓存的 Container
+     * </p>
      *
-     * @param stack ItemStack
+     * @param stack  ItemStack
      * @param player 玩家实体（用于获取 PlayerShellData）
      * @return ToolShellContainer 实例，不存在返回 null
      */
@@ -132,7 +145,7 @@ public class ToolShellItem extends Item {
     /**
      * 检查是否正在运行
      *
-     * @param stack ItemStack
+     * @param stack  ItemStack
      * @param player 玩家实体（用于获取 PlayerShellData）
      * @return 是否正在运行
      */

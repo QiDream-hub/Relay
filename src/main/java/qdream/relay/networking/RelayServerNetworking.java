@@ -184,7 +184,8 @@ public class RelayServerNetworking {
         });
 
         // 注册 C2S_ToolShellConfigPayload
-        PayloadTypeRegistry.serverboundPlay().register(C2S_ToolShellConfigPayload.TYPE, C2S_ToolShellConfigPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(C2S_ToolShellConfigPayload.TYPE,
+                C2S_ToolShellConfigPayload.CODEC);
 
         // 注册服务端接收处理器 - 工具外壳配置更新
         ServerPlayNetworking.registerGlobalReceiver(C2S_ToolShellConfigPayload.TYPE, (payload, context) -> {
@@ -193,22 +194,27 @@ public class RelayServerNetworking {
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.items.ToolShellScreenHandler handler) {
+                if (player.containerMenu instanceof qdream.relay.screen.ToolShellScreenHandler handler) {
                     handler.setUseInventoryEnergyModule(payload.useInventoryEnergyModule());
                 }
             });
         });
-    }
 
-    /**
-     * 发送操作列表到客户端
-     */
-    public static void sendOperationList(ServerPlayer player) {
-        if (player == null) {
-            return;
-        }
+        // 注册 C2S_ToolShellDebugOutput
+        PayloadTypeRegistry.serverboundPlay().register(C2S_ToolShellDebugOutput.TYPE,
+                C2S_ToolShellDebugOutput.CODEC);
 
-        List<String> ops = new ArrayList<>(OperationRegistry.getAllOperationIds());
-        // TODO: 发送 S2C_OperationListPayload
+        // 注册服务端接收处理器 - 工具外壳调试输出开关
+        ServerPlayNetworking.registerGlobalReceiver(C2S_ToolShellDebugOutput.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player == null)
+                return;
+
+            context.server().execute(() -> {
+                if (player.containerMenu instanceof qdream.relay.screen.ToolShellScreenHandler handler) {
+                    handler.setDebugOutputEnabled(payload.enabled());
+                }
+            });
+        });
     }
 }

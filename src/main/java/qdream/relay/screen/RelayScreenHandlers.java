@@ -7,7 +7,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.flag.FeatureFlags;
 
 import qdream.relay.Relay;
-import qdream.relay.items.ToolShellScreenHandler;
 
 /**
  * ScreenHandler 注册表

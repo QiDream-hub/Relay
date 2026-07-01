@@ -9,9 +9,9 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-
-import qdream.relay.items.ToolShellScreenHandler;
 import qdream.relay.networking.payloads.C2S_ToolShellConfigPayload;
+import qdream.relay.networking.payloads.C2S_ToolShellDebugOutput;
+import qdream.relay.screen.ToolShellScreenHandler;
 
 /**
  * 工具外壳屏幕
@@ -35,6 +35,7 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
 
     // 配置按钮
     private Button useInventoryEnergyButton;
+    private Button debugOutputButton;
 
     public ToolShellScreen(ToolShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -61,11 +62,27 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         .build();
 
         this.addRenderableWidget(useInventoryEnergyButton);
+
+        // 配置按钮:是否启用调试输出
+        buttonY += buttonHeight + 8;
+        debugOutputButton = Button.builder(
+            getDebugOutputLabel(),
+            btn -> toggleDebugOutput()
+        )
+        .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
+        .build();
+
+        this.addRenderableWidget(debugOutputButton);
     }
 
     private Component getUseInventoryEnergyLabel() {
         boolean useInventory = this.menu.isUseInventoryEnergyModule();
         return Component.literal(useInventory ? "§a 使用背包能量" : "§7 使用插槽能量");
+    }
+
+    private Component getDebugOutputLabel() {
+        boolean debugEnabled = this.menu.isDebugOutputEnabled();
+        return Component.literal(debugEnabled ? "§c 调试输出:开" : "§7 调试输出:关");
     }
 
     /**
@@ -77,6 +94,14 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         ClientPlayNetworking.send(new C2S_ToolShellConfigPayload(newValue));
         // 立即更新本地 UI（不等待服务端同步）
         this.menu.setUseInventoryEnergyModule(newValue);
+    }
+
+    private void toggleDebugOutput() {
+        boolean newValue = !this.menu.isDebugOutputEnabled();
+        // 发送网络包到服务端
+        ClientPlayNetworking.send(new C2S_ToolShellDebugOutput(newValue));
+        // 立即更新本地 UI（不等待服务端同步）
+        this.menu.setDebugOutputEnabled(newValue);
     }
 
     @Override
@@ -102,6 +127,9 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         // 每帧更新按钮文本，确保与服务端同步
         if (useInventoryEnergyButton != null) {
             useInventoryEnergyButton.setMessage(getUseInventoryEnergyLabel());
+        }
+        if (debugOutputButton != null) {
+            debugOutputButton.setMessage(getDebugOutputLabel());
         }
 
         super.extractRenderState(graphics, mouseX, mouseY, delta);

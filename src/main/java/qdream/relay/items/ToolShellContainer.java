@@ -353,6 +353,20 @@ public class ToolShellContainer implements ShellContainer {
         stack.set(RelayDataComponents.TOOL_SHELL_CONFIG, configTag);
     }
 
+    public boolean isDebugOutputEnabled() {
+        CompoundTag configTag = stack.get(RelayDataComponents.TOOL_SHELL_CONFIG);
+        if (configTag == null) {
+            return false;
+        }
+        return configTag.getBoolean("debugOutputEnabled").orElse(false);
+    }
+
+    public void setDebugOutputEnabled(boolean enabled) {
+        CompoundTag configTag = stack.getOrDefault(RelayDataComponents.TOOL_SHELL_CONFIG, new CompoundTag());
+        configTag.putBoolean("debugOutputEnabled", enabled);
+        stack.set(RelayDataComponents.TOOL_SHELL_CONFIG, configTag);
+    }
+
     // ========== 快捷方法 ==========
 
     public ItemStack getCoreStack() {
