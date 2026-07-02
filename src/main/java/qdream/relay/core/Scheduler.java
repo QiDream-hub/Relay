@@ -65,7 +65,7 @@ public class Scheduler {
             }
             
             // 检查是否需要执行
-            if (scheduled.shell.isInitialized() && scheduled.shell.getCoreCount() > 0) {
+            if (scheduled.shell.isInitialized() && scheduled.shell.getCoreCost() > 0) {
                 // 更新 tick 计数器
                 scheduled.tickCounter++;
                 if (scheduled.tickCounter >= scheduled.shell.getInterval()) {

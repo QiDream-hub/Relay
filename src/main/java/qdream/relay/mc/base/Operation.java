@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 
 import qdream.relay.engine.Executable;
-import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.mc.signature.Signature;
 
 /**

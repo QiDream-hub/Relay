@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.jspecify.annotations.NonNull;
 
 import net.minecraft.world.item.ItemStack;
-
+import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -34,14 +34,17 @@ public class GetWorldInteractorOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        if (!executor.hasContext("worldInteractor")) {
+        if (!executor.hasContext("shellContainer")) {
             executor.pushData(new BooleanType(false));
             return;
         }
 
-        Optional<ItemStack> optional = executor.getContext("worldInteractor", ItemStack.class);
-        boolean hasInteractor = optional.isPresent() && !optional.get().isEmpty();
-        executor.pushData(new BooleanType(hasInteractor));
+        Optional<ShellContainer> opt = executor.getContext("shellContainer", ShellContainer.class);
+        if (opt.isPresent()) {
+            executor.pushData(new BooleanType(opt.get().hasWorldInteractor()));
+        } else {
+            executor.pushData(new BooleanType(false));
+        }
     }
 
 }

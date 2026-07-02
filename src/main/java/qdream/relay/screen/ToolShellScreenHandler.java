@@ -15,6 +15,7 @@ import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.items.ToolShellContainer;
 import qdream.relay.mc.component.EnergyModuleComponent;
+import qdream.relay.mc.component.WorldInteractorComponent;
 
 /**
  * 工具外壳 ScreenHandler
@@ -184,10 +185,10 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         Item item = stack.getItem();
 
         return switch (slot) {
-            case ShellContainer.CORE_SLOT -> item instanceof ComputingCoreComponent;
-            case ShellContainer.DISK_SLOT -> item instanceof SpellDiskItem;
-            case ShellContainer.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
-            case ShellContainer.INTERACTOR_SLOT -> true; // 世界交互器插槽允许任意物品
+            case ToolShellContainer.CORE_SLOT -> item instanceof ComputingCoreComponent;
+            case ToolShellContainer.DISK_SLOT -> item instanceof SpellDiskItem;
+            case ToolShellContainer.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
+            case ToolShellContainer.INTERACTOR_SLOT -> item instanceof WorldInteractorComponent;
             default -> false;
         };
     }

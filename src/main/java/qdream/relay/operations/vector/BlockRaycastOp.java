@@ -11,6 +11,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
+import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
@@ -42,19 +43,14 @@ public class BlockRaycastOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器
-        if (!executor.hasContext("worldInteractor")) {
+        // 检查世界交互器 - 通过 shellContainer 检查
+        ShellContainer container = getShellContainer(executor);
+        if (container == null || !container.hasWorldInteractor()) {
             executor.triggerMishap("block_raycast 需要世界交互器");
             return;
         }
 
-        Optional<ItemStack> interactorOpt = executor.getContext("worldInteractor", ItemStack.class);
-        if (interactorOpt.isEmpty() || interactorOpt.get().isEmpty()) {
-            executor.triggerMishap("世界交互器无效");
-            return;
-        }
-
-        ItemStack interactor = interactorOpt.get();
+        ItemStack interactor = container.getInteractorStack();
 
         // 弹出参数
         Executable maxDistExe = executor.popData();
@@ -107,5 +103,17 @@ public class BlockRaycastOp extends Spell {
         } else {
             executor.pushData(NullType.INSTANCE);
         }
+    }
+
+    /**
+     * 从上下文获取 ShellContainer
+     * @param executor 状态机
+     * @return ShellContainer，如果不存在返回 null
+     */
+    private ShellContainer getShellContainer(StateMachine executor) {
+        if (!executor.hasContext("shellContainer")) {
+            return null;
+        }
+        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

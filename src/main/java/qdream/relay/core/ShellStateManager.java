@@ -3,6 +3,9 @@ package qdream.relay.core;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+
+import java.util.UUID;
+
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
@@ -14,11 +17,16 @@ import qdream.relay.mc.StateMachineNbtSerializer;
 /**
  * ShellContainer 状态管理器
  * 
- * <p>提供通用的物品栏管理、StateMachine 持久化、Owner 管理逻辑</p>
+ * <p>
+ * 提供通用的物品栏管理、StateMachine 持久化、Owner 管理逻辑
+ * </p>
  * 
- * <p>使用组合模式：ShellBlockEntity 和 ToolShellContainer 持有一个 ShellStateManager 实例</p>
+ * <p>
+ * 使用组合模式：ShellBlockEntity 和 ToolShellContainer 持有一个 ShellStateManager 实例
+ * </p>
  * 
  * <h3>存储结构</h3>
+ * 
  * <pre>
  * {
  *   "inventory": ListTag,           // 4 个插槽
@@ -34,13 +42,13 @@ public class ShellStateManager {
     protected final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     protected final StateMachine stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
     protected Entity owner;
-    private java.util.UUID ownerUuid;
+    private UUID ownerUuid;
 
-    public void setOwnerUuid(java.util.UUID uuid) {
+    public void setOwnerUuid(UUID uuid) {
         this.ownerUuid = uuid;
     }
 
-    public java.util.UUID getOwnerUuid() {
+    public UUID getOwnerUuid() {
         return ownerUuid;
     }
 

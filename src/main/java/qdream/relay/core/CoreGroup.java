@@ -70,7 +70,7 @@ public class CoreGroup {
         shells.add(shell);
         
         // 累加核心数
-        totalCoreCount += shell.getCoreCount();
+        totalCoreCount += shell.getCoreCost();
         
         // 取最大 interval
         maxInterval = Math.max(maxInterval, shell.getInterval());
@@ -93,7 +93,7 @@ public class CoreGroup {
         maxInterval = 1;
         
         for (ShellBlockEntity shell : shells) {
-            totalCoreCount += shell.getCoreCount();
+            totalCoreCount += shell.getCoreCost();
             maxInterval = Math.max(maxInterval, shell.getInterval());
         }
     }

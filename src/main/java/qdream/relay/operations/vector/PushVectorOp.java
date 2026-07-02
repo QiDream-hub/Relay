@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
+import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
@@ -20,10 +21,10 @@ import qdream.relay.types.VectorType;
 /**
  * 向量推动操作
  * 对指定实体施加动量/推力
- * 
+ *
  * 弹出：vector (推力向量), entity (目标实体)
  * 压入：boolean (是否成功推动)
- * 
+ *
  * 需要世界交互器，并检查实体到施法者的距离
  */
 public class PushVectorOp extends Spell {
@@ -38,19 +39,14 @@ public class PushVectorOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器
-        if (!executor.hasContext("worldInteractor")) {
+        // 检查世界交互器 - 通过 shellContainer 检查
+        ShellContainer container = getShellContainer(executor);
+        if (container == null || !container.hasWorldInteractor()) {
             executor.triggerMishap("push_vector 需要世界交互器");
             return;
         }
 
-        Optional<ItemStack> interactorOpt = executor.getContext("worldInteractor", ItemStack.class);
-        if (interactorOpt.isEmpty() || interactorOpt.get().isEmpty()) {
-            executor.triggerMishap("世界交互器无效");
-            return;
-        }
-
-        ItemStack interactor = interactorOpt.get();
+        ItemStack interactor = container.getInteractorStack();
 
         // 获取施法者位置（从 self 上下文）
         Vec3 sourcePos = null;
@@ -112,5 +108,17 @@ public class PushVectorOp extends Spell {
         // targetEntity.teleportTo(vec3.x, vec3.y, vec3.z);
 
         executor.pushData(new BooleanType(true));
+    }
+
+    /**
+     * 从上下文获取 ShellContainer
+     * @param executor 状态机
+     * @return ShellContainer，如果不存在返回 null
+     */
+    private ShellContainer getShellContainer(StateMachine executor) {
+        if (!executor.hasContext("shellContainer")) {
+            return null;
+        }
+        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

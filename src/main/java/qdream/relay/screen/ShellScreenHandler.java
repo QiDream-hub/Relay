@@ -10,10 +10,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.Relay;
+import qdream.relay.blocks.entity.custom.ShellBlockEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.component.EnergyModuleComponent;
+import qdream.relay.mc.component.WorldInteractorComponent;
 
 /**
  * 外壳 ScreenHandler
@@ -52,9 +54,9 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
     // 数据同步槽（服务端 → 客户端）
     private final DataSlot enabledSlot = DataSlot.standalone();
-    private final DataSlot coreCountSlot = DataSlot.standalone();
+    private final DataSlot coreCostSlot = DataSlot.standalone();
     private final DataSlot initializedSlot = DataSlot.standalone();
-    
+
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
     private double syncedEnergy = 0.0;
 
@@ -78,13 +80,13 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
         // 注册数据同步槽
         this.addDataSlot(enabledSlot);
-        this.addDataSlot(coreCountSlot);
+        this.addDataSlot(coreCostSlot);
         this.addDataSlot(initializedSlot);
 
         // 初始化同步槽的值（确保 GUI 打开时立即显示正确状态）
         if (container != null) {
             enabledSlot.set(container.isEnabled() ? 1 : 0);
-            coreCountSlot.set(container.getCoreCount());
+            coreCostSlot.set(container.getCoreCost());
             initializedSlot.set(container.isInitialized() ? 1 : 0);
             syncedEnergy = container.getEnergy();
         }
@@ -157,7 +159,8 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
     /**
      * 根据插槽类型限制可放置的物品
-     * @param slot 插槽索引 (0-核心，1-磁盘，2-能量模块，3-世界交互器)
+     * 
+     * @param slot  插槽索引 (0-核心，1-磁盘，2-能量模块，3-世界交互器)
      * @param stack 物品堆
      * @return 是否允许放置
      */
@@ -169,10 +172,10 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         Item item = stack.getItem();
 
         return switch (slot) {
-            case ShellContainer.CORE_SLOT -> item instanceof ComputingCoreComponent;
-            case ShellContainer.DISK_SLOT -> item instanceof SpellDiskItem;
-            case ShellContainer.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
-            case ShellContainer.INTERACTOR_SLOT -> true; // 世界交互器插槽允许任意物品
+            case ShellBlockEntity.CORE_SLOT -> item instanceof ComputingCoreComponent;
+            case ShellBlockEntity.DISK_SLOT -> item instanceof SpellDiskItem;
+            case ShellBlockEntity.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
+            case ShellBlockEntity.INTERACTOR_SLOT -> item instanceof WorldInteractorComponent; // 世界交互器插槽允许任意物品
             default -> false;
         };
     }
@@ -183,7 +186,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         // 从服务端同步状态到客户端
         if (container != null) {
             enabledSlot.set(container.isEnabled() ? 1 : 0);
-            coreCountSlot.set(container.getCoreCount());
+            coreCostSlot.set(container.getCoreCost());
             initializedSlot.set(container.isInitialized() ? 1 : 0);
         }
     }
@@ -203,7 +206,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
     /** 获取同步的核心数量 */
     public int getSyncedCoreCount() {
-        return coreCountSlot.get();
+        return coreCostSlot.get();
     }
 
     /** 获取同步的能量值 */

@@ -16,15 +16,19 @@ import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
+import qdream.relay.mc.component.WorldInteractorComponent;
 
 import java.util.UUID;
 
 /**
  * 工具外壳的 ShellContainer 实现
  *
- * <p>使用 {@link ShellStateManager} 统一管理物品栏、StateMachine、Owner 状态</p>
+ * <p>
+ * 使用 {@link ShellStateManager} 统一管理物品栏、StateMachine、Owner 状态
+ * </p>
  *
  * <h3>存储结构</h3>
+ * 
  * <pre>
  * TOOL_SHELL_DATA: {
  *   "inventory": ListTag,           // 4 个插槽
@@ -55,20 +59,19 @@ public class ToolShellContainer implements ShellContainer, Container {
     private final UUID sessionId; // 会话 ID
     private final ShellStateManager stateManager;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
-    private Entity owner;
 
     public ToolShellContainer(ToolShellItem toolShell, ItemStack stack, UUID sessionId) {
         this.toolShell = toolShell;
         this.stack = stack;
         this.sessionId = sessionId;
         this.stateManager = new ShellStateManager();
-        this.owner = null;
 
         loadAllState();
 
         // 设置事故回调
         StateMachine machine = getStateMachine();
         machine.setMishapHandler(reason -> {
+            Entity owner = stateManager.getOwner();
             if (owner != null && owner instanceof net.minecraft.world.entity.player.Player player) {
                 player.sendSystemMessage(Component.literal("§c[工具外壳] 事故：" + reason));
             }
@@ -84,9 +87,11 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     /**
      * 更新持有的 ItemStack 引用
-     * <p>当物品在玩家物品栏中移动时，Minecraft 会创建新的 ItemStack 实例，
+     * <p>
+     * 当物品在玩家物品栏中移动时，Minecraft 会创建新的 ItemStack 实例，
      * 但 DataComponent 会被复制。此方法确保 Container 持有最新的 ItemStack 引用，
-     * 避免状态保存到错误的 ItemStack。</p>
+     * 避免状态保存到错误的 ItemStack。
+     * </p>
      *
      * @param newStack 新的 ItemStack 引用（当前玩家持有的实例）
      */
@@ -123,15 +128,17 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     /**
      * 保存所有状态
-     * <p>公开访问，供 PlayerShellData 调用</p>
+     * <p>
+     * 公开访问，供 PlayerShellData 调用
+     * </p>
      */
     public void saveAllState() {
         // 保存物品栏、StateMachine、Owner 到 TOOL_SHELL_DATA
         CompoundTag dataTag = stateManager.saveToTag();
-        
+
         // 保存 Tick 状态
         saveTickState();
-        
+
         stack.set(RelayDataComponents.TOOL_SHELL_DATA, dataTag);
     }
 
@@ -167,7 +174,9 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     /**
      * 执行 tick 逻辑
-     * <p>不再每 tick 保存状态，由 PlayerShellData 管理保存时机</p>
+     * <p>
+     * 不再每 tick 保存状态，由 PlayerShellData 管理保存时机
+     * </p>
      */
     public void tick(Level world, Entity player) {
         // 设置 enabled 状态
@@ -178,14 +187,25 @@ public class ToolShellContainer implements ShellContainer, Container {
 
         // 设置上下文
         if (machine.isRunning()) {
-            machine.setContext("worldInteractor", getInteractorStack());
             machine.setContext("shellContainer", this);
-            machine.setContext("level", world);  // 使用 "level" 键，与操作中的 getContext 一致
+            machine.setContext("level", world);
             machine.setContext("self", player);
         }
 
         // 执行 tick
         tickHandler.tick(this);
+    }
+
+    /**
+     * 获取玩家实体（用于背包能量模块访问）
+     * 
+     * @return 玩家实体，如果 owner 不是玩家返回 null
+     */
+    private net.minecraft.world.entity.player.Player getOwnerPlayer() {
+        Entity owner = stateManager.getOwner();
+        return (owner instanceof net.minecraft.world.entity.player.Player)
+                ? (net.minecraft.world.entity.player.Player) owner
+                : null;
     }
 
     // ========== ShellContainer 接口 ==========
@@ -207,7 +227,7 @@ public class ToolShellContainer implements ShellContainer, Container {
     }
 
     @Override
-    public int getCoreCount() {
+    public int getCoreCost() {
         ItemStack coreStack = getCoreStack();
         return !coreStack.isEmpty() ? coreStack.getCount() : 0;
     }
@@ -260,16 +280,19 @@ public class ToolShellContainer implements ShellContainer, Container {
             return emi.getStoredEnergy(energyStack);
         }
         // 如果启用背包能量模块且插槽为空，检查背包
-        if (isUseInventoryEnergyModule() && owner instanceof net.minecraft.world.entity.player.Player player) {
-            double totalEnergy = 0.0;
-            var inv = player.getInventory();
-            for (int i = 0; i < inv.getContainerSize(); i++) {
-                ItemStack slot = inv.getItem(i);
-                if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {
-                    totalEnergy += emiSlot.getStoredEnergy(slot);
+        if (isUseInventoryEnergyModule()) {
+            net.minecraft.world.entity.player.Player player = getOwnerPlayer();
+            if (player != null) {
+                double totalEnergy = 0.0;
+                var inv = player.getInventory();
+                for (int i = 0; i < inv.getContainerSize(); i++) {
+                    ItemStack slot = inv.getItem(i);
+                    if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {
+                        totalEnergy += emiSlot.getStoredEnergy(slot);
+                    }
                 }
+                return totalEnergy;
             }
-            return totalEnergy;
         }
         return 0;
     }
@@ -285,6 +308,7 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     /**
      * 消耗能量
+     * 
      * @param amount 需要消耗的能量
      * @return 实际消耗的能量
      */
@@ -294,7 +318,8 @@ public class ToolShellContainer implements ShellContainer, Container {
             return emi.consumeEnergy(energyStack, amount);
         }
         // 如果启用背包能量模块，从背包内的能量模块扣除
-        if (isUseInventoryEnergyModule() && owner instanceof net.minecraft.world.entity.player.Player player) {
+        net.minecraft.world.entity.player.Player player = getOwnerPlayer();
+        if (player != null) {
             double remaining = amount;
             var inv = player.getInventory();
             for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -331,14 +356,45 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public Entity getOwner() {
-        return owner;
+        return stateManager.getOwner();
     }
 
     @Override
     public void setOwner(Entity owner) {
-        this.owner = owner;
         stateManager.setOwner(owner);
         saveAllState();
+    }
+
+    @Override
+    public boolean hasOwner() {
+        if (stateManager.getOwner() == null) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean hasWorldInteractor() {
+        if (stateManager.getInventorySlot(INTERACTOR_SLOT).getItem() instanceof WorldInteractorComponent) {
+            return true;
+        }
+        return false;
+    }
+
+    public ItemStack getCoreStack() {
+        return getInventorySlot(CORE_SLOT);
+    }
+
+    public ItemStack getDiskStack() {
+        return getInventorySlot(DISK_SLOT);
+    }
+
+    public ItemStack getEnergyStack() {
+        return getInventorySlot(ENERGY_SLOT);
+    }
+
+    public ItemStack getInteractorStack() {
+        return getInventorySlot(INTERACTOR_SLOT);
     }
 
     // ========== 配置项 ==========
@@ -369,24 +425,6 @@ public class ToolShellContainer implements ShellContainer, Container {
         CompoundTag configTag = stack.getOrDefault(RelayDataComponents.TOOL_SHELL_CONFIG, new CompoundTag());
         configTag.putBoolean("debugOutputEnabled", enabled);
         stack.set(RelayDataComponents.TOOL_SHELL_CONFIG, configTag);
-    }
-
-    // ========== 快捷方法 ==========
-
-    public ItemStack getCoreStack() {
-        return getInventorySlot(CORE_SLOT);
-    }
-
-    public ItemStack getDiskStack() {
-        return getInventorySlot(DISK_SLOT);
-    }
-
-    public ItemStack getEnergyStack() {
-        return getInventorySlot(ENERGY_SLOT);
-    }
-
-    public ItemStack getInteractorStack() {
-        return getInventorySlot(INTERACTOR_SLOT);
     }
 
     // ========== Container 接口实现 ==========
@@ -451,4 +489,5 @@ public class ToolShellContainer implements ShellContainer, Container {
             stateManager.setInventorySlot(i, ItemStack.EMPTY);
         }
     }
+
 }

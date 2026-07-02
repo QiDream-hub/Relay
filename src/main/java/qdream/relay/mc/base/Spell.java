@@ -8,7 +8,7 @@ import qdream.relay.mc.signature.OperationSignature;
  */
 public abstract class Spell extends Operation {
     // 操作消耗的能量
-    protected final int energy;
+    protected final double energy;
 
     protected final OperationSignature signature;
 
@@ -18,7 +18,7 @@ public abstract class Spell extends Operation {
         this.signature = signature;
     }
 
-    public int getEnergy() {
+    public double getEnergy() {
         return energy;
     }
 

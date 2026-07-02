@@ -57,7 +57,6 @@ public class WorldInteractorItem extends Item implements WorldInteractorComponen
      * @param stack 物品堆
      * @return 品阶值（1-64）
      */
-    @Override
     public int getTier(ItemStack stack) {
         Integer tier = stack.get(RelayDataComponents.WORLD_INTERACTOR_TIER);
         return tier != null ? tier : fixedTier;
@@ -70,7 +69,6 @@ public class WorldInteractorItem extends Item implements WorldInteractorComponen
      * @param tier  品阶值（1-64）
      * @return 是否设置成功（固定品阶返回 false）
      */
-    @Override
     public boolean setTier(ItemStack stack, int tier) {
         return false;
     }

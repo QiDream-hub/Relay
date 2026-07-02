@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
@@ -20,10 +21,10 @@ import qdream.relay.types.VectorType;
 /**
  * 实体检测操作
  * 检测指定位置附近是否存在实体
- * 
+ *
  * 弹出：vector (中心位置), number (搜索半径)
  * 压入：boolean (是否存在实体)
- * 
+ *
  * 需要世界交互器，并检查范围
  */
 public class DetectEntityOp extends Spell {
@@ -38,19 +39,14 @@ public class DetectEntityOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器
-        if (!executor.hasContext("worldInteractor")) {
+        // 检查世界交互器 - 通过 shellContainer 检查
+        ShellContainer container = getShellContainer(executor);
+        if (container == null || !container.hasWorldInteractor()) {
             executor.triggerMishap("detect_entity 需要世界交互器");
             return;
         }
-        
-        Optional<ItemStack> interactorOpt = executor.getContext("worldInteractor", ItemStack.class);
-        if (interactorOpt.isEmpty() || interactorOpt.get().isEmpty()) {
-            executor.triggerMishap("世界交互器无效");
-            return;
-        }
-        
-        ItemStack interactor = interactorOpt.get();
+
+        ItemStack interactor = container.getInteractorStack();
         
         // 弹出参数
         Executable radiusExe = executor.popData();
@@ -104,8 +100,20 @@ public class DetectEntityOp extends Spell {
             center.x - radius, center.y - radius, center.z - radius,
             center.x + radius, center.y + radius, center.z + radius
         );
-        
+
         boolean found = !level.getEntitiesOfClass(Entity.class, searchBox).isEmpty();
         executor.pushData(new BooleanType(found));
+    }
+
+    /**
+     * 从上下文获取 ShellContainer
+     * @param executor 状态机
+     * @return ShellContainer，如果不存在返回 null
+     */
+    private ShellContainer getShellContainer(StateMachine executor) {
+        if (!executor.hasContext("shellContainer")) {
+            return null;
+        }
+        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

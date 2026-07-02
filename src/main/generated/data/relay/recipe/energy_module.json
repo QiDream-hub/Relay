@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "G": "minecraft:gold_ingot",
+    "C": "minecraft:copper_ingot",
     "R": "minecraft:redstone"
   },
   "pattern": [
-    " G ",
-    "GRG",
-    " G "
+    " C ",
+    "CRC",
+    " C "
   ],
   "result": {
     "id": "relay:energy_module"

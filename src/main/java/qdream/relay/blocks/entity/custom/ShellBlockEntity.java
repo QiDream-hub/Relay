@@ -28,19 +28,22 @@ import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.core.ShellRegistry;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.StateMachineNbtSerializer;
+import qdream.relay.mc.component.WorldInteractorComponent;
 
 /**
  * 外壳方块实体
  * 
- * <p>使用 {@link ShellStateManager} 管理物品栏、StateMachine、Owner 状态</p>
+ * <p>
+ * 使用 {@link ShellStateManager} 管理物品栏、StateMachine、Owner 状态
+ * </p>
  * 
  * <h3>职责</h3>
  * <ul>
- *   <li>实现 Container 接口（物品栏插槽访问）</li>
- *   <li>实现 MenuProvider（GUI 支持）</li>
- *   <li>实现 ShellContainer（外壳容器接口）</li>
- *   <li>Tick 逻辑（通过 ShellTickHandler）</li>
- *   <li>NBT 持久化（ValueInput/ValueOutput）</li>
+ * <li>实现 Container 接口（物品栏插槽访问）</li>
+ * <li>实现 MenuProvider（GUI 支持）</li>
+ * <li>实现 ShellContainer（外壳容器接口）</li>
+ * <li>Tick 逻辑（通过 ShellTickHandler）</li>
+ * <li>NBT 持久化（ValueInput/ValueOutput）</li>
  * </ul>
  */
 public class ShellBlockEntity extends BlockEntity implements MenuProvider, Container, ShellContainer {
@@ -49,6 +52,11 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     private final ShellTickHandler tickHandler;
     private double energy;
     private boolean enabled;
+
+    public static final int CORE_SLOT = 0;
+    public static final int DISK_SLOT = 1;
+    public static final int ENERGY_SLOT = 2;
+    public static final int INTERACTOR_SLOT = 3;
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
@@ -84,7 +92,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         var machine = entity.stateManager.getStateMachine();
         if (machine.isRunning()) {
             machine.setContext("level", world);
-            // self 可能是 Entity（工具外壳/实体外壳）或 BlockEntity（方块外壳）
             machine.setContext("self", entity);
         }
 
@@ -219,7 +226,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     }
 
     @Override
-    public int getCoreCount() {
+    public int getCoreCost() {
         return tickHandler.getCoreCount();
     }
 
@@ -295,6 +302,41 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         }
     }
 
+    @Override
+    public ItemStack getCoreStack() {
+        return stateManager.getInventorySlot(CORE_SLOT);
+    }
+
+    @Override
+    public ItemStack getDiskStack() {
+        return stateManager.getInventorySlot(DISK_SLOT);
+    }
+
+    @Override
+    public ItemStack getEnergyStack() {
+        return stateManager.getInventorySlot(ENERGY_SLOT);
+    }
+
+    @Override
+    public ItemStack getInteractorStack() {
+        return stateManager.getInventorySlot(INTERACTOR_SLOT);
+    }
+
+    @Override
+    public boolean hasOwner() {
+        if (this.stateManager.getOwner() != null && this.stateManager.getOwner() instanceof Player) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasWorldInteractor() {
+        if (getInteractorStack().getItem() instanceof WorldInteractorComponent) {
+            return true;
+        }
+        return false;
+    }
     // ========== NBT 序列化与反序列化 ==========
 
     @Override
