@@ -26,10 +26,10 @@ import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.core.ShellRegistry;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.mc.component.WorldInteractorComponent;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.mc.component.DiskComponent;
 
 /**
  * 外壳方块实体
@@ -294,7 +294,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         }
 
         // 通过接口获取磁盘组件
-        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
             return;
         }
@@ -314,9 +314,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
      * @param stack 物品堆
      * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
      */
-    private SpellDiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof SpellDiskComponent) {
-            return (SpellDiskComponent) stack.getItem();
+    private DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
         }
         return null;
     }

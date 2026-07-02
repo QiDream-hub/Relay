@@ -25,7 +25,7 @@ import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.screen.SpellEditorScreenHandler;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.mc.component.DiskComponent;
 
 /**
  * 法术编辑器方块实体
@@ -70,7 +70,7 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
         if (diskStack.isEmpty()) {
             return;
         }
-        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
             return;
         }
@@ -86,7 +86,7 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
         if (diskStack.isEmpty()) {
             return;
         }
-        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
             return;
         }
@@ -99,9 +99,9 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
      * @param stack 物品堆
      * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
      */
-    private SpellDiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof SpellDiskComponent) {
-            return (SpellDiskComponent) stack.getItem();
+    private DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
         }
         return null;
     }
@@ -160,7 +160,7 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == 0 && stack.getItem() instanceof qdream.relay.items.SpellDiskItem;
+        return slot == 0 && stack.getItem() instanceof qdream.relay.items.DiskItem;
     }
 
     @Override

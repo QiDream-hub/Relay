@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.blocks.entity.custom.ShellBlockEntity;
 import qdream.relay.core.ShellContainer;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.networking.payloads.*;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
@@ -45,7 +45,7 @@ public class RelayServerNetworking {
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.SpellEditorScreenHandler handler) {
                     ItemStack diskStack = handler.getDiskItem();
-                    if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
+                    if (!diskStack.isEmpty() && diskStack.getItem() instanceof DiskItem) {
                         handler.onDiskInserted(diskStack);
                         try {
                             ListTag programList = ProgramCompiler.toNbt(handler.getProgramEntries());
@@ -114,7 +114,7 @@ public class RelayServerNetworking {
                     // 如果程序列表为空但磁盘存在，先加载磁盘
                     ItemStack diskStack = handler.getDiskItem();
                     if (handler.getProgramEntries().isEmpty() && !diskStack.isEmpty()
-                            && diskStack.getItem() instanceof qdream.relay.items.SpellDiskItem) {
+                            && diskStack.getItem() instanceof qdream.relay.items.DiskItem) {
                         handler.loadProgramFromDisk(diskStack);
                     }
 

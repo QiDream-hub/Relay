@@ -15,9 +15,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.mc.component.DiskComponent;
 
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class ReadCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        SpellDiskComponent diskComponent = getDiskComponent(stack);
+        DiskComponent diskComponent = getDiskComponent(stack);
         if (diskComponent == null) {
             throw NO_DISK.create();
         }
@@ -115,7 +115,7 @@ public class ReadCommands {
         if (disk.isEmpty()) {
             throw NO_DISK.create();
         }
-        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        DiskComponent diskComponent = getDiskComponent(disk);
         if (diskComponent == null) {
             throw NO_DISK.create();
         }
@@ -138,7 +138,7 @@ public class ReadCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        SpellDiskComponent diskComponent = getDiskComponent(stack);
+        DiskComponent diskComponent = getDiskComponent(stack);
         if (diskComponent == null) {
             throw NO_DISK.create();
         }
@@ -173,7 +173,7 @@ public class ReadCommands {
         if (disk.isEmpty()) {
             throw NO_DISK.create();
         }
-        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        DiskComponent diskComponent = getDiskComponent(disk);
         if (diskComponent == null) {
             throw NO_DISK.create();
         }
@@ -191,9 +191,9 @@ public class ReadCommands {
     /**
      * 从物品堆获取 SpellDiskComponent
      */
-    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof SpellDiskComponent) {
-            return (SpellDiskComponent) stack.getItem();
+    private static DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
         }
         return null;
     }

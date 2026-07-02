@@ -26,7 +26,7 @@ import qdream.relay.client.screen.widget.info.HoverInfoWidget;
 import qdream.relay.client.screen.widget.info.HoverInfoWidget.InfoContent;
 import qdream.relay.client.screen.widget.info.InfoUtils;
 import qdream.relay.engine.Executable;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
@@ -320,11 +320,11 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
      */
     private void onLoad() {
         ItemStack diskStack = this.menu.getDiskItem();
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
+        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof DiskItem disk)) {
             return;
         }
 
-        List<Executable> program = SpellDiskItem.getProgram(diskStack);
+        List<Executable> program = disk.getProgram(diskStack);
         try {
             String formatted = ProgramCompiler.toPrettyJson(program);
             jsonEditorWidget.setJsonContent(formatted);

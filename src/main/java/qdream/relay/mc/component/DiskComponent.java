@@ -9,8 +9,7 @@ import qdream.relay.engine.Executable;
  * 法术磁盘组件接口
  * 提供程序存储和读写方法
  */
-public interface SpellDiskComponent {
-
+public interface DiskComponent {
     /**
      * 从磁盘读取程序
      *
@@ -22,7 +21,7 @@ public interface SpellDiskComponent {
     /**
      * 保存程序到磁盘
      *
-     * @param stack 物品堆
+     * @param stack   物品堆
      * @param program 程序列表
      */
     void setProgram(ItemStack stack, List<Executable> program);
@@ -31,7 +30,7 @@ public interface SpellDiskComponent {
      * 从状态机保存状态
      * 保存程序栈和数据栈的完整状态
      *
-     * @param stack 物品堆
+     * @param stack   物品堆
      * @param program 程序列表
      */
     void saveFromStateMachine(ItemStack stack, List<Executable> program);
@@ -40,7 +39,7 @@ public interface SpellDiskComponent {
      * 加载状态到状态机
      * 恢复程序栈
      *
-     * @param stack 物品堆
+     * @param stack   物品堆
      * @param machine 状态机
      */
     void loadToStateMachine(ItemStack stack, qdream.relay.engine.StateMachine machine);
@@ -79,7 +78,7 @@ public interface SpellDiskComponent {
     /**
      * 从 JSON 字符串导入程序到磁盘
      *
-     * @param stack 物品堆
+     * @param stack   物品堆
      * @param jsonStr JSON 字符串
      * @throws qdream.relay.mc.ProgramCompiler.CompilationException 解析错误
      */

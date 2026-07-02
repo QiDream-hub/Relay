@@ -12,16 +12,16 @@ import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.mc.component.DiskComponent;
 
 /**
  * 法术磁盘物品
  * 存储栈图程序（Iota 列表）
  * 使用 26.1.2 DataComponent 系统，底层使用 NBT 格式存储
  */
-public class SpellDiskItem extends Item implements SpellDiskComponent {
+public class DiskItem extends Item implements DiskComponent {
 
-    public SpellDiskItem(Properties properties) {
+    public DiskItem(Properties properties) {
         super(properties);
     }
 

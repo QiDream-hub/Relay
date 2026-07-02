@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.Relay;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.items.ToolShellContainer;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
@@ -186,7 +186,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
 
         return switch (slot) {
             case ToolShellContainer.CORE_SLOT -> item instanceof ComputingCoreComponent;
-            case ToolShellContainer.DISK_SLOT -> item instanceof SpellDiskItem;
+            case ToolShellContainer.DISK_SLOT -> item instanceof DiskItem;
             case ToolShellContainer.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
             case ToolShellContainer.INTERACTOR_SLOT -> item instanceof WorldInteractorComponent;
             default -> false;

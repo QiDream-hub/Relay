@@ -38,7 +38,7 @@ public class RelayItems {
     public static final Item COMPUTING_CORE_64 = register("computing_core_64",
             props -> new FixedIntervalCoreItem(props, 1), new Item.Properties());
 
-    public static final Item SPELL_DISK = register("spell_disk", SpellDiskItem::new, new Item.Properties());
+    public static final Item SPELL_DISK = register("spell_disk", DiskItem::new, new Item.Properties());
     public static final Item ENERGY_MODULE = register("energy_module", EnergyModuleItem::new, new Item.Properties());
 
     // 世界交互器系列 - 品阶 1-64（品阶数字越大，交互距离越远，能量消耗越高）

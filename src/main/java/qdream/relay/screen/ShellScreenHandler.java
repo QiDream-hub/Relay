@@ -13,7 +13,7 @@ import qdream.relay.Relay;
 import qdream.relay.blocks.entity.custom.ShellBlockEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
 
@@ -173,7 +173,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
         return switch (slot) {
             case ShellBlockEntity.CORE_SLOT -> item instanceof ComputingCoreComponent;
-            case ShellBlockEntity.DISK_SLOT -> item instanceof SpellDiskItem;
+            case ShellBlockEntity.DISK_SLOT -> item instanceof DiskItem;
             case ShellBlockEntity.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
             case ShellBlockEntity.INTERACTOR_SLOT -> item instanceof WorldInteractorComponent; // 世界交互器插槽允许任意物品
             default -> false;

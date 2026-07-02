@@ -14,8 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import qdream.relay.core.ShellContainer;
-import qdream.relay.items.SpellDiskItem;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.items.DiskItem;
+import qdream.relay.mc.component.DiskComponent;
 
 /**
  * 清空法术命令
@@ -62,7 +62,7 @@ public class ClearCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        if (!(stack.getItem() instanceof SpellDiskComponent diskComponent)) {
+        if (!(stack.getItem() instanceof DiskComponent diskComponent)) {
             throw NO_DISK.create();
         }
 
@@ -89,7 +89,7 @@ public class ClearCommands {
         if (disk.isEmpty()) {
             throw NO_DISK.create();
         }
-        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        DiskComponent diskComponent = getDiskComponent(disk);
         if (diskComponent == null) {
             throw NO_DISK.create();
         }
@@ -103,9 +103,9 @@ public class ClearCommands {
     /**
      * 从物品堆获取 SpellDiskComponent
      */
-    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof SpellDiskComponent) {
-            return (SpellDiskComponent) stack.getItem();
+    private static DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
         }
         return null;
     }

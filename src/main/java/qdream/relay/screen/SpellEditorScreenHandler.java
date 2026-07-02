@@ -12,13 +12,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import qdream.relay.blocks.entity.custom.SpellEditorBlockEntity;
 import qdream.relay.engine.Executable;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.Signature;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.mc.component.DiskComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,14 +67,14 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
             this.addSlot(new Slot(blockEntity, 0, DISK_SLOT_X, DISK_SLOT_Y) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    return stack.getItem() instanceof SpellDiskItem;
+                    return stack.getItem() instanceof DiskItem;
                 }
 
                 @Override
                 public void onQuickCraft(ItemStack stack, ItemStack previousStack) {
                     super.onQuickCraft(stack, previousStack);
                     // 磁盘放入时，加载并同步
-                    if (!stack.isEmpty() && stack.getItem() instanceof SpellDiskItem) {
+                    if (!stack.isEmpty() && stack.getItem() instanceof DiskItem) {
                         loadProgramFromDisk(stack);
                     }
                 }
@@ -83,7 +83,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
                 public void set(ItemStack stack) {
                     super.set(stack);
                     // 磁盘变化时，加载并同步
-                    if (!stack.isEmpty() && stack.getItem() instanceof SpellDiskItem) {
+                    if (!stack.isEmpty() && stack.getItem() instanceof DiskItem) {
                         loadProgramFromDisk(stack);
                     }
                 }
@@ -93,7 +93,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
             this.addSlot(new Slot(new net.minecraft.world.SimpleContainer(1), 0, DISK_SLOT_X, DISK_SLOT_Y) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    return stack.getItem() instanceof SpellDiskItem;
+                    return stack.getItem() instanceof DiskItem;
                 }
             });
         }
@@ -119,7 +119,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         if (blockEntity != null && blockEntity.getLevel() != null && !blockEntity.getLevel().isClientSide()) {
             if (blockEntity.getProgram().isEmpty()) {
                 ItemStack diskStack = getDiskItem();
-                if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
+                if (!diskStack.isEmpty() && diskStack.getItem() instanceof DiskItem) {
                     // 从磁盘加载并同步到客户端
                     loadProgramFromDisk(diskStack);
                 }
@@ -140,7 +140,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         if (diskStack.isEmpty()) {
             return;
         }
-        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
             return;
         }
@@ -159,9 +159,9 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
      * @param stack 物品堆
      * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
      */
-    private SpellDiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof SpellDiskComponent) {
-            return (SpellDiskComponent) stack.getItem();
+    private DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
         }
         return null;
     }
@@ -221,7 +221,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         if (diskStack.isEmpty()) {
             return;
         }
-        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
             return;
         }
@@ -322,7 +322,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         }
         // 从玩家物品栏移到磁盘槽（只允许磁盘）
         else {
-            if (stack.getItem() instanceof SpellDiskItem) {
+            if (stack.getItem() instanceof DiskItem) {
                 if (!this.moveItemStackTo(stack, DISK_SLOT, DISK_SLOT + 1, false)) {
                     return ItemStack.EMPTY;
                 }
@@ -358,7 +358,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
 
         // 磁盘插槽只允许 SpellDiskItem
         if (slot == DISK_SLOT) {
-            return stack.getItem() instanceof SpellDiskItem;
+            return stack.getItem() instanceof DiskItem;
         }
 
         // 其他插槽（玩家物品栏）允许所有物品
@@ -374,7 +374,7 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
      * 当磁盘放入插槽时调用（由客户端通过 C2S 包触发）
      */
     public void onDiskInserted(ItemStack diskStack) {
-        if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
+        if (!diskStack.isEmpty() && diskStack.getItem() instanceof DiskItem) {
             loadProgramFromDisk(diskStack);
         }
     }

@@ -21,11 +21,11 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.ComputingCoreComponent;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.mc.component.DiskComponent;
 
 /**
  * 运行法术命令
@@ -121,9 +121,9 @@ public class RunCommands {
     /**
      * 从物品堆获取 SpellDiskComponent
      */
-    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof SpellDiskComponent) {
-            return (SpellDiskComponent) stack.getItem();
+    private static DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
         }
         return null;
     }
@@ -137,7 +137,7 @@ public class RunCommands {
         Player player = source.getPlayerOrException();
         ItemStack diskStack = player.getMainHandItem();
 
-        if (!(diskStack.getItem() instanceof SpellDiskItem)) {
+        if (!(diskStack.getItem() instanceof DiskItem)) {
             throw NO_DISK.create();
         }
 
@@ -164,7 +164,7 @@ public class RunCommands {
         StateMachine stateMachine = new StateMachine();
 
         // 从磁盘加载程序
-        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent != null) {
             List<Executable> program = diskComponent.getProgram(diskStack);
             stateMachine.loadProgram(program);

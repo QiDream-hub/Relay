@@ -15,10 +15,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
-import qdream.relay.items.SpellDiskItem;
+import qdream.relay.items.DiskItem;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
-import qdream.relay.mc.component.SpellDiskComponent;
+import qdream.relay.mc.component.DiskComponent;
 
 import java.util.List;
 
@@ -94,7 +94,7 @@ public class WriteCommands {
 
         ItemStack stack = player.getMainHandItem();
 
-        if (!(stack.getItem() instanceof SpellDiskItem)) {
+        if (!(stack.getItem() instanceof DiskItem)) {
             throw NO_DISK.create();
         }
 
@@ -107,7 +107,7 @@ public class WriteCommands {
             return 0;
         }
 
-        if (stack.getItem() instanceof SpellDiskComponent diskComponent) {
+        if (stack.getItem() instanceof DiskComponent diskComponent) {
             diskComponent.setProgram(stack, program);
         }
 
@@ -142,7 +142,7 @@ public class WriteCommands {
             source.sendFailure(Component.literal("§c 程序编译失败：" + e.getMessage()));
             return 0;
         }
-        if (disk.getItem() instanceof SpellDiskComponent diskComponent) {
+        if (disk.getItem() instanceof DiskComponent diskComponent) {
             diskComponent.setProgram(disk, program);
         }
         shell.setChanged();
@@ -159,7 +159,7 @@ public class WriteCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        if (!(stack.getItem() instanceof SpellDiskComponent diskComponent)) {
+        if (!(stack.getItem() instanceof DiskComponent diskComponent)) {
             throw NO_DISK.create();
         }
 
@@ -195,7 +195,7 @@ public class WriteCommands {
         if (disk.isEmpty()) {
             throw NO_DISK.create();
         }
-        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        DiskComponent diskComponent = getDiskComponent(disk);
         if (diskComponent == null) {
             throw NO_DISK.create();
         }
@@ -216,9 +216,9 @@ public class WriteCommands {
     /**
      * 从物品堆获取 SpellDiskComponent
      */
-    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof SpellDiskComponent) {
-            return (SpellDiskComponent) stack.getItem();
+    private static DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
         }
         return null;
     }
