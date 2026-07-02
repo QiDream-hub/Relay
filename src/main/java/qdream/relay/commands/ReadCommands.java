@@ -17,6 +17,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 import java.util.List;
 
@@ -81,11 +82,12 @@ public class ReadCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        if (!(stack.getItem() instanceof SpellDiskItem)) {
+        SpellDiskComponent diskComponent = getDiskComponent(stack);
+        if (diskComponent == null) {
             throw NO_DISK.create();
         }
 
-        List<Executable> program = SpellDiskItem.getProgram(stack);
+        List<Executable> program = diskComponent.getProgram(stack);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -110,11 +112,15 @@ public class ReadCommands {
         }
 
         ItemStack disk = shell.getDiskStack();
-        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+        if (disk.isEmpty()) {
+            throw NO_DISK.create();
+        }
+        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        if (diskComponent == null) {
             throw NO_DISK.create();
         }
 
-        List<Executable> program = SpellDiskItem.getProgram(disk);
+        List<Executable> program = diskComponent.getProgram(disk);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -132,12 +138,13 @@ public class ReadCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        if (!(stack.getItem() instanceof SpellDiskItem)) {
+        SpellDiskComponent diskComponent = getDiskComponent(stack);
+        if (diskComponent == null) {
             throw NO_DISK.create();
         }
 
         String format = StringArgumentType.getString(context, "format");
-        List<Executable> program = SpellDiskItem.getProgram(stack);
+        List<Executable> program = diskComponent.getProgram(stack);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -163,11 +170,15 @@ public class ReadCommands {
         }
 
         ItemStack disk = shell.getDiskStack();
-        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+        if (disk.isEmpty()) {
+            throw NO_DISK.create();
+        }
+        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        if (diskComponent == null) {
             throw NO_DISK.create();
         }
 
-        List<Executable> program = SpellDiskItem.getProgram(disk);
+        List<Executable> program = diskComponent.getProgram(disk);
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -175,6 +186,16 @@ public class ReadCommands {
 
         sendFormattedProgram(source, program, format);
         return program.size();
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     */
+    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
     }
 
     /**

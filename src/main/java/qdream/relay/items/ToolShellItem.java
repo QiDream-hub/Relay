@@ -17,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.core.PlayerShellDataAccessor;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 /**
  * 工具外壳（手持物品形态）
@@ -103,8 +104,9 @@ public class ToolShellItem extends Item {
         } else {
             // 已停止，加载磁盘程序并运行
             ItemStack diskStack = container.getDiskStack();
-            if (!diskStack.isEmpty() && diskStack.getItem() instanceof SpellDiskItem) {
-                List<Executable> program = SpellDiskItem.getProgram(diskStack);
+            SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+            if (diskComponent != null) {
+                List<Executable> program = diskComponent.getProgram(diskStack);
                 if (!program.isEmpty()) {
                     // 清空双栈后加载新程序
                     machine.clear();
@@ -155,5 +157,17 @@ public class ToolShellItem extends Item {
             return false;
         }
         return container.getStateMachine().isRunning();
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     * @param stack 物品堆
+     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
+     */
+    private SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
     }
 }

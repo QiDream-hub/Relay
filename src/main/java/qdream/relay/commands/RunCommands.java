@@ -1,15 +1,11 @@
 package qdream.relay.commands;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -21,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
@@ -29,15 +24,16 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
-import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.component.ComputingCoreComponent;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 /**
  * 运行法术命令
  *
  * 命令格式：
- * /relay run hand [ops] [withInteractor] [energy] [owner] [self]
+ * /relay run hand - 默认配置 (1000 能量，世界交互器范围 16)
+ * /relay run hand <energy> - 自定义能量 (-1=无限)
+ * /relay run hand <energy> <range> - 世界交互器范围
  */
 public class RunCommands {
     /**
@@ -45,35 +41,22 @@ public class RunCommands {
      */
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher,
             LiteralCommandNode<CommandSourceStack> root) {
+        // /relay run hand [energy] [range]
+        var energyNode = Commands.argument("energy", DoubleArgumentType.doubleArg(-1, 100000))
+                .executes(RunCommands::runHandWithEnergy)
+                .then(Commands.argument("range", DoubleArgumentType.doubleArg(0, 128))
+                        .executes(ctx -> runHandWithInteractor(ctx,
+                                DoubleArgumentType.getDouble(ctx, "energy"))));
+
         // /relay run hand
-        var handNode = Commands.literal("hand");
-
-        // // 构建参数链：self <- owner <- energy <- worldInteractor <- ops
-        // var selfNode = Commands.argument("self", StringArgumentType.word())
-        // .executes(RunCommands::runHandFull);
-
-        // var ownerNode = Commands.argument("owner", StringArgumentType.word())
-        // .then(selfNode);
-
-        // var energyNode = Commands.argument("energy", DoubleArgumentType.doubleArg(0))
-        // .then(ownerNode);
-
-        // var interactorNode = Commands.argument("worldInteractor",
-        // BoolArgumentType.bool())
-        // .then(energyNode);
-
-        // var opsNode = Commands.argument("ops", IntegerArgumentType.integer(1, 10000))
-        // .executes(RunCommands::runHandWithOps)
-        // .then(interactorNode);
-
-        // handNode.executes(RunCommands::runHand)
-        // .then(opsNode);
-
-        var runHand = handNode.build();
+        var handNode = Commands.literal("hand")
+                .executes(RunCommands::runHand)
+                .then(energyNode)
+                .build();
 
         // /relay run
         var runNode = Commands.literal("run")
-                .then(runHand)
+                .then(handNode)
                 .build();
 
         root.addChild(runNode);
@@ -84,36 +67,72 @@ public class RunCommands {
             Component.literal("手中没有法术磁盘"));
 
     /**
-     * 模拟执行指定数量的操作
+     * 一次性执行所有步骤，不进行 tick 分割
      *
-     * @param machine 状态机
-     * @param maxCost 最大执行操作数
-     * @return 实际消耗的操作数
+     * @param machine      状态机
+     * @param energyModule 能量模块
+     * @return 执行的操作数
      */
-    private static int executeOps(StateMachine machine, int maxCost, ItemStack energyModule) {
-        int executedCost = 0;
+    private static int executeAll(StateMachine machine, ItemStack energyModule) {
+        int executedCount = 0;
 
-        var program = machine.peekProgram();
-        if (program instanceof Operation operation) {
-            executedCost += operation.getCost();
-        }
-        if (program instanceof Spell spell) {
-            ((EnergyModule) energyModule.getItem()).consumeEnergy(energyModule, spell.getEnergy());
-        }
-
-        while (executedCost < maxCost && machine.isRunning()) {
+        // 持续执行直到程序栈为空或发生事故
+        while (machine.isRunning()) {
             if (!machine.step()) {
+                break;
+            }
+            executedCount++;
+
+            // 安全检查：防止无限循环
+            if (executedCount > 100000) {
+                machine.triggerMishap("操作数超过限制");
                 break;
             }
         }
 
-        return executedCost;
+        return executedCount;
     }
 
     /**
      * 运行手中的法术磁盘（基础版）
+     * 默认：1000 能量，世界交互器范围 16
      */
     private static int runHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        return runHandInternal(context, 1000.0, 16.0);
+    }
+
+    /**
+     * 运行手中的法术磁盘（自定义能量）
+     */
+    private static int runHandWithEnergy(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        double energy = DoubleArgumentType.getDouble(context, "energy");
+        return runHandInternal(context, energy, 16.0);
+    }
+
+    /**
+     * 运行手中的法术磁盘（完整参数）
+     */
+    private static int runHandWithInteractor(CommandContext<CommandSourceStack> context, double energy)
+            throws CommandSyntaxException {
+        double range = DoubleArgumentType.getDouble(context, "range");
+        return runHandInternal(context, energy, range);
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     */
+    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
+    }
+
+    /**
+     * 内部统一执行方法
+     */
+    private static int runHandInternal(CommandContext<CommandSourceStack> context,
+            double energy, double range) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         Player player = source.getPlayerOrException();
         ItemStack diskStack = player.getMainHandItem();
@@ -122,32 +141,72 @@ public class RunCommands {
             throw NO_DISK.create();
         }
 
-        // 在方法内部创建临时物品
+        // 创建临时物品
         ItemStack energyModule = new ItemStack(new EnergyModule(new Item.Properties()));
         ItemStack worldInteractor = new ItemStack(new WorldInteractor(new Item.Properties()));
         ItemStack computingCore = new ItemStack(new ComputingCore(new Item.Properties()));
 
-        // 根据命令设置物品
+        // 配置能量
+        if (energyModule.getItem() instanceof EnergyModule em) {
+            if (energy < 0) {
+                em.setIsUnlimitedEnergy(true);
+            } else {
+                em.setStoredEnergy(energyModule, energy);
+            }
+        }
 
-        // 创建运行栈机
+        // 配置世界交互器范围
+        if (worldInteractor.getItem() instanceof WorldInteractor wi) {
+            wi.setRange(worldInteractor, range);
+        }
+
+        // 创建状态机
         StateMachine stateMachine = new StateMachine();
 
-        // 设置Shell容器
-        CommandShellContainer commandShellContainer = new CommandShellContainer(stateMachine, player, computingCore,
-                energyModule, worldInteractor, diskStack);
+        // 从磁盘加载程序
+        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent != null) {
+            List<Executable> program = diskComponent.getProgram(diskStack);
+            stateMachine.loadProgram(program);
+        }
+
+        // 创建 Shell 容器
+        CommandShellContainer commandShellContainer = new CommandShellContainer(
+                stateMachine, player, computingCore, energyModule, worldInteractor, diskStack);
         commandShellContainer.setOwner(player);
 
-        // 设置栈机器运行上下文
+        // 设置执行上下文
         stateMachine.setContext("self", player);
         stateMachine.setContext("level", source.getLevel());
         stateMachine.setContext("shellContainer", commandShellContainer);
 
-        // 开始运行
-        return executeOps(stateMachine, 0, energyModule);
+        stateMachine.setMishapHandler(e -> {
+            player.sendSystemMessage(Component.literal(e));
+        });
 
+        // 记录初始能量
+        EnergyModule em = (EnergyModule) energyModule.getItem();
+
+        // 一次性执行所有步骤
+        int executedCount = executeAll(stateMachine, energyModule);
+
+        // 计算消耗
+        double consumedEnergy = em.getConsumeEnergy();
+        double addedEnergy = em.getAddEnergy();
+        double remainingEnergy = em.getStoredEnergy(energyModule);
+
+        // 输出结果
+        player.sendSystemMessage(Component.literal(
+                "§a=== 法术执行完成 ===§r\n" +
+                        "执行步数：" + executedCount + "\n" +
+                        "消耗能量：" + consumedEnergy + "\n" +
+                        "添加能量：" + addedEnergy + "\n" +
+                        "剩余能量：" + remainingEnergy));
+
+        return executedCount;
     }
 
-    // 定义各各组件
+    // 定义各组件
     static class EnergyModule extends Item implements EnergyModuleComponent {
 
         double energy;
@@ -296,7 +355,8 @@ public class RunCommands {
         boolean changed = false;
 
         public CommandShellContainer(StateMachine stateMachine, Entity owner, ItemStack... component) {
-            Collections.addAll(itemStack, component);
+            this.itemStack = new ArrayList<>();
+            Collections.addAll(this.itemStack, component);
             this.stateMachine = stateMachine;
             this.owner = owner;
         }
@@ -422,7 +482,6 @@ public class RunCommands {
             }
             return false;
         }
-
     }
 
 }

@@ -18,6 +18,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 import java.util.List;
 
@@ -106,7 +107,9 @@ public class WriteCommands {
             return 0;
         }
 
-        SpellDiskItem.setProgram(stack, program);
+        if (stack.getItem() instanceof SpellDiskComponent diskComponent) {
+            diskComponent.setProgram(stack, program);
+        }
 
         source.sendSuccess(() -> Component.literal("已写入法术程序：§e" + program.size() + "§r 个指令"), true);
         return program.size();
@@ -128,7 +131,7 @@ public class WriteCommands {
         }
 
         ItemStack disk = shell.getDiskStack();
-        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+        if (disk.isEmpty()) {
             throw NO_DISK.create();
         }
 
@@ -139,7 +142,9 @@ public class WriteCommands {
             source.sendFailure(Component.literal("§c 程序编译失败：" + e.getMessage()));
             return 0;
         }
-        SpellDiskItem.setProgram(disk, program);
+        if (disk.getItem() instanceof SpellDiskComponent diskComponent) {
+            diskComponent.setProgram(disk, program);
+        }
         shell.setChanged();
 
         source.sendSuccess(() -> Component.literal("已向外壳写入法术程序：§e" + program.size() + "§r 个指令"), true);
@@ -154,19 +159,19 @@ public class WriteCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        if (!(stack.getItem() instanceof SpellDiskItem)) {
+        if (!(stack.getItem() instanceof SpellDiskComponent diskComponent)) {
             throw NO_DISK.create();
         }
 
         String jsonStr = StringArgumentType.getString(context, "json");
         try {
-            SpellDiskItem.importFromJson(stack, jsonStr);
+            diskComponent.importFromJson(stack, jsonStr);
         } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
 
-        List<Executable> program = SpellDiskItem.getProgram(stack);
+        List<Executable> program = diskComponent.getProgram(stack);
         source.sendSuccess(() -> Component.literal("已写入 JSON 程序：§e" + program.size() + "§r 个指令"), true);
         return program.size();
     }
@@ -187,20 +192,34 @@ public class WriteCommands {
         }
 
         ItemStack disk = shell.getDiskStack();
-        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+        if (disk.isEmpty()) {
+            throw NO_DISK.create();
+        }
+        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        if (diskComponent == null) {
             throw NO_DISK.create();
         }
 
         try {
-            SpellDiskItem.importFromJson(disk, jsonStr);
+            diskComponent.importFromJson(disk, jsonStr);
         } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
         shell.setChanged();
 
-        List<Executable> program = SpellDiskItem.getProgram(disk);
+        List<Executable> program = diskComponent.getProgram(disk);
         source.sendSuccess(() -> Component.literal("已向外壳写入 JSON 程序：§e" + program.size() + "§r 个指令"), true);
         return program.size();
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     */
+    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
     }
 }

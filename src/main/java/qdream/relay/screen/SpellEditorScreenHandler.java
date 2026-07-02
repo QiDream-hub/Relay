@@ -18,6 +18,7 @@ import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.Signature;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,17 +137,33 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
      * @param diskStack 磁盘物品（直接传入，避免客户端/服务端不同步）
      */
     public void loadProgramFromDisk(ItemStack diskStack) {
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
+        if (diskStack.isEmpty()) {
+            return;
+        }
+        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent == null) {
             return;
         }
 
         if (blockEntity != null) {
-            List<Executable> loadedProgram = SpellDiskItem.getProgram(diskStack);
+            List<Executable> loadedProgram = diskComponent.getProgram(diskStack);
             blockEntity.setProgram(loadedProgram);
         }
 
         // 同步到客户端
         syncProgramToClient();
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     * @param stack 物品堆
+     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
+     */
+    private SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
     }
 
     /**
@@ -199,13 +216,17 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
      */
     public void saveProgramToDisk() {
         if (blockEntity == null) return;
-        
+
         ItemStack diskStack = getDiskItem();
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
+        if (diskStack.isEmpty()) {
+            return;
+        }
+        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent == null) {
             return;
         }
 
-        SpellDiskItem.setProgram(diskStack, blockEntity.getProgram());
+        diskComponent.setProgram(diskStack, blockEntity.getProgram());
     }
 
     /**

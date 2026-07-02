@@ -25,6 +25,7 @@ import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.screen.SpellEditorScreenHandler;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 /**
  * 法术编辑器方块实体
@@ -66,10 +67,14 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
      */
     public void loadProgramFromDisk() {
         ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof qdream.relay.items.SpellDiskItem)) {
+        if (diskStack.isEmpty()) {
             return;
         }
-        List<Executable> loadedProgram = qdream.relay.items.SpellDiskItem.getProgram(diskStack);
+        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent == null) {
+            return;
+        }
+        List<Executable> loadedProgram = diskComponent.getProgram(diskStack);
         setProgram(loadedProgram);
     }
 
@@ -78,11 +83,27 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
      */
     public void saveProgramToDisk() {
         ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof qdream.relay.items.SpellDiskItem)) {
+        if (diskStack.isEmpty()) {
             return;
         }
-        qdream.relay.items.SpellDiskItem.setProgram(diskStack, this.program);
+        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent == null) {
+            return;
+        }
+        diskComponent.setProgram(diskStack, this.program);
         setChanged();
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     * @param stack 物品堆
+     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
+     */
+    private SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
     }
 
     // ========== Container 接口 ==========

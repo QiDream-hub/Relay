@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.items.SpellDiskItem;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 /**
  * 清空法术命令
@@ -61,11 +62,11 @@ public class ClearCommands {
         var player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();
 
-        if (!(stack.getItem() instanceof SpellDiskItem)) {
+        if (!(stack.getItem() instanceof SpellDiskComponent diskComponent)) {
             throw NO_DISK.create();
         }
 
-        SpellDiskItem.clear(stack);
+        diskComponent.clear(stack);
         source.sendSuccess(() -> Component.literal("已清空法术磁盘"), true);
         return 1;
     }
@@ -85,13 +86,27 @@ public class ClearCommands {
         }
 
         ItemStack disk = shell.getDiskStack();
-        if (disk.isEmpty() || !(disk.getItem() instanceof SpellDiskItem)) {
+        if (disk.isEmpty()) {
+            throw NO_DISK.create();
+        }
+        SpellDiskComponent diskComponent = getDiskComponent(disk);
+        if (diskComponent == null) {
             throw NO_DISK.create();
         }
 
-        SpellDiskItem.clear(disk);
+        diskComponent.clear(disk);
         shell.setChanged();
         source.sendSuccess(() -> Component.literal("已清空外壳中的法术磁盘"), true);
         return 1;
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     */
+    private static SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
     }
 }

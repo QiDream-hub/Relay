@@ -29,6 +29,7 @@ import qdream.relay.core.ShellRegistry;
 import qdream.relay.items.SpellDiskItem;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.mc.component.WorldInteractorComponent;
+import qdream.relay.mc.component.SpellDiskComponent;
 
 /**
  * 外壳方块实体
@@ -288,18 +289,36 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         }
 
         ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof SpellDiskItem)) {
+        if (diskStack.isEmpty()) {
+            return;
+        }
+
+        // 通过接口获取磁盘组件
+        SpellDiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent == null) {
             return;
         }
 
         stateManager.getStateMachine().clear();
-        List<Executable> program = SpellDiskItem.getProgram(diskStack);
+        List<Executable> program = diskComponent.getProgram(diskStack);
         if (!program.isEmpty()) {
             stateManager.getStateMachine().loadProgram(program);
             setInitialized(true);
             setChanged();
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     * @param stack 物品堆
+     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
+     */
+    private SpellDiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof SpellDiskComponent) {
+            return (SpellDiskComponent) stack.getItem();
+        }
+        return null;
     }
 
     @Override
