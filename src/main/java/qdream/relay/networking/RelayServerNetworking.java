@@ -176,9 +176,9 @@ public class RelayServerNetworking {
                 ItemStack offHand = player.getOffhandItem();
 
                 if (mainHand.getItem() instanceof qdream.relay.items.ToolShellItem toolShellItem) {
-                    player.openMenu(new qdream.relay.items.ToolShellMenuProvider(mainHand));
+                    player.openMenu(new qdream.relay.items.menu.ToolShellMenuProvider(mainHand));
                 } else if (offHand.getItem() instanceof qdream.relay.items.ToolShellItem toolShellItem) {
-                    player.openMenu(new qdream.relay.items.ToolShellMenuProvider(offHand));
+                    player.openMenu(new qdream.relay.items.menu.ToolShellMenuProvider(offHand));
                 }
             });
         });

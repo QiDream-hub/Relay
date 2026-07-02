@@ -15,6 +15,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
 
 import qdream.relay.engine.StateMachine;
+import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.core.PlayerShellDataAccessor;
 import qdream.relay.mc.component.DiskComponent;

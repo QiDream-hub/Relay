@@ -1,4 +1,4 @@
-package qdream.relay.items;
+package qdream.relay.items.menu;
 
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -9,6 +9,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 
 import qdream.relay.core.PlayerShellDataAccessor;
+import qdream.relay.items.ToolShellItem;
+import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.screen.ToolShellScreenHandler;
 
 /**

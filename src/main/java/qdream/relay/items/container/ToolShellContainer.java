@@ -1,4 +1,4 @@
-package qdream.relay.items;
+package qdream.relay.items.container;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.items.ToolShellItem;
 import qdream.relay.types.EntityType;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellStateManager;

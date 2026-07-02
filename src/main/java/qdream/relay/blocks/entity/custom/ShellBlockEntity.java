@@ -25,8 +25,6 @@ import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.screen.ShellScreenHandler;
-import qdream.relay.core.ShellRegistry;
-import qdream.relay.items.DiskItem;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
@@ -72,17 +70,11 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
         });
-
-        // 注册到 ShellRegistry
-        if (level != null && !level.isClientSide()) {
-            ShellRegistry.register(this, pos);
-        }
     }
 
     @Override
     public void setRemoved() {
         super.setRemoved();
-        ShellRegistry.unregister(this);
     }
 
     /**
