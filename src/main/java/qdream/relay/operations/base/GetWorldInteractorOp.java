@@ -28,7 +28,7 @@ public class GetWorldInteractorOp extends Spell {
 
     public GetWorldInteractorOp() {
         super("relay:get_world_interactor", 1, 1, OperationSignature.builder()
-                .producesToData("relay:boolean")
+                .producesToData("hasInteractor", "relay:boolean")
                 .build());
     }
 

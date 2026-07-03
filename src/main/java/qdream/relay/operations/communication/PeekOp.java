@@ -17,8 +17,8 @@ public class PeekOp extends Spell {
 
     public PeekOp() {
         super("relay:peek", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .producesToData("any")
+                .consumesFromData("channel", "relay:number")
+                .producesToData("data", "any")
                 .build());
     }
 

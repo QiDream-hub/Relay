@@ -20,8 +20,8 @@ public class ListLengthOp extends Spell {
 
     public ListLengthOp() {
         super("relay:list_length", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:list")
-                .producesToData("relay:number")
+                .consumesFromData("list", "relay:list")
+                .producesToData("size", "relay:number")
                 .build());
     }
 

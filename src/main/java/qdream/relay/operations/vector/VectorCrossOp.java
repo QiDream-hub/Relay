@@ -18,9 +18,9 @@ public class VectorCrossOp extends Spell {
 
     public VectorCrossOp() {
         super("relay:vector_cross", 1, 2, OperationSignature.builder()
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:vector")
-                .producesToData("relay:vector")
+                .consumesFromData("left", "relay:vector")
+                .consumesFromData("right", "relay:vector")
+                .producesToData("crossProduct", "relay:vector")
                 .build());
     }
 

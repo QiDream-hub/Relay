@@ -13,9 +13,9 @@ public class DivOp extends Spell {
 
     public DivOp() {
         super("relay:div", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .consumesFromData("relay:number")
-                .producesToData("relay:number")
+                .consumesFromData("dividend", "relay:number")
+                .consumesFromData("divisor", "relay:number")
+                .producesToData("quotient", "relay:number")
                 .build());
     }
 

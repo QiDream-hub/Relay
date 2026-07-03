@@ -34,10 +34,10 @@ public class BlockRaycastOp extends Spell {
 
     public BlockRaycastOp() {
         super("relay:block_raycast", 4, 3, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:vector")
-                .producesToData("relay:vector")
+                .consumesFromData("maxDistance", "relay:number")
+                .consumesFromData("direction", "relay:vector")
+                .consumesFromData("start", "relay:vector")
+                .producesToData("hitPos", "relay:vector")
                 .build());
     }
 

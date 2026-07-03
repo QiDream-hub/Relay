@@ -11,7 +11,7 @@ public class PopOp extends Spell {
 
     public PopOp() {
         super("relay:pop", 1, 1, OperationSignature.builder()
-                .consumesFromData("any")
+                .consumesFromData("value", "any")
                 .build());
     }
 

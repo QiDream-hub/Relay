@@ -19,9 +19,9 @@ public class VectorDotOp extends Spell {
 
     public VectorDotOp() {
         super("relay:vector_dot", 1, 2, OperationSignature.builder()
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:vector")
-                .producesToData("relay:number")
+                .consumesFromData("left", "relay:vector")
+                .consumesFromData("right", "relay:vector")
+                .producesToData("dotProduct", "relay:number")
                 .build());
     }
 

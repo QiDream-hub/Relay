@@ -23,8 +23,8 @@ public class GetEntityPosOp extends Spell {
 
     public GetEntityPosOp() {
         super("relay:get_entity_pos", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:entity")
-                .producesToData("relay:vector")
+                .consumesFromData("entity", "relay:entity")
+                .producesToData("position", "relay:vector")
                 .build());
     }
 

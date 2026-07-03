@@ -14,9 +14,9 @@ public class AddOp extends Spell {
 
     public AddOp() {
         super("relay:add", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .consumesFromData("relay:number")
-                .producesToData("relay:number")
+                .consumesFromData("augend", "relay:number")
+                .consumesFromData("addend", "relay:number")
+                .producesToData("sum", "relay:number")
                 .build());
     }
 

@@ -23,8 +23,8 @@ public class GetLookVectorOp extends Spell {
 
     public GetLookVectorOp() {
         super("relay:get_look_vector", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:entity")
-                .producesToData("relay:vector")
+                .consumesFromData("entity", "relay:entity")
+                .producesToData("lookDirection", "relay:vector")
                 .build());
     }
 

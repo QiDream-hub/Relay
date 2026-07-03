@@ -26,7 +26,7 @@ public class GetOwnerOp extends Spell {
 
     public GetOwnerOp() {
         super("relay:get_owner", 1, 1, OperationSignature.builder()
-                .producesToData("relay:entity")
+                .producesToData("owner", "relay:entity")
                 .build());
     }
 

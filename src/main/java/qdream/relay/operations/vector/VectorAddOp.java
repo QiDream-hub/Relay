@@ -19,9 +19,9 @@ public class VectorAddOp extends Spell {
 
     public VectorAddOp() {
         super("relay:vector_add", 1, 2, OperationSignature.builder()
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:vector")
-                .producesToData("relay:vector")
+                .consumesFromData("left", "relay:vector")
+                .consumesFromData("right", "relay:vector")
+                .producesToData("sum", "relay:vector")
                 .build());
     }
 

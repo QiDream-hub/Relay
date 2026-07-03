@@ -16,9 +16,9 @@ public class SendOp extends Spell {
 
     public SendOp() {
         super("relay:send", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .consumesFromData("any")
-                .producesToData("relay:boolean")
+                .consumesFromData("channel", "relay:number")
+                .consumesFromData("data", "any")
+                .producesToData("success", "relay:boolean")
                 .build());
     }
 

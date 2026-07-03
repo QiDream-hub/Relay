@@ -12,9 +12,9 @@ public class DupOp extends Spell {
 
     public DupOp() {
         super("relay:dup", 1, 1, OperationSignature.builder()
-                .consumesFromData("any")
-                .producesToData("any")
-                .producesToData("any")
+                .consumesFromData("value", "any")
+                .producesToData("copy", "any")
+                .producesToData("original", "any")
                 .build());
     }
 

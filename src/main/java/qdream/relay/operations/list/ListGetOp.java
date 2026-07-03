@@ -20,9 +20,9 @@ public class ListGetOp extends Spell {
 
     public ListGetOp() {
         super("relay:list_get", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:list")
-                .consumesFromData("relay:number")
-                .producesToData("any")
+                .consumesFromData("list", "relay:list")
+                .consumesFromData("index", "relay:number")
+                .producesToData("element", "any")
                 .build());
     }
 

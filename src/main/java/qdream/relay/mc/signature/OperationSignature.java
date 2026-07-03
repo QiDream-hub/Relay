@@ -90,8 +90,8 @@ public class OperationSignature implements Signature<ParameterDescriptor, Parame
         /**
          * 添加从数据栈消费的参数
          */
-        public Builder consumesFromData(String... types) {
-            consumesFromData.add(ParameterDescriptor.builder().types(types).build());
+        public Builder consumesFromData(String name, String... types) {
+            consumesFromData.add(ParameterDescriptor.builder().types(types).name(name).build());
             return this;
         }
 
@@ -106,9 +106,10 @@ public class OperationSignature implements Signature<ParameterDescriptor, Parame
         /**
          * 添加从程序栈消费的参数
          */
-        public Builder consumesFromProgram(String... types) {
+        public Builder consumesFromProgram(String name, String... types) {
             consumesFromProgram.add(ParameterDescriptor.builder()
                     .source(ParameterSource.PROGRAM_STACK)
+                    .name(name)
                     .types(types)
                     .build());
             return this;
@@ -125,8 +126,8 @@ public class OperationSignature implements Signature<ParameterDescriptor, Parame
         /**
          * 添加向数据栈生产的参数
          */
-        public Builder producesToData(String... types) {
-            producesToData.add(ParameterDescriptor.builder().types(types).build());
+        public Builder producesToData(String name, String... types) {
+            producesToData.add(ParameterDescriptor.builder().types(types).name(name).build());
             return this;
         }
 
@@ -141,9 +142,10 @@ public class OperationSignature implements Signature<ParameterDescriptor, Parame
         /**
          * 添加向程序栈生产的参数
          */
-        public Builder producesToProgram(String... types) {
+        public Builder producesToProgram(String name, String... types) {
             producesToProgram.add(ParameterDescriptor.builder()
                     .source(ParameterSource.PROGRAM_STACK)
+                    .name(name)
                     .types(types)
                     .build());
             return this;

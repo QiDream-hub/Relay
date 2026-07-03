@@ -22,7 +22,6 @@ import qdream.relay.mc.component.ComputingCoreComponent;
 public abstract class ComputingCoreItem extends Item implements ComputingCoreComponent {
 
     public ComputingCoreItem(Properties properties) {
-        // 不设置 stacksTo，使用默认 64 堆叠
         super(properties);
     }
 

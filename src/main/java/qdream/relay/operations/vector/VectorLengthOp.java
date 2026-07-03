@@ -19,8 +19,8 @@ public class VectorLengthOp extends Spell {
 
     public VectorLengthOp() {
         super("relay:vector_length", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:vector")
-                .producesToData("relay:number")
+                .consumesFromData("vector", "relay:vector")
+                .producesToData("length", "relay:number")
                 .build());
     }
 

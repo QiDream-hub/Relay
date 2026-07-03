@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -85,9 +86,8 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
         if (content.description != null && !content.description.isEmpty()) {
             // 描述文字自动换行
             var wrappedLines = font.split(
-                net.minecraft.network.chat.Component.literal(content.description),
-                this.width - 12
-            );
+                    Component.literal(content.description),
+                    this.width - 12);
             for (var line : wrappedLines) {
                 graphics.text(this.font, line, textX, textY, DESC_COLOR);
                 textY += lineHeight + 1;
@@ -103,23 +103,27 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
             textY += 4;
 
             for (InfoLine line : content.lines) {
-                int color = line.color != null ? line.color : DESC_COLOR;
-                graphics.text(this.font, line.text, textX, textY, color);
-                textY += lineHeight + 2;
+                var wrappedLines = font.split(Component.literal(line.text), this.width - 12);
+                for (var displayLine : wrappedLines) {
+                    int color = line.color != null ? line.color : DESC_COLOR;
+                    graphics.text(this.font, displayLine, textX, textY, color);
+                    textY += lineHeight + 2;
+                }
             }
         }
     }
 
     @Override
-    protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
         // 无障碍：无需额外描述
     }
 
     /**
      * 信息内容
-     * @param title 标题
+     * 
+     * @param title       标题
      * @param description 描述
-     * @param lines 内容行列表（输入/输出签名）
+     * @param lines       内容行列表（输入/输出签名）
      */
     public record InfoContent(String title, String description, List<InfoLine> lines) {
         public InfoContent(String title, String description) {
@@ -143,7 +147,8 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
 
     /**
      * 信息行
-     * @param text 文本内容
+     * 
+     * @param text  文本内容
      * @param color 颜色（可选）
      */
     public record InfoLine(String text, Integer color) {

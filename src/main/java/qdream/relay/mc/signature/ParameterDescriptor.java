@@ -11,9 +11,11 @@ import java.util.List;
 public class ParameterDescriptor {
     private final ParameterSource source;
     private final List<String> types;
+    private final String name;
 
-    public ParameterDescriptor(ParameterSource source, List<String> types) {
+    public ParameterDescriptor(ParameterSource source, String name, List<String> types) {
         this.source = source;
+        this.name = name;
         this.types = Collections.unmodifiableList(new ArrayList<>(types));
     }
 
@@ -25,16 +27,26 @@ public class ParameterDescriptor {
         return types;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
         private ParameterSource source = ParameterSource.DATA_STACK;
+        private String name = "";
         private final List<String> types = new ArrayList<>();
 
         public Builder source(ParameterSource source) {
             this.source = source;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
             return this;
         }
 
@@ -49,7 +61,7 @@ public class ParameterDescriptor {
         }
 
         public ParameterDescriptor build() {
-            return new ParameterDescriptor(source, types);
+            return new ParameterDescriptor(source, name, types);
         }
     }
 }

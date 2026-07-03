@@ -14,9 +14,9 @@ import qdream.relay.types.NumberType;
 public class ListCreatOp extends Spell{
     public ListCreatOp() {
         super("relay:list_creat", 1, 1, OperationSignature.builder()
-                .consumesFromData("Number")
-                .consumesFromData("...any")
-                .producesToData("relay:list")
+                .consumesFromData("size", "relay:number")
+                .consumesFromData("elements", "...any")
+                .producesToData("result", "relay:list")
                 .build());
     }
     @Override

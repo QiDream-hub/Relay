@@ -18,9 +18,9 @@ public class VectorSubOp extends Spell {
 
     public VectorSubOp() {
         super("relay:vector_sub", 1, 2, OperationSignature.builder()
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:vector")
-                .producesToData("relay:vector")
+                .consumesFromData("minuend", "relay:vector")
+                .consumesFromData("subtrahend", "relay:vector")
+                .producesToData("difference", "relay:vector")
                 .build());
     }
 

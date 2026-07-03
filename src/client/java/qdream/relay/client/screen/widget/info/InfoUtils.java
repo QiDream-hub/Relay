@@ -25,8 +25,9 @@ public class InfoUtils {
 
     /**
      * 生成操作的语言文件 Key
+     * 
      * @param operationId 操作 ID（如 "relay:pop", "relay:add"）
-     * @param keyType Key 类型（如 "name", "description", "param.0"）
+     * @param keyType     Key 类型（如 "name", "description", "param.0"）
      * @return 完整的语言文件 Key
      */
     public static String makeOperationKey(String operationId, String keyType) {
@@ -35,12 +36,23 @@ public class InfoUtils {
 
     /**
      * 生成类型的语言文件 Key
-     * @param typeId 类型 ID（如 "relay:number", "relay:vector"）
+     * 
+     * @param typeId  类型 ID（如 "relay:number", "relay:vector"）
      * @param keyType Key 类型（如 "name", "description"）
      * @return 完整的语言文件 Key
      */
     public static String makeTypeKey(String typeId, String keyType) {
         return "type." + typeId + "." + keyType;
+    }
+
+    /**
+     * 生成类型的语言文件 Key
+     * 
+     * @param name 参数名称（如 "augend", "addend"）
+     * @return 完整的语言文件 Key
+     */
+    public static String makeParamDescriptionKey(String name) {
+        return "param." + name + ".description";
     }
 
     /**
@@ -54,6 +66,7 @@ public class InfoUtils {
 
     /**
      * 获取操作的显示名称（从语言文件）
+     * 
      * @param operationId 操作 ID（如 "relay:pop", "relay:add"）
      * @return 显示名称，如果语言文件不存在则返回 ID
      */
@@ -63,7 +76,19 @@ public class InfoUtils {
     }
 
     /**
+     * 参数的描述（从语言文件）
+     * 
+     * @param name 参数名称（如 "augend", "addend"）
+     * @return 显示名称，如果语言文件不存在则返回 注册名称
+     */
+    public static String getParamDescription(String name) {
+        String paramDescriptionKey = makeParamDescriptionKey(name);
+        return getLanguageText(paramDescriptionKey, name);
+    }
+
+    /**
      * 获取类型的显示名称（从语言文件）
+     * 
      * @param typeId 类型 ID（如 "relay:number", "relay:vector"）
      * @return 显示名称，如果语言文件不存在则返回 ID
      */
@@ -76,8 +101,9 @@ public class InfoUtils {
      * 构建操作的悬停信息内容
      * 第一部分：输入和输出的签名
      * 第二部分：语言文件中的描述
+     * 
      * @param operationId 操作 ID
-     * @param signature 操作签名
+     * @param signature   操作签名
      * @return InfoContent 内容
      */
     public static HoverInfoWidget.InfoContent buildOperationInfo(String operationId, OperationSignature signature) {
@@ -95,15 +121,17 @@ public class InfoUtils {
 
         // 第一部分：输入签名
         List<String> inputTypes = new ArrayList<>();
-        
+
         // 从数据栈消费的参数
         for (ParameterDescriptor descriptor : signature.getConsumesFromData()) {
-            inputTypes.add(formatTypes(descriptor.getTypes()));
+            inputTypes.add(formatTypes(descriptor.getTypes()) + ": " + getParamDescription(descriptor.getName()));
         }
-        
+
         // 从程序栈消费的参数
         for (ParameterDescriptor descriptor : signature.getConsumesFromProgram()) {
-            inputTypes.add(formatTypes(descriptor.getTypes()) + " [程序]");
+            inputTypes
+                    .add(formatTypes(descriptor.getTypes()) + ": " + getParamDescription(descriptor.getName())
+                            + " [程序]");
         }
 
         if (!inputTypes.isEmpty()) {
@@ -115,15 +143,16 @@ public class InfoUtils {
 
         // 第一部分：输出签名
         List<String> outputTypes = new ArrayList<>();
-        
+
         // 向数据栈生产的参数
         for (ParameterDescriptor descriptor : signature.getProducesToData()) {
-            outputTypes.add(formatTypes(descriptor.getTypes()));
+            outputTypes.add(formatTypes(descriptor.getTypes()) + ": " + getParamDescription(descriptor.getName()));
         }
-        
+
         // 向程序栈生产的参数
         for (ParameterDescriptor descriptor : signature.getProducesToProgram()) {
-            outputTypes.add(formatTypes(descriptor.getTypes()) + " [程序]");
+            outputTypes.add(
+                    formatTypes(descriptor.getTypes()) + ": " + getParamDescription(descriptor.getName()) + " [程序]");
         }
 
         if (!outputTypes.isEmpty()) {
@@ -140,6 +169,7 @@ public class InfoUtils {
      * 构建类型的悬停信息内容
      * 第一部分：输入字段（构建该类型需要的字段）
      * 第二部分：语言文件中的描述
+     * 
      * @param typeId 类型 ID
      * @return InfoContent 内容
      */
@@ -158,7 +188,7 @@ public class InfoUtils {
                 var executable = entry.create();
                 if (executable instanceof Data data) {
                     DataSignature signature = data.getSignature();
-                    
+
                     // 显示输入字段（构建该类型需要的字段）
                     List<DataFieldDescriptor> inputs = signature.getInputs();
                     if (!inputs.isEmpty()) {
@@ -188,6 +218,7 @@ public class InfoUtils {
 
     /**
      * 格式化数据字段描述符
+     * 
      * @param field 字段描述符
      * @return 格式化后的字符串（如 "x: Number|String"）
      */
@@ -210,6 +241,7 @@ public class InfoUtils {
 
     /**
      * 格式化类型列表为可读字符串，使用 | 拼接
+     * 
      * @param types 类型列表
      * @return 格式化后的字符串（如 "Number|String"）
      */
@@ -224,11 +256,12 @@ public class InfoUtils {
             displayTypes.add(getTypeDisplayName(type));
         }
 
-        return String.join("|", displayTypes);
+        return String.join(" | ", displayTypes);
     }
 
     /**
      * 计算信息 Widget 所需的最小高度
+     * 
      * @param lineCount 内容行数
      * @return 最小高度（像素）
      */
@@ -241,7 +274,8 @@ public class InfoUtils {
 
     /**
      * 计算信息 Widget 所需的最小宽度
-     * @param font 字体
+     * 
+     * @param font  字体
      * @param lines 内容行
      * @return 最小宽度（像素）
      */

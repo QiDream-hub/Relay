@@ -36,11 +36,11 @@ public class EntityRaycastOp extends Spell {
 
     public EntityRaycastOp() {
         super("relay:entity_raycast", 3, 5, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:entity")
-                .producesToData("relay:entity")
+                .consumesFromData("maxDistance", "relay:number")
+                .consumesFromData("direction", "relay:vector")
+                .consumesFromData("start", "relay:vector")
+                .consumesFromData("exclude", "relay:entity")
+                .producesToData("hitEntity", "relay:entity")
                 .build());
     }
 

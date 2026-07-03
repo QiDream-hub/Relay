@@ -33,7 +33,7 @@ public class GetSelfOp extends Spell {
 
     public GetSelfOp() {
         super("relay:get_self", 1, 1, OperationSignature.builder()
-                .producesToData("relay:entity", "relay:block_entity")
+                .producesToData("self", "relay:entity", "relay:block_entity")
                 .build());
     }
 

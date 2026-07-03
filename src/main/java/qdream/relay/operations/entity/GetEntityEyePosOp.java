@@ -22,8 +22,8 @@ public class GetEntityEyePosOp extends Spell {
 
     public GetEntityEyePosOp() {
         super("relay:get_entity_eye_pos", 1, 1, OperationSignature.builder()
-                .consumesFromData("relay:entity")
-                .producesToData("relay:vector")
+                .consumesFromData("entity", "relay:entity")
+                .producesToData("eyePosition", "relay:vector")
                 .build());
     }
 

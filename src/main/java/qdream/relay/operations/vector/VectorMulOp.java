@@ -19,9 +19,9 @@ public class VectorMulOp extends Spell {
 
     public VectorMulOp() {
         super("relay:vector_mul", 1, 2, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .consumesFromData("relay:vector")
-                .producesToData("relay:vector")
+                .consumesFromData("scalar", "relay:number")
+                .consumesFromData("vector", "relay:vector")
+                .producesToData("result", "relay:vector")
                 .build());
     }
 

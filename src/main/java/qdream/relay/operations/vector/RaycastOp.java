@@ -33,10 +33,10 @@ public class RaycastOp extends Spell {
 
     public RaycastOp() {
         super("relay:raycast", 5, 3, OperationSignature.builder()
-                .consumesFromData("relay:number")
-                .consumesFromData("relay:vector")
-                .consumesFromData("relay:vector")
-                .producesToData("relay:vector", "relay:null")
+                .consumesFromData("maxDistance", "relay:number")
+                .consumesFromData("direction", "relay:vector")
+                .consumesFromData("start", "relay:vector")
+                .producesToData("hitPos", "relay:vector", "relay:null")
                 .build());
     }
 

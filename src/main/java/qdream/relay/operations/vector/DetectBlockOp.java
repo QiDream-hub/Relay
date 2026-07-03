@@ -32,8 +32,8 @@ public class DetectBlockOp extends Spell {
 
     public DetectBlockOp() {
         super("relay:detect_block", 3, 1, OperationSignature.builder()
-                .consumesFromData("relay:vector")
-                .producesToData("relay:boolean")
+                .consumesFromData("position", "relay:vector")
+                .producesToData("exists", "relay:boolean")
                 .build());
     }
 
