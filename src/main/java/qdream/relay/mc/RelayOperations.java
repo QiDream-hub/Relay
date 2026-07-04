@@ -14,8 +14,13 @@ import qdream.relay.operations.communication.RecvOp;
 import qdream.relay.operations.communication.SendOp;
 import qdream.relay.operations.communication.SendMessageOp;
 import qdream.relay.operations.control.EvalOp;
+import qdream.relay.operations.control.ForOp;
 import qdream.relay.operations.control.IfOp;
 import qdream.relay.operations.control.StopOp;
+import qdream.relay.operations.control.WhileOp;
+import qdream.relay.operations.entity.GetBlockEntityOp;
+import qdream.relay.operations.entity.GetBlockOp;
+import qdream.relay.operations.entity.GetEntityOp;
 import qdream.relay.operations.entity.GetEntityPosOp;
 import qdream.relay.operations.entity.DetectEntityOp;
 import qdream.relay.operations.entity.GetEntityEyePosOp;
@@ -53,6 +58,7 @@ import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListSetOp;
 import qdream.relay.types.BooleanType;
 import qdream.relay.types.BlockEntityType;
+import qdream.relay.types.BlockType;
 import qdream.relay.types.EntityType;
 import qdream.relay.types.ListType;
 import qdream.relay.types.NullType;
@@ -96,6 +102,8 @@ public class RelayOperations {
                 new OperationRegistry.DataEntry(() -> new ListType(new ArrayList<>())));
         OperationRegistry.register("relay:block_entity",
                 new OperationRegistry.DataEntry(() -> new BlockEntityType(null, null, null)));
+        OperationRegistry.register("relay:block",
+                new OperationRegistry.DataEntry(() -> new BlockType(null, null, null)));
     }
 
     private static void registerOperations() {
@@ -116,6 +124,14 @@ public class RelayOperations {
         OperationRegistry.register("relay:is_player",
                 new OperationRegistry.OpEntry(new IsPlayerOp()));
 
+        // 实体获取操作
+        OperationRegistry.register("relay:get_block_entity",
+                new OperationRegistry.OpEntry(new GetBlockEntityOp()));
+        OperationRegistry.register("relay:get_entity",
+                new OperationRegistry.OpEntry(new GetEntityOp()));
+        OperationRegistry.register("relay:get_block",
+                new OperationRegistry.OpEntry(new GetBlockOp()));
+
         // 算术操作
         OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new AddOp()));
         OperationRegistry.register("relay:sub", new OperationRegistry.OpEntry(new SubOp()));
@@ -135,6 +151,8 @@ public class RelayOperations {
         // 控制流
         OperationRegistry.register("relay:eval", new OperationRegistry.OpEntry(new EvalOp()));
         OperationRegistry.register("relay:if", new OperationRegistry.OpEntry(new IfOp()));
+        OperationRegistry.register("relay:for", new OperationRegistry.OpEntry(new ForOp()));
+        OperationRegistry.register("relay:while", new OperationRegistry.OpEntry(new WhileOp()));
         OperationRegistry.register("relay:stop", new OperationRegistry.OpEntry(new StopOp()));
 
         // 通信操作

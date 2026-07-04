@@ -98,7 +98,7 @@ public class ToolShellItem extends Item {
                                 + qdream.relay.commands.CommandUtils
                                         .dataStackToString(machine.getProgramStackSnapshot())));
                 player.sendSystemMessage(
-                        Component.literal("§e[数据序栈] "
+                        Component.literal("§e[数据栈] "
                                 + qdream.relay.commands.CommandUtils
                                         .dataStackToString(machine.getDataStackSnapshot())));
             }

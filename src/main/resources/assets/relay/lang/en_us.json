@@ -84,6 +84,12 @@
   "operation.relay:eval.name": "Evaluate Subprogram",
   "operation.relay:eval.description": "Execute a list as a program",
 
+  "operation.relay:for.name": "For Loop",
+  "operation.relay:for.description": "Stack-based iterator: pops first element from list, pushes remaining back automatically, enabling stateless iteration. Program structure [list, body, ForOp] expands to multiple iterations",
+
+  "operation.relay:while.name": "While Loop",
+  "operation.relay:while.description": "Stack-based iterator: pops boolean condition, executes body and continues loop if true, ends if false. Condition must be recalculated after each body execution",
+
   "operation.relay:stop.name": "Stop",
   "operation.relay:stop.description": "Stop program execution",
 
@@ -192,6 +198,15 @@
   "operation.relay:push_vector.name": "Push Entity",
   "operation.relay:push_vector.description": "Apply push force to an entity",
 
+  "operation.relay:get_block.name": "Get Block",
+  "operation.relay:get_block.description": "Get block state from coordinates",
+
+  "operation.relay:get_block_entity.name": "Get Block Entity",
+  "operation.relay:get_block_entity.description": "Get block entity reference from coordinates",
+
+  "operation.relay:get_entity.name": "Get Entity",
+  "operation.relay:get_entity.description": "Get nearest entity reference from coordinates",
+
   "param.augend.description": "Augend",
   "param.addend.description": "Addend",
   "param.sum.description": "Sum",
@@ -257,6 +272,9 @@
   "param.push.description": "Push vector",
   "param.lookDirection.description": "Look direction",
   "param.crossProduct.description": "Cross product result vector(perpendicular \nto both input vectors)",
+  "param.blockState.description": "Block state",
+  "param.blockEntity.description": "Block entity",
+  "param.block.description": "Block",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",

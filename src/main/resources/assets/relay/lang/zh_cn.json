@@ -84,6 +84,12 @@
   "operation.relay:eval.name": "执行子程序",
   "operation.relay:eval.description": "将列表作为程序执行",
 
+  "operation.relay:for.name": "列表遍历",
+  "operation.relay:for.description": "栈式迭代器：每次取出列表首元素，剩余元素自动压回，实现无状态循环。程序结构 [list, body, ForOp] 会自动展开为多次迭代",
+
+  "operation.relay:while.name": "条件循环",
+  "operation.relay:while.description": "栈式迭代器：弹出布尔值，为 true 时执行 body 并继续循环，为 false 时结束。条件值需在每次 body 执行后重新计算",
+
   "operation.relay:stop.name": "停止",
   "operation.relay:stop.description": "停止程序执行",
 
@@ -188,6 +194,14 @@
 
   "operation.relay:push_vector.name": "推动实体",
   "operation.relay:push_vector.description": "向实体施加推力",
+  "operation.relay:get_block.name": "获取方块",
+  "operation.relay:get_block.description": "从坐标获取方块状态",
+
+  "operation.relay:get_block_entity.name": "获取方块实体",
+  "operation.relay:get_block_entity.description": "从坐标获取方块实体引用",
+
+  "operation.relay:get_entity.name": "获取实体",
+  "operation.relay:get_entity.description": "从坐标获取最近的实体引用",
 
   "param.augend.description": "被加数",
   "param.addend.description": "加数",
@@ -254,6 +268,9 @@
   "param.push.description": "推力向量",
   "param.lookDirection.description": "朝向方向",
   "param.crossProduct.description": "叉积结果向量（垂直于\n两个输入向量）",
+  "param.blockState.description": "方块状态",
+  "param.blockEntity.description": "方块实体",
+  "param.block.description": "方块",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
@@ -267,6 +284,8 @@
   "type.relay:entity.description": "实体引用，可获取实体属性",
   "type.relay:block_entity.name": "方块实体",
   "type.relay:block_entity.description": "方块实体引用，可获取方块实体属性",
+  "type.relay:block.name": "方块",
+  "type.relay:block.description": "方块状态引用，可获取方块属性",
   "type.relay:list.name": "列表",
   "type.relay:list.description": "元素列表，可存储任意类型",
   "type.relay:null.name": "空值",
