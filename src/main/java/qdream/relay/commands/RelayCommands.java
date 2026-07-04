@@ -21,7 +21,6 @@ public class RelayCommands {
         // 注册各子命令模块
         WriteCommands.register(dispatcher, root);
         ReadCommands.register(dispatcher, root);
-        RunCommands.register(dispatcher, root);
         ClearCommands.register(dispatcher, root);
     }
 }
