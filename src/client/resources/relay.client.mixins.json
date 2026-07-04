@@ -3,7 +3,8 @@
 	"package": "qdream.relay.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"ExampleClientMixin"
+		"ExampleClientMixin",
+		"ClientPlayerShellDataMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

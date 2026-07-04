@@ -13,6 +13,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.ChatFormatting;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.entity.SlotAccess;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.container.ToolShellContainer;
@@ -138,7 +141,7 @@ public class ToolShellItem extends Item {
      * @param player 玩家实体（用于获取 PlayerShellData）
      * @return ToolShellContainer 实例，不存在返回 null
      */
-    public ToolShellContainer getContainer(ItemStack stack, net.minecraft.world.entity.player.Player player) {
+    public ToolShellContainer getContainer(ItemStack stack, Player player) {
         if (player instanceof PlayerShellDataAccessor accessor) {
             return accessor.relay$getShellData().getContainer(stack);
         }
@@ -152,7 +155,7 @@ public class ToolShellItem extends Item {
      * @param player 玩家实体（用于获取 PlayerShellData）
      * @return 是否正在运行
      */
-    public boolean isRunning(ItemStack stack, net.minecraft.world.entity.player.Player player) {
+    public boolean isRunning(ItemStack stack, Player player) {
         ToolShellContainer container = getContainer(stack, player);
         if (container == null) {
             return false;
@@ -170,5 +173,78 @@ public class ToolShellItem extends Item {
             return (DiskComponent) stack.getItem();
         }
         return null;
+    }
+
+    /**
+     * 处理拿着 ToolShell 点击其他物品的逻辑
+     * <p>
+     * 调用时机：鼠标持有 ToolShell，点击其他物品（如磁盘）
+     * </p>
+     *
+     * @param self       工具外壳物品堆（鼠标持有的物品）
+     * @param other      被点击的槽位中的物品
+     * @param slot       被点击的槽位
+     * @param clickAction 点击动作
+     * @param player     玩家实体
+     * @param carriedItem 鼠标持有的物品访问器
+     * @return 是否成功处理交互
+     */
+    @Override
+    public boolean overrideOtherStackedOnMe(
+            final ItemStack self,
+            final ItemStack other,
+            final Slot slot,
+            final ClickAction clickAction,
+            final Player player,
+            final SlotAccess carriedItem
+    ) {
+        // 获取 ToolShell 容器
+        ToolShellContainer container = getContainer(self, player);
+
+        // 如果容器不存在，创建一个新的
+        if (container == null) {
+            if (player instanceof PlayerShellDataAccessor accessor) {
+                var shellData = accessor.relay$getShellData();
+                container = shellData.getOrCreateContainer(self);
+            } else {
+                return false;
+            }
+        }
+
+        ItemStack diskStack = container.getDiskStack(); // ToolShell 中的磁盘
+
+        if (clickAction == ClickAction.PRIMARY) {
+            // 左键点击：如果点击的是磁盘，尝试放入 ToolShell
+            if (!other.isEmpty() && other.getItem() instanceof DiskComponent) {
+                if (diskStack.isEmpty()) {
+                    // 磁盘插槽为空，直接放入
+                    ItemStack toInsert = other.copy();
+                    toInsert.setCount(1);
+                    container.setInventorySlot(ToolShellContainer.DISK_SLOT, toInsert);
+                    other.shrink(1);
+                    player.sendSystemMessage(Component.literal("§a[工具外壳] 已放入磁盘"));
+                    return true;
+                } else {
+                    // 磁盘插槽已有物品，交换
+                    ItemStack existing = diskStack.copy();
+                    container.setInventorySlot(ToolShellContainer.DISK_SLOT, other.copy());
+                    slot.set(existing);
+                    player.sendSystemMessage(Component.literal("§e[工具外壳] 已交换磁盘"));
+                    return true;
+                }
+            }
+        } else if (clickAction == ClickAction.SECONDARY) {
+            // 右键点击：如果 ToolShell 中有磁盘，取出到鼠标
+            if (!diskStack.isEmpty()) {
+                // 将磁盘放到鼠标拖拽中
+                ItemStack toTake = diskStack.copy();
+                carriedItem.set(toTake);
+                container.setInventorySlot(ToolShellContainer.DISK_SLOT, ItemStack.EMPTY);
+                player.sendSystemMessage(Component.literal("§e[工具外壳] 已取出磁盘"));
+                return true;
+            }
+        }
+
+        return false;
     }
 }
