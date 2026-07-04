@@ -61,4 +61,9 @@ public class StringData extends Data {
         }
         return new StringData("");
     }
+
+    @Override
+    public String toString() {
+        return "StringData{value=" + value + "}";
+    }
 }

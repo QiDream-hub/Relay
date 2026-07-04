@@ -36,6 +36,9 @@
   "item.relay.tool_shell.usage_right": "§7Right-click: §eLoad/Run program",
   "item.relay.tool_shell.usage_shift": "§7Shift+Right-click: §cStop program",
   "item.relay.tool_shell.usage_gui": "§7%1$s: §bOpen config GUI",
+  "item.relay.spell_disk.empty": "§8Empty Disk",
+  "item.relay.spell_disk.size": "Program Size: §e%d",
+  "item.relay.spell_disk.more": "  §8... and %d more",
   "key.relay.open_tool_shell_config": "Open Tool Shell Config",
   "key.category.relay.relay": "Relay",
 
@@ -59,6 +62,15 @@
 
   "operation.relay:div.name": "Divide",
   "operation.relay:div.description": "Calculate quotient of two numbers",
+
+  "operation.relay:mod.name": "Modulo",
+  "operation.relay:mod.description": "Calculate remainder of two numbers",
+
+  "operation.relay:floor.name": "Floor",
+  "operation.relay:floor.description": "Round down to nearest integer",
+
+  "operation.relay:ceil.name": "Ceil",
+  "operation.relay:ceil.description": "Round up to nearest integer",
 
   "operation.relay:and.name": "Logical AND",
   "operation.relay:and.description": "Calculate logical AND of two booleans",
@@ -162,6 +174,9 @@
   "operation.relay:vector_distance.name": "Vector Distance",
   "operation.relay:vector_distance.description": "Calculate distance between two points",
 
+  "operation.relay:build_vector.name": "Build Vector",
+  "operation.relay:build_vector.description": "Build a vector from three numbers (X, Y, Z)",
+
   "operation.relay:raycast.name": "Raycast",
   "operation.relay:raycast.description": "Cast a ray from origin along direction, return hit block position",
 
@@ -232,6 +247,10 @@
   "param.quotient.description": "Quotient",
   "param.left.description": "Left operand",
   "param.right.description": "Right operand",
+  "param.dotProduct.description": "Dot product result",
+  "param.floor.description": "Floor result",
+  "param.ceil.description": "Ceil result",
+  "param.remainder.description": "Remainder result",
   "param.result.description": "Result",
   "param.operand.description": "Operand",
   "param.first.description": "First value",
@@ -293,6 +312,8 @@
   "param.block.description": "Block",
   "param.type_a.description": "First type",
   "param.type_b.description": "Second type",
+  "param.block_entity.description": "Obtained block entity",
+  "param.scalar.description": "Scalar multiplier",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",
@@ -311,5 +332,9 @@
   "type.relay:null.name": "Null",
   "type.relay:null.description": "Null type, represents no data",
   "type.relay:program.name": "Program",
-  "type.relay:program.description": "Program block, contains executable instruction sequence"
+  "type.relay:program.description": "Program block, contains executable instruction sequence",
+
+  "param.x.description": "X coordinate",
+  "param.y.description": "Y coordinate",
+  "param.z.description": "Z coordinate"
 }

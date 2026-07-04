@@ -36,6 +36,9 @@
   "item.relay.tool_shell.usage_right": "§7右键：§e加载/运行程序",
   "item.relay.tool_shell.usage_shift": "§7Shift+ 右键：§c停止程序",
   "item.relay.tool_shell.usage_gui": "§7%1$s：§b打开配置 GUI",
+  "item.relay.spell_disk.empty": "§8空磁盘",
+  "item.relay.spell_disk.size": "程序大小：§e%d",
+  "item.relay.spell_disk.more": "  §8... 还有 %d 项",
   "key.relay.open_tool_shell_config": "打开工具外壳配置",
   "key.category.relay.relay": "Relay",
 
@@ -59,6 +62,15 @@
 
   "operation.relay:div.name": "除法",
   "operation.relay:div.description": "计算两个数的商",
+
+  "operation.relay:mod.name": "取余",
+  "operation.relay:mod.description": "计算两个数的余数",
+
+  "operation.relay:floor.name": "取底",
+  "operation.relay:floor.description": "向下取整",
+
+  "operation.relay:ceil.name": "取顶",
+  "operation.relay:ceil.description": "向上取整",
 
   "operation.relay:and.name": "逻辑与",
   "operation.relay:and.description": "计算两个布尔值的逻辑与",
@@ -162,6 +174,9 @@
   "operation.relay:vector_distance.name": "向量距离",
   "operation.relay:vector_distance.description": "计算两个向量之间的距离",
 
+  "operation.relay:build_vector.name": "构建向量",
+  "operation.relay:build_vector.description": "从三个数字构建向量 (X, Y, Z)",
+
   "operation.relay:raycast.name": "射线追踪",
   "operation.relay:raycast.description": "从起点沿方向发射射线，返回命中的方块位置",
 
@@ -228,6 +243,10 @@
   "param.quotient.description": "商",
   "param.left.description": "左操作数",
   "param.right.description": "右操作数",
+  "param.dotProduct.description": "点积结果",
+  "param.floor.description":"取底结果",
+  "param.ceil.description":"取顶结果",
+  "param.remainder.description": "取余结果",
   "param.result.description": "结果",
   "param.operand.description": "操作数",
   "param.first.description": "第一个值",
@@ -289,6 +308,8 @@
   "param.block.description": "方块",
   "param.type_a.description": "第一个类型",
   "param.type_b.description": "第二个类型",
+  "param.block_entity.description": "获取的方块实体",
+  "param.scalar.description": "数乘标量",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
@@ -311,5 +332,9 @@
   "type.relay:null.name": "空值",
   "type.relay:null.description": "空值类型，表示无数据",
   "type.relay:program.name": "程序",
-  "type.relay:program.description": "程序块，包含可执行的指令序列"
+  "type.relay:program.description": "程序块，包含可执行的指令序列",
+
+  "param.x.description": "X 坐标",
+  "param.y.description": "Y 坐标",
+  "param.z.description": "Z 坐标"
 }

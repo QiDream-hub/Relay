@@ -2,10 +2,11 @@ package qdream.relay.operations.communication;
 
 import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -16,25 +17,22 @@ public class SendOp extends Spell {
 
     public SendOp() {
         super("relay:send", 1, 1, OperationSignature.builder()
-                .consumesFromData("channel", "relay:number")
                 .consumesFromData("data", "any")
+                .consumesFromData("channel", "relay:number")
                 .producesToData("success", "relay:boolean")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
-        Operation dataData = (Operation) executor.popData();
-        if (dataData == null) return;
-        Operation channelData = (Operation) executor.popData();
-        if (channelData == null) return;
-        if (!(channelData instanceof NumberData channel)) {
-            executor.triggerMishap("操作 relay:send 期望 number 类型，实际为：" + channelData.getId());
+        Executable data = executor.popData();
+        if (data == null)
             return;
-        }
+
+        NumberData channel = OperationHelpers.popNumber(executor, "relay:number");
 
         int ch = channel.asInt();
-        boolean success = CommunicationSystem.send(ch, dataData);
+        boolean success = CommunicationSystem.send(ch, data);
 
         if (!success) {
             executor.triggerMishap("操作 relay:send 频道 " + ch + " 队列已满");

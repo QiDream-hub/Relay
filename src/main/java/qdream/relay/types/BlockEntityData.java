@@ -26,10 +26,10 @@ import qdream.relay.mc.signature.DataSignature;
 public class BlockEntityData extends Data {
     // 方块位置
     private final BlockPos blockPos;
-    
+
     // 世界 ID 字符串（例如 "minecraft:overworld"）
     private final String worldId;
-    
+
     // 运行时缓存，不序列化
     private transient BlockEntity blockEntityRef;
 
@@ -72,6 +72,7 @@ public class BlockEntityData extends Data {
 
     /**
      * 获取方块实体引用（通过世界查询位置）
+     * 
      * @return 方块实体引用，如果不存在则返回 null
      */
     public BlockEntity getBlockEntity(Level world) {
@@ -90,6 +91,7 @@ public class BlockEntityData extends Data {
 
     /**
      * 获取方块位置
+     * 
      * @return 方块位置
      */
     public BlockPos getBlockPos() {
@@ -98,6 +100,7 @@ public class BlockEntityData extends Data {
 
     /**
      * 获取世界 ID 字符串
+     * 
      * @return 世界 ID 字符串
      */
     public String getWorldId() {
@@ -132,7 +135,10 @@ public class BlockEntityData extends Data {
         if (worldId != null) {
             valueTag.putString("world", worldId);
         }
-        
+
+        valueTag.putInt("x", 0);
+        valueTag.putInt("y", 0);
+        valueTag.putInt("z", 0);
         if (blockPos != null) {
             valueTag.putInt("x", blockPos.getX());
             valueTag.putInt("y", blockPos.getY());
@@ -171,7 +177,7 @@ public class BlockEntityData extends Data {
         if (worldId != null) {
             valueObject.addProperty("world", worldId);
         }
-        
+
         if (blockPos != null) {
             valueObject.addProperty("x", blockPos.getX());
             valueObject.addProperty("y", blockPos.getY());
@@ -184,12 +190,12 @@ public class BlockEntityData extends Data {
     public Data fromJson(JsonObject json) {
         if (json.has("value")) {
             JsonObject valueObject = json.get("value").getAsJsonObject();
-            
+
             String worldId = null;
             if (valueObject.has("world")) {
                 worldId = valueObject.get("world").getAsString();
             }
-            
+
             BlockPos blockPos = null;
             if (valueObject.has("x") && valueObject.has("y") && valueObject.has("z")) {
                 int x = valueObject.get("x").getAsInt();
@@ -197,9 +203,17 @@ public class BlockEntityData extends Data {
                 int z = valueObject.get("z").getAsInt();
                 blockPos = new BlockPos(x, y, z);
             }
-            
+
             return BlockEntityData.fromBlockPos(blockPos, worldId);
         }
         return new BlockEntityData(null, null, null);
+    }
+
+    @Override
+    public String toString() {
+        if (blockPos == null && worldId == null) {
+            return "BlockEntityData{null}";
+        }
+        return "BlockEntityData{pos=" + blockPos + ", worldId=" + worldId + "}";
     }
 }

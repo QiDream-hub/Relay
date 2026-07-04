@@ -53,4 +53,9 @@ public class NullData extends Data {
     public Data fromJson(JsonObject json) {
         return INSTANCE;
     }
+
+    @Override
+    public String toString() {
+        return "NullData{}";
+    }
 }

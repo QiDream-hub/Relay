@@ -84,4 +84,9 @@ public class VectorData extends Data {
 
         return new VectorData(vec);
     }
+
+    @Override
+    public String toString() {
+        return "VectorData{x=" + vec3.x + ", y=" + vec3.y + ", z=" + vec3.z + "}";
+    }
 }

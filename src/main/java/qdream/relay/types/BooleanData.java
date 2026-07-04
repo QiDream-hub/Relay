@@ -65,4 +65,9 @@ public class BooleanData extends Data {
         }
         return new BooleanData(false);
     }
+
+    @Override
+    public String toString() {
+        return "BooleanData{value=" + value + "}";
+    }
 }

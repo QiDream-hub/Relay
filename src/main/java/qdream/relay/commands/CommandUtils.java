@@ -13,7 +13,9 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 
 import qdream.relay.engine.Executable;
+import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.tools.StackTools;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
@@ -66,6 +68,7 @@ public class CommandUtils {
 
     /**
      * 将程序转换为可读字符串
+     * 使用简洁格式：操作去除 relay: 前缀，数据显示实际值
      */
     public static String programToString(List<Executable> program) {
         StringBuilder sb = new StringBuilder();
@@ -89,7 +92,7 @@ public class CommandUtils {
             } else if (exec instanceof ListData list) {
                 sb.append("[...]");
             } else {
-                sb.append(((Operation) exec).getId());
+                sb.append(exec.getClass().getSimpleName());
             }
         }
         return sb.toString();
@@ -97,6 +100,7 @@ public class CommandUtils {
 
     /**
      * 将数据栈转换为可读字符串
+     * 使用简洁格式：数据显示实际值，操作显示 ID
      */
     public static String dataStackToString(List<Executable> dataStack) {
         StringBuilder sb = new StringBuilder();
@@ -110,10 +114,26 @@ public class CommandUtils {
                 sb.append(n.getValue());
             } else if (data instanceof BooleanData b) {
                 sb.append(b.asBoolean());
+            } else if (data instanceof Operation op) {
+                sb.append(op.getId());
             } else {
-                sb.append(((Operation) data).getId());
+                sb.append(data.getClass().getSimpleName());
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * 格式化状态机的程序栈为命令调试格式
+     */
+    public static String formatProgramStack(StateMachine executor) {
+        return programToString(executor.getProgramStackSnapshot());
+    }
+
+    /**
+     * 格式化状态机的数据栈为命令调试格式
+     */
+    public static String formatDataStack(StateMachine executor) {
+        return dataStackToString(executor.getDataStackSnapshot());
     }
 }

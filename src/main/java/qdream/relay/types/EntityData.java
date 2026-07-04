@@ -219,4 +219,12 @@ public class EntityData extends Data {
         }
         return new EntityData(null, null, null);
     }
+
+    @Override
+    public String toString() {
+        if (uuid == null && worldId == null) {
+            return "EntityData{null}";
+        }
+        return "EntityData{uuid=" + uuid + ", worldId=" + worldId + "}";
+    }
 }

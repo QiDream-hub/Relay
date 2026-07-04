@@ -116,4 +116,9 @@ public class ListData extends Data {
 
         return new ListData(list);
     }
+
+    @Override
+    public String toString() {
+        return "ListData{size=" + value.size() + ", elements=" + value + "}";
+    }
 }

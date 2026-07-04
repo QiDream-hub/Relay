@@ -2,7 +2,10 @@ package qdream.relay.mc;
 
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.operations.arithmetic.AddOp;
+import qdream.relay.operations.arithmetic.CeilOp;
 import qdream.relay.operations.arithmetic.DivOp;
+import qdream.relay.operations.arithmetic.FloorOp;
+import qdream.relay.operations.arithmetic.ModOp;
 import qdream.relay.operations.arithmetic.MulOp;
 import qdream.relay.operations.arithmetic.SubOp;
 import qdream.relay.operations.base.DupOp;
@@ -48,6 +51,7 @@ import qdream.relay.operations.vector.VectorLengthOp;
 import qdream.relay.operations.vector.VectorMulOp;
 import qdream.relay.operations.vector.VectorNormalizeOp;
 import qdream.relay.operations.vector.VectorSubOp;
+import qdream.relay.operations.vector.BuildVectorOp;
 import qdream.relay.operations.logic.AndOp;
 import qdream.relay.operations.logic.EqOp;
 import qdream.relay.operations.logic.GtOp;
@@ -151,6 +155,9 @@ public class RelayOperations {
         OperationRegistry.register("relay:sub", new OperationRegistry.OpEntry(new SubOp()));
         OperationRegistry.register("relay:mul", new OperationRegistry.OpEntry(new MulOp()));
         OperationRegistry.register("relay:div", new OperationRegistry.OpEntry(new DivOp()));
+        OperationRegistry.register("relay:mod", new OperationRegistry.OpEntry(new ModOp()));
+        OperationRegistry.register("relay:floor", new OperationRegistry.OpEntry(new FloorOp()));
+        OperationRegistry.register("relay:ceil", new OperationRegistry.OpEntry(new CeilOp()));
 
         // 逻辑操作
         OperationRegistry.register("relay:and", new OperationRegistry.OpEntry(new AndOp()));
@@ -191,6 +198,7 @@ public class RelayOperations {
         OperationRegistry.register("relay:vector_normalize", new OperationRegistry.OpEntry(new VectorNormalizeOp()));
         OperationRegistry.register("relay:vector_length", new OperationRegistry.OpEntry(new VectorLengthOp()));
         OperationRegistry.register("relay:vector_distance", new OperationRegistry.OpEntry(new VectorDistanceOp()));
+        OperationRegistry.register("relay:build_vector", new OperationRegistry.OpEntry(new BuildVectorOp()));
 
         // 世界交互操作（需要世界交互器）
         OperationRegistry.register("relay:raycast", new OperationRegistry.OpEntry(new RaycastOp()));

@@ -77,4 +77,8 @@ public class TypeData extends Data {
         return new TypeData("");
     }
 
+    @Override
+    public String toString() {
+        return "TypeData{id=" + value + "}";
+    }
 }

@@ -72,6 +72,7 @@ public class BlockData extends Data {
 
     /**
      * 获取方块状态（通过世界查询位置）
+     * 
      * @return 方块状态，如果不存在则返回 null
      */
     public BlockState getBlockState(Level world) {
@@ -90,6 +91,7 @@ public class BlockData extends Data {
 
     /**
      * 获取方块位置
+     * 
      * @return 方块位置
      */
     public BlockPos getBlockPos() {
@@ -98,6 +100,7 @@ public class BlockData extends Data {
 
     /**
      * 获取世界 ID 字符串
+     * 
      * @return 世界 ID 字符串
      */
     public String getWorldId() {
@@ -133,6 +136,9 @@ public class BlockData extends Data {
             valueTag.putString("world", worldId);
         }
 
+        valueTag.putInt("x", 0);
+        valueTag.putInt("y", 0);
+        valueTag.putInt("z", 0);
         if (blockPos != null) {
             valueTag.putInt("x", blockPos.getX());
             valueTag.putInt("y", blockPos.getY());
@@ -201,5 +207,13 @@ public class BlockData extends Data {
             return BlockData.fromBlockPos(blockPos, worldId);
         }
         return new BlockData(null, null, null);
+    }
+
+    @Override
+    public String toString() {
+        if (blockPos == null && worldId == null) {
+            return "BlockData{null}";
+        }
+        return "BlockData{pos=" + blockPos + ", worldId=" + worldId + "}";
     }
 }

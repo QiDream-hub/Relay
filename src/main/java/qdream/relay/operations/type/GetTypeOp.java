@@ -35,7 +35,7 @@ public class GetTypeOp extends Spell {
 
     public GetTypeOp() {
         super("relay:get_type", 1, 1, OperationSignature.builder()
-                .consumesFromData("input", "relay:entity", "relay:block_entity", " relay:block")
+                .consumesFromData("input", "relay:entity", "relay:block_entity", "relay:block")
                 .producesToData("type", "relay:type")
                 .build());
     }

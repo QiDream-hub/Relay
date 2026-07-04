@@ -73,4 +73,9 @@ public class NumberData extends Data {
                 .get("number").getAsString();
         return new NumberData(Double.parseDouble(value));
     }
+
+    @Override
+    public String toString() {
+        return "NumberData{value=" + value + "}";
+    }
 }
