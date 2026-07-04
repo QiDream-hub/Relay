@@ -1,7 +1,7 @@
 package qdream.relay.operations.list;
 
-import qdream.relay.types.ListType;
-import qdream.relay.types.NumberType;
+import qdream.relay.types.ListData;
+import qdream.relay.types.NumberData;
 
 import java.util.List;
 
@@ -30,13 +30,13 @@ public class ListLengthOp extends Spell {
         Operation listData = (Operation) executor.popData();
         if (listData == null)
             return;
-        if (!(listData instanceof ListType listBlock)) {
+        if (!(listData instanceof ListData listBlock)) {
             executor.triggerMishap("操作 relay:list_length 期望 list 类型，实际为：" + listData.getId());
             return;
         }
 
         List<Executable> list = listBlock.getValue();
-        executor.pushData(new NumberType(list.size()));
+        executor.pushData(new NumberData(list.size()));
     }
 
 }

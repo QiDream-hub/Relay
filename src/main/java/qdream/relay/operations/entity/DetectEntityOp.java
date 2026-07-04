@@ -14,9 +14,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.VectorData;
 
 /**
  * 实体检测操作
@@ -57,8 +57,8 @@ public class DetectEntityOp extends Spell {
             return;
         }
         
-        if (!(radiusExe instanceof NumberType radiusEx) || 
-            !(centerExe instanceof VectorType centerEx)) {
+        if (!(radiusExe instanceof NumberData radiusEx) || 
+            !(centerExe instanceof VectorData centerEx)) {
             executor.triggerMishap("期望 number, vector 类型");
             return;
         }
@@ -82,7 +82,7 @@ public class DetectEntityOp extends Spell {
         // 检查范围（检测搜索区域的边界）
         Vec3 searchEdge = center.add(new Vec3(radius, radius, radius));
         if (!WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
         
@@ -102,7 +102,7 @@ public class DetectEntityOp extends Spell {
         );
 
         boolean found = !level.getEntitiesOfClass(Entity.class, searchBox).isEmpty();
-        executor.pushData(new BooleanType(found));
+        executor.pushData(new BooleanData(found));
     }
 
     /**

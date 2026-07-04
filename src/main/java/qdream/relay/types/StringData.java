@@ -10,10 +10,10 @@ import qdream.relay.mc.signature.DataSignature;
  * 字符串类型
  * 执行时自动压入数据栈
  */
-public class StringType extends Data {
+public class StringData extends Data {
     private final String value;
 
-    public StringType(String value) {
+    public StringData(String value) {
         super("relay:string", 0,
                 DataSignature.builder()
                         .output("relay:string")
@@ -42,7 +42,7 @@ public class StringType extends Data {
     @Override
     public Data fromNbt(CompoundTag tag) {
         String string = tag.getCompound("value").flatMap(ct -> ct.getString("string")).orElse("");
-        return new StringType(string);
+        return new StringData(string);
     }
 
     @Override
@@ -57,8 +57,8 @@ public class StringType extends Data {
     public Data fromJson(JsonObject json) {
         if (json.has("value")) {
             JsonObject value = json.get("value").getAsJsonObject();
-            return new StringType(value.get("string").getAsString());
+            return new StringData(value.get("string").getAsString());
         }
-        return new StringType("");
+        return new StringData("");
     }
 }

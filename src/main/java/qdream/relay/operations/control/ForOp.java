@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.ListType;
+import qdream.relay.types.ListData;
 
 import java.util.ArrayList;
 
@@ -55,7 +55,7 @@ public class ForOp extends Spell {
             executor.triggerMishap("数据栈不足需要 list");
             return;
         }
-        if (!(list instanceof ListType listType)) {
+        if (!(list instanceof ListData listType)) {
             executor.triggerMishap("需要列表类型");
             return;
         }
@@ -72,13 +72,13 @@ public class ForOp extends Spell {
         // 取出第一个元素
         Executable first = elements.removeFirst();
         // 将修改后的list放回数据栈中
-        executor.pushData(new ListType(elements));
+        executor.pushData(new ListData(elements));
 
         // 压入当前元素到数据栈
         executor.pushData(first);
 
         // 处理执行体：如果是程序列表则加载，否则压入单个操作
-        if (body instanceof ListType programList) {
+        if (body instanceof ListData programList) {
             executor.loadProgram(programList.getValue());
         } else {
             executor.pushProgram(body);

@@ -4,8 +4,8 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.VectorData;
 
 /**
  * 获取实体眼睛位置操作
@@ -36,7 +36,7 @@ public class GetEntityEyePosOp extends Spell {
             return;
         }
 
-        if (!(entityExe instanceof EntityType entityEx)) {
+        if (!(entityExe instanceof EntityData entityEx)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
@@ -49,6 +49,6 @@ public class GetEntityEyePosOp extends Spell {
 
         // 获取实体眼睛位置（用于射线追踪的起点）
         var eyePos = entity.getEyePosition();
-        executor.pushData(new VectorType(eyePos));
+        executor.pushData(new VectorData(eyePos));
     }
 }

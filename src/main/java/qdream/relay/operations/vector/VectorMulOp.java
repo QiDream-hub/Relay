@@ -4,8 +4,8 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.VectorData;
 
 import net.minecraft.world.phys.Vec3;
 
@@ -35,13 +35,13 @@ public class VectorMulOp extends Spell {
             return;
         }
         
-        if (!(vecExe instanceof VectorType vec) || !(numExe instanceof NumberType num)) {
+        if (!(vecExe instanceof VectorData vec) || !(numExe instanceof NumberData num)) {
             executor.triggerMishap("期望 vector 和 number 类型");
             return;
         }
         
         double scalar = num.asDouble();
         Vec3 result = vec.asVector().scale(scalar);
-        executor.pushData(new VectorType(result));
+        executor.pushData(new VectorData(result));
     }
 }

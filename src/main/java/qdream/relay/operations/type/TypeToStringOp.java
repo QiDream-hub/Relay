@@ -1,7 +1,7 @@
 package qdream.relay.operations.type;
 
-import qdream.relay.types.TypeType;
-import qdream.relay.types.StringType;
+import qdream.relay.types.TypeData;
+import qdream.relay.types.StringData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -30,7 +30,7 @@ public class TypeToStringOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 弹出类型
-        TypeType type = (TypeType) executor.popData();
+        TypeData type = (TypeData) executor.popData();
         if (type == null) {
             executor.triggerMishap("数据栈不足，需要 type");
             return;
@@ -38,7 +38,7 @@ public class TypeToStringOp extends Spell {
 
         // 获取类型 ID 并转换为字符串
         String typeId = type.getId();
-        executor.pushData(new StringType(typeId != null ? typeId : ""));
+        executor.pushData(new StringData(typeId != null ? typeId : ""));
     }
 
 }

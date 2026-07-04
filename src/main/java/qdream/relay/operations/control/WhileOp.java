@@ -4,8 +4,8 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.ListType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.ListData;
 
 /**
  * WhileOp - 条件循环迭代器
@@ -56,7 +56,7 @@ public class WhileOp extends Spell {
             executor.triggerMishap("数据栈不足需要 condition");
             return;
         }
-        if (!(condition instanceof BooleanType booleanType)) {
+        if (!(condition instanceof BooleanData booleanType)) {
             executor.triggerMishap("需要布尔类型");
             return;
         }
@@ -66,7 +66,7 @@ public class WhileOp extends Spell {
             // 重新压入 WhileOp 以继续下一轮检查
             executor.pushProgram(this);
             // 压入 body 执行
-            if (body instanceof ListType programList) {
+            if (body instanceof ListData programList) {
                 executor.loadProgram(programList.getValue());
             } else {
                 executor.pushProgram(body);

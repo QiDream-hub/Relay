@@ -1,6 +1,6 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.types.NumberType;
+import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Operation;
@@ -26,7 +26,7 @@ public class PeekOp extends Spell {
     public void execute(StateMachine executor) {
         Operation channelData = (Operation) executor.popData();
         if (channelData == null) return;
-        if (!(channelData instanceof NumberType channel)) {
+        if (!(channelData instanceof NumberData channel)) {
             executor.triggerMishap("操作 relay:peek 期望 number 类型，实际为：" + channelData.getId());
             return;
         }

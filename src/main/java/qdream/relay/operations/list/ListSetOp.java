@@ -1,7 +1,7 @@
 package qdream.relay.operations.list;
 
-import qdream.relay.types.ListType;
-import qdream.relay.types.NumberType;
+import qdream.relay.types.ListData;
+import qdream.relay.types.NumberData;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
@@ -35,14 +35,14 @@ public class ListSetOp extends Spell {
         Operation indexData = (Operation) executor.popData();
         if (indexData == null)
             return;
-        if (!(indexData instanceof NumberType index)) {
+        if (!(indexData instanceof NumberData index)) {
             executor.triggerMishap("操作 relay:list_set 期望 number 类型，实际为：" + indexData.getId());
             return;
         }
         Operation listData = (Operation) executor.popData();
         if (listData == null)
             return;
-        if (!(listData instanceof ListType listBlock)) {
+        if (!(listData instanceof ListData listBlock)) {
             executor.triggerMishap("操作 relay:list_set 期望 list 类型，实际为：" + listData.getId());
             return;
         }
@@ -56,7 +56,7 @@ public class ListSetOp extends Spell {
         // 创建新列表（不可变修改）
         List<Executable> newList = new ArrayList<>(list);
         newList.set(indexVal, valueData);
-        executor.pushData(new ListType(newList));
+        executor.pushData(new ListData(newList));
     }
 
 }

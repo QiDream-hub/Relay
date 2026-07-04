@@ -15,8 +15,8 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.VectorData;
 
 /**
  * 从坐标获取实体操作
@@ -63,7 +63,7 @@ public class GetEntityOp extends Spell {
             return;
         }
 
-        if (!(posExe instanceof VectorType posEx)) {
+        if (!(posExe instanceof VectorData posEx)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }
@@ -110,7 +110,7 @@ public class GetEntityOp extends Spell {
 
         if (entities.isEmpty()) {
             // 返回 null EntityType
-            executor.pushData(new EntityType(null, null, null));
+            executor.pushData(new EntityData(null, null, null));
             return;
         }
 
@@ -128,9 +128,9 @@ public class GetEntityOp extends Spell {
 
         // 创建 EntityType
         if (closestEntity != null) {
-            executor.pushData(EntityType.from(closestEntity, level));
+            executor.pushData(EntityData.from(closestEntity, level));
         } else {
-            executor.pushData(new EntityType(null, null, null));
+            executor.pushData(new EntityData(null, null, null));
         }
     }
 

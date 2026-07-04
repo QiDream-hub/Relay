@@ -14,10 +14,10 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.NullType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.NullData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.VectorData;
 
 /**
  * 实体视线追踪操作
@@ -66,10 +66,10 @@ public class EntityRaycastOp extends Spell {
             return;
         }
 
-        if (!(maxDistExe instanceof NumberType maxDistEx) ||
-            !(dirExe instanceof VectorType dirEx) ||
-            !(startExe instanceof VectorType startEx) ||
-            !(excludeExe instanceof EntityType excludeEx)) {
+        if (!(maxDistExe instanceof NumberData maxDistEx) ||
+            !(dirExe instanceof VectorData dirEx) ||
+            !(startExe instanceof VectorData startEx) ||
+            !(excludeExe instanceof EntityData excludeEx)) {
             executor.triggerMishap("期望 number, vector, vector, entity 类型");
             return;
         }
@@ -142,12 +142,12 @@ public class EntityRaycastOp extends Spell {
         // 检查击中的实体是否在范围内（参考 Hexcasting）
         if (hitEntity != null && hitPos != null) {
             if (!WorldInteractorItem.isInRange(interactor, start, hitPos)) {
-                executor.pushData(NullType.INSTANCE);
+                executor.pushData(NullData.INSTANCE);
                 return;
             }
-            executor.pushData(EntityType.from(hitEntity, level));
+            executor.pushData(EntityData.from(hitEntity, level));
         } else {
-            executor.pushData(NullType.INSTANCE);
+            executor.pushData(NullData.INSTANCE);
         }
     }
 

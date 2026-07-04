@@ -17,9 +17,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.NullType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.NullData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.VectorData;
 
 /**
  * 方块视线追踪操作
@@ -62,9 +62,9 @@ public class BlockRaycastOp extends Spell {
             return;
         }
 
-        if (!(maxDistExe instanceof NumberType maxDistEx) ||
-            !(dirExe instanceof VectorType dirEx) ||
-            !(startExe instanceof VectorType startEx)) {
+        if (!(maxDistExe instanceof NumberData maxDistEx) ||
+            !(dirExe instanceof VectorData dirEx) ||
+            !(startExe instanceof VectorData startEx)) {
             executor.triggerMishap("期望 number, vector, vector 类型");
             return;
         }
@@ -95,13 +95,13 @@ public class BlockRaycastOp extends Spell {
             // 检查击中方块在范围内（参考 Hexcasting）
             Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
             if (!WorldInteractorItem.isInRange(interactor, start, blockCenter)) {
-                executor.pushData(NullType.INSTANCE);
+                executor.pushData(NullData.INSTANCE);
                 return;
             }
             // 返回击中的方块坐标（方块中心）
-            executor.pushData(new VectorType(blockCenter));
+            executor.pushData(new VectorData(blockCenter));
         } else {
-            executor.pushData(NullType.INSTANCE);
+            executor.pushData(NullData.INSTANCE);
         }
     }
 

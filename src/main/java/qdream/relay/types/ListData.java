@@ -20,10 +20,10 @@ import qdream.relay.mc.signature.DataSignature;
 /**
  * 列表类型
  */
-public class ListType extends Data {
+public class ListData extends Data {
     private final List<Executable> value;
 
-    public ListType(List<Executable> value) {
+    public ListData(List<Executable> value) {
         super("relay:list", 0,
                 DataSignature.builder()
                         .output("relay:list")
@@ -74,7 +74,7 @@ public class ListType extends Data {
                 })
                 .orElse(new ArrayList<>());
 
-        return new ListType(list);
+        return new ListData(list);
     }
 
     @Override
@@ -114,6 +114,6 @@ public class ListType extends Data {
             }
         }
 
-        return new ListType(list);
+        return new ListData(list);
     }
 }

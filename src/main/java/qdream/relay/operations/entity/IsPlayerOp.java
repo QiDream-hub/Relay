@@ -7,8 +7,8 @@ import net.minecraft.world.level.Level;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.EntityType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.EntityData;
 
 /**
  * IsPlayerOp 操作 - 检测实体是否是玩家
@@ -41,7 +41,7 @@ public class IsPlayerOp extends Spell {
             return;
         }
 
-        if (!(entityExe instanceof EntityType entityIota)) {
+        if (!(entityExe instanceof EntityData entityIota)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
@@ -51,6 +51,6 @@ public class IsPlayerOp extends Spell {
 
         // 检查是否是玩家
         boolean isPlayer = (entity instanceof Player);
-        executor.pushData(new BooleanType(isPlayer));
+        executor.pushData(new BooleanData(isPlayer));
     }
 }

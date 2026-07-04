@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.VectorData;
 
 import net.minecraft.world.phys.Vec3;
 
@@ -34,12 +34,12 @@ public class VectorSubOp extends Spell {
             return;
         }
         
-        if (!(bExe instanceof VectorType bVec) || !(aExe instanceof VectorType aVec)) {
+        if (!(bExe instanceof VectorData bVec) || !(aExe instanceof VectorData aVec)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }
         
         Vec3 result = aVec.asVector().subtract(bVec.asVector());
-        executor.pushData(new VectorType(result));
+        executor.pushData(new VectorData(result));
     }
 }

@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import qdream.relay.engine.Executable;
-import qdream.relay.types.NullType;
+import qdream.relay.types.NullData;
 
 /**
  * 通信系统
@@ -50,7 +50,7 @@ public class CommunicationSystem {
     public static Executable recv(int channel) {
         Queue<Executable> queue = CHANNELS.get(channel);
         if (queue == null || queue.isEmpty()) {
-            return NullType.INSTANCE;
+            return NullData.INSTANCE;
         }
         return queue.poll();
     }
@@ -63,7 +63,7 @@ public class CommunicationSystem {
     public static Executable peek(int channel) {
         Queue<Executable> queue = CHANNELS.get(channel);
         if (queue == null || queue.isEmpty()) {
-            return NullType.INSTANCE;
+            return NullData.INSTANCE;
         }
         return queue.peek();
     }

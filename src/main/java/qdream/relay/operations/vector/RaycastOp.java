@@ -16,9 +16,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.NullType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.NullData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.VectorData;
 
 /**
  * 视线追踪操作（Raycast）
@@ -61,9 +61,9 @@ public class RaycastOp extends Spell {
             return;
         }
 
-        if (!(maxDistExe instanceof NumberType maxDistEx) ||
-                !(dirExe instanceof VectorType dirEx) ||
-                !(startExe instanceof VectorType startEx)) {
+        if (!(maxDistExe instanceof NumberData maxDistEx) ||
+                !(dirExe instanceof VectorData dirEx) ||
+                !(startExe instanceof VectorData startEx)) {
             executor.triggerMishap("期望 number, vector, vector 类型");
             return;
         }
@@ -96,9 +96,9 @@ public class RaycastOp extends Spell {
                 CollisionContext.empty()));
 
         if (hitResult.getType() == HitResult.Type.BLOCK) {
-            executor.pushData(new VectorType(hitResult.getLocation()));
+            executor.pushData(new VectorData(hitResult.getLocation()));
         } else {
-            executor.pushData(NullType.INSTANCE);
+            executor.pushData(NullData.INSTANCE);
         }
     }
 

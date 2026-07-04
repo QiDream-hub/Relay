@@ -59,16 +59,16 @@ import qdream.relay.operations.list.ListCreatOp;
 import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListSetOp;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.BlockEntityType;
-import qdream.relay.types.BlockType;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.ListType;
-import qdream.relay.types.NullType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.StringType;
-import qdream.relay.types.VectorType;
-import qdream.relay.types.TypeType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.BlockEntityData;
+import qdream.relay.types.BlockData;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.ListData;
+import qdream.relay.types.NullData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.StringData;
+import qdream.relay.types.VectorData;
+import qdream.relay.types.TypeData;
 
 import java.util.ArrayList;
 
@@ -91,25 +91,25 @@ public class RelayOperations {
     private static void registerDataTypes() {
         // 基础类型 - 工厂方法创建默认值实例
         OperationRegistry.register("relay:number",
-                new OperationRegistry.DataEntry(() -> new NumberType(0)));
+                new OperationRegistry.DataEntry(() -> new NumberData(0)));
         OperationRegistry.register("relay:boolean",
-                new OperationRegistry.DataEntry(() -> new BooleanType(false)));
+                new OperationRegistry.DataEntry(() -> new BooleanData(false)));
         OperationRegistry.register("relay:string",
-                new OperationRegistry.DataEntry(() -> new StringType("")));
+                new OperationRegistry.DataEntry(() -> new StringData("")));
         OperationRegistry.register("relay:vector",
-                new OperationRegistry.DataEntry(() -> new VectorType(new Vec3(0, 0, 0))));
+                new OperationRegistry.DataEntry(() -> new VectorData(new Vec3(0, 0, 0))));
         OperationRegistry.register("relay:entity",
-                new OperationRegistry.DataEntry(() -> new EntityType(null, null, null)));
+                new OperationRegistry.DataEntry(() -> new EntityData(null, null, null)));
         OperationRegistry.register("relay:null",
-                new OperationRegistry.DataEntry(() -> NullType.INSTANCE));
+                new OperationRegistry.DataEntry(() -> NullData.INSTANCE));
         OperationRegistry.register("relay:list",
-                new OperationRegistry.DataEntry(() -> new ListType(new ArrayList<>())));
+                new OperationRegistry.DataEntry(() -> new ListData(new ArrayList<>())));
         OperationRegistry.register("relay:block_entity",
-                new OperationRegistry.DataEntry(() -> new BlockEntityType(null, null, null)));
+                new OperationRegistry.DataEntry(() -> new BlockEntityData(null, null, null)));
         OperationRegistry.register("relay:block",
-                new OperationRegistry.DataEntry(() -> new BlockType(null, null, null)));
+                new OperationRegistry.DataEntry(() -> new BlockData(null, null, null)));
         OperationRegistry.register("relay:type",
-                new OperationRegistry.DataEntry(() -> new TypeType("")));
+                new OperationRegistry.DataEntry(() -> new TypeData("")));
     }
 
     private static void registerOperations() {

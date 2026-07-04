@@ -9,8 +9,8 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.VectorData;
 
 /**
  * 获取实体视线方向操作
@@ -37,7 +37,7 @@ public class GetLookVectorOp extends Spell {
             return;
         }
         
-        if (!(entityExe instanceof EntityType entityEx)) {
+        if (!(entityExe instanceof EntityData entityEx)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
@@ -58,6 +58,6 @@ public class GetLookVectorOp extends Spell {
         double z = Math.cos(Math.toRadians(yRot)) * Math.cos(Math.toRadians(xRot));
         
         Vec3 lookVec = new Vec3(x, y, z).normalize();
-        executor.pushData(new VectorType(lookVec));
+        executor.pushData(new VectorData(lookVec));
     }
 }

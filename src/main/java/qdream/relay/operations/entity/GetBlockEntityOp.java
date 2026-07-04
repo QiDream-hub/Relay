@@ -13,8 +13,8 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BlockEntityType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.BlockEntityData;
+import qdream.relay.types.VectorData;
 
 /**
  * 从坐标获取方块实体操作
@@ -58,7 +58,7 @@ public class GetBlockEntityOp extends Spell {
             return;
         }
 
-        if (!(posExe instanceof VectorType posEx)) {
+        if (!(posExe instanceof VectorData posEx)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }
@@ -99,10 +99,10 @@ public class GetBlockEntityOp extends Spell {
 
         // 创建 BlockEntityType
         if (blockEntity != null) {
-            executor.pushData(BlockEntityType.from(blockEntity, level));
+            executor.pushData(BlockEntityData.from(blockEntity, level));
         } else {
             // 返回 null BlockEntityType
-            executor.pushData(new BlockEntityType(blockPos, level.dimension().registry().toString(), null));
+            executor.pushData(new BlockEntityData(blockPos, level.dimension().registry().toString(), null));
         }
     }
 

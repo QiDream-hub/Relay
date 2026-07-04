@@ -10,10 +10,10 @@ import qdream.relay.mc.signature.DataSignature;
  * 数字类型
  * 执行时自动压入数据栈
  */
-public class NumberType extends Data {
+public class NumberData extends Data {
     private final double value;
 
-    public NumberType(double value) {
+    public NumberData(double value) {
         super("relay:number", 0,
                 DataSignature.builder()
                         .output("relay:number")
@@ -56,7 +56,7 @@ public class NumberType extends Data {
         String value = tag.getCompound("value")
                 .flatMap(ct -> ct.getString("number"))
                 .orElse("0.0");
-        return new NumberType(Double.parseDouble(value));
+        return new NumberData(Double.parseDouble(value));
     }
 
     @Override
@@ -71,6 +71,6 @@ public class NumberType extends Data {
     public Data fromJson(JsonObject json) {
         String value = json.get("value").getAsJsonObject()
                 .get("number").getAsString();
-        return new NumberType(Double.parseDouble(value));
+        return new NumberData(Double.parseDouble(value));
     }
 }

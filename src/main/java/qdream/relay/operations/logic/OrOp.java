@@ -1,6 +1,6 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.types.BooleanType;
+import qdream.relay.types.BooleanData;
 
 
 import qdream.relay.engine.StateMachine;
@@ -26,20 +26,20 @@ public class OrOp extends Spell {
         Operation bData = (Operation) executor.popData();
         if (bData == null)
             return;
-        if (!(bData instanceof BooleanType b)) {
+        if (!(bData instanceof BooleanData b)) {
             executor.triggerMishap("操作 relay:or 期望 boolean 类型，实际为：" + bData.getId());
             return;
         }
         Operation aData = (Operation) executor.popData();
         if (aData == null)
             return;
-        if (!(aData instanceof BooleanType a)) {
+        if (!(aData instanceof BooleanData a)) {
             executor.triggerMishap("操作 relay:or 期望 boolean 类型，实际为：" + aData.getId());
             return;
         }
 
         boolean result = a.asBoolean() || b.asBoolean();
-        executor.pushData(new BooleanType(result));
+        executor.pushData(new BooleanData(result));
     }
 
 }

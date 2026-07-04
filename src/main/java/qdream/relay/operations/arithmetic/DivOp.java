@@ -1,6 +1,6 @@
 package qdream.relay.operations.arithmetic;
 
-import qdream.relay.types.NumberType;
+import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
@@ -24,14 +24,14 @@ public class DivOp extends Spell {
         Operation bData = (Operation) executor.popData();
         if (bData == null)
             return;
-        if (!(bData instanceof NumberType b)) {
+        if (!(bData instanceof NumberData b)) {
             executor.triggerMishap("操作 relay:div 期望 number 类型，实际为：" + bData.getId());
             return;
         }
         Operation aData = (Operation) executor.popData();
         if (aData == null)
             return;
-        if (!(aData instanceof NumberType a)) {
+        if (!(aData instanceof NumberData a)) {
             executor.triggerMishap("操作 relay:div 期望 number 类型，实际为：" + aData.getId());
             return;
         }
@@ -43,7 +43,7 @@ public class DivOp extends Spell {
         }
 
         double result = a.asDouble() / divisor;
-        executor.pushData(new NumberType(result));
+        executor.pushData(new NumberData(result));
     }
 
 }

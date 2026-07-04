@@ -15,9 +15,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.VectorData;
 
 /**
  * 方块检测操作
@@ -56,7 +56,7 @@ public class DetectBlockOp extends Spell {
             return;
         }
         
-        if (!(posExe instanceof VectorType posEx)) {
+        if (!(posExe instanceof VectorData posEx)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }
@@ -80,7 +80,7 @@ public class DetectBlockOp extends Spell {
 
         // 检查范围
         if (!WorldInteractorItem.isInRange(interactor, sourcePos, posVec)) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
         
@@ -97,7 +97,7 @@ public class DetectBlockOp extends Spell {
         BlockState state = level.getBlockState(pos);
         boolean exists = !state.isAir();
 
-        executor.pushData(new BooleanType(exists));
+        executor.pushData(new BooleanData(exists));
     }
 
     /**

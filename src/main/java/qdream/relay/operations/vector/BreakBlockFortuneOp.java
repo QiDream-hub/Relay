@@ -17,9 +17,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.VectorData;
 
 /**
  * 挖掘方块操作（时运版本）
@@ -60,8 +60,8 @@ public class BreakBlockFortuneOp extends Spell {
             return;
         }
 
-        if (!(fortuneExe instanceof NumberType fortuneEx) ||
-            !(posExe instanceof VectorType posEx)) {
+        if (!(fortuneExe instanceof NumberData fortuneEx) ||
+            !(posExe instanceof VectorData posEx)) {
             executor.triggerMishap("期望 number, vector 类型");
             return;
         }
@@ -86,7 +86,7 @@ public class BreakBlockFortuneOp extends Spell {
 
         // 检查范围
         if (!WorldInteractorItem.isInRange(interactor, sourcePos, posVec)) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -102,7 +102,7 @@ public class BreakBlockFortuneOp extends Spell {
         // 挖掘方块
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -110,7 +110,7 @@ public class BreakBlockFortuneOp extends Spell {
         // 1. 先破坏方块
         boolean destroyed = level.destroyBlock(pos, false, null, 512);  // dropResources=false，手动处理掉落
         if (!destroyed) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -126,7 +126,7 @@ public class BreakBlockFortuneOp extends Spell {
         // 3. 手动掉落物品（应用时运）
         net.minecraft.world.level.block.Block.dropResources(state, level, pos, null, null, fortuneTool);
 
-        executor.pushData(new BooleanType(true));
+        executor.pushData(new BooleanData(true));
     }
 
     /**

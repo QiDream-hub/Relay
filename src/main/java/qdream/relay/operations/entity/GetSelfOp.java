@@ -10,9 +10,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BlockEntityType;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.NullType;
+import qdream.relay.types.BlockEntityData;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.NullData;
 
 /**
  * GetSelf 操作 - 获取自身外壳对应的实体/方块实体
@@ -43,7 +43,7 @@ public class GetSelfOp extends Spell {
         Optional<Object> selfObj = executor.getContext("self", Object.class);
 
         if (!selfObj.isPresent() || selfObj.get() == null) {
-            executor.pushData(NullType.INSTANCE);
+            executor.pushData(NullData.INSTANCE);
             return;
         }
 
@@ -51,13 +51,13 @@ public class GetSelfOp extends Spell {
 
         // 根据类型创建对应的 Iota
         if (self instanceof Entity entity) {
-            EntityType entityType = EntityType.from(entity, entity.level());
+            EntityData entityType = EntityData.from(entity, entity.level());
             executor.pushData(entityType);
         } else if (self instanceof BlockEntity blockEntity) {
-            BlockEntityType blockEntityType = BlockEntityType.from(blockEntity, blockEntity.getLevel());
+            BlockEntityData blockEntityType = BlockEntityData.from(blockEntity, blockEntity.getLevel());
             executor.pushData(blockEntityType);
         } else {
-            executor.pushData(NullType.INSTANCE);
+            executor.pushData(NullData.INSTANCE);
         }
     }
 }

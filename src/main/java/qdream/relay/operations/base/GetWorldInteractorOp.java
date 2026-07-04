@@ -9,7 +9,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
+import qdream.relay.types.BooleanData;
 
 /**
  * GetWorldInteractor 操作 - 获取世界交互器
@@ -35,15 +35,15 @@ public class GetWorldInteractorOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         if (!executor.hasContext("shellContainer")) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
         Optional<ShellContainer> opt = executor.getContext("shellContainer", ShellContainer.class);
         if (opt.isPresent()) {
-            executor.pushData(new BooleanType(opt.get().hasWorldInteractor()));
+            executor.pushData(new BooleanData(opt.get().hasWorldInteractor()));
         } else {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
         }
     }
 

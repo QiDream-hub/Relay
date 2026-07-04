@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.VectorData;
 
 import net.minecraft.world.phys.Vec3;
 
@@ -33,7 +33,7 @@ public class VectorNormalizeOp extends Spell {
             return;
         }
         
-        if (!(vecExe instanceof VectorType vec)) {
+        if (!(vecExe instanceof VectorData vec)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }
@@ -47,6 +47,6 @@ public class VectorNormalizeOp extends Spell {
         }
         
         Vec3 result = v.normalize();
-        executor.pushData(new VectorType(result));
+        executor.pushData(new VectorData(result));
     }
 }

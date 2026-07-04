@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.ToolShellItem;
-import qdream.relay.types.EntityType;
+import qdream.relay.types.EntityData;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;

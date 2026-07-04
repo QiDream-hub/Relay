@@ -7,11 +7,11 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.signature.DataSignature;
 
-public class TypeType extends Data {
+public class TypeData extends Data {
 
     private final String value;
 
-    public TypeType(String id) {
+    public TypeData(String id) {
         super("relay:type", 0, DataSignature.builder()
                 .output("relay:type")
                 .field("id", "String")
@@ -33,7 +33,7 @@ public class TypeType extends Data {
      * @param other 另一个 TypeType 实例
      * @return 如果两个类型的 id 相同则返回 true
      */
-    public boolean equalsTo(TypeType other) {
+    public boolean equalsTo(TypeData other) {
         if (other == null) {
             return false;
         }
@@ -57,7 +57,7 @@ public class TypeType extends Data {
     @Override
     public Data fromNbt(CompoundTag tag) {
         String id = tag.getCompound("value").flatMap(ct -> ct.getString("id")).orElse("");
-        return new TypeType(id);
+        return new TypeData(id);
     }
 
     @Override
@@ -72,9 +72,9 @@ public class TypeType extends Data {
     public Data fromJson(JsonObject json) {
         if (json.has("value")) {
             JsonObject value = json.get("value").getAsJsonObject();
-            return new TypeType(value.get("id").getAsString());
+            return new TypeData(value.get("id").getAsString());
         }
-        return new TypeType("");
+        return new TypeData("");
     }
 
 }

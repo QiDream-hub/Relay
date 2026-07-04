@@ -4,8 +4,8 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.VectorData;
 
 /**
  * 获取实体坐标操作
@@ -37,7 +37,7 @@ public class GetEntityPosOp extends Spell {
             return;
         }
 
-        if (!(entityExe instanceof EntityType entityEx)) {
+        if (!(entityExe instanceof EntityData entityEx)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
@@ -50,6 +50,6 @@ public class GetEntityPosOp extends Spell {
 
         // 获取实体位置
         var pos = entity.position();
-        executor.pushData(new VectorType(pos));
+        executor.pushData(new VectorData(pos));
     }
 }

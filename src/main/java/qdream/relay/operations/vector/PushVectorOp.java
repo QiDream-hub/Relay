@@ -14,9 +14,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.VectorData;
 
 /**
  * 向量推动操作
@@ -69,12 +69,12 @@ public class PushVectorOp extends Spell {
             return;
         }
 
-        if (!(entityExe instanceof EntityType entityEx)) {
+        if (!(entityExe instanceof EntityData entityEx)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
 
-        if (!(pushExe instanceof VectorType pushEx)) {
+        if (!(pushExe instanceof VectorData pushEx)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }
@@ -82,7 +82,7 @@ public class PushVectorOp extends Spell {
         Entity targetEntity = entityEx.getEntity();
 
         if (targetEntity == null) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -91,7 +91,7 @@ public class PushVectorOp extends Spell {
 
         // 检查范围：施法者到目标实体的距离
         if (!WorldInteractorItem.isInRange(interactor, sourcePos, targetPos)) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -107,7 +107,7 @@ public class PushVectorOp extends Spell {
         // targetEntity.stopRiding();
         // targetEntity.teleportTo(vec3.x, vec3.y, vec3.z);
 
-        executor.pushData(new BooleanType(true));
+        executor.pushData(new BooleanData(true));
     }
 
     /**

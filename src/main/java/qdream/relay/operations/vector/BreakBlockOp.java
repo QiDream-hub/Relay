@@ -15,8 +15,8 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.VectorData;
 
 /**
  * 挖掘方块操作
@@ -55,7 +55,7 @@ public class BreakBlockOp extends Spell {
             return;
         }
 
-        if (!(posExe instanceof VectorType posEx)) {
+        if (!(posExe instanceof VectorData posEx)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }
@@ -79,7 +79,7 @@ public class BreakBlockOp extends Spell {
 
         // 检查范围
         if (!WorldInteractorItem.isInRange(interactor, sourcePos, posVec)) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -95,14 +95,14 @@ public class BreakBlockOp extends Spell {
         // 挖掘方块
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) {
-            executor.pushData(new BooleanType(false));
+            executor.pushData(new BooleanData(false));
             return;
         }
 
         // 破坏方块（基础版本，无附魔）
         // destroyBlock 参数：位置，是否掉落物品，破坏者实体，更新限制
         boolean destroyed = level.destroyBlock(pos, true, null, 512);
-        executor.pushData(new BooleanType(destroyed));
+        executor.pushData(new BooleanData(destroyed));
     }
 
     /**

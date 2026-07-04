@@ -10,10 +10,10 @@ import qdream.relay.mc.signature.DataSignature;
  * 布尔类型
  * 执行时自动压入数据栈
  */
-public class BooleanType extends Data {
+public class BooleanData extends Data {
     private final boolean value;
 
-    public BooleanType(boolean value) {
+    public BooleanData(boolean value) {
         super("relay:boolean", 0,
                 DataSignature.builder()
                         .output("relay:boolean")
@@ -46,7 +46,7 @@ public class BooleanType extends Data {
                 .flatMap(ct -> ct.getBoolean("boolean"))
                 .orElse(false);
 
-        return new BooleanType(value);
+        return new BooleanData(value);
     }
 
     @Override
@@ -61,8 +61,8 @@ public class BooleanType extends Data {
     public Data fromJson(JsonObject json) {
         if (json.has("value")) {
             JsonObject jsonObject = json.get("value").getAsJsonObject();
-            return new BooleanType(jsonObject.has("boolean") && jsonObject.get("boolean").getAsBoolean());
+            return new BooleanData(jsonObject.has("boolean") && jsonObject.get("boolean").getAsBoolean());
         }
-        return new BooleanType(false);
+        return new BooleanData(false);
     }
 }

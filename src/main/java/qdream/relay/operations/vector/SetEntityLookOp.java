@@ -7,8 +7,8 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.VectorType;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.VectorData;
 
 /**
  * 设置实体朝向操作
@@ -44,12 +44,12 @@ public class SetEntityLookOp extends Spell {
             return;
         }
 
-        if (!(entityExe instanceof EntityType entityEx)) {
+        if (!(entityExe instanceof EntityData entityEx)) {
             executor.triggerMishap("期望 entity 类型");
             return;
         }
 
-        if (!(vectorExe instanceof VectorType vectorEx)) {
+        if (!(vectorExe instanceof VectorData vectorEx)) {
             executor.triggerMishap("期望 vector 类型");
             return;
         }

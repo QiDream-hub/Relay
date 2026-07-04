@@ -1,6 +1,6 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.types.BooleanType;
+import qdream.relay.types.BooleanData;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
@@ -29,7 +29,7 @@ public class EqOp extends Spell {
             return;
 
         boolean result = aData.equals(bData);
-        executor.pushData(new BooleanType(result));
+        executor.pushData(new BooleanData(result));
     }
 
 }

@@ -8,10 +8,10 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.types.BlockEntityType;
-import qdream.relay.types.BlockType;
-import qdream.relay.types.EntityType;
-import qdream.relay.types.TypeType;
+import qdream.relay.types.BlockEntityData;
+import qdream.relay.types.BlockData;
+import qdream.relay.types.EntityData;
+import qdream.relay.types.TypeData;
 
 /**
  * 获取 Entity/BlockEntity/Block 的类型 ID 操作
@@ -51,7 +51,7 @@ public class GetTypeOp extends Spell {
         }
 
         // 根据输入类型提取 Identifier
-        if (inputExe instanceof EntityType entityType) {
+        if (inputExe instanceof EntityData entityType) {
             // 获取实体的 EntityType ID
             var entity = entityType.getEntity();
             if (entity == null) {
@@ -61,9 +61,9 @@ public class GetTypeOp extends Spell {
             // 使用 BuiltInRegistries 获取 EntityType 的注册表 ID
             var registryKey = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
             String id = registryKey != null ? registryKey.toString() : "unknown";
-            executor.pushData(new TypeType(id));
+            executor.pushData(new TypeData(id));
 
-        } else if (inputExe instanceof BlockEntityType blockEntityType) {
+        } else if (inputExe instanceof BlockEntityData blockEntityType) {
             // 获取方块实体的 BlockEntityType ID
             // 尝试从上下文获取世界
             Level level = getLevel(executor);
@@ -75,9 +75,9 @@ public class GetTypeOp extends Spell {
             // 使用 BuiltInRegistries 获取 BlockEntityType 的注册表 ID
             var registryKey = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType());
             String id = registryKey != null ? registryKey.toString() : "unknown";
-            executor.pushData(new TypeType(id));
+            executor.pushData(new TypeData(id));
 
-        } else if (inputExe instanceof BlockType blockType) {
+        } else if (inputExe instanceof BlockData blockType) {
             // 获取方块的 Block ID
             // 尝试从上下文获取世界
             Level level = getLevel(executor);
@@ -89,7 +89,7 @@ public class GetTypeOp extends Spell {
             // 使用 BuiltInRegistries 获取 Block 的注册表 ID
             var registryKey = BuiltInRegistries.BLOCK.getKey(blockState.getBlock());
             String id = registryKey != null ? registryKey.toString() : "unknown";
-            executor.pushData(new TypeType(id));
+            executor.pushData(new TypeData(id));
 
         } else {
             executor.triggerMishap("期望 entity/block_entity/block 类型");

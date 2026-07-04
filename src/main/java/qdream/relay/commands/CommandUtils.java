@@ -14,10 +14,10 @@ import net.minecraft.network.chat.MutableComponent;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.types.BooleanType;
-import qdream.relay.types.ListType;
-import qdream.relay.types.NumberType;
-import qdream.relay.types.StringType;
+import qdream.relay.types.BooleanData;
+import qdream.relay.types.ListData;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.StringData;
 
 import java.util.List;
 
@@ -80,13 +80,13 @@ public class CommandUtils {
                 } else {
                     sb.append("\"").append(str).append("\"");
                 }
-            } else if (exec instanceof StringType s) {
+            } else if (exec instanceof StringData s) {
                 sb.append("\"").append(s.asString()).append("\"");
-            } else if (exec instanceof NumberType n) {
+            } else if (exec instanceof NumberData n) {
                 sb.append(n.getValue());
-            } else if (exec instanceof BooleanType b) {
+            } else if (exec instanceof BooleanData b) {
                 sb.append(b.asBoolean());
-            } else if (exec instanceof ListType list) {
+            } else if (exec instanceof ListData list) {
                 sb.append("[...]");
             } else {
                 sb.append(((Operation) exec).getId());
@@ -104,11 +104,11 @@ public class CommandUtils {
             Executable data = dataStack.get(i);
             if (i > 0) sb.append(", ");
 
-            if (data instanceof StringType s) {
+            if (data instanceof StringData s) {
                 sb.append("\"").append(s.asString()).append("\"");
-            } else if (data instanceof NumberType n) {
+            } else if (data instanceof NumberData n) {
                 sb.append(n.getValue());
-            } else if (data instanceof BooleanType b) {
+            } else if (data instanceof BooleanData b) {
                 sb.append(b.asBoolean());
             } else {
                 sb.append(((Operation) data).getId());

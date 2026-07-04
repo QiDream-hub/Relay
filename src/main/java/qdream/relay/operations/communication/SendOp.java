@@ -1,7 +1,7 @@
 package qdream.relay.operations.communication;
 
-import qdream.relay.types.NumberType;
-import qdream.relay.types.BooleanType;
+import qdream.relay.types.NumberData;
+import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
@@ -28,7 +28,7 @@ public class SendOp extends Spell {
         if (dataData == null) return;
         Operation channelData = (Operation) executor.popData();
         if (channelData == null) return;
-        if (!(channelData instanceof NumberType channel)) {
+        if (!(channelData instanceof NumberData channel)) {
             executor.triggerMishap("操作 relay:send 期望 number 类型，实际为：" + channelData.getId());
             return;
         }
@@ -41,7 +41,7 @@ public class SendOp extends Spell {
             return;
         }
 
-        executor.pushData(new BooleanType(true));
+        executor.pushData(new BooleanData(true));
     }
 
 }
