@@ -85,10 +85,10 @@
   "operation.relay:eval.description": "将列表作为程序执行",
 
   "operation.relay:for.name": "列表遍历",
-  "operation.relay:for.description": "栈式迭代器：每次取出列表首元素，剩余元素自动压回，实现无状态循环。程序结构 [list, body, ForOp] 会自动展开为多次迭代",
+  "operation.relay:for.description": "每次取出列表首元素，剩余元素自动压回，实现无状态循环。",
 
   "operation.relay:while.name": "条件循环",
-  "operation.relay:while.description": "栈式迭代器：弹出布尔值，为 true 时执行 body 并继续循环，为 false 时结束。条件值需在每次 body 执行后重新计算",
+  "operation.relay:while.description": "弹出布尔值，为 true 时执行 body 并继续循环，为 false 时结束。条件值需在每次 body 执行后重新计算",
 
   "operation.relay:stop.name": "停止",
   "operation.relay:stop.description": "停止程序执行",
@@ -289,7 +289,6 @@
   "param.block.description": "方块",
   "param.type_a.description": "第一个类型",
   "param.type_b.description": "第二个类型",
-  "param.result.description": "比较结果",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",

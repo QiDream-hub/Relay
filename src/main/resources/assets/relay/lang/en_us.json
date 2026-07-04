@@ -85,10 +85,10 @@
   "operation.relay:eval.description": "Execute a list as a program",
 
   "operation.relay:for.name": "For Loop",
-  "operation.relay:for.description": "Stack-based iterator: pops first element from list, pushes remaining back automatically, enabling stateless iteration. Program structure [list, body, ForOp] expands to multiple iterations",
+  "operation.relay:for.description": "pops first element from list, pushes remaining back automatically, enabling stateless iteration.",
 
   "operation.relay:while.name": "While Loop",
-  "operation.relay:while.description": "Stack-based iterator: pops boolean condition, executes body and continues loop if true, ends if false. Condition must be recalculated after each body execution",
+  "operation.relay:while.description": "pops boolean condition, executes body and continues loop if true, ends if false. Condition must be recalculated after each body execution",
 
   "operation.relay:stop.name": "Stop",
   "operation.relay:stop.description": "Stop program execution",
@@ -293,7 +293,6 @@
   "param.block.description": "Block",
   "param.type_a.description": "First type",
   "param.type_b.description": "Second type",
-  "param.result.description": "Comparison result",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",
