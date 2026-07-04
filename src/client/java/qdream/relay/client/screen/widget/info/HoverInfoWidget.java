@@ -114,13 +114,19 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
     }
 
     @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        // 信息提示 Widget 不拦截鼠标事件，让下层 Widget 能正常接收
+        return false;
+    }
+
+    @Override
     protected void updateWidgetNarration(NarrationElementOutput builder) {
         // 无障碍：无需额外描述
     }
 
     /**
      * 信息内容
-     * 
+     *
      * @param title       标题
      * @param description 描述
      * @param lines       内容行列表（输入/输出签名）
