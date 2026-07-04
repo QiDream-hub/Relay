@@ -207,6 +207,17 @@
   "operation.relay:get_entity.name": "Get Entity",
   "operation.relay:get_entity.description": "Get nearest entity reference from coordinates",
 
+  "operation.relay:get_type.name": "Get Type",
+  "operation.relay:get_type.description": "Get registry ID from entity, block entity, or block",
+
+  "operation.relay:type_eq.name": "Type Equals",
+  "operation.relay:type_eq.description": "Compare two types for equality",
+
+  "operation.relay:type_to_string.name": "Type To String",
+  "operation.relay:type_to_string.description": "Convert type ID to string",
+
+  "param.string.description": "String",
+
   "param.augend.description": "Augend",
   "param.addend.description": "Addend",
   "param.sum.description": "Sum",
@@ -252,6 +263,8 @@
   "param.owner.description": "Owner",
   "param.self.description": "Self",
   "param.position.description": "Position",
+  "param.input.description": "Input value",
+  "param.type.description": "Type ID",
   "param.eyePosition.description": "Eye position",
   "param.radius.description": "Radius",
   "param.center.description": "Center",
@@ -278,6 +291,9 @@
   "param.blockState.description": "Block state",
   "param.blockEntity.description": "Block entity",
   "param.block.description": "Block",
+  "param.type_a.description": "First type",
+  "param.type_b.description": "Second type",
+  "param.result.description": "Comparison result",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",
@@ -291,6 +307,8 @@
   "type.relay:entity.description": "Entity reference, can access entity properties",
   "type.relay:list.name": "List",
   "type.relay:list.description": "Element list, can store any type",
+  "type.relay:type.name": "Type",
+  "type.relay:type.description": "Type identifier, stores registry ID",
   "type.relay:null.name": "Null",
   "type.relay:null.description": "Null type, represents no data",
   "type.relay:program.name": "Program",

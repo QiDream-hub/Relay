@@ -203,6 +203,17 @@
   "operation.relay:get_entity.name": "获取实体",
   "operation.relay:get_entity.description": "从坐标获取最近的实体引用",
 
+  "operation.relay:get_type.name": "获取类型",
+  "operation.relay:get_type.description": "从实体、方块实体或方块获取注册表 ID",
+
+  "operation.relay:type_eq.name": "类型相等",
+  "operation.relay:type_eq.description": "比较两个类型是否相同",
+
+  "operation.relay:type_to_string.name": "类型转字符串",
+  "operation.relay:type_to_string.description": "将类型 ID 转换为字符串",
+
+  "param.string.description": "字符串",
+
   "param.augend.description": "被加数",
   "param.addend.description": "加数",
   "param.sum.description": "和",
@@ -248,6 +259,8 @@
   "param.owner.description": "所有者",
   "param.self.description": "自身",
   "param.position.description": "位置",
+  "param.input.description": "输入值",
+  "param.type.description": "类型 ID",
   "param.eyePosition.description": "眼睛位置",
   "param.radius.description": "半径",
   "param.center.description": "中心",
@@ -274,6 +287,9 @@
   "param.blockState.description": "方块状态",
   "param.blockEntity.description": "方块实体",
   "param.block.description": "方块",
+  "param.type_a.description": "第一个类型",
+  "param.type_b.description": "第二个类型",
+  "param.result.description": "比较结果",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
@@ -291,6 +307,8 @@
   "type.relay:block.description": "方块状态引用，可获取方块属性",
   "type.relay:list.name": "列表",
   "type.relay:list.description": "元素列表，可存储任意类型",
+  "type.relay:type.name": "类型",
+  "type.relay:type.description": "类型标识符，存储注册表 ID",
   "type.relay:null.name": "空值",
   "type.relay:null.description": "空值类型，表示无数据",
   "type.relay:program.name": "程序",

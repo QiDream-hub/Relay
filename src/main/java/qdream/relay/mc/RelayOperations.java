@@ -27,6 +27,9 @@ import qdream.relay.operations.entity.GetEntityEyePosOp;
 import qdream.relay.operations.entity.GetOwnerOp;
 import qdream.relay.operations.entity.GetSelfOp;
 import qdream.relay.operations.entity.IsPlayerOp;
+import qdream.relay.operations.type.GetTypeOp;
+import qdream.relay.operations.type.TypeEqualsOp;
+import qdream.relay.operations.type.TypeToStringOp;
 import qdream.relay.operations.vector.BlockRaycastOp;
 import qdream.relay.operations.vector.BreakBlockFortuneOp;
 import qdream.relay.operations.vector.BreakBlockOp;
@@ -65,6 +68,7 @@ import qdream.relay.types.NullType;
 import qdream.relay.types.NumberType;
 import qdream.relay.types.StringType;
 import qdream.relay.types.VectorType;
+import qdream.relay.types.TypeType;
 
 import java.util.ArrayList;
 
@@ -104,6 +108,8 @@ public class RelayOperations {
                 new OperationRegistry.DataEntry(() -> new BlockEntityType(null, null, null)));
         OperationRegistry.register("relay:block",
                 new OperationRegistry.DataEntry(() -> new BlockType(null, null, null)));
+        OperationRegistry.register("relay:type",
+                new OperationRegistry.DataEntry(() -> new TypeType("")));
     }
 
     private static void registerOperations() {
@@ -131,6 +137,14 @@ public class RelayOperations {
                 new OperationRegistry.OpEntry(new GetEntityOp()));
         OperationRegistry.register("relay:get_block",
                 new OperationRegistry.OpEntry(new GetBlockOp()));
+
+        // 类型操作
+        OperationRegistry.register("relay:get_type",
+                new OperationRegistry.OpEntry(new GetTypeOp()));
+        OperationRegistry.register("relay:type_eq",
+                new OperationRegistry.OpEntry(new TypeEqualsOp()));
+        OperationRegistry.register("relay:type_to_string",
+                new OperationRegistry.OpEntry(new TypeToStringOp()));
 
         // 算术操作
         OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new AddOp()));
