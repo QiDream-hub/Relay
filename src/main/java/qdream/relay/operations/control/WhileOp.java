@@ -44,7 +44,6 @@ public class WhileOp extends Spell {
                 .consumesFromData("condition", "relay:boolean")
                 .consumesFromProgram("body", "any", "relay:list")
                 .producesToProgram("body", "any")
-                .producesToProgram("whileOp", "relay:while")
                 .build());
     }
 
