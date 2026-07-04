@@ -168,14 +168,14 @@ public class ToolShellItem extends Item {
     }
 
     /**
-     * 处理拿着 ToolShell 点击其他物品的逻辑
+     * 处理其他物品点击 ToolShell 的逻辑
      * <p>
-     * 调用时机：鼠标持有 ToolShell，点击其他物品（如磁盘）
+     * 调用时机：鼠标持有其他物品（如磁盘），点击背包中的 ToolShell
      * </p>
      *
-     * @param self        工具外壳物品堆（鼠标持有的物品）
-     * @param other       被点击的槽位中的物品
-     * @param slot        被点击的槽位
+     * @param self        工具外壳物品堆（被点击的 ToolShell）
+     * @param other       鼠标持有的物品
+     * @param slot        ToolShell 所在的槽位
      * @param clickAction 点击动作
      * @param player      玩家实体
      * @param carriedItem 鼠标持有的物品访问器
@@ -205,26 +205,25 @@ public class ToolShellItem extends Item {
         ItemStack diskStack = container.getDiskStack(); // ToolShell 中的磁盘
 
         if (clickAction == ClickAction.PRIMARY) {
-            // 左键点击：如果点击的是磁盘，尝试放入 ToolShell
+            // 左键点击：如果鼠标持有磁盘，尝试放入/交换 ToolShell
             if (!other.isEmpty() && other.getItem() instanceof DiskComponent) {
                 if (diskStack.isEmpty()) {
                     // 磁盘插槽为空，直接放入
                     ItemStack toInsert = other.copy();
-                    toInsert.setCount(1);
                     container.setInventorySlot(ToolShellContainer.DISK_SLOT, toInsert);
-                    other.shrink(1);
+                    other.shrink(other.count());
                     return true;
                 } else {
-                    // 磁盘插槽已有物品，交换
+                    // 磁盘插槽已有物品，交换到鼠标
                     ItemStack existing = diskStack.copy();
                     container.setInventorySlot(ToolShellContainer.DISK_SLOT, other.copy());
-                    slot.set(existing);
+                    carriedItem.set(existing); // 修改鼠标持有的物品，而不是 slot
                     return true;
                 }
             }
         } else if (clickAction == ClickAction.SECONDARY) {
-            // 右键点击：如果 ToolShell 中有磁盘，取出到鼠标
-            if (!diskStack.isEmpty()) {
+            // 右键点击：如果 ToolShell 中有磁盘且鼠标为空，取出到鼠标
+            if (!diskStack.isEmpty() && carriedItem.get().isEmpty()) {
                 // 将磁盘放到鼠标拖拽中
                 ItemStack toTake = diskStack.copy();
                 carriedItem.set(toTake);
