@@ -96,14 +96,6 @@ public class ToolShellItem extends Item {
             // 开启调试输出时，显示程序栈和数据栈
             if (container.isDebugOutputEnabled()) {
                 player.sendSystemMessage(Component.literal("§e[工具外壳] 程序正在运行中"));
-                player.sendSystemMessage(
-                        Component.literal("§e[程序栈] "
-                                + qdream.relay.commands.CommandUtils
-                                        .dataStackToString(machine.getProgramStackSnapshot())));
-                player.sendSystemMessage(
-                        Component.literal("§e[数据栈] "
-                                + qdream.relay.commands.CommandUtils
-                                        .dataStackToString(machine.getDataStackSnapshot())));
             }
         } else {
             // 已停止，加载磁盘程序并运行
@@ -116,7 +108,6 @@ public class ToolShellItem extends Item {
                     machine.clear();
                     machine.loadProgram(program);
                     container.setInitialized(true);
-                    // 不立即保存，让 tick 管理
                     if (container.isDebugOutputEnabled()) {
                         player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
                     }
@@ -165,6 +156,7 @@ public class ToolShellItem extends Item {
 
     /**
      * 从物品堆获取 SpellDiskComponent
+     * 
      * @param stack 物品堆
      * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
      */
@@ -181,11 +173,11 @@ public class ToolShellItem extends Item {
      * 调用时机：鼠标持有 ToolShell，点击其他物品（如磁盘）
      * </p>
      *
-     * @param self       工具外壳物品堆（鼠标持有的物品）
-     * @param other      被点击的槽位中的物品
-     * @param slot       被点击的槽位
+     * @param self        工具外壳物品堆（鼠标持有的物品）
+     * @param other       被点击的槽位中的物品
+     * @param slot        被点击的槽位
      * @param clickAction 点击动作
-     * @param player     玩家实体
+     * @param player      玩家实体
      * @param carriedItem 鼠标持有的物品访问器
      * @return 是否成功处理交互
      */
@@ -196,8 +188,7 @@ public class ToolShellItem extends Item {
             final Slot slot,
             final ClickAction clickAction,
             final Player player,
-            final SlotAccess carriedItem
-    ) {
+            final SlotAccess carriedItem) {
         // 获取 ToolShell 容器
         ToolShellContainer container = getContainer(self, player);
 
@@ -222,14 +213,12 @@ public class ToolShellItem extends Item {
                     toInsert.setCount(1);
                     container.setInventorySlot(ToolShellContainer.DISK_SLOT, toInsert);
                     other.shrink(1);
-                    player.sendSystemMessage(Component.literal("§a[工具外壳] 已放入磁盘"));
                     return true;
                 } else {
                     // 磁盘插槽已有物品，交换
                     ItemStack existing = diskStack.copy();
                     container.setInventorySlot(ToolShellContainer.DISK_SLOT, other.copy());
                     slot.set(existing);
-                    player.sendSystemMessage(Component.literal("§e[工具外壳] 已交换磁盘"));
                     return true;
                 }
             }
@@ -240,7 +229,6 @@ public class ToolShellItem extends Item {
                 ItemStack toTake = diskStack.copy();
                 carriedItem.set(toTake);
                 container.setInventorySlot(ToolShellContainer.DISK_SLOT, ItemStack.EMPTY);
-                player.sendSystemMessage(Component.literal("§e[工具外壳] 已取出磁盘"));
                 return true;
             }
         }

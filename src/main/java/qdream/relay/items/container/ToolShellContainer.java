@@ -9,16 +9,18 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 
 import qdream.relay.Component.RelayDataComponents;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.ToolShellItem;
-import qdream.relay.types.EntityData;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -73,8 +75,37 @@ public class ToolShellContainer implements ShellContainer, Container {
         StateMachine machine = getStateMachine();
         machine.setMishapHandler(reason -> {
             Entity owner = stateManager.getOwner();
-            if (owner != null && owner instanceof net.minecraft.world.entity.player.Player player) {
+            if (owner != null && owner instanceof Player player) {
                 player.sendSystemMessage(Component.literal("§c[工具外壳] 事故：" + reason));
+            }
+        });
+        // 设置调试回调
+        tickHandler.setDebugCallback((stateMachine, phase, executable) -> {
+            if (isDebugOutputEnabled()) {
+                Entity owner = stateManager.getOwner();
+                if (owner != null && owner instanceof Player player) {
+                    // mishap: 显示操作和双栈
+                    if ("mishap".equals(phase)) {
+                        String opName = "unknown";
+                        if (executable instanceof Operation op) {
+                            opName = op.getId();
+                        }
+                        player.sendSystemMessage(Component.literal(
+                                "§c[§c 事故 §c] §f操作：" + opName));
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 程序栈 §7]: " + formatStack(stateMachine.getProgramStackSnapshot())));
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 数据栈 §7]: " + formatStack(stateMachine.getDataStackSnapshot())));
+                    }
+                    // afterStep: 只显示双栈
+                    else if ("afterStep".equals(phase)) {
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 程序栈 §7]: " + formatStack(stateMachine.getProgramStackSnapshot())));
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 数据栈 §7]: " + formatStack(stateMachine.getDataStackSnapshot())));
+                    }
+                    player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
+                }
             }
         });
     }
@@ -489,6 +520,32 @@ public class ToolShellContainer implements ShellContainer, Container {
         for (int i = 0; i < 4; i++) {
             stateManager.setInventorySlot(i, ItemStack.EMPTY);
         }
+    }
+
+    /**
+     * 格式化栈快照为字符串
+     *
+     * @param stack 栈快照
+     * @return 格式化后的字符串
+     */
+    private String formatStack(List<Executable> stack) {
+        if (stack.isEmpty()) {
+            return "§8[]";
+        }
+        StringBuilder sb = new StringBuilder("§8[");
+        for (int i = 0; i < stack.size(); i++) {
+            if (i > 0) {
+                sb.append("§8, ");
+            }
+            Executable exe = stack.get(i);
+            if (exe instanceof Operation op) {
+                sb.append("§e").append(op.getId());
+            } else {
+                sb.append("§f").append(exe.getClass().getSimpleName());
+            }
+        }
+        sb.append("§8]");
+        return sb.toString();
     }
 
 }

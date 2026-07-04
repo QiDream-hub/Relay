@@ -1,9 +1,8 @@
 package qdream.relay.core;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.Executable;
+import qdream.relay.engine.StateMachine;
 import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
@@ -16,11 +15,27 @@ import qdream.relay.mc.base.Spell;
  */
 public class ShellTickHandler {
 
+    /**
+     * 调试回调接口 - 用于监视 StateMachine 的栈变化
+     */
+    @FunctionalInterface
+    public interface DebugCallback {
+        /**
+         * 当 StateMachine 发生栈修改时调用
+         *
+         * @param stateMachine 被监视的状态机
+         * @param phase        执行阶段 ("beforeStep" / "afterStep" / "mishap")
+         * @param executable   当前执行的可执行单元
+         */
+        void onStackChange(StateMachine stateMachine, String phase, Executable executable);
+    }
+
     private int tickCounter;
     private int interval;
     private int coreCount;
     private double energyCost; // 核心能量消耗
     private boolean initialized;
+    private DebugCallback debugCallback;
 
     public ShellTickHandler() {
         this.tickCounter = 0;
@@ -28,6 +43,7 @@ public class ShellTickHandler {
         this.coreCount = 0;
         this.energyCost = 0;
         this.initialized = false;
+        this.debugCallback = null;
     }
 
     /**
@@ -113,8 +129,24 @@ public class ShellTickHandler {
             }
 
             // 执行单个操作
+            Executable currentOp = top;
+            
+            // 调试回调 - 执行前
+            if (debugCallback != null) {
+                debugCallback.onStackChange(stateMachine, "beforeStep", currentOp);
+            }
+            
             if (!stateMachine.step()) {
+                // 调试回调 - 执行失败
+                if (debugCallback != null) {
+                    debugCallback.onStackChange(stateMachine, "mishap", currentOp);
+                }
                 break; // 执行失败
+            }
+            
+            // 调试回调 - 执行后
+            if (debugCallback != null) {
+                debugCallback.onStackChange(stateMachine, "afterStep", currentOp);
             }
 
             // 扣除能量 - 使用 container 的方法，支持背包能量模块
@@ -215,5 +247,23 @@ public class ShellTickHandler {
 
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
+    }
+
+    /**
+     * 设置调试回调
+     *
+     * @param callback 调试回调，为 null 时禁用调试
+     */
+    public void setDebugCallback(DebugCallback callback) {
+        this.debugCallback = callback;
+    }
+
+    /**
+     * 获取调试回调
+     *
+     * @return 当前的调试回调
+     */
+    public DebugCallback getDebugCallback() {
+        return debugCallback;
     }
 }
