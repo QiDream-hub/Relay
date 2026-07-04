@@ -11,9 +11,9 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
@@ -46,43 +46,36 @@ public class EntityRaycastOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器 - 通过 shellContainer 检查
-        ShellContainer container = getShellContainer(executor);
-        if (container == null || !container.hasWorldInteractor()) {
-            executor.triggerMishap("entity_raycast 需要世界交互器");
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, "entity_raycast")) {
             return;
         }
-
-        ItemStack interactor = container.getInteractorStack();
 
         // 弹出参数
-        Executable maxDistExe = executor.popData();
-        Executable dirExe = executor.popData();
-        Executable startExe = executor.popData();
+        NumberData maxDistData = OperationHelpers.popNumber(executor, "entity_raycast");
+        if (maxDistData == null) return;
+
+        VectorData dir = OperationHelpers.popVector(executor, "entity_raycast");
+        if (dir == null) return;
+
+        VectorData startData = OperationHelpers.popVector(executor, "entity_raycast");
+        if (startData == null) return;
+
         Executable excludeExe = executor.popData();
-
-        if (maxDistExe == null || dirExe == null || startExe == null || excludeExe == null) {
-            executor.triggerMishap("数据栈不足，需要 number, vector, vector, entity");
+        if (excludeExe == null || !(excludeExe instanceof EntityData excludeEx)) {
+            executor.pushData(NullData.INSTANCE);
             return;
         }
 
-        if (!(maxDistExe instanceof NumberData maxDistEx) ||
-            !(dirExe instanceof VectorData dirEx) ||
-            !(startExe instanceof VectorData startEx) ||
-            !(excludeExe instanceof EntityData excludeEx)) {
-            executor.triggerMishap("期望 number, vector, vector, entity 类型");
-            return;
-        }
-
-        double maxDist = maxDistEx.asDouble();
-        Vec3 direction = dirEx.asVector().normalize();
-        Vec3 start = startEx.asVector();
+        double maxDist = maxDistData.asDouble();
+        Vec3 direction = dir.asVector().normalize();
+        Vec3 start = startData.asVector();
         Vec3 end = start.add(direction.scale(maxDist));
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = executor.getContext("level", Level.class);
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "entity_raycast");
         if (levelOpt.isEmpty()) {
-            executor.triggerMishap("无法获取世界");
+            executor.pushData(NullData.INSTANCE);
             return;
         }
 
@@ -141,7 +134,7 @@ public class EntityRaycastOp extends Spell {
 
         // 检查击中的实体是否在范围内（参考 Hexcasting）
         if (hitEntity != null && hitPos != null) {
-            if (!WorldInteractorItem.isInRange(interactor, start, hitPos)) {
+            if (!OperationHelpers.checkInRange(executor, "entity_raycast", start, hitPos)) {
                 executor.pushData(NullData.INSTANCE);
                 return;
             }
@@ -149,17 +142,5 @@ public class EntityRaycastOp extends Spell {
         } else {
             executor.pushData(NullData.INSTANCE);
         }
-    }
-
-    /**
-     * 从上下文获取 ShellContainer
-     * @param executor 状态机
-     * @return ShellContainer，如果不存在返回 null
-     */
-    private ShellContainer getShellContainer(StateMachine executor) {
-        if (!executor.hasContext("shellContainer")) {
-            return null;
-        }
-        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

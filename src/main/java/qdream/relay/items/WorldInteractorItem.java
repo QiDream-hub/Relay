@@ -8,9 +8,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import java.util.function.Consumer;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.phys.Vec3;
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.mc.component.WorldInteractorComponent;
 
@@ -120,27 +118,6 @@ public class WorldInteractorItem extends Item implements WorldInteractorComponen
     @Override
     public boolean setEnergyCost(ItemStack stack, double energyCost) {
         return false;
-    }
-
-    /**
-     * 检查两个坐标是否在世界交互器的交互范围内
-     * 使用欧几里得距离判断
-     *
-     * @param worldInteractor 世界交互器物品堆
-     * @param sourcePos       源坐标（交互器位置）
-     * @param targetPos       目标坐标（操作位置）
-     * @return 如果目标坐标在范围内返回 true，否则返回 false
-     */
-    public static boolean isInRange(ItemStack worldInteractor, Vec3 sourcePos, Vec3 targetPos) {
-        if (worldInteractor.isEmpty() || !(worldInteractor.getItem() instanceof WorldInteractorItem)) {
-            return false;
-        }
-
-        WorldInteractorItem interactor = (WorldInteractorItem) worldInteractor.getItem();
-        double range = interactor.getRange(worldInteractor);
-        double distance = sourcePos.distanceTo(targetPos);
-
-        return distance <= range;
     }
 
     @Override

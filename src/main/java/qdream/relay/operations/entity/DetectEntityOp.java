@@ -12,7 +12,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.base.OperationHelpers;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
@@ -62,9 +62,8 @@ public class DetectEntityOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        ItemStack interactor = OperationHelpers.getWorldInteractorStack(executor).orElse(ItemStack.EMPTY);
         Vec3 searchEdge = centerPos.add(new Vec3(radiusVal, radiusVal, radiusVal));
-        if (!qdream.relay.items.WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {
+        if (!OperationHelpers.checkInRange(executor, "detect_entity", sourcePos, searchEdge)) {
             executor.pushData(new BooleanData(false));
             return;
         }

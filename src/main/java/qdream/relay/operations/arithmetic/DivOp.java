@@ -1,10 +1,10 @@
 package qdream.relay.operations.arithmetic;
 
-import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 
 /**
  * Div 操作 - 除法

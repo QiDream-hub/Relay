@@ -13,7 +13,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.base.OperationHelpers;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -53,10 +53,8 @@ public class GetEntityOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        ItemStack interactor = OperationHelpers.getWorldInteractorStack(executor).orElse(ItemStack.EMPTY);
         Vec3 searchEdge = posVec.add(new Vec3(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS));
-        if (!qdream.relay.items.WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {
-            executor.triggerMishap("relay:get_entity 超出世界交互器范围");
+        if (!OperationHelpers.checkInRange(executor, "get_entity", sourcePos, searchEdge)) {
             return;
         }
 

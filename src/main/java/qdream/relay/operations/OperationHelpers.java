@@ -1,4 +1,4 @@
-package qdream.relay.operations.base;
+package qdream.relay.operations;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
@@ -86,14 +86,20 @@ public final class OperationHelpers {
      * @param targetPos 目标位置
      * @return 如果在范围内返回 true，否则返回 false
      */
-    public static boolean checkInRange(StateMachine executor, String operationName, 
-                                       net.minecraft.world.phys.Vec3 sourcePos, 
+    public static boolean checkInRange(StateMachine executor, String operationName,
+                                       net.minecraft.world.phys.Vec3 sourcePos,
                                        net.minecraft.world.phys.Vec3 targetPos) {
         Optional<ItemStack> interactorOpt = getWorldInteractorStack(executor);
         if (interactorOpt.isEmpty()) {
+            executor.triggerMishap(operationName + " 需要世界交互器");
             return false;
         }
-        if (!qdream.relay.items.WorldInteractorItem.isInRange(interactorOpt.get(), sourcePos, targetPos)) {
+        ItemStack interactor = interactorOpt.get();
+        if (!(interactor.getItem() instanceof qdream.relay.mc.component.WorldInteractorComponent component)) {
+            executor.triggerMishap(operationName + " 物品不是有效的世界交互器");
+            return false;
+        }
+        if (!component.isInRange(interactor, sourcePos, targetPos)) {
             executor.triggerMishap(operationName + " 超出世界交互器范围");
             return false;
         }

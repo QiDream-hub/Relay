@@ -2,7 +2,6 @@ package qdream.relay.operations.entity;
 
 import java.util.Optional;
 
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
@@ -10,9 +9,9 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.VectorData;
 
@@ -41,56 +40,27 @@ public class GetBlockEntityOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器 - 通过 shellContainer 检查
-        ShellContainer container = getShellContainer(executor);
-        if (container == null || !container.hasWorldInteractor()) {
-            executor.triggerMishap("get_block_entity 需要世界交互器");
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, "get_block_entity")) {
             return;
         }
-
-        ItemStack interactor = container.getInteractorStack();
 
         // 弹出参数
-        Executable posExe = executor.popData();
+        VectorData pos = OperationHelpers.popVector(executor, "get_block_entity");
+        if (pos == null) return;
 
-        if (posExe == null) {
-            executor.triggerMishap("数据栈不足，需要 vector");
-            return;
-        }
-
-        if (!(posExe instanceof VectorData posEx)) {
-            executor.triggerMishap("期望 vector 类型");
-            return;
-        }
-
-        Vec3 posVec = posEx.asVector();
+        Vec3 posVec = pos.asVector();
         net.minecraft.core.BlockPos blockPos = net.minecraft.core.BlockPos.containing(posVec);
 
-        // 从 self 获取执行者位置作为源位置（self 可能是 Entity 或 BlockEntity）
-        Vec3 sourcePos = new Vec3(0, 0, 0);
-        var selfOpt = executor.getContext("self", Object.class);
-        if (selfOpt.isPresent()) {
-            Object self = selfOpt.get();
-            if (self instanceof net.minecraft.world.entity.Entity entity) {
-                sourcePos = new Vec3(entity.getX(), entity.getY(), entity.getZ());
-            } else if (self instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
-                net.minecraft.core.BlockPos blockPosSelf = blockEntity.getBlockPos();
-                sourcePos = new Vec3(blockPosSelf.getX() + 0.5, blockPosSelf.getY(), blockPosSelf.getZ() + 0.5);
-            }
-        }
-
-        // 检查范围
-        if (!WorldInteractorItem.isInRange(interactor, sourcePos, posVec)) {
-            executor.triggerMishap("get_block_entity 超出世界交互器范围");
+        // 获取源位置并检查范围
+        Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
+        if (!OperationHelpers.checkInRange(executor, "get_block_entity", sourcePos, posVec)) {
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = executor.getContext("level", Level.class);
-        if (levelOpt.isEmpty()) {
-            executor.triggerMishap("无法获取世界");
-            return;
-        }
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "get_block_entity");
+        if (levelOpt.isEmpty()) return;
 
         Level level = levelOpt.get();
 
@@ -104,17 +74,5 @@ public class GetBlockEntityOp extends Spell {
             // 返回 null BlockEntityType
             executor.pushData(new BlockEntityData(blockPos, level.dimension().registry().toString(), null));
         }
-    }
-
-    /**
-     * 从上下文获取 ShellContainer
-     * @param executor 状态机
-     * @return ShellContainer，如果不存在返回 null
-     */
-    private ShellContainer getShellContainer(StateMachine executor) {
-        if (!executor.hasContext("shellContainer")) {
-            return null;
-        }
-        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

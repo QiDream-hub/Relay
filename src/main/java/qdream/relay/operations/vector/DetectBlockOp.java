@@ -12,7 +12,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.base.OperationHelpers;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.VectorData;
 
@@ -54,8 +54,7 @@ public class DetectBlockOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        ItemStack interactor = OperationHelpers.getWorldInteractorStack(executor).orElse(ItemStack.EMPTY);
-        if (!qdream.relay.items.WorldInteractorItem.isInRange(interactor, sourcePos, posVec)) {
+        if (!OperationHelpers.checkInRange(executor, "detect_block", sourcePos, posVec)) {
             executor.pushData(new BooleanData(false));
             return;
         }

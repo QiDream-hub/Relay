@@ -15,7 +15,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.base.OperationHelpers;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
@@ -79,8 +79,7 @@ public class BlockRaycastOp extends Spell {
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             // 检查击中方块在范围内
             Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
-            ItemStack interactor = OperationHelpers.getWorldInteractorStack(executor).orElse(ItemStack.EMPTY);
-            if (!qdream.relay.items.WorldInteractorItem.isInRange(interactor, startPos, blockCenter)) {
+            if (!OperationHelpers.checkInRange(executor, "block_raycast", startPos, blockCenter)) {
                 executor.pushData(NullData.INSTANCE);
                 return;
             }

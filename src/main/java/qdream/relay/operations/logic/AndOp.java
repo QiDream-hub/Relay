@@ -1,10 +1,10 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 
 /**
  * And 操作 - 逻辑与
