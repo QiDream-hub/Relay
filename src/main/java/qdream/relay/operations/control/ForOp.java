@@ -4,6 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.ListData;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
  * </ol>
  *
  * <h3>示例</h3>
- * 
+ *
  * <pre>
  * 程序：[List[1,2,3], PrintOp, ForOp]
  * 第 1 轮：弹出 1，剩余 [2,3] 压回 → 执行 PrintOp(1)
@@ -48,21 +49,15 @@ public class ForOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable list = executor.popData();
+        ListData list = OperationHelpers.popList(executor, "relay:for");
+        if (list == null) return;
+        
         Executable body = executor.peekProgram();
+        if (body == null) return;
 
-        if (list == null) {
-            executor.triggerMishap("数据栈不足需要 list");
-            return;
-        }
-        if (!(list instanceof ListData listType)) {
-            executor.triggerMishap("需要列表类型");
-            return;
-        }
-
-        var elements = listType.getValue();
+        var elements = list.getValue();
         if (elements.isEmpty()) {
-            // 移除空的列表,终止循环
+            // 移除空的列表，终止循环
             executor.popProgram();
             return;
         }
@@ -71,7 +66,7 @@ public class ForOp extends Spell {
 
         // 取出第一个元素
         Executable first = elements.removeFirst();
-        // 将修改后的list放回数据栈中
+        // 将修改后的 list 放回数据栈中
         executor.pushData(new ListData(elements));
 
         // 压入当前元素到数据栈

@@ -1,15 +1,14 @@
 package qdream.relay.operations.list;
 
+import qdream.relay.engine.Executable;
+import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
 
 import java.util.List;
-
-import qdream.relay.engine.Executable;
-import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
-import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * List Length 操作 - 获取列表长度
@@ -27,16 +26,11 @@ public class ListLengthOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Operation listData = (Operation) executor.popData();
-        if (listData == null)
-            return;
-        if (!(listData instanceof ListData listBlock)) {
-            executor.triggerMishap("操作 relay:list_length 期望 list 类型，实际为：" + listData.getId());
-            return;
-        }
+        ListData list = OperationHelpers.popList(executor, "relay:list_length");
+        if (list == null) return;
 
-        List<Executable> list = listBlock.getValue();
-        executor.pushData(new NumberData(list.size()));
+        List<Executable> listData = list.getValue();
+        executor.pushData(new NumberData(listData.size()));
     }
 
 }

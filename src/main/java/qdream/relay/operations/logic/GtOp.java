@@ -1,9 +1,9 @@
 package qdream.relay.operations.logic;
 
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 
@@ -22,20 +22,11 @@ public class GtOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Operation bData = (Operation) executor.popData();
-        if (bData == null)
-            return;
-        if (!(bData instanceof NumberData b)) {
-            executor.triggerMishap("操作 relay:gt 期望 number 类型，实际为：" + bData.getId());
-            return;
-        }
-        Operation aData = (Operation) executor.popData();
-        if (aData == null)
-            return;
-        if (!(aData instanceof NumberData a)) {
-            executor.triggerMishap("操作 relay:gt 期望 number 类型，实际为：" + aData.getId());
-            return;
-        }
+        NumberData b = OperationHelpers.popNumber(executor, "relay:gt");
+        if (b == null) return;
+        
+        NumberData a = OperationHelpers.popNumber(executor, "relay:gt");
+        if (a == null) return;
 
         boolean result = a.asDouble() > b.asDouble();
         executor.pushData(new BooleanData(result));

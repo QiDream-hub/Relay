@@ -8,12 +8,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
@@ -39,81 +38,53 @@ public class DetectEntityOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器 - 通过 shellContainer 检查
-        ShellContainer container = getShellContainer(executor);
-        if (container == null || !container.hasWorldInteractor()) {
-            executor.triggerMishap("detect_entity 需要世界交互器");
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, "relay:detect_entity")) {
+            executor.pushData(new BooleanData(false));
             return;
         }
 
-        ItemStack interactor = container.getInteractorStack();
-        
         // 弹出参数
-        Executable radiusExe = executor.popData();
-        Executable centerExe = executor.popData();
-        
-        if (radiusExe == null || centerExe == null) {
-            executor.triggerMishap("数据栈不足，需要 number, vector");
-            return;
-        }
-        
-        if (!(radiusExe instanceof NumberData radiusEx) || 
-            !(centerExe instanceof VectorData centerEx)) {
-            executor.triggerMishap("期望 number, vector 类型");
-            return;
-        }
-        
-        double radius = radiusEx.asDouble();
-        Vec3 center = centerEx.asVector();
-
-        // 从 self 获取执行者位置作为源位置（self 可能是 Entity 或 BlockEntity）
-        Vec3 sourcePos = new Vec3(0, 0, 0);
-        var selfOpt = executor.getContext("self", Object.class);
-        if (selfOpt.isPresent()) {
-            Object self = selfOpt.get();
-            if (self instanceof net.minecraft.world.entity.Entity entity) {
-                sourcePos = new Vec3(entity.getX(), entity.getY(), entity.getZ());
-            } else if (self instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
-                net.minecraft.core.BlockPos blockPos = blockEntity.getBlockPos();
-                sourcePos = new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
-            }
-        }
-
-        // 检查范围（检测搜索区域的边界）
-        Vec3 searchEdge = center.add(new Vec3(radius, radius, radius));
-        if (!WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {
+        NumberData radius = OperationHelpers.popNumber(executor, "relay:detect_entity");
+        if (radius == null) {
             executor.pushData(new BooleanData(false));
             return;
         }
         
-        // 获取 Level 上下文
-        Optional<Level> levelOpt = executor.getContext("level", Level.class);
-        if (levelOpt.isEmpty()) {
-            executor.triggerMishap("无法获取世界");
+        VectorData center = OperationHelpers.popVector(executor, "relay:detect_entity");
+        if (center == null) {
+            executor.pushData(new BooleanData(false));
             return;
         }
-        
+
+        double radiusVal = radius.asDouble();
+        Vec3 centerPos = center.asVector();
+
+        // 获取源位置并检查范围
+        Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
+        ItemStack interactor = OperationHelpers.getWorldInteractorStack(executor).orElse(ItemStack.EMPTY);
+        Vec3 searchEdge = centerPos.add(new Vec3(radiusVal, radiusVal, radiusVal));
+        if (!qdream.relay.items.WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {
+            executor.pushData(new BooleanData(false));
+            return;
+        }
+
+        // 获取 Level 上下文
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "relay:detect_entity");
+        if (levelOpt.isEmpty()) {
+            executor.pushData(new BooleanData(false));
+            return;
+        }
+
         Level level = levelOpt.get();
-        
+
         // 检测实体
         AABB searchBox = new AABB(
-            center.x - radius, center.y - radius, center.z - radius,
-            center.x + radius, center.y + radius, center.z + radius
+            centerPos.x - radiusVal, centerPos.y - radiusVal, centerPos.z - radiusVal,
+            centerPos.x + radiusVal, centerPos.y + radiusVal, centerPos.z + radiusVal
         );
 
         boolean found = !level.getEntitiesOfClass(Entity.class, searchBox).isEmpty();
         executor.pushData(new BooleanData(found));
-    }
-
-    /**
-     * 从上下文获取 ShellContainer
-     * @param executor 状态机
-     * @return ShellContainer，如果不存在返回 null
-     */
-    private ShellContainer getShellContainer(StateMachine executor) {
-        if (!executor.hasContext("shellContainer")) {
-            return null;
-        }
-        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

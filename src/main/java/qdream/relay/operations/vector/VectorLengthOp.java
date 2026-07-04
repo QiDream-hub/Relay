@@ -1,6 +1,6 @@
 package qdream.relay.operations.vector;
 
-import qdream.relay.engine.Executable;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * 向量长度计算操作
- * 
+ *
  * 弹出：vector
  * 压入：number (向量的模长)
  */
@@ -26,18 +26,9 @@ public class VectorLengthOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable vecExe = executor.popData();
-        
-        if (vecExe == null) {
-            executor.triggerMishap("数据栈不足，需要 vector");
-            return;
-        }
-        
-        if (!(vecExe instanceof VectorData vec)) {
-            executor.triggerMishap("期望 vector 类型");
-            return;
-        }
-        
+        VectorData vec = OperationHelpers.popVector(executor, "relay:vector_length");
+        if (vec == null) return;
+
         double length = vec.asVector().length();
         executor.pushData(new NumberData(length));
     }

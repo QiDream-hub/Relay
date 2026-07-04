@@ -1,10 +1,10 @@
 package qdream.relay.operations.logic;
 
-import qdream.relay.types.BooleanData;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.types.BooleanData;
 
 /**
  * Eq 操作 - 等于比较
@@ -21,14 +21,13 @@ public class EqOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable bData = executor.popData();
-        if (bData == null)
-            return;
-        Executable aData = executor.popData();
-        if (aData == null)
-            return;
+        Executable b = executor.popData();
+        if (b == null) return;
+        
+        Executable a = executor.popData();
+        if (a == null) return;
 
-        boolean result = aData.equals(bData);
+        boolean result = a.equals(b);
         executor.pushData(new BooleanData(result));
     }
 

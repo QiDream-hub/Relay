@@ -1,6 +1,6 @@
 package qdream.relay.operations.vector;
 
-import qdream.relay.engine.Executable;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * 向量减法操作
- * 
+ *
  * 弹出：vector, vector
  * 压入：vector (a - b)
  */
@@ -26,19 +26,12 @@ public class VectorSubOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable bExe = executor.popData();
-        Executable aExe = executor.popData();
+        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_sub");
+        if (bVec == null) return;
         
-        if (bExe == null || aExe == null) {
-            executor.triggerMishap("数据栈不足，需要 2 个 vector");
-            return;
-        }
-        
-        if (!(bExe instanceof VectorData bVec) || !(aExe instanceof VectorData aVec)) {
-            executor.triggerMishap("期望 vector 类型");
-            return;
-        }
-        
+        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_sub");
+        if (aVec == null) return;
+
         Vec3 result = aVec.asVector().subtract(bVec.asVector());
         executor.pushData(new VectorData(result));
     }

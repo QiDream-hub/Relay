@@ -11,12 +11,11 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
-import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
@@ -43,58 +42,45 @@ public class BlockRaycastOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器 - 通过 shellContainer 检查
-        ShellContainer container = getShellContainer(executor);
-        if (container == null || !container.hasWorldInteractor()) {
-            executor.triggerMishap("block_raycast 需要世界交互器");
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, "relay:block_raycast")) {
             return;
         }
-
-        ItemStack interactor = container.getInteractorStack();
 
         // 弹出参数
-        Executable maxDistExe = executor.popData();
-        Executable dirExe = executor.popData();
-        Executable startExe = executor.popData();
+        NumberData maxDist = OperationHelpers.popNumber(executor, "relay:block_raycast");
+        if (maxDist == null) return;
+        
+        VectorData dir = OperationHelpers.popVector(executor, "relay:block_raycast");
+        if (dir == null) return;
+        
+        VectorData start = OperationHelpers.popVector(executor, "relay:block_raycast");
+        if (start == null) return;
 
-        if (maxDistExe == null || dirExe == null || startExe == null) {
-            executor.triggerMishap("数据栈不足，需要 number, vector, vector");
-            return;
-        }
-
-        if (!(maxDistExe instanceof NumberData maxDistEx) ||
-            !(dirExe instanceof VectorData dirEx) ||
-            !(startExe instanceof VectorData startEx)) {
-            executor.triggerMishap("期望 number, vector, vector 类型");
-            return;
-        }
-
-        double maxDist = maxDistEx.asDouble();
-        Vec3 direction = dirEx.asVector().normalize();
-        Vec3 start = startEx.asVector();
-        Vec3 end = start.add(direction.scale(maxDist));
+        double maxDistVal = maxDist.asDouble();
+        Vec3 direction = dir.asVector().normalize();
+        Vec3 startPos = start.asVector();
+        Vec3 endPos = startPos.add(direction.scale(maxDistVal));
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = executor.getContext("level", Level.class);
-        if (levelOpt.isEmpty()) {
-            executor.triggerMishap("无法获取世界");
-            return;
-        }
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "relay:block_raycast");
+        if (levelOpt.isEmpty()) return;
 
         Level level = levelOpt.get();
 
         // 执行射线追踪
         BlockHitResult hitResult = level.clip(new ClipContext(
-            start, end,
+            startPos, endPos,
             ClipContext.Block.COLLIDER,
             ClipContext.Fluid.NONE,
             CollisionContext.empty()
         ));
 
         if (hitResult.getType() == HitResult.Type.BLOCK) {
-            // 检查击中方块在范围内（参考 Hexcasting）
+            // 检查击中方块在范围内
             Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
-            if (!WorldInteractorItem.isInRange(interactor, start, blockCenter)) {
+            ItemStack interactor = OperationHelpers.getWorldInteractorStack(executor).orElse(ItemStack.EMPTY);
+            if (!qdream.relay.items.WorldInteractorItem.isInRange(interactor, startPos, blockCenter)) {
                 executor.pushData(NullData.INSTANCE);
                 return;
             }
@@ -103,17 +89,5 @@ public class BlockRaycastOp extends Spell {
         } else {
             executor.pushData(NullData.INSTANCE);
         }
-    }
-
-    /**
-     * 从上下文获取 ShellContainer
-     * @param executor 状态机
-     * @return ShellContainer，如果不存在返回 null
-     */
-    private ShellContainer getShellContainer(StateMachine executor) {
-        if (!executor.hasContext("shellContainer")) {
-            return null;
-        }
-        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

@@ -4,6 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.ListData;
 
@@ -24,7 +25,7 @@ import qdream.relay.types.ListData;
  * </ol>
  *
  * <h3>示例</h3>
- * 
+ *
  * <pre>
  * 程序：[Boolean(true), DecrementOp, WhileOp]
  * 第 1 轮：条件为 true → 执行 DecrementOp
@@ -49,20 +50,14 @@ public class WhileOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable condition = executor.popData();
+        BooleanData condition = OperationHelpers.popBoolean(executor, "relay:while");
+        if (condition == null) return;
+        
         Executable body = executor.peekProgram();
-
-        if (condition == null) {
-            executor.triggerMishap("数据栈不足需要 condition");
-            return;
-        }
-        if (!(condition instanceof BooleanData booleanType)) {
-            executor.triggerMishap("需要布尔类型");
-            return;
-        }
+        if (body == null) return;
 
         // 如果条件为 true，执行 body 并继续循环
-        if (booleanType.asBoolean()) {
+        if (condition.asBoolean()) {
             // 重新压入 WhileOp 以继续下一轮检查
             executor.pushProgram(this);
             // 压入 body 执行

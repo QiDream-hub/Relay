@@ -1,6 +1,6 @@
 package qdream.relay.operations.vector;
 
-import qdream.relay.engine.Executable;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * 向量数乘操作
- * 
+ *
  * 弹出：number, vector
  * 压入：vector (向量 * 标量)
  */
@@ -27,19 +27,12 @@ public class VectorMulOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable vecExe = executor.popData();
-        Executable numExe = executor.popData();
+        VectorData vec = OperationHelpers.popVector(executor, "relay:vector_mul");
+        if (vec == null) return;
         
-        if (vecExe == null || numExe == null) {
-            executor.triggerMishap("数据栈不足，需要 number 和 vector");
-            return;
-        }
-        
-        if (!(vecExe instanceof VectorData vec) || !(numExe instanceof NumberData num)) {
-            executor.triggerMishap("期望 vector 和 number 类型");
-            return;
-        }
-        
+        NumberData num = OperationHelpers.popNumber(executor, "relay:vector_mul");
+        if (num == null) return;
+
         double scalar = num.asDouble();
         Vec3 result = vec.asVector().scale(scalar);
         executor.pushData(new VectorData(result));

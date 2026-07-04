@@ -1,6 +1,6 @@
 package qdream.relay.operations.vector;
 
-import qdream.relay.engine.Executable;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * 向量点积（内积）操作
- * 
+ *
  * 弹出：vector, vector
  * 压入：number (标量结果)
  */
@@ -27,19 +27,12 @@ public class VectorDotOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable bExe = executor.popData();
-        Executable aExe = executor.popData();
+        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_dot");
+        if (bVec == null) return;
         
-        if (bExe == null || aExe == null) {
-            executor.triggerMishap("数据栈不足，需要 2 个 vector");
-            return;
-        }
-        
-        if (!(bExe instanceof VectorData bVec) || !(aExe instanceof VectorData aVec)) {
-            executor.triggerMishap("期望 vector 类型");
-            return;
-        }
-        
+        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_dot");
+        if (aVec == null) return;
+
         double result = aVec.asVector().dot(bVec.asVector());
         executor.pushData(new NumberData(result));
     }

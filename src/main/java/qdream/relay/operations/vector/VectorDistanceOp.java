@@ -1,6 +1,6 @@
 package qdream.relay.operations.vector;
 
-import qdream.relay.engine.Executable;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * 向量距离计算操作
  * 计算两个点之间的距离
- * 
+ *
  * 弹出：vector, vector
  * 压入：number (两点间的欧几里得距离)
  */
@@ -28,19 +28,12 @@ public class VectorDistanceOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable bExe = executor.popData();
-        Executable aExe = executor.popData();
+        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_distance");
+        if (bVec == null) return;
         
-        if (bExe == null || aExe == null) {
-            executor.triggerMishap("数据栈不足，需要 2 个 vector");
-            return;
-        }
-        
-        if (!(bExe instanceof VectorData bVec) || !(aExe instanceof VectorData aVec)) {
-            executor.triggerMishap("期望 vector 类型");
-            return;
-        }
-        
+        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_distance");
+        if (aVec == null) return;
+
         double distance = aVec.asVector().distanceTo(bVec.asVector());
         executor.pushData(new NumberData(distance));
     }

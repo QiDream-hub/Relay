@@ -2,9 +2,9 @@ package qdream.relay.operations.control;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.ListData;
 
 import java.util.List;
@@ -24,13 +24,8 @@ public class EvalOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Operation listData = (Operation) executor.popData();
-        if (listData == null)
-            return;
-        if (!(listData instanceof ListData list)) {
-            executor.triggerMishap("操作 relay:eval 期望 list 类型，实际为：" + listData.getId());
-            return;
-        }
+        ListData list = OperationHelpers.popList(executor, "relay:eval");
+        if (list == null) return;
 
         List<Executable> reversed = list.getValue();
         executor.loadProgram(reversed);

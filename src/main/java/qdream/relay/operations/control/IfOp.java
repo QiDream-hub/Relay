@@ -2,10 +2,11 @@ package qdream.relay.operations.control;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.BooleanData;
+import qdream.relay.types.ListData;
 
 /**
  * If 操作 - 条件分支
@@ -26,25 +27,19 @@ public class IfOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-
-        Operation conditionData = (Operation) executor.popData();
-        if (conditionData == null)
-            return;
-        if (!(conditionData instanceof BooleanData condition)) {
-            executor.triggerMishap("操作 relay:if 期望 boolean 类型，实际为：" + conditionData.getId());
-            return;
-        }
-        Operation trueBranchData = (Operation) executor.popProgram();
-        if (trueBranchData == null)
-            return;
-        Operation falseBranchData = (Operation) executor.popProgram();
-        if (falseBranchData == null)
-            return;
+        BooleanData condition = OperationHelpers.popBoolean(executor, "relay:if");
+        if (condition == null) return;
+        
+        Executable trueBranch = executor.popProgram();
+        if (trueBranch == null) return;
+        
+        Executable falseBranch = executor.popProgram();
+        if (falseBranch == null) return;
 
         // 根据条件选择分支
         Executable selected = condition.asBoolean()
-                ? trueBranchData
-                : falseBranchData;
+                ? trueBranch
+                : falseBranch;
 
         executor.pushProgram(selected);
     }

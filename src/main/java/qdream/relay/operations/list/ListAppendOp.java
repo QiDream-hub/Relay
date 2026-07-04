@@ -2,9 +2,9 @@ package qdream.relay.operations.list;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.ListData;
 
 import java.util.List;
@@ -28,15 +28,10 @@ public class ListAppendOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         Executable valueData = executor.popData();
-        if (valueData == null)
-            return;
-        Operation listData = (Operation) executor.popData();
-        if (listData == null)
-            return;
-        if (!(listData instanceof ListData list)) {
-            executor.triggerMishap("操作 relay:list_append 期望 list 类型，实际为：" + listData.getId());
-            return;
-        }
+        if (valueData == null) return;
+        
+        ListData list = OperationHelpers.popList(executor, "relay:list_append");
+        if (list == null) return;
 
         // 创建新列表并添加原列表元素
         List<Executable> newList = list.getValue();

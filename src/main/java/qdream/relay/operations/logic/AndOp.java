@@ -1,8 +1,8 @@
 package qdream.relay.operations.logic;
 
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 
@@ -21,20 +21,11 @@ public class AndOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Operation bData = (Operation) executor.popData();
-        if (bData == null)
-            return;
-        if (!(bData instanceof BooleanData b)) {
-            executor.triggerMishap("操作 relay:and 期望 boolean 类型，实际为：" + bData.getId());
-            return;
-        }
-        Operation aData = (Operation) executor.popData();
-        if (aData == null)
-            return;
-        if (!(aData instanceof BooleanData a)) {
-            executor.triggerMishap("操作 relay:and 期望 boolean 类型，实际为：" + aData.getId());
-            return;
-        }
+        BooleanData b = OperationHelpers.popBoolean(executor, "relay:and");
+        if (b == null) return;
+        
+        BooleanData a = OperationHelpers.popBoolean(executor, "relay:and");
+        if (a == null) return;
 
         boolean result = a.asBoolean() && b.asBoolean();
         executor.pushData(new BooleanData(result));

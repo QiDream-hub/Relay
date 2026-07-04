@@ -1,12 +1,12 @@
 package qdream.relay.operations.list;
 
-import qdream.relay.types.ListData;
-import qdream.relay.types.NumberData;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
+import qdream.relay.types.ListData;
+import qdream.relay.types.NumberData;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -30,31 +30,22 @@ public class ListSetOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         Executable valueData = executor.popData();
-        if (valueData == null)
-            return;
-        Operation indexData = (Operation) executor.popData();
-        if (indexData == null)
-            return;
-        if (!(indexData instanceof NumberData index)) {
-            executor.triggerMishap("操作 relay:list_set 期望 number 类型，实际为：" + indexData.getId());
-            return;
-        }
-        Operation listData = (Operation) executor.popData();
-        if (listData == null)
-            return;
-        if (!(listData instanceof ListData listBlock)) {
-            executor.triggerMishap("操作 relay:list_set 期望 list 类型，实际为：" + listData.getId());
-            return;
-        }
+        if (valueData == null) return;
+        
+        NumberData index = OperationHelpers.popNumber(executor, "relay:list_set");
+        if (index == null) return;
+        
+        ListData list = OperationHelpers.popList(executor, "relay:list_set");
+        if (list == null) return;
 
-        List<Executable> list = listBlock.getValue();
+        List<Executable> listData = list.getValue();
         int indexVal = index.asInt();
-        if (indexVal < 0 || indexVal >= list.size()) {
+        if (indexVal < 0 || indexVal >= listData.size()) {
             executor.triggerMishap("操作 relay:list_set 索引超出范围：" + indexVal);
             return;
         }
         // 创建新列表（不可变修改）
-        List<Executable> newList = new ArrayList<>(list);
+        List<Executable> newList = new ArrayList<>(listData);
         newList.set(indexVal, valueData);
         executor.pushData(new ListData(newList));
     }

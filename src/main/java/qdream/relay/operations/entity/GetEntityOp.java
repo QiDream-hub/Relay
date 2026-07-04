@@ -9,12 +9,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.items.WorldInteractorItem;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -26,11 +25,6 @@ import qdream.relay.types.VectorData;
  * 压入：entity (实体引用，如果不存在则为 null)
  *
  * 需要世界交互器，并检查范围
- *
- * 示例用法：
- * 1. 获取位置实体：some_vector get_entity
- * 2. 检查是否存在实体：some_vector get_entity is_null if ...
- * 3. 获取坐标并存储：get_self get_entity_pos get_entity some_list list_append
  */
 public class GetEntityOp extends Spell {
 
@@ -46,56 +40,29 @@ public class GetEntityOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器 - 通过 shellContainer 检查
-        ShellContainer container = getShellContainer(executor);
-        if (container == null || !container.hasWorldInteractor()) {
-            executor.triggerMishap("get_entity 需要世界交互器");
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, "relay:get_entity")) {
             return;
         }
-
-        ItemStack interactor = container.getInteractorStack();
 
         // 弹出参数
-        Executable posExe = executor.popData();
+        VectorData pos = OperationHelpers.popVector(executor, "relay:get_entity");
+        if (pos == null) return;
 
-        if (posExe == null) {
-            executor.triggerMishap("数据栈不足，需要 vector");
-            return;
-        }
+        Vec3 posVec = pos.asVector();
 
-        if (!(posExe instanceof VectorData posEx)) {
-            executor.triggerMishap("期望 vector 类型");
-            return;
-        }
-
-        Vec3 posVec = posEx.asVector();
-
-        // 从 self 获取执行者位置作为源位置（self 可能是 Entity 或 BlockEntity）
-        Vec3 sourcePos = new Vec3(0, 0, 0);
-        var selfOpt = executor.getContext("self", Object.class);
-        if (selfOpt.isPresent()) {
-            Object self = selfOpt.get();
-            if (self instanceof net.minecraft.world.entity.Entity entity) {
-                sourcePos = new Vec3(entity.getX(), entity.getY(), entity.getZ());
-            } else if (self instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
-                net.minecraft.core.BlockPos blockPosSelf = blockEntity.getBlockPos();
-                sourcePos = new Vec3(blockPosSelf.getX() + 0.5, blockPosSelf.getY(), blockPosSelf.getZ() + 0.5);
-            }
-        }
-
-        // 检查范围（检测搜索区域的边界）
+        // 获取源位置并检查范围
+        Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
+        ItemStack interactor = OperationHelpers.getWorldInteractorStack(executor).orElse(ItemStack.EMPTY);
         Vec3 searchEdge = posVec.add(new Vec3(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS));
-        if (!WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {
-            executor.triggerMishap("get_entity 超出世界交互器范围");
+        if (!qdream.relay.items.WorldInteractorItem.isInRange(interactor, sourcePos, searchEdge)) {
+            executor.triggerMishap("relay:get_entity 超出世界交互器范围");
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = executor.getContext("level", Level.class);
-        if (levelOpt.isEmpty()) {
-            executor.triggerMishap("无法获取世界");
-            return;
-        }
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "relay:get_entity");
+        if (levelOpt.isEmpty()) return;
 
         Level level = levelOpt.get();
 
@@ -132,17 +99,5 @@ public class GetEntityOp extends Spell {
         } else {
             executor.pushData(new EntityData(null, null, null));
         }
-    }
-
-    /**
-     * 从上下文获取 ShellContainer
-     * @param executor 状态机
-     * @return ShellContainer，如果不存在返回 null
-     */
-    private ShellContainer getShellContainer(StateMachine executor) {
-        if (!executor.hasContext("shellContainer")) {
-            return null;
-        }
-        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
     }
 }

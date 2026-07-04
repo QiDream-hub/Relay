@@ -1,8 +1,8 @@
 package qdream.relay.operations.logic;
 
+import qdream.relay.operations.base.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 
@@ -20,13 +20,8 @@ public class NotOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Operation aData = (Operation) executor.popData();
-        if (aData == null)
-            return;
-        if (!(aData instanceof BooleanData a)) {
-            executor.triggerMishap("操作 relay:not 期望 boolean 类型，实际为：" + aData.getId());
-            return;
-        }
+        BooleanData a = OperationHelpers.popBoolean(executor, "relay:not");
+        if (a == null) return;
 
         boolean result = !a.asBoolean();
         executor.pushData(new BooleanData(result));
