@@ -1,13 +1,10 @@
 package qdream.relay.operations.base;
 
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.NumberData;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 复制到栈顶操作 - 将指定位置的值复制一份到栈顶
@@ -17,71 +14,26 @@ public class CopyToTopOp extends Spell {
 
     public CopyToTopOp() {
         super("relay:copy_to_top", 1, 1, OperationSignature.builder()
-                .consumesFromData("index", "number")
+                .consumesFromData("index", "relay:number")
                 .producesToData("copy", "any")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
-        Executable indexExe = executor.popData();
-        if (indexExe == null) {
+        NumberData indexData = OperationHelpers.popNumber(executor, "复制到栈顶");
+        if (indexData == null) {
             return;
         }
 
-        if (!(indexExe instanceof NumberData numberData)) {
-            executor.triggerMishap("复制到栈顶：参数必须是数字");
-            return;
-        }
+        int index = indexData.asInt();
 
-        if (!numberData.isInteger()) {
-            executor.triggerMishap("复制到栈顶：索引必须是整数");
-            return;
-        }
-
-        int index = numberData.asInt();
-        if (index < 0) {
-            executor.triggerMishap("复制到栈顶：索引不能为负数");
-            return;
-        }
-
-        if (index >= executor.getDataStackSize()) {
-            executor.triggerMishap("复制到栈顶：索引超出栈范围");
-            return;
-        }
-
-        // 获取当前栈
-        List<Executable> stack = executor.getDataStackSnapshot();
-        
-        // 计算实际位置（栈顶为 0，向下递增）
-        int targetPos = index;
-        if (targetPos < 0 || targetPos >= stack.size()) {
-            executor.triggerMishap("复制到栈顶：位置无效");
-            return;
-        }
-
-        // 弹出栈顶到目标位置之前的所有元素
-        List<Executable> above = new ArrayList<>();
-        for (int i = 0; i < index; i++) {
-            above.add(executor.popData());
-        }
-
-        // 弹出目标元素
-        Executable target = executor.popData();
+        // 获取目标位置的元素并复制一份到栈顶
+        var target = OperationHelpers.getDataAt(executor, index, "复制到栈顶");
         if (target == null) {
-            executor.triggerMishap("复制到栈顶：无法获取目标元素");
             return;
         }
 
-        // 先将目标元素压回
         executor.pushData(target);
-        
-        // 再将目标元素复制一份压入栈顶
-        executor.pushData(target);
-
-        // 最后压回上面的元素（需要反转）
-        for (int i = above.size() - 1; i >= 0; i--) {
-            executor.pushData(above.get(i));
-        }
     }
 }

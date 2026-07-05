@@ -11,9 +11,12 @@ import qdream.relay.operations.arithmetic.SubOp;
 import qdream.relay.operations.base.BatchDupOp;
 import qdream.relay.operations.base.CopyToTopOp;
 import qdream.relay.operations.base.DupOp;
+import qdream.relay.operations.base.GetDataStackLengthOp;
+import qdream.relay.operations.base.GetProgramStackLengthOp;
 import qdream.relay.operations.base.GetWorldInteractorOp;
 import qdream.relay.operations.base.MoveToTopOp;
 import qdream.relay.operations.base.PopOp;
+import qdream.relay.operations.base.StackRearrangeOp;
 import qdream.relay.operations.base.SwapOp;
 import qdream.relay.operations.communication.PeekOp;
 import qdream.relay.operations.communication.RecvOp;
@@ -65,7 +68,9 @@ import qdream.relay.operations.list.ListAppendOp;
 import qdream.relay.operations.list.ListCreatOp;
 import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
+import qdream.relay.operations.list.ListRemoveOp;
 import qdream.relay.operations.list.ListSetOp;
+import qdream.relay.operations.list.ListUnpackOp;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.BlockData;
@@ -127,6 +132,9 @@ public class RelayOperations {
         OperationRegistry.register("relay:batch_dup", new OperationRegistry.OpEntry(new BatchDupOp()));
         OperationRegistry.register("relay:move_to_top", new OperationRegistry.OpEntry(new MoveToTopOp()));
         OperationRegistry.register("relay:copy_to_top", new OperationRegistry.OpEntry(new CopyToTopOp()));
+        OperationRegistry.register("relay:stack_rearrange", new OperationRegistry.OpEntry(new StackRearrangeOp()));
+        OperationRegistry.register("relay:get_data_stack_length", new OperationRegistry.OpEntry(new GetDataStackLengthOp()));
+        OperationRegistry.register("relay:get_program_stack_length", new OperationRegistry.OpEntry(new GetProgramStackLengthOp()));
         OperationRegistry.register("relay:get_world_interactor",
                 new OperationRegistry.OpEntry(new GetWorldInteractorOp()));
         OperationRegistry.register("relay:get_self",
@@ -191,9 +199,11 @@ public class RelayOperations {
         // 列表操作
         OperationRegistry.register("relay:list_append", new OperationRegistry.OpEntry(new ListAppendOp()));
         OperationRegistry.register("relay:list_get", new OperationRegistry.OpEntry(new ListGetOp()));
+        OperationRegistry.register("relay:list_remove", new OperationRegistry.OpEntry(new ListRemoveOp()));
         OperationRegistry.register("relay:list_set", new OperationRegistry.OpEntry(new ListSetOp()));
         OperationRegistry.register("relay:list_length", new OperationRegistry.OpEntry(new ListLengthOp()));
         OperationRegistry.register("relay:list_creat", new OperationRegistry.OpEntry(new ListCreatOp()));
+        OperationRegistry.register("relay:list_unpack", new OperationRegistry.OpEntry(new ListUnpackOp()));
 
         // 向量操作
         OperationRegistry.register("relay:vector_add", new OperationRegistry.OpEntry(new VectorAddOp()));

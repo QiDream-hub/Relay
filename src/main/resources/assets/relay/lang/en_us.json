@@ -60,6 +60,15 @@
   "operation.relay:copy_to_top.name": "Copy to Top",
   "operation.relay:copy_to_top.description": "Copy element at specified index to top (index 0 is top)",
 
+  "operation.relay:stack_rearrange.name": "Stack Rearrange",
+  "operation.relay:stack_rearrange.description": "Rearrange elements popped from data stack according to index list",
+
+  "operation.relay:get_data_stack_length.name": "Get Data Stack Length",
+  "operation.relay:get_data_stack_length.description": "Get the current number of elements in data stack",
+
+  "operation.relay:get_program_stack_length.name": "Get Program Stack Length",
+  "operation.relay:get_program_stack_length.description": "Get the current number of elements in program stack",
+
   "operation.relay:add.name": "Add",
   "operation.relay:add.description": "Calculate sum of two numbers",
 
@@ -130,7 +139,10 @@
   "operation.relay:list_append.description": "Append element to a list",
 
   "operation.relay:list_get.name": "List Get",
-  "operation.relay:list_get.description": "Get element at specified index in list",
+  "operation.relay:list_get.description": "Get element at specified index in list (without consuming list)",
+
+  "operation.relay:list_remove.name": "List Remove",
+  "operation.relay:list_remove.description": "Remove element at specified index from list (without consuming list)",
 
   "operation.relay:list_set.name": "List Set",
   "operation.relay:list_set.description": "Set element at specified index in list",
@@ -140,6 +152,9 @@
 
   "operation.relay:list_creat.name": "Create List",
   "operation.relay:list_creat.description": "Create an empty list of specified length",
+
+  "operation.relay:list_unpack.name": "List Unpack",
+  "operation.relay:list_unpack.description": "Unpack list elements onto data stack",
 
   "operation.relay:is_player.name": "Is Player",
   "operation.relay:is_player.description": "Check if an entity is a player",
@@ -328,6 +343,9 @@
   "param.x.description": "X coordinate",
   "param.y.description": "Y coordinate",
   "param.z.description": "Z coordinate",
+  "param.indices.description": "Index list (1-based)",
+  "param.amount.description": "Amount to pop",
+  "param.many.description": "Variable input (elements popped from data stack)",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",

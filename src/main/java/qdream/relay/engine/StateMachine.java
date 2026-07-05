@@ -223,6 +223,100 @@ public class StateMachine {
         return programStack.size();
     }
 
+    // ========== 索引访问操作 ==========
+
+    /**
+     * 获取程序栈指定索引位置的元素
+     * @param index 索引（0 为栈顶）
+     * @return 元素，索引越界返回 null
+     */
+    public Executable getProgramAt(int index) {
+        if (index < 0 || index >= programStack.size()) {
+            return null;
+        }
+        List<Executable> snapshot = new ArrayList<>(programStack);
+        return snapshot.get(index);
+    }
+
+    /**
+     * 设置程序栈指定索引位置的元素
+     * @param index 索引（0 为栈顶）
+     * @param executable 新元素
+     * @return 是否成功（索引越界返回 false）
+     */
+    public boolean setProgramAt(int index, Executable executable) {
+        if (index < 0 || index >= programStack.size()) {
+            return false;
+        }
+        List<Executable> snapshot = new ArrayList<>(programStack);
+        snapshot.set(index, executable);
+        programStack.clear();
+        programStack.addAll(snapshot);
+        return true;
+    }
+
+    /**
+     * 移除程序栈指定索引位置的元素
+     * @param index 索引（0 为栈顶）
+     * @return 被移除的元素，索引越界返回 null
+     */
+    public Executable removeProgramAt(int index) {
+        if (index < 0 || index >= programStack.size()) {
+            return null;
+        }
+        List<Executable> snapshot = new ArrayList<>(programStack);
+        Executable removed = snapshot.remove(index);
+        programStack.clear();
+        programStack.addAll(snapshot);
+        return removed;
+    }
+
+    /**
+     * 获取数据栈指定索引位置的元素
+     * @param index 索引（0 为栈顶）
+     * @return 元素，索引越界返回 null
+     */
+    public Executable getDataAt(int index) {
+        if (index < 0 || index >= dataStack.size()) {
+            return null;
+        }
+        List<Executable> snapshot = new ArrayList<>(dataStack);
+        return snapshot.get(index);
+    }
+
+    /**
+     * 设置数据栈指定索引位置的元素
+     * @param index 索引（0 为栈顶）
+     * @param executable 新元素
+     * @return 是否成功（索引越界返回 false）
+     */
+    public boolean setDataAt(int index, Executable executable) {
+        if (index < 0 || index >= dataStack.size()) {
+            return false;
+        }
+        List<Executable> snapshot = new ArrayList<>(dataStack);
+        snapshot.set(index, executable);
+        dataStack.clear();
+        dataStack.addAll(snapshot);
+        return true;
+    }
+
+    /**
+     * 移除数据栈指定索引位置的元素
+     * @param index 索引（0 为栈顶）
+     * @return 被移除的元素，索引越界返回 null
+     */
+    public Executable removeDataAt(int index) {
+        if (index < 0 || index >= dataStack.size()) {
+            return null;
+        }
+        List<Executable> snapshot = new ArrayList<>(dataStack);
+        Executable removed = snapshot.remove(index);
+        dataStack.clear();
+        dataStack.addAll(snapshot);
+        return removed;
+    }
+
     // ========== 状态 ==========
 
     /**

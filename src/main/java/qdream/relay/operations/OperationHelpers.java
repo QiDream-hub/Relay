@@ -172,25 +172,45 @@ public final class OperationHelpers {
 
     /**
      * 从数据栈弹出并检查类型
-     * 
+     *
      * @param executor      状态机
      * @param expectedType  期望的类型
      * @param operationName 操作名称（用于错误消息）
      * @param <T>           期望的类型
      * @return 转换后的值，如果失败触发事故并返回 null
      */
-    public static <T> T popAsType(StateMachine executor, Class<T> expectedType, String operationName) {
+    public static <T> T popAsType(StateMachine executor, Class<T> expectedType, String operationName, String targetId) {
         Executable exe = executor.popData();
         if (exe == null) {
             executor.triggerMishap(operationName + " 数据栈不足");
             return null;
         }
         if (!expectedType.isInstance(exe)) {
-            String id = expectedType.getSimpleName();
-            if (exe instanceof Operation op) {
-                id = op.getId();
-            }
-            executor.triggerMishap(operationName + " 期望:" + id +
+            executor.triggerMishap(operationName + " 期望:" + targetId +
+                    " 类型，实际为：" + StackTools.getId(exe));
+            return null;
+        }
+        return expectedType.cast(exe);
+    }
+
+    /**
+     * 从数据栈窥视（不弹出）并检查类型
+     *
+     * @param executor      状态机
+     * @param index         索引（0 为栈顶）
+     * @param expectedType  期望的类型
+     * @param operationName 操作名称（用于错误消息）
+     * @param <T>           期望的类型
+     * @return 转换后的值，如果失败触发事故并返回 null
+     */
+    public static <T> T peekAsType(StateMachine executor, int index, Class<T> expectedType, String operationName,
+            String targetId) {
+        Executable exe = getDataAt(executor, index, operationName);
+        if (exe == null) {
+            return null;
+        }
+        if (!expectedType.isInstance(exe)) {
+            executor.triggerMishap(operationName + " 期望:" + targetId +
                     " 类型，实际为：" + StackTools.getId(exe));
             return null;
         }
@@ -199,90 +219,178 @@ public final class OperationHelpers {
 
     /**
      * 弹出 NumberData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return NumberData，失败返回 null
      */
     public static NumberData popNumber(StateMachine executor, String operationName) {
-        return popAsType(executor, NumberData.class, operationName);
+        return popAsType(executor, NumberData.class, operationName, "relay:number");
+    }
+
+    /**
+     * 窥视栈顶 NumberData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return NumberData，失败返回 null
+     */
+    public static NumberData peekNumber(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, NumberData.class, operationName, "relay:number");
     }
 
     /**
      * 弹出 BooleanData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return BooleanData，失败返回 null
      */
     public static BooleanData popBoolean(StateMachine executor, String operationName) {
-        return popAsType(executor, BooleanData.class, operationName);
+        return popAsType(executor, BooleanData.class, operationName, "relay:boolean");
+    }
+
+    /**
+     * 窥视栈顶 BooleanData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return BooleanData，失败返回 null
+     */
+    public static BooleanData peekBoolean(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, BooleanData.class, operationName, "relay:boolean");
     }
 
     /**
      * 弹出 VectorData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return VectorData，失败返回 null
      */
     public static VectorData popVector(StateMachine executor, String operationName) {
-        return popAsType(executor, VectorData.class, operationName);
+        return popAsType(executor, VectorData.class, operationName, "relay:vector");
+    }
+
+    /**
+     * 窥视栈顶 VectorData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return VectorData，失败返回 null
+     */
+    public static VectorData peekVector(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, VectorData.class, operationName, "relay:vector");
     }
 
     /**
      * 弹出 EntityData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return EntityData，失败返回 null
      */
     public static EntityData popEntity(StateMachine executor, String operationName) {
-        return popAsType(executor, EntityData.class, operationName);
+        return popAsType(executor, EntityData.class, operationName, "relay:entity");
+    }
+
+    /**
+     * 窥视栈顶 EntityData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return EntityData，失败返回 null
+     */
+    public static EntityData peekEntity(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, EntityData.class, operationName, "relay:entity");
     }
 
     /**
      * 弹出 BlockEntityData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return BlockEntityData，失败返回 null
      */
     public static BlockEntityData popBlockEntity(StateMachine executor, String operationName) {
-        return popAsType(executor, BlockEntityData.class, operationName);
+        return popAsType(executor, BlockEntityData.class, operationName, "relay:block_entity");
+    }
+
+    /**
+     * 窥视栈顶 BlockEntityData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return BlockEntityData，失败返回 null
+     */
+    public static BlockEntityData peekBlockEntity(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, BlockEntityData.class, operationName, "relay:block_entity");
     }
 
     /**
      * 弹出 ListData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return ListData，失败返回 null
      */
     public static ListData popList(StateMachine executor, String operationName) {
-        return popAsType(executor, ListData.class, operationName);
+        return popAsType(executor, ListData.class, operationName, "relay:list");
+    }
+
+    /**
+     * 窥视栈顶 ListData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return ListData，失败返回 null
+     */
+    public static ListData peekList(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, ListData.class, operationName, "relay:list");
     }
 
     /**
      * 弹出 StringData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return StringData，失败返回 null
      */
     public static StringData popString(StateMachine executor, String operationName) {
-        return popAsType(executor, StringData.class, operationName);
+        return popAsType(executor, StringData.class, operationName, "relay:string");
+    }
+
+    /**
+     * 窥视栈顶 StringData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return StringData，失败返回 null
+     */
+    public static StringData peekString(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, StringData.class, operationName, "relay:string");
     }
 
     /**
      * 弹出 TypeData 类型
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @return TypeData，失败返回 null
      */
     public static TypeData popType(StateMachine executor, String operationName) {
-        return popAsType(executor, TypeData.class, operationName);
+        return popAsType(executor, TypeData.class, operationName,"relay:type");
+    }
+
+    /**
+     * 窥视栈顶 TypeData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return TypeData，失败返回 null
+     */
+    public static TypeData peekType(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, TypeData.class, operationName,"relay:type");
     }
 
     // ==================== 便捷转换方法 ====================
@@ -358,6 +466,175 @@ public final class OperationHelpers {
     public static boolean checkStackSize(StateMachine executor, int required, String operationName) {
         if (executor.getDataStackSize() < required) {
             executor.triggerMishap(operationName + " 需要 " + required + " 个参数");
+            return false;
+        }
+        return true;
+    }
+
+    // ==================== 栈索引访问相关 ====================
+
+    /**
+     * 从数据栈获取指定索引的元素
+     *
+     * @param executor      状态机
+     * @param index         索引（0 为栈顶）
+     * @param operationName 操作名称
+     * @return 元素，如果失败返回 null
+     */
+    public static Executable getDataAt(StateMachine executor, int index, String operationName) {
+        if (index < 0) {
+            executor.triggerMishap(operationName + " 索引不能为负数");
+            return null;
+        }
+        if (index >= executor.getDataStackSize()) {
+            executor.triggerMishap(operationName + " 索引超出栈范围");
+            return null;
+        }
+        Executable target = executor.getDataAt(index);
+        if (target == null) {
+            executor.triggerMishap(operationName + " 无法获取目标元素");
+        }
+        return target;
+    }
+
+    /**
+     * 从数据栈移除指定索引的元素
+     *
+     * @param executor      状态机
+     * @param index         索引（0 为栈顶）
+     * @param operationName 操作名称
+     * @return 被移除的元素，如果失败返回 null
+     */
+    public static Executable removeDataAt(StateMachine executor, int index, String operationName) {
+        if (index < 0) {
+            executor.triggerMishap(operationName + " 索引不能为负数");
+            return null;
+        }
+        if (index >= executor.getDataStackSize()) {
+            executor.triggerMishap(operationName + " 索引超出栈范围");
+            return null;
+        }
+        Executable target = executor.removeDataAt(index);
+        if (target == null) {
+            executor.triggerMishap(operationName + " 无法移除目标元素");
+        }
+        return target;
+    }
+
+    /**
+     * 设置数据栈指定索引的元素
+     *
+     * @param executor      状态机
+     * @param index         索引（0 为栈顶）
+     * @param value         新值
+     * @param operationName 操作名称
+     * @return 如果成功返回 true，否则返回 false
+     */
+    public static boolean setDataAt(StateMachine executor, int index, Executable value, String operationName) {
+        if (index < 0) {
+            executor.triggerMishap(operationName + " 索引不能为负数");
+            return false;
+        }
+        if (index >= executor.getDataStackSize()) {
+            executor.triggerMishap(operationName + " 索引超出栈范围");
+            return false;
+        }
+        if (!executor.setDataAt(index, value)) {
+            executor.triggerMishap(operationName + " 无法设置目标元素");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 从程序栈获取指定索引的元素
+     *
+     * @param executor      状态机
+     * @param index         索引（0 为栈顶）
+     * @param operationName 操作名称
+     * @return 元素，如果失败返回 null
+     */
+    public static Executable getProgramAt(StateMachine executor, int index, String operationName) {
+        if (index < 0) {
+            executor.triggerMishap(operationName + " 索引不能为负数");
+            return null;
+        }
+        if (index >= executor.getProgramStackSize()) {
+            executor.triggerMishap(operationName + " 索引超出栈范围");
+            return null;
+        }
+        Executable target = executor.getProgramAt(index);
+        if (target == null) {
+            executor.triggerMishap(operationName + " 无法获取目标元素");
+        }
+        return target;
+    }
+
+    /**
+     * 从程序栈移除指定索引的元素
+     *
+     * @param executor      状态机
+     * @param index         索引（0 为栈顶）
+     * @param operationName 操作名称
+     * @return 被移除的元素，如果失败返回 null
+     */
+    public static Executable removeProgramAt(StateMachine executor, int index, String operationName) {
+        if (index < 0) {
+            executor.triggerMishap(operationName + " 索引不能为负数");
+            return null;
+        }
+        if (index >= executor.getProgramStackSize()) {
+            executor.triggerMishap(operationName + " 索引超出栈范围");
+            return null;
+        }
+        Executable target = executor.removeProgramAt(index);
+        if (target == null) {
+            executor.triggerMishap(operationName + " 无法移除目标元素");
+        }
+        return target;
+    }
+
+    /**
+     * 设置程序栈指定索引的元素
+     *
+     * @param executor      状态机
+     * @param index         索引（0 为栈顶）
+     * @param value         新值
+     * @param operationName 操作名称
+     * @return 如果成功返回 true，否则返回 false
+     */
+    public static boolean setProgramAt(StateMachine executor, int index, Executable value, String operationName) {
+        if (index < 0) {
+            executor.triggerMishap(operationName + " 索引不能为负数");
+            return false;
+        }
+        if (index >= executor.getProgramStackSize()) {
+            executor.triggerMishap(operationName + " 索引超出栈范围");
+            return false;
+        }
+        if (!executor.setProgramAt(index, value)) {
+            executor.triggerMishap(operationName + " 无法设置目标元素");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 验证索引是否有效
+     *
+     * @param executor      状态机
+     * @param index         索引值
+     * @param stackSize     栈大小
+     * @param operationName 操作名称
+     * @return 如果有效返回 true，否则返回 false
+     */
+    public static boolean checkIndex(StateMachine executor, int index, int stackSize, String operationName) {
+        if (index < 0) {
+            executor.triggerMishap(operationName + " 索引不能为负数");
+            return false;
+        }
+        if (index >= stackSize) {
+            executor.triggerMishap(operationName + " 索引超出栈范围");
             return false;
         }
         return true;

@@ -60,6 +60,15 @@
   "operation.relay:copy_to_top.name": "复制到栈顶",
   "operation.relay:copy_to_top.description": "将指定位置的值复制一份到栈顶（位置 0 为栈顶）",
 
+  "operation.relay:stack_rearrange.name": "栈重排",
+  "operation.relay:stack_rearrange.description": "从数据栈弹出元素后按索引列表重新排列",
+
+  "operation.relay:get_data_stack_length.name": "获取数据栈长度",
+  "operation.relay:get_data_stack_length.description": "获取数据栈当前元素数量",
+
+  "operation.relay:get_program_stack_length.name": "获取程序栈长度",
+  "operation.relay:get_program_stack_length.description": "获取程序栈当前元素数量",
+
   "operation.relay:add.name": "加法",
   "operation.relay:add.description": "计算两个数的和",
 
@@ -130,7 +139,10 @@
   "operation.relay:list_append.description": "向列表追加元素",
 
   "operation.relay:list_get.name": "列表获取",
-  "operation.relay:list_get.description": "获取列表指定位置的元素",
+  "operation.relay:list_get.description": "获取列表指定位置的元素（不消耗列表）",
+
+  "operation.relay:list_remove.name": "列表移除",
+  "operation.relay:list_remove.description": "移除列表指定位置的元素（不消耗列表）",
 
   "operation.relay:list_set.name": "列表设置",
   "operation.relay:list_set.description": "设置列表指定位置的元素",
@@ -140,6 +152,9 @@
 
   "operation.relay:list_creat.name": "创建列表",
   "operation.relay:list_creat.description": "创建指定长度的空列表",
+
+  "operation.relay:list_unpack.name": "列表解包",
+  "operation.relay:list_unpack.description": "将列表元素逐个压入数据栈",
 
   "operation.relay:is_player.name": "是玩家",
   "operation.relay:is_player.description": "检查实体是否为玩家",
@@ -324,6 +339,9 @@
   "param.x.description": "X 坐标",
   "param.y.description": "Y 坐标",
   "param.z.description": "Z 坐标",
+  "param.indices.description": "索引列表（从 1 开始计数）",
+  "param.amount.description": "弹出数量",
+  "param.many.description": "可变输入（从数据栈\n弹出的元素）",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
