@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
 
 /**
@@ -60,6 +61,15 @@ public class StringData extends Data {
             return new StringData(value.get("string").getAsString());
         }
         return new StringData("");
+    }
+
+    @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof StringData)) {
+            return false;
+        }
+        StringData that = (StringData) other;
+        return this.value != null ? this.value.equals(that.value) : that.value == null;
     }
 
     @Override

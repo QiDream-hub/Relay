@@ -118,6 +118,28 @@ public class ListData extends Data {
     }
 
     @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof ListData that)) {
+            return false;
+        }
+        if (this.value.size() != that.value.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.value.size(); i++) {
+            Executable thisElem = this.value.get(i);
+            Executable thatElem = that.value.get(i);
+            if (thisElem instanceof Operation && thatElem instanceof Operation) {
+                if (!((Operation) thisElem).equalsTo((Operation) thatElem)) {
+                    return false;
+                }
+            } else if (!thisElem.equals(thatElem)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "ListData{size=" + value.size() + ", elements=" + value + "}";
     }

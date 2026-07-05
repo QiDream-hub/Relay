@@ -12,7 +12,7 @@ public abstract class Spell extends Operation {
 
     protected final OperationSignature signature;
 
-    public Spell(String id, int cost,int energy, OperationSignature signature) {
+    public Spell(String id, int cost, int energy, OperationSignature signature) {
         super(id, cost);
         this.energy = energy;
         this.signature = signature;
@@ -25,5 +25,15 @@ public abstract class Spell extends Operation {
     @Override
     public OperationSignature getSignature() {
         return signature;
+    }
+
+    @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof Spell that)) {
+            return false;
+        }
+
+        return this.getId().equals(that.getId());
+
     }
 }

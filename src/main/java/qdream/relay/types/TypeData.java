@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
 
 public class TypeData extends Data {
@@ -29,21 +30,23 @@ public class TypeData extends Data {
     }
 
     /**
-     * 比较两个 TypeType 是否相同
-     * @param other 另一个 TypeType 实例
+     * 比较两个 TypeData 是否相同
+     * @param other 另一个 TypeData 实例
      * @return 如果两个类型的 id 相同则返回 true
      */
-    public boolean equalsTo(TypeData other) {
-        if (other == null) {
+    @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof TypeData)) {
             return false;
         }
-        if (this.value == null && other.value == null) {
+        TypeData that = (TypeData) other;
+        if (this.value == null && that.value == null) {
             return true;
         }
-        if (this.value == null || other.value == null) {
+        if (this.value == null || that.value == null) {
             return false;
         }
-        return this.value.equals(other.value);
+        return this.value.equals(that.value);
     }
 
     @Override

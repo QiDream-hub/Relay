@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
 
 import java.util.UUID;
@@ -218,6 +219,21 @@ public class EntityData extends Data {
             }
         }
         return new EntityData(null, null, null);
+    }
+
+    @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof EntityData)) {
+            return false;
+        }
+        EntityData that = (EntityData) other;
+        if (this.uuid == null && that.uuid == null) {
+            return true;
+        }
+        if (this.uuid == null || that.uuid == null) {
+            return false;
+        }
+        return this.uuid.equals(that.uuid);
     }
 
     @Override

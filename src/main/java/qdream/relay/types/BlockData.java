@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
 
 /**
@@ -215,5 +216,20 @@ public class BlockData extends Data {
             return "BlockData{null}";
         }
         return "BlockData{pos=" + blockPos + ", worldId=" + worldId + "}";
+    }
+
+    @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof BlockData)) {
+            return false;
+        }
+        BlockData that = (BlockData) other;
+        if (this.blockPos == null && that.blockPos == null) {
+            return true;
+        }
+        if (this.blockPos == null || that.blockPos == null) {
+            return false;
+        }
+        return this.blockPos.equals(that.blockPos);
     }
 }

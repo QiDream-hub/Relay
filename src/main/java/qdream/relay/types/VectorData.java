@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
 
 /**
@@ -83,6 +84,15 @@ public class VectorData extends Data {
         }
 
         return new VectorData(vec);
+    }
+
+    @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof VectorData)) {
+            return false;
+        }
+        VectorData that = (VectorData) other;
+        return this.vec3 != null ? this.vec3.equals(that.vec3) : that.vec3 == null;
     }
 
     @Override

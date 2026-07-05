@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
 
 /**
@@ -64,6 +65,15 @@ public class BooleanData extends Data {
             return new BooleanData(jsonObject.has("boolean") && jsonObject.get("boolean").getAsBoolean());
         }
         return new BooleanData(false);
+    }
+
+    @Override
+    public boolean equalsTo(Operation other) {
+        if (!(other instanceof BooleanData)) {
+            return false;
+        }
+        BooleanData that = (BooleanData) other;
+        return this.value == that.value;
     }
 
     @Override
