@@ -17,19 +17,18 @@ public class SendOp extends Spell {
 
     public SendOp() {
         super("relay:send", 1, 1, OperationSignature.builder()
-                .consumesFromData("data", "any")
                 .consumesFromData("channel", "relay:number")
+                .consumesFromData("data", "any")
                 .producesToData("success", "relay:boolean")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
-        Executable data = executor.popData();
-        if (data == null)
-            return;
 
         NumberData channel = OperationHelpers.popNumber(executor, "relay:number");
+
+        Executable data = OperationHelpers.popAny(executor);
 
         int ch = channel.asInt();
         boolean success = CommunicationSystem.send(ch, data);

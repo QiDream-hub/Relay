@@ -8,8 +8,11 @@ import qdream.relay.operations.arithmetic.FloorOp;
 import qdream.relay.operations.arithmetic.ModOp;
 import qdream.relay.operations.arithmetic.MulOp;
 import qdream.relay.operations.arithmetic.SubOp;
+import qdream.relay.operations.base.BatchDupOp;
+import qdream.relay.operations.base.CopyToTopOp;
 import qdream.relay.operations.base.DupOp;
 import qdream.relay.operations.base.GetWorldInteractorOp;
+import qdream.relay.operations.base.MoveToTopOp;
 import qdream.relay.operations.base.PopOp;
 import qdream.relay.operations.base.SwapOp;
 import qdream.relay.operations.communication.PeekOp;
@@ -121,6 +124,9 @@ public class RelayOperations {
         OperationRegistry.register("relay:pop", new OperationRegistry.OpEntry(new PopOp()));
         OperationRegistry.register("relay:dup", new OperationRegistry.OpEntry(new DupOp()));
         OperationRegistry.register("relay:swap", new OperationRegistry.OpEntry(new SwapOp()));
+        OperationRegistry.register("relay:batch_dup", new OperationRegistry.OpEntry(new BatchDupOp()));
+        OperationRegistry.register("relay:move_to_top", new OperationRegistry.OpEntry(new MoveToTopOp()));
+        OperationRegistry.register("relay:copy_to_top", new OperationRegistry.OpEntry(new CopyToTopOp()));
         OperationRegistry.register("relay:get_world_interactor",
                 new OperationRegistry.OpEntry(new GetWorldInteractorOp()));
         OperationRegistry.register("relay:get_self",

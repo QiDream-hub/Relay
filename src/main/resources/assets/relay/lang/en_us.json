@@ -51,6 +51,15 @@
   "operation.relay:swap.name": "Swap",
   "operation.relay:swap.description": "Swap top two elements of data stack",
 
+  "operation.relay:batch_dup.name": "Batch Duplicate",
+  "operation.relay:batch_dup.description": "Duplicate top N elements of data stack",
+
+  "operation.relay:move_to_top.name": "Move to Top",
+  "operation.relay:move_to_top.description": "Move element at specified index to top (index 0 is top)",
+
+  "operation.relay:copy_to_top.name": "Copy to Top",
+  "operation.relay:copy_to_top.description": "Copy element at specified index to top (index 0 is top)",
+
   "operation.relay:add.name": "Add",
   "operation.relay:add.description": "Calculate sum of two numbers",
 
@@ -275,6 +284,8 @@
   "param.remaining.description": "Remaining elements to iterate",
   "param.whileOp.description": "WhileOp itself,\nused to continue next loop check",
   "param.index.description": "Index",
+  "param.count.description": "Count",
+  "param.copies.description": "Copies",
   "param.size.description": "Size",
   "param.elements.description": "Elements",
   "param.entity.description": "Entity",
@@ -314,6 +325,9 @@
   "param.type_b.description": "Second type",
   "param.block_entity.description": "Obtained block entity",
   "param.scalar.description": "Scalar multiplier",
+  "param.x.description": "X coordinate",
+  "param.y.description": "Y coordinate",
+  "param.z.description": "Z coordinate",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",
@@ -331,10 +345,7 @@
   "type.relay:type.description": "Type identifier, stores registry ID",
   "type.relay:null.name": "Null",
   "type.relay:null.description": "Null type, represents no data",
-  "type.relay:program.name": "Program",
-  "type.relay:program.description": "Program block, contains executable instruction sequence",
 
-  "param.x.description": "X coordinate",
-  "param.y.description": "Y coordinate",
-  "param.z.description": "Z coordinate"
+  "type.any.name": "any",
+  "type....any.name": "...any"
 }

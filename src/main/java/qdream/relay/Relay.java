@@ -17,6 +17,7 @@ import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.blocks.RelayBlocks;
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.commands.RelayCommands;
+import qdream.relay.core.CommunicationSystem;
 import qdream.relay.items.RelayItems;
 import qdream.relay.mc.RelayOperations;
 import qdream.relay.networking.RelayServerNetworking;
@@ -92,6 +93,9 @@ public class Relay implements ModInitializer {
 
 		// 注册网络
 		RelayServerNetworking.register();
+
+		// 初始化频道
+		CommunicationSystem.init();
 
 		// 注册命令
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {

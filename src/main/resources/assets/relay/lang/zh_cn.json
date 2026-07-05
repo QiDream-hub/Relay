@@ -51,6 +51,15 @@
   "operation.relay:swap.name": "交换",
   "operation.relay:swap.description": "交换数据栈顶部两个元素",
 
+  "operation.relay:batch_dup.name": "批量复制",
+  "operation.relay:batch_dup.description": "复制数据栈顶部 N 个元素",
+
+  "operation.relay:move_to_top.name": "移到栈顶",
+  "operation.relay:move_to_top.description": "将指定位置的值移到栈顶（位置 0 为栈顶）",
+
+  "operation.relay:copy_to_top.name": "复制到栈顶",
+  "operation.relay:copy_to_top.description": "将指定位置的值复制一份到栈顶（位置 0 为栈顶）",
+
   "operation.relay:add.name": "加法",
   "operation.relay:add.description": "计算两个数的和",
 
@@ -244,8 +253,8 @@
   "param.left.description": "左操作数",
   "param.right.description": "右操作数",
   "param.dotProduct.description": "点积结果",
-  "param.floor.description":"取底结果",
-  "param.ceil.description":"取顶结果",
+  "param.floor.description": "取底结果",
+  "param.ceil.description": "取顶结果",
   "param.remainder.description": "取余结果",
   "param.result.description": "结果",
   "param.operand.description": "操作数",
@@ -271,6 +280,8 @@
   "param.remaining.description": "剩余未遍历的列表",
   "param.whileOp.description": "WhileOp 自身，\n用于继续下一轮循环检查",
   "param.index.description": "索引",
+  "param.count.description": "数量",
+  "param.copies.description": "副本列表",
   "param.size.description": "大小",
   "param.elements.description": "元素列表",
   "param.entity.description": "实体",
@@ -310,6 +321,9 @@
   "param.type_b.description": "第二个类型",
   "param.block_entity.description": "获取的方块实体",
   "param.scalar.description": "数乘标量",
+  "param.x.description": "X 坐标",
+  "param.y.description": "Y 坐标",
+  "param.z.description": "Z 坐标",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
@@ -331,10 +345,7 @@
   "type.relay:type.description": "类型标识符，存储注册表 ID",
   "type.relay:null.name": "空值",
   "type.relay:null.description": "空值类型，表示无数据",
-  "type.relay:program.name": "程序",
-  "type.relay:program.description": "程序块，包含可执行的指令序列",
 
-  "param.x.description": "X 坐标",
-  "param.y.description": "Y 坐标",
-  "param.z.description": "Z 坐标"
+  "type.any.name": "任意",
+  "type....any.name": "...任意"
 }

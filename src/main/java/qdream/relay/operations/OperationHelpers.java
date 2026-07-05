@@ -4,6 +4,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.tools.StackTools;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.VectorData;
@@ -160,6 +161,15 @@ public final class OperationHelpers {
 
     // ==================== 类型安全的栈弹出 ====================
 
+    public static Executable popAny(StateMachine executor) {
+        Executable popData = executor.popData();
+        if (popData == null) {
+            executor.triggerMishap(" 数据栈不足");
+            return null;
+        }
+        return popData;
+    }
+
     /**
      * 从数据栈弹出并检查类型
      * 
@@ -181,7 +191,7 @@ public final class OperationHelpers {
                 id = op.getId();
             }
             executor.triggerMishap(operationName + " 期望:" + id +
-                    " 类型，实际为：" + exe.getClass().getSimpleName());
+                    " 类型，实际为：" + StackTools.getId(exe));
             return null;
         }
         return expectedType.cast(exe);

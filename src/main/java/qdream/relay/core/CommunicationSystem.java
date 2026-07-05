@@ -2,9 +2,11 @@ package qdream.relay.core;
 
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import qdream.relay.Relay;
 import qdream.relay.engine.Executable;
 import qdream.relay.types.NullData;
 
@@ -24,12 +26,14 @@ public class CommunicationSystem {
      */
     public static final int MAX_QUEUE_SIZE = 1000;
 
-    private CommunicationSystem() {}
+    private CommunicationSystem() {
+    }
 
     /**
      * 发送数据到频道
+     * 
      * @param channel 频道号
-     * @param data 数据
+     * @param data    数据
      * @return 成功返回 true，队列已满返回 false
      */
     public static boolean send(int channel, Executable data) {
@@ -44,6 +48,7 @@ public class CommunicationSystem {
 
     /**
      * 接收数据（出队）
+     * 
      * @param channel 频道号
      * @return 数据或 null
      */
@@ -57,6 +62,7 @@ public class CommunicationSystem {
 
     /**
      * 窥探数据（不出队）
+     * 
      * @param channel 频道号
      * @return 数据或 null
      */
@@ -100,7 +106,11 @@ public class CommunicationSystem {
     /**
      * 获取所有频道号
      */
-    public static java.util.Set<Integer> getAllChannels() {
+    public static Set<Integer> getAllChannels() {
         return CHANNELS.keySet();
+    }
+
+    public static void init() {
+        Relay.LOGGER.info("频道初始化完成");
     }
 }
