@@ -64,12 +64,14 @@ import qdream.relay.operations.logic.GtOp;
 import qdream.relay.operations.logic.LtOp;
 import qdream.relay.operations.logic.NotOp;
 import qdream.relay.operations.logic.OrOp;
+import qdream.relay.operations.list.ListAddUniqueOp;
 import qdream.relay.operations.list.ListAppendOp;
 import qdream.relay.operations.list.ListCreatOp;
 import qdream.relay.operations.list.ListGetOp;
 import qdream.relay.operations.list.ListLengthOp;
 import qdream.relay.operations.list.ListRemoveOp;
 import qdream.relay.operations.list.ListSetOp;
+import qdream.relay.operations.list.ListUniqOp;
 import qdream.relay.operations.list.ListUnpackOp;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.BlockEntityData;
@@ -198,12 +200,14 @@ public class RelayOperations {
 
         // 列表操作
         OperationRegistry.register("relay:list_append", new OperationRegistry.OpEntry(new ListAppendOp()));
+        OperationRegistry.register("relay:list_add_unique", new OperationRegistry.OpEntry(new ListAddUniqueOp()));
         OperationRegistry.register("relay:list_get", new OperationRegistry.OpEntry(new ListGetOp()));
         OperationRegistry.register("relay:list_remove", new OperationRegistry.OpEntry(new ListRemoveOp()));
         OperationRegistry.register("relay:list_set", new OperationRegistry.OpEntry(new ListSetOp()));
         OperationRegistry.register("relay:list_length", new OperationRegistry.OpEntry(new ListLengthOp()));
         OperationRegistry.register("relay:list_creat", new OperationRegistry.OpEntry(new ListCreatOp()));
         OperationRegistry.register("relay:list_unpack", new OperationRegistry.OpEntry(new ListUnpackOp()));
+        OperationRegistry.register("relay:list_uniq", new OperationRegistry.OpEntry(new ListUniqOp()));
 
         // 向量操作
         OperationRegistry.register("relay:vector_add", new OperationRegistry.OpEntry(new VectorAddOp()));

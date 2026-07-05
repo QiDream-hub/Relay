@@ -138,6 +138,12 @@
   "operation.relay:list_append.name": "列表追加",
   "operation.relay:list_append.description": "向列表追加元素",
 
+  "operation.relay:list_add_unique.name": "列表唯一添加",
+  "operation.relay:list_add_unique.description": "向列表添加元素（自动去重）",
+
+  "operation.relay:list_uniq.name": "列表去重",
+  "operation.relay:list_uniq.description": "移除列表中的重复元素",
+
   "operation.relay:list_get.name": "列表获取",
   "operation.relay:list_get.description": "获取列表指定位置的元素（不消耗列表）",
 

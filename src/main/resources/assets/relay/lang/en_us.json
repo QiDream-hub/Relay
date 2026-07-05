@@ -138,6 +138,12 @@
   "operation.relay:list_append.name": "List Append",
   "operation.relay:list_append.description": "Append element to a list",
 
+  "operation.relay:list_add_unique.name": "List Add Unique",
+  "operation.relay:list_add_unique.description": "Append element to a list (auto-deduplicate)",
+
+  "operation.relay:list_uniq.name": "List Uniq",
+  "operation.relay:list_uniq.description": "Remove duplicate elements from a list",
+
   "operation.relay:list_get.name": "List Get",
   "operation.relay:list_get.description": "Get element at specified index in list (without consuming list)",
 
