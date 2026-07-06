@@ -24,7 +24,7 @@ public class EvalOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        ListData list = OperationHelpers.popList(executor, "relay:eval");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null) return;
 
         List<Executable> reversed = list.getValue();

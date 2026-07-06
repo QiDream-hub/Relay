@@ -21,7 +21,7 @@ public class MoveToTopOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData indexData = OperationHelpers.popNumber(executor, "移到栈顶");
+        NumberData indexData = OperationHelpers.popNumber(executor, id);
         if (indexData == null) {
             return;
         }
@@ -29,7 +29,7 @@ public class MoveToTopOp extends Spell {
         int index = indexData.asInt();
 
         // 移除目标位置的元素并压入栈顶
-        var target = OperationHelpers.removeDataAt(executor, index, "移到栈顶");
+        var target = OperationHelpers.removeDataAt(executor, index, id);
         if (target == null) {
             return;
         }

@@ -22,10 +22,10 @@ public class LtOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData b = OperationHelpers.popNumber(executor, "relay:lt");
+        NumberData b = OperationHelpers.popNumber(executor, id);
         if (b == null) return;
         
-        NumberData a = OperationHelpers.popNumber(executor, "relay:lt");
+        NumberData a = OperationHelpers.popNumber(executor, id);
         if (a == null) return;
 
         boolean result = a.asDouble() < b.asDouble();

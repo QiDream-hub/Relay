@@ -26,7 +26,7 @@ public class SendOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
 
-        NumberData channel = OperationHelpers.popNumber(executor, "relay:number");
+        NumberData channel = OperationHelpers.popNumber(executor, id);
 
         Executable data = OperationHelpers.popAny(executor);
 

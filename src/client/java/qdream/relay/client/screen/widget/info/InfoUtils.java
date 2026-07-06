@@ -130,8 +130,8 @@ public class InfoUtils {
         // 从程序栈消费的参数
         for (ParameterDescriptor descriptor : signature.getConsumesFromProgram()) {
             inputTypes
-                    .add(formatTypes(descriptor.getTypes()) + ": " + getParamDescription(descriptor.getName())
-                            + " [程序]");
+                    .add("[程序]" + formatTypes(descriptor.getTypes()) + ": "
+                            + getParamDescription(descriptor.getName()));
         }
 
         if (!inputTypes.isEmpty()) {
@@ -151,8 +151,8 @@ public class InfoUtils {
 
         // 向程序栈生产的参数
         for (ParameterDescriptor descriptor : signature.getProducesToProgram()) {
-            outputTypes.add(
-                    formatTypes(descriptor.getTypes()) + ": " + getParamDescription(descriptor.getName()) + " [程序]");
+            outputTypes.add("[程序]" +
+                    formatTypes(descriptor.getTypes()) + ": " + getParamDescription(descriptor.getName()));
         }
 
         if (!outputTypes.isEmpty()) {
@@ -236,7 +236,7 @@ public class InfoUtils {
             displayTypes.add(getTypeDisplayName(type));
         }
 
-        return fieldName + ": " + String.join(" | ", displayTypes);
+        return fieldName + ": " + String.join("|", displayTypes);
     }
 
     /**
@@ -256,7 +256,7 @@ public class InfoUtils {
             displayTypes.add(getTypeDisplayName(type));
         }
 
-        return String.join(" | ", displayTypes);
+        return String.join("|", displayTypes);
     }
 
     /**

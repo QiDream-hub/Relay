@@ -348,6 +348,7 @@
   "param.indices.description": "索引列表（从 1 开始计数）",
   "param.amount.description": "弹出数量",
   "param.many.description": "可变输入（从数据栈\n弹出的元素）",
+  "param.removed.description": "被移除的元素",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",

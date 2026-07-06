@@ -26,7 +26,7 @@ public class ListLengthOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        ListData list = OperationHelpers.popList(executor, "relay:list_length");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null) return;
 
         List<Executable> listData = list.getValue();

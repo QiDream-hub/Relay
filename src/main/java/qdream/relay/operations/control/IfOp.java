@@ -27,7 +27,7 @@ public class IfOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        BooleanData condition = OperationHelpers.popBoolean(executor, "relay:if");
+        BooleanData condition = OperationHelpers.popBoolean(executor, id);
         if (condition == null) return;
         
         Executable trueBranch = executor.popProgram();

@@ -13,9 +13,8 @@ import java.util.ArrayList;
 
 /**
  * List Remove 操作 - 移除列表指定索引的元素
- * 使用 peek 方式读取列表（不消耗），只消耗索引
  * 输入：列表（栈顶 +1），索引（栈顶）
- * 输出：新列表（移除元素后的副本）
+ * 输出：新列表（移除元素后的副本）、被移除的元素
  */
 public class ListRemoveOp extends Spell {
 
@@ -24,18 +23,19 @@ public class ListRemoveOp extends Spell {
                 .consumesFromData("index", "relay:number")
                 .consumesFromData("list", "relay:list")
                 .producesToData("result", "relay:list")
+                .producesToData("removed", "any")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
         // 弹出并消耗索引
-        NumberData index = OperationHelpers.popNumber(executor, "relay:list_remove");
+        NumberData index = OperationHelpers.popNumber(executor, id);
         if (index == null)
             return;
 
         // 栈顶是索引，栈顶 +1 是列表
-        ListData list = OperationHelpers.popList(executor, "relay:list_remove");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null)
             return;
 
@@ -48,11 +48,11 @@ public class ListRemoveOp extends Spell {
 
         // 创建新列表（不可变修改）
         List<Executable> newList = new ArrayList<>(listData);
-        Executable remove = newList.remove(idx);
+        Executable removed = newList.remove(idx);
 
-        // 将新列表压入栈（原列表仍然保留在栈顶 +1 位置）
+        // 将新列表和被移除的元素压入栈
         executor.pushData(new ListData(newList));
-        executor.pushData(remove);
+        executor.pushData(removed);
     }
 
 }

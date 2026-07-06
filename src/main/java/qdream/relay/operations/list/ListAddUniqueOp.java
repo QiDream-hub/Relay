@@ -31,7 +31,7 @@ public class ListAddUniqueOp extends Spell {
         Executable valueData = executor.popData();
         if (valueData == null) return;
 
-        ListData list = OperationHelpers.popList(executor, "relay:list_add_unique");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null) return;
 
         List<Executable> newList = list.getValue();

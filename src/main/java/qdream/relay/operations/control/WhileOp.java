@@ -50,7 +50,7 @@ public class WhileOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        BooleanData condition = OperationHelpers.popBoolean(executor, "relay:while");
+        BooleanData condition = OperationHelpers.popBoolean(executor, id);
         if (condition == null) return;
         
         Executable body = executor.peekProgram();

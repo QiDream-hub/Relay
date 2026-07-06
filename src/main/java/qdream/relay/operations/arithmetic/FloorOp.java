@@ -20,7 +20,7 @@ public class FloorOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData a = OperationHelpers.popNumber(executor, "relay:floor");
+        NumberData a = OperationHelpers.popNumber(executor, id);
         if (a == null) return;
 
         double result = Math.floor(a.asDouble());

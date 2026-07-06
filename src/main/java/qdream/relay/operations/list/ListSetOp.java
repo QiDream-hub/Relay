@@ -32,10 +32,10 @@ public class ListSetOp extends Spell {
         Executable valueData = executor.popData();
         if (valueData == null) return;
         
-        NumberData index = OperationHelpers.popNumber(executor, "relay:list_set");
+        NumberData index = OperationHelpers.popNumber(executor, id);
         if (index == null) return;
         
-        ListData list = OperationHelpers.popList(executor, "relay:list_set");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null) return;
 
         List<Executable> listData = list.getValue();

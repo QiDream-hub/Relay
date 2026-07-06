@@ -16,7 +16,7 @@ public class BatchDupOp extends Spell {
 
     public BatchDupOp() {
         super("relay:batch_dup", 1, 1, OperationSignature.builder()
-                .consumesFromData("count", "number")
+                .consumesFromData("count", "relay:number")
                 .producesToData("copies", "...any")
                 .build());
     }

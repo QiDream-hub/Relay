@@ -49,7 +49,7 @@ public class ForOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        ListData list = OperationHelpers.popList(executor, "relay:for");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null) return;
         
         Executable body = executor.peekProgram();

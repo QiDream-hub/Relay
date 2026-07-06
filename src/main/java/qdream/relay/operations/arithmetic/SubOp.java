@@ -21,10 +21,10 @@ public class SubOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData b = OperationHelpers.popNumber(executor, "relay:sub");
+        NumberData b = OperationHelpers.popNumber(executor, id);
         if (b == null) return;
         
-        NumberData a = OperationHelpers.popNumber(executor, "relay:sub");
+        NumberData a = OperationHelpers.popNumber(executor, id);
         if (a == null) return;
 
         double result = a.asDouble() - b.asDouble();

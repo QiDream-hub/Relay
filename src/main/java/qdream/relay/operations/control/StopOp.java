@@ -16,12 +16,8 @@ public class StopOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 清空程序栈
-        while (executor.getProgramStackSize() > 0) {
-            executor.popProgram();
-        }
-        // 触发事故来清空数据栈
-        executor.triggerMishap("stop 操作被调用");
+        // 清空双栈，终止程序执行
+        executor.clear();
     }
 
 }

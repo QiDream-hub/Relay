@@ -30,7 +30,7 @@ public class ListAppendOp extends Spell {
         Executable valueData = executor.popData();
         if (valueData == null) return;
         
-        ListData list = OperationHelpers.popList(executor, "relay:list_append");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null) return;
 
         // 创建新列表并添加原列表元素

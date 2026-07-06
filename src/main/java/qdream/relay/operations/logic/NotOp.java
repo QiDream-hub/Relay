@@ -20,7 +20,7 @@ public class NotOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        BooleanData a = OperationHelpers.popBoolean(executor, "relay:not");
+        BooleanData a = OperationHelpers.popBoolean(executor, id);
         if (a == null) return;
 
         boolean result = !a.asBoolean();

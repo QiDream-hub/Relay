@@ -26,7 +26,7 @@ public class ListUniqOp extends qdream.relay.mc.base.Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        ListData list = OperationHelpers.popList(executor, "relay:list_uniq");
+        ListData list = OperationHelpers.popList(executor, id);
         if (list == null) return;
 
         List<Executable> originalList = list.getValue();

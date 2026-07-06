@@ -21,10 +21,10 @@ public class DivOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData b = OperationHelpers.popNumber(executor, "relay:div");
+        NumberData b = OperationHelpers.popNumber(executor, id);
         if (b == null) return;
         
-        NumberData a = OperationHelpers.popNumber(executor, "relay:div");
+        NumberData a = OperationHelpers.popNumber(executor, id);
         if (a == null) return;
 
         double divisor = b.asDouble();

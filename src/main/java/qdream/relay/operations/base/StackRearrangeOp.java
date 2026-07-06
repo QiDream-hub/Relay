@@ -42,18 +42,18 @@ public class StackRearrangeOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 1. 弹出索引列表
-        ListData indicesList = OperationHelpers.popList(executor, "relay:stack_rearrange");
+        ListData indicesList = OperationHelpers.popList(executor, id);
         if (indicesList == null)
             return;
 
         // 2. 弹出数量
-        NumberData amountData = OperationHelpers.popNumber(executor, "relay:stack_rearrange");
+        NumberData amountData = OperationHelpers.popNumber(executor, id);
         if (amountData == null)
             return;
 
         int amount = amountData.asInt();
         if (amount <= 0) {
-            executor.triggerMishap("relay:stack_rearrange: amount 必须大于 0");
+            executor.triggerMishap(id + ": amount 必须大于 0");
             return;
         }
 
@@ -62,7 +62,7 @@ public class StackRearrangeOp extends Spell {
         for (int i = 0; i < amount; i++) {
             Executable element = executor.popData();
             if (element == null) {
-                executor.triggerMishap("relay:stack_rearrange: 数据栈不足，需要 " + amount + " 个元素");
+                executor.triggerMishap(id + ": 数据栈不足，需要 " + amount + " 个元素");
                 return;
             }
             tempArray.add(element);
@@ -75,13 +75,13 @@ public class StackRearrangeOp extends Spell {
 
         for (Executable indexExe : indices) {
             if (!(indexExe instanceof NumberData indexNum)) {
-                executor.triggerMishap("relay:stack_rearrange: 索引必须是数字");
+                executor.triggerMishap(id + ": 索引必须是数字");
                 return;
             }
 
             int index = indexNum.asInt();
             if (index < 1 || index > amount) {
-                executor.triggerMishap("relay:stack_rearrange: 索引 " + index +
+                executor.triggerMishap(id + ": 索引 " + index +
                         " 超出范围 [1, " + amount + "]");
                 return;
             }

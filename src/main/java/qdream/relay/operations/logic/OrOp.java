@@ -21,10 +21,10 @@ public class OrOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        BooleanData b = OperationHelpers.popBoolean(executor, "relay:or");
+        BooleanData b = OperationHelpers.popBoolean(executor, id);
         if (b == null) return;
         
-        BooleanData a = OperationHelpers.popBoolean(executor, "relay:or");
+        BooleanData a = OperationHelpers.popBoolean(executor, id);
         if (a == null) return;
 
         boolean result = a.asBoolean() || b.asBoolean();

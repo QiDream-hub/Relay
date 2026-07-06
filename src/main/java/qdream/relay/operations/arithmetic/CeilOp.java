@@ -20,7 +20,7 @@ public class CeilOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData a = OperationHelpers.popNumber(executor, "relay:ceil");
+        NumberData a = OperationHelpers.popNumber(executor, id);
         if (a == null) return;
 
         double result = Math.ceil(a.asDouble());

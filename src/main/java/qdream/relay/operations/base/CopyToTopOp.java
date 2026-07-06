@@ -21,7 +21,7 @@ public class CopyToTopOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData indexData = OperationHelpers.popNumber(executor, "复制到栈顶");
+        NumberData indexData = OperationHelpers.popNumber(executor, id);
         if (indexData == null) {
             return;
         }
@@ -29,7 +29,7 @@ public class CopyToTopOp extends Spell {
         int index = indexData.asInt();
 
         // 获取目标位置的元素并复制一份到栈顶
-        var target = OperationHelpers.getDataAt(executor, index, "复制到栈顶");
+        var target = OperationHelpers.getDataAt(executor, index, id);
         if (target == null) {
             return;
         }

@@ -352,6 +352,7 @@
   "param.indices.description": "Index list (1-based)",
   "param.amount.description": "Amount to pop",
   "param.many.description": "Variable input (elements popped from data stack)",
+  "param.removed.description": "The removed element",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",

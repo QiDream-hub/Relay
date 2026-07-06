@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
@@ -15,7 +16,7 @@ import net.minecraft.network.chat.Component;
  * - 第一部分：标题 + 描述
  * - 第二部分：输入/输出签名
  */
-public class HoverInfoWidget extends net.minecraft.client.gui.components.AbstractWidget {
+public class HoverInfoWidget extends AbstractWidget {
 
     private static final int BG_COLOR = 0xFF1E1E1E;
     private static final int BORDER_COLOR = 0xFF3A3A3A;
@@ -147,6 +148,16 @@ public class HoverInfoWidget extends net.minecraft.client.gui.components.Abstrac
 
         public InfoContent addLine(String text, int color) {
             lines.add(new InfoLine(text, color));
+            return this;
+        }
+
+        public InfoContent pushLine(String text, int color) {
+            lines.add(0, new InfoLine(text, color));
+            return this;
+        }
+
+        public InfoContent pushLine(String text) {
+            lines.add(0, new InfoLine(text, null));
             return this;
         }
     }

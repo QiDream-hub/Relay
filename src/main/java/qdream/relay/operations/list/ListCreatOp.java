@@ -27,7 +27,7 @@ public class ListCreatOp extends Spell {
     
     @Override
     public void execute(StateMachine executor) {
-        NumberData sizeData = OperationHelpers.popNumber(executor, "relay:list_creat");
+        NumberData sizeData = OperationHelpers.popNumber(executor, id);
         if (sizeData == null) return;
         
         int size = (int) sizeData.asDouble();
