@@ -4,34 +4,25 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 
-import java.util.UUID;
-
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.entity.Entity;
-
-import qdream.relay.Relay;
-import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.StateMachineNbtSerializer;
 
 /**
- * ShellContainer 状态管理器
- * 
+ * ShellContainer 物品栏管理器
+ *
  * <p>
- * 提供通用的物品栏管理、StateMachine 持久化、Owner 管理逻辑
+ * 提供通用的物品栏管理、序列化逻辑
  * </p>
- * 
+ *
  * <p>
  * 使用组合模式：ShellBlockEntity 和 ToolShellContainer 持有一个 ShellStateManager 实例
  * </p>
- * 
+ *
  * <h3>存储结构</h3>
- * 
+ *
  * <pre>
  * {
- *   "inventory": ListTag,           // 4 个插槽
- *   "stateMachine": {...},          // StateMachine NBT
- *   "owner": "uuid-string"          // 拥有者 UUID (可选)
+ *   "inventory": ListTag            // 4 个插槽
  * }
  * </pre>
  */
@@ -40,17 +31,6 @@ public class ShellStateManager {
     private static final int SLOT_COUNT = 4;
 
     protected final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    protected final StateMachine stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
-    protected Entity owner;
-    private UUID ownerUuid;
-
-    public void setOwnerUuid(UUID uuid) {
-        this.ownerUuid = uuid;
-    }
-
-    public UUID getOwnerUuid() {
-        return ownerUuid;
-    }
 
     public ShellStateManager() {
     }
@@ -58,58 +38,9 @@ public class ShellStateManager {
     // ========== 数据加载/保存 ==========
 
     /**
-     * 从 CompoundTag 加载所有状态
+     * 从 CompoundTag 加载物品栏
      */
-    public void loadFromTag(CompoundTag data) {
-        if (data == null) {
-            return;
-        }
-
-        // 加载物品栏
-        loadInventory(data, inventory);
-
-        // 加载 StateMachine
-        CompoundTag machineTag = data.getCompound("stateMachine").orElse(null);
-        if (machineTag != null) {
-            StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, machineTag);
-        }
-
-        // 加载 Owner
-        String uuidStr = data.getString("owner").orElse("");
-        if (!uuidStr.isEmpty()) {
-            try {
-                ownerUuid = java.util.UUID.fromString(uuidStr);
-            } catch (IllegalArgumentException e) {
-                // UUID 格式错误，忽略
-            }
-        }
-    }
-
-    /**
-     * 保存所有状态到 CompoundTag
-     */
-    public CompoundTag saveToTag() {
-        CompoundTag data = new CompoundTag();
-
-        // 保存物品栏
-        saveInventory(data, inventory);
-
-        // 保存 StateMachine
-        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
-        data.put("stateMachine", machineTag);
-
-        // 保存 Owner
-        if (owner != null) {
-            data.putString("owner", owner.getUUID().toString());
-        }
-
-        return data;
-    }
-
-    /**
-     * 从 NBT 加载物品栏
-     */
-    public void loadInventory(CompoundTag tag, NonNullList<ItemStack> inventory) {
+    public void loadInventory(CompoundTag tag) {
         ListTag listTag = tag.getList("inventory").orElse(null);
         if (listTag == null) {
             return;
@@ -134,7 +65,7 @@ public class ShellStateManager {
     /**
      * 保存物品栏到 NBT
      */
-    public void saveInventory(CompoundTag tag, NonNullList<ItemStack> inventory) {
+    public void saveInventory(CompoundTag tag) {
         ListTag listTag = new ListTag();
 
         for (ItemStack stack : inventory) {
@@ -159,25 +90,6 @@ public class ShellStateManager {
     public void setInventorySlot(int slot, ItemStack stack) {
         if (slot >= 0 && slot < inventory.size()) {
             inventory.set(slot, stack);
-        }
-    }
-
-    // ========== StateMachine 访问 ==========
-
-    public StateMachine getStateMachine() {
-        return stateMachine;
-    }
-
-    // ========== Owner 管理 ==========
-
-    public Entity getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Entity owner) {
-        this.owner = owner;
-        if (owner != null) {
-            this.ownerUuid = owner.getUUID();
         }
     }
 

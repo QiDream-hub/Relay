@@ -19,7 +19,10 @@ import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
+import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.tools.StackTools;
+import qdream.relay.mc.StateMachineNbtSerializer;
+import qdream.relay.Relay;
 
 import java.util.List;
 import java.util.UUID;
@@ -62,20 +65,23 @@ public class ToolShellContainer implements ShellContainer, Container {
     ItemStack stack; // package-private - 非 final 以支持引用更新
     private final UUID sessionId; // 会话 ID
     private final ShellStateManager stateManager;
+    private final StateMachine stateMachine;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
+    private Entity owner;
+    private UUID ownerUuid;
 
     public ToolShellContainer(ToolShellItem toolShell, ItemStack stack, UUID sessionId) {
         this.toolShell = toolShell;
         this.stack = stack;
         this.sessionId = sessionId;
         this.stateManager = new ShellStateManager();
+        this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
 
         loadAllState();
 
         // 设置事故回调
-        StateMachine machine = getStateMachine();
-        machine.setMishapHandler(reason -> {
-            Entity owner = stateManager.getOwner();
+        stateMachine.setMishapHandler(reason -> {
+            Entity owner = ToolShellContainer.this.owner;
             if (owner != null && owner instanceof Player player) {
                 player.sendSystemMessage(Component.literal("§c[工具外壳] 事故：" + reason));
             }
@@ -83,7 +89,7 @@ public class ToolShellContainer implements ShellContainer, Container {
         // 设置调试回调
         tickHandler.setDebugCallback((stateMachine, phase, executable) -> {
             if (isDebugOutputEnabled()) {
-                Entity owner = stateManager.getOwner();
+                Entity owner = ToolShellContainer.this.owner;
                 if (owner != null && owner instanceof Player player) {
                     // mishap: 显示操作和双栈
                     if ("mishap".equals(phase)) {
@@ -152,8 +158,24 @@ public class ToolShellContainer implements ShellContainer, Container {
             return;
         }
 
-        // 加载物品栏和 StateMachine、Owner
-        stateManager.loadFromTag(dataTag);
+        // 加载物品栏
+        stateManager.loadInventory(dataTag);
+
+        // 加载 StateMachine
+        CompoundTag machineTag = dataTag.getCompound("stateMachine").orElse(null);
+        if (machineTag != null) {
+            StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, machineTag);
+        }
+
+        // 加载 Owner
+        String uuidStr = dataTag.getString("owner").orElse("");
+        if (!uuidStr.isEmpty()) {
+            try {
+                ownerUuid = java.util.UUID.fromString(uuidStr);
+            } catch (IllegalArgumentException e) {
+                // UUID 格式错误，忽略
+            }
+        }
 
         // 加载 Tick 状态
         loadTickState();
@@ -166,8 +188,19 @@ public class ToolShellContainer implements ShellContainer, Container {
      * </p>
      */
     public void saveAllState() {
-        // 保存物品栏、StateMachine、Owner 到 TOOL_SHELL_DATA
-        CompoundTag dataTag = stateManager.saveToTag();
+        CompoundTag dataTag = new CompoundTag();
+
+        // 保存物品栏
+        stateManager.saveInventory(dataTag);
+
+        // 保存 StateMachine
+        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
+        dataTag.put("stateMachine", machineTag);
+
+        // 保存 Owner
+        if (owner != null) {
+            dataTag.putString("owner", owner.getUUID().toString());
+        }
 
         // 保存 Tick 状态
         saveTickState();
@@ -231,11 +264,11 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     /**
      * 获取玩家实体（用于背包能量模块访问）
-     * 
+     *
      * @return 玩家实体，如果 owner 不是玩家返回 null
      */
     private net.minecraft.world.entity.player.Player getOwnerPlayer() {
-        Entity owner = stateManager.getOwner();
+        Entity owner = this.owner;
         return (owner instanceof net.minecraft.world.entity.player.Player)
                 ? (net.minecraft.world.entity.player.Player) owner
                 : null;
@@ -256,7 +289,7 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public StateMachine getStateMachine() {
-        return stateManager.getStateMachine();
+        return stateMachine;
     }
 
     @Override
@@ -330,13 +363,16 @@ public class ToolShellContainer implements ShellContainer, Container {
         return 0;
     }
 
+    /**
+     * 设置能量（仅用于内部同步）
+     * 使用背包能量模块时，不直接设置能量值，而是通过 consumeEnergy/addEnergy 管理
+     */
     @Override
     public void setEnergy(double energy) {
         ItemStack energyStack = getEnergyStack();
         if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
             emi.setStoredEnergy(energyStack, energy);
         }
-        // 使用背包能量模块时，不直接设置能量值，而是通过 consumeEnergy/addEnergy 管理
     }
 
     /**
@@ -345,6 +381,7 @@ public class ToolShellContainer implements ShellContainer, Container {
      * @param amount 需要消耗的能量
      * @return 如果能量充足并成功扣除返回 true，否则返回 false
      */
+    @Override
     public boolean consumeEnergy(double amount) {
         double currentEnergy = getEnergy();
         if (currentEnergy < amount) {
@@ -396,18 +433,21 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public Entity getOwner() {
-        return stateManager.getOwner();
+        return owner;
     }
 
     @Override
     public void setOwner(Entity owner) {
-        stateManager.setOwner(owner);
+        this.owner = owner;
+        if (owner != null) {
+            this.ownerUuid = owner.getUUID();
+        }
         saveAllState();
     }
 
     @Override
     public boolean hasOwner() {
-        if (stateManager.getOwner() == null) {
+        if (this.owner == null) {
             return false;
         }
         return true;
@@ -419,6 +459,76 @@ public class ToolShellContainer implements ShellContainer, Container {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public double getEnergyCostPerTick() {
+        ItemStack coreStack = getCoreStack();
+        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+            return core.getEnergyCost(coreStack);
+        }
+        return 0;
+    }
+
+    @Override
+    public double addEnergy(double amount) {
+        ItemStack energyStack = getEnergyStack();
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            return emi.addEnergy(energyStack, amount);
+        }
+        // 如果启用背包能量模块，添加到背包内的能量模块
+        if (isUseInventoryEnergyModule()) {
+            net.minecraft.world.entity.player.Player player = getOwnerPlayer();
+            if (player != null) {
+                double remaining = amount;
+                var inv = player.getInventory();
+                for (int i = 0; i < inv.getContainerSize(); i++) {
+                    ItemStack slot = inv.getItem(i);
+                    if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {
+                        double added = emiSlot.addEnergy(slot, remaining);
+                        remaining -= added;
+                        if (remaining <= 0) {
+                            return amount - remaining;
+                        }
+                    }
+                }
+                return amount - remaining;
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public void loadProgramFromDisk() {
+        ItemStack diskStack = getDiskStack();
+        if (diskStack.isEmpty()) {
+            return;
+        }
+
+        DiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent == null) {
+            return;
+        }
+
+        getStateMachine().clear();
+        List<Executable> program = diskComponent.getProgram(diskStack);
+        if (!program.isEmpty()) {
+            getStateMachine().loadProgram(program);
+            setInitialized(true);
+            saveAllState();
+        }
+    }
+
+    /**
+     * 从物品堆获取 SpellDiskComponent
+     * @param stack 物品堆
+     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
+     */
+    private DiskComponent getDiskComponent(ItemStack stack) {
+        if (stack.getItem() instanceof DiskComponent) {
+            return (DiskComponent) stack.getItem();
+        }
+        return null;
     }
 
     public ItemStack getCoreStack() {

@@ -18,6 +18,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Container;
 import java.util.List;
+import java.util.UUID;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.blocks.entity.RelayBlockEntities;
@@ -28,6 +29,9 @@ import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
+import qdream.relay.mc.component.ComputingCoreComponent;
+import qdream.relay.mc.component.EnergyModuleComponent;
+import qdream.relay.Relay;
 
 /**
  * 外壳方块实体
@@ -49,6 +53,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     private final ShellStateManager stateManager;
     private final ShellTickHandler tickHandler;
+    private final StateMachine stateMachine;
+    private Entity owner;
+    private UUID ownerUuid;
     private double energy;
     private boolean enabled;
 
@@ -61,11 +68,12 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
         this.stateManager = new ShellStateManager();
         this.tickHandler = new ShellTickHandler();
+        this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
         this.energy = 0;
         this.enabled = false;
 
         // 设置事故回调
-        stateManager.getStateMachine().setMishapHandler(reason -> {
+        stateMachine.setMishapHandler(reason -> {
             if (level != null && !level.isClientSide()) {
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
@@ -82,7 +90,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
      */
     public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
         // 在 tick 前设置上下文（level 和 self）
-        var machine = entity.stateManager.getStateMachine();
+        var machine = entity.stateMachine;
         if (machine.isRunning()) {
             machine.setContext("level", world);
             machine.setContext("self", entity);
@@ -182,7 +190,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public StateMachine getStateMachine() {
-        return stateManager.getStateMachine();
+        return stateMachine;
     }
 
     @Override
@@ -199,33 +207,41 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     @Override
     public Entity getOwner() {
         // 优先返回直接持有的 owner 字段
-        if (stateManager.getOwner() != null) {
-            return stateManager.getOwner();
+        if (owner != null) {
+            return owner;
         }
         // 延迟加载作为兜底
-        if (stateManager.getOwnerUuid() != null && level != null && !level.isClientSide()) {
-            Entity owner = level.getEntity(stateManager.getOwnerUuid());
-            if (owner != null) {
-                stateManager.setOwner(owner);
+        if (ownerUuid != null && level != null && !level.isClientSide()) {
+            Entity ownerEntity = level.getEntity(ownerUuid);
+            if (ownerEntity != null) {
+                owner = ownerEntity;
             }
         }
-        return stateManager.getOwner();
+        return owner;
     }
 
     @Override
     public void setOwner(Entity owner) {
-        stateManager.setOwner(owner);
+        this.owner = owner;
+        if (owner != null) {
+            this.ownerUuid = owner.getUUID();
+        }
         setChanged();
     }
 
     @Override
     public int getCoreCost() {
-        return tickHandler.getCoreCount();
+        ItemStack coreStack = getCoreStack();
+        return !coreStack.isEmpty() ? coreStack.getCount() : 0;
     }
 
     @Override
     public int getInterval() {
-        return tickHandler.getInterval();
+        ItemStack coreStack = getCoreStack();
+        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+            return core.getInterval(coreStack);
+        }
+        return 0;
     }
 
     @Override
@@ -286,33 +302,12 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         return level != null && level.isClientSide();
     }
 
-    /**
-     * 复位程序 - 清空双栈后从磁盘重新加载程序
-     */
-    public void resetProgram() {
-        if (level == null || level.isClientSide()) {
-            return;
+    @Override
+    public boolean hasOwner() {
+        if (this.owner != null && this.owner instanceof Player) {
+            return true;
         }
-
-        ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty()) {
-            return;
-        }
-
-        // 通过接口获取磁盘组件
-        DiskComponent diskComponent = getDiskComponent(diskStack);
-        if (diskComponent == null) {
-            return;
-        }
-
-        stateManager.getStateMachine().clear();
-        List<Executable> program = diskComponent.getProgram(diskStack);
-        if (!program.isEmpty()) {
-            stateManager.getStateMachine().loadProgram(program);
-            setInitialized(true);
-            setChanged();
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        }
+        return false;
     }
 
     /**
@@ -348,19 +343,61 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     }
 
     @Override
-    public boolean hasOwner() {
-        if (this.stateManager.getOwner() != null && this.stateManager.getOwner() instanceof Player) {
+    public boolean hasWorldInteractor() {
+        if (getInteractorStack().getItem() instanceof WorldInteractorComponent) {
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean hasWorldInteractor() {
-        if (getInteractorStack().getItem() instanceof WorldInteractorComponent) {
-            return true;
+    public double getEnergyCostPerTick() {
+        ItemStack coreStack = getCoreStack();
+        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+            return core.getEnergyCost(coreStack);
         }
-        return false;
+        return 0;
+    }
+
+    @Override
+    public double addEnergy(double amount) {
+        ItemStack energyStack = getEnergyStack();
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            double added = emi.addEnergy(energyStack, amount);
+            setEnergy(getEnergy()); // 同步内部 energy 字段
+            setChanged();
+            if (level != null && !level.isClientSide()) {
+                syncEnergyToClient(level, worldPosition);
+            }
+            return added;
+        }
+        return 0;
+    }
+
+    @Override
+    public void loadProgramFromDisk() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+
+        ItemStack diskStack = getDiskStack();
+        if (diskStack.isEmpty()) {
+            return;
+        }
+
+        DiskComponent diskComponent = getDiskComponent(diskStack);
+        if (diskComponent == null) {
+            return;
+        }
+
+        getStateMachine().clear();
+        List<Executable> program = diskComponent.getProgram(diskStack);
+        if (!program.isEmpty()) {
+            getStateMachine().loadProgram(program);
+            setInitialized(true);
+            setChanged();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
     // ========== NBT 序列化与反序列化 ==========
 
@@ -375,21 +412,19 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         output.putDouble("energy", energy);
 
         // 保存状态机状态
-        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateManager.getStateMachine());
+        CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
         output.store("stateMachine", CompoundTag.CODEC, machineTag);
 
         // 保存开关状态
         output.putBoolean("enabled", enabled);
 
         // 保存所有者信息
-        if (stateManager.getOwner() != null) {
-            output.putString("owner", stateManager.getOwner().getUUID().toString());
+        if (owner != null) {
+            output.putString("owner", owner.getUUID().toString());
         }
 
         // 保存 TickHandler 状态
         output.putInt("tickCounter", tickHandler.getTickCounter());
-        output.putInt("coreCount", tickHandler.getCoreCount());
-        output.putInt("interval", tickHandler.getInterval());
         output.putBoolean("initialized", tickHandler.isInitialized());
     }
 
@@ -405,7 +440,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
         // 加载状态机状态
         input.read("stateMachine", CompoundTag.CODEC).ifPresent(machineTag -> {
-            StateMachineNbtSerializer.INSTANCE.deserialize(stateManager.getStateMachine(), (CompoundTag) machineTag);
+            StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, (CompoundTag) machineTag);
         });
 
         // 加载开关状态
@@ -415,8 +450,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         String uuidStr = input.getString("owner").orElse("");
         if (!uuidStr.isEmpty()) {
             try {
-                java.util.UUID ownerUuid = java.util.UUID.fromString(uuidStr);
-                stateManager.setOwnerUuid(ownerUuid);
+                ownerUuid = java.util.UUID.fromString(uuidStr);
             } catch (IllegalArgumentException e) {
                 // UUID 格式错误，忽略
             }
@@ -424,8 +458,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
         // 加载 TickHandler 状态
         tickHandler.setTickCounter(input.getIntOr("tickCounter", 0));
-        tickHandler.setCoreCount(input.getIntOr("coreCount", 0));
-        tickHandler.setInterval(input.getIntOr("interval", 0));
         tickHandler.setInitialized(input.getBooleanOr("initialized", false));
     }
 

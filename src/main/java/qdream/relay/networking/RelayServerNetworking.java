@@ -93,7 +93,7 @@ public class RelayServerNetworking {
                 if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
                     ShellContainer container = handler.getContainer();
                     if (container instanceof ShellBlockEntity shell) {
-                        shell.resetProgram();
+                        shell.loadProgramFromDisk();
                         // updateStatus() 已移除，核心状态由 ShellTickHandler 在 tick 时自动更新
                     }
                 }

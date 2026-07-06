@@ -4,14 +4,14 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.container.ToolShellContainer;
-import qdream.relay.mc.component.ComputingCoreComponent;
-import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.component.EnergyModuleComponent;
 
 /**
  * 外壳 Tick 处理器
  * 处理三种外壳（方块/实体/工具）的通用 tick 逻辑
+ * 
+ * <p>所有状态访问都通过 {@link ShellContainer} 接口进行，不直接访问物品或内部字段。</p>
  */
 public class ShellTickHandler {
 
@@ -31,17 +31,11 @@ public class ShellTickHandler {
     }
 
     private int tickCounter;
-    private int interval;
-    private int coreCount;
-    private double energyCost; // 核心能量消耗
     private boolean initialized;
     private DebugCallback debugCallback;
 
     public ShellTickHandler() {
         this.tickCounter = 0;
-        this.interval = 1;
-        this.coreCount = 0;
-        this.energyCost = 0;
         this.initialized = false;
         this.debugCallback = null;
     }
@@ -61,19 +55,16 @@ public class ShellTickHandler {
             return;
         }
 
-        // 更新能量状态
-        updateEnergy(container);
-
-        // 更新核心状态
-        updateCoreState(container);
-
-        // 从 container 同步 initialized 状态（关键修复：每次 tick 使用 container 的状态）
+        // 从 container 同步 initialized 状态（权威来源）
         this.initialized = container.isInitialized();
 
         // 执行状态机
-        if (initialized && coreCount > 0 && interval > 0 && container.getStateMachine().isRunning()) {
+        if (initialized && container.isRunning()) {
             tickCounter++;
-            if (tickCounter >= interval) {
+            int interval = container.getInterval();
+            int coreCount = container.getCoreCost();
+            
+            if (tickCounter >= interval && coreCount > 0) {
                 tickCounter = 0;
 
                 // 设置上下文 - 传递世界交互器等信息给操作
@@ -91,15 +82,15 @@ public class ShellTickHandler {
      * mc 层负责：控制每 tick 执行的操作数、扣除能量
      *
      * @param container 外壳容器
-     * @param maxOps    本 tick 最大可执行操作数（由核心数量决定）
+     * @param coreCount 核心数量（每 tick 最大可执行操作数）
      */
-    private void runTick(ShellContainer container, int maxOps) {
+    private void runTick(ShellContainer container, int coreCount) {
         var stateMachine = container.getStateMachine();
-        double currentEnergy = container.getEnergy();
+        double energyCostPerTick = container.getEnergyCostPerTick();
 
         int usedCost = 0;
 
-        while (usedCost < maxOps && stateMachine.isRunning()) {
+        while (usedCost < coreCount && stateMachine.isRunning()) {
             // 预检查栈顶操作的 cost
             Executable top = stateMachine.peekProgram();
             if (top == null) {
@@ -111,28 +102,24 @@ public class ShellTickHandler {
                 cost = op.getCost();
             }
 
-            if (usedCost + cost > maxOps) {
+            if (usedCost + cost > coreCount) {
                 break; // cost 不足，等待下 tick
             }
 
-            // 检查能量（核心基础消耗 + 操作基础消耗）
-            // 注意：Spell 类型的操作会在自己的 execute() 中扣除完整的操作能量（基础 + 动态）
-            // 所以这里只检查核心基础消耗，不扣除 Spell 的操作能量，避免重复扣除
-            double required = energyCost; // 核心基础消耗
-
-            if (currentEnergy < required) {
-                stateMachine.triggerMishap("能量不足：需要 " + required + "，当前只有 " + currentEnergy);
+            // 检查能量（核心基础消耗）
+            if (!container.hasEnoughEnergy(energyCostPerTick)) {
+                stateMachine.triggerMishap("能量不足：需要 " + energyCostPerTick + "，当前只有 " + container.getEnergy());
                 return;
             }
 
             // 执行单个操作
             Executable currentOp = top;
-            
+
             // 调试回调 - 执行前
             if (debugCallback != null) {
                 debugCallback.onStackChange(stateMachine, "beforeStep", currentOp);
             }
-            
+
             if (!stateMachine.step()) {
                 // 调试回调 - 执行失败
                 if (debugCallback != null) {
@@ -140,22 +127,14 @@ public class ShellTickHandler {
                 }
                 break; // 执行失败
             }
-            
+
             // 调试回调 - 执行后
             if (debugCallback != null) {
                 debugCallback.onStackChange(stateMachine, "afterStep", currentOp);
             }
 
-            // 扣除能量 - 使用 container 的方法，支持背包能量模块
-            if (container instanceof ToolShellContainer toolShell) {
-                toolShell.consumeEnergy(required);
-            } else {
-                ItemStack energyStack = container.getEnergyStack();
-                if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
-                    emi.consumeEnergy(energyStack, required);
-                }
-            }
-            currentEnergy = container.getEnergy();
+            // 扣除能量 - 通过 container 接口，支持背包能量模块
+            container.consumeEnergy(energyCostPerTick);
             usedCost += cost;
         }
 
@@ -168,41 +147,6 @@ public class ShellTickHandler {
         container.setChanged();
     }
 
-    /**
-     * 更新核心状态
-     */
-    public void updateCoreState(ShellContainer container) {
-        ItemStack coreStack = container.getCoreStack();
-        if (!coreStack.isEmpty()) {
-            coreCount = coreStack.count();
-            // 从核心物品中读取 interval 和 energyCost 属性
-            if (coreStack.getItem() instanceof ComputingCoreComponent core) {
-                interval = core.getInterval(coreStack);
-                energyCost = core.getEnergyCost(coreStack);
-            } else {
-                interval = 0;
-                energyCost = 0;
-            }
-        } else {
-            coreCount = 0;
-            interval = 0;
-            energyCost = 0;
-        }
-    }
-
-    /**
-     * 更新能量状态
-     */
-    public void updateEnergy(ShellContainer container) {
-        ItemStack energyStack = container.getEnergyStack();
-        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
-            double storedEnergy = emi.getStoredEnergy(energyStack);
-            container.setEnergy(storedEnergy);
-        } else {
-            container.setEnergy(0);
-        }
-    }
-
     // ========== Getter/Setter ==========
 
     public int getTickCounter() {
@@ -211,30 +155,6 @@ public class ShellTickHandler {
 
     public void setTickCounter(int tickCounter) {
         this.tickCounter = tickCounter;
-    }
-
-    public int getInterval() {
-        return interval;
-    }
-
-    public void setInterval(int interval) {
-        this.interval = interval;
-    }
-
-    public int getCoreCount() {
-        return coreCount;
-    }
-
-    public void setCoreCount(int coreCount) {
-        this.coreCount = coreCount;
-    }
-
-    public double getEnergyCost() {
-        return energyCost;
-    }
-
-    public void setEnergyCost(double energyCost) {
-        this.energyCost = energyCost;
     }
 
     public boolean isInitialized() {
