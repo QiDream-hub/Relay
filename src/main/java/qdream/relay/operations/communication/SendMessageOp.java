@@ -2,12 +2,12 @@ package qdream.relay.operations.communication;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.StringData;
 import qdream.relay.types.BooleanData;
@@ -38,37 +38,26 @@ public class SendMessageOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 弹出实体
-        var entityExe = executor.popData();
-        if (entityExe == null) {
-            executor.triggerMishap("无法弹出实体");
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             return;
         }
 
-        if (!(entityExe instanceof EntityData entityIota)) {
-            executor.triggerMishap("期望 entity 类型");
-            return;
-        }
+        // 先弹出消息（后压入的先弹出）
+        StringData message = OperationHelpers.popString(executor, id);
+        if (message == null) return;
 
-        // 弹出消息字符串
-        var msgExe = executor.popData();
-        if (msgExe == null) {
-            executor.triggerMishap("无法弹出消息");
-            return;
-        }
-
-        if (!(msgExe instanceof StringData stringIota)) {
-            executor.triggerMishap("期望 string 类型");
-            return;
-        }
+        // 再弹出实体
+        EntityData recipient = OperationHelpers.popEntity(executor, id);
+        if (recipient == null) return;
 
         // 获取实体引用
-        Entity entity = entityIota.getEntity();
-        String message = stringIota.asString();
+        Entity entity = recipient.getEntity();
+        String msg = message.asString();
 
         // 检查是否是玩家
         if (entity instanceof Player player) {
-            player.sendSystemMessage(Component.literal(message));
+            player.sendSystemMessage(Component.literal(msg));
             executor.pushData(new BooleanData(true));
         } else {
             // 不是玩家或实体不存在，返回 false
