@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorMulOp extends Spell {
 
     public VectorMulOp() {
-        super("relay:vector_mul", 1, 2, OperationSignature.builder()
+        super("relay:vector_mul", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("scalar", "relay:number")
                 .consumesFromData("vector", "relay:vector")
                 .producesToData("result", "relay:vector")

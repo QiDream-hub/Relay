@@ -12,12 +12,16 @@ public abstract class Spell extends Operation {
 
     protected final OperationSignature signature;
 
-    public Spell(String id, int cost, int energy, OperationSignature signature) {
+    public Spell(String id, int cost, double energy, OperationSignature signature) {
         super(id, cost);
         this.energy = energy;
         this.signature = signature;
     }
 
+    /**
+     * 获取基础能量消耗
+     * @return 基础能量值
+     */
     public double getEnergy() {
         return energy;
     }

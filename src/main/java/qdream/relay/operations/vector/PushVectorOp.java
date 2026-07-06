@@ -21,15 +21,27 @@ import qdream.relay.types.VectorData;
  * 向量推动操作
  * 对指定实体施加动量/推力
  *
- * 弹出：vector (推力向量), entity (目标实体)
+ * 弹出：entity (目标实体), vector (推力向量)
  * 压入：boolean (是否成功推动)
  *
  * 需要世界交互器，并检查实体到施法者的距离
+ *
+ * 能量消耗：基础 1 + 向量模长 × 0.5
  */
 public class PushVectorOp extends Spell {
 
+    /**
+     * 基础能量消耗
+     */
+    private static final double BASE_ENERGY = 1.0;
+
+    /**
+     * 向量模长系数
+     */
+    private static final double MAGNITUDE_MULTIPLIER = 0.5;
+
     public PushVectorOp() {
-        super("relay:push_vector", 1, 5, OperationSignature.builder()
+        super("relay:push_vector", 1, BASE_ENERGY, OperationSignature.builder()
                 .consumesFromData("target", "relay:entity")
                 .consumesFromData("push", "relay:vector")
                 .producesToData("success", "relay:boolean")
@@ -39,7 +51,7 @@ public class PushVectorOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "push_vector")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             executor.pushData(new BooleanData(false));
             return;
         }
@@ -77,7 +89,15 @@ public class PushVectorOp extends Spell {
         Vec3 targetPos = targetEntity.position();
 
         // 检查范围：施法者到目标实体的距离
-        if (!OperationHelpers.checkInRange(executor, "push_vector", sourcePos, targetPos)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, targetPos)) {
+            executor.pushData(new BooleanData(false));
+            return;
+        }
+
+        // 动态计算并扣除能量：基础 + 向量模长 × 系数
+        // checkEnergy 会自动加上操作的基础能量消耗
+        double dynamicEnergy = pushVector.length() * MAGNITUDE_MULTIPLIER;
+        if (!OperationHelpers.checkEnergy(executor, id, dynamicEnergy)) {
             executor.pushData(new BooleanData(false));
             return;
         }
@@ -87,12 +107,6 @@ public class PushVectorOp extends Spell {
         if (targetEntity instanceof Player) {
             targetEntity.hurtMarked = true;
         }
-
-        // 传送
-        // 计算坐标
-        // Vec3 vec3 = targetEntity.position().add(pushVector);
-        // targetEntity.stopRiding();
-        // targetEntity.teleportTo(vec3.x, vec3.y, vec3.z);
 
         executor.pushData(new BooleanData(true));
     }

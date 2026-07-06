@@ -6,7 +6,7 @@ import qdream.relay.Component.RelayDataComponents;
 /**
  * 固定间隔的计算核心物品
  * 当前 7 种核心使用此实现（64/32/16/8/4/2/1）
- * energyCost 与 interval 倒序对应（interval 64→energyCost 1, interval 1→energyCost 64）
+ * energyCost 与 interval 倒序对应（interval 64→energyCost 0.5, interval 1→energyCost 32）
  */
 public class FixedIntervalCoreItem extends ComputingCoreItem {
 
@@ -16,8 +16,10 @@ public class FixedIntervalCoreItem extends ComputingCoreItem {
     public FixedIntervalCoreItem(Properties properties, int interval) {
         super(properties);
         this.fixedInterval = interval;
-        // energyCost 与 interval 倒序：64/interval
-        this.fixedEnergyCost = 64.0 / interval;
+        // energyCost 与 interval 倒序：32.0/interval
+        // 核心_1 (interval=64): 0.5 能量
+        // 核心_64 (interval=1): 32 能量
+        this.fixedEnergyCost = 32.0 / interval;
     }
 
     @Override

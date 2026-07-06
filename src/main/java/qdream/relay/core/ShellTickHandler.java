@@ -115,13 +115,10 @@ public class ShellTickHandler {
                 break; // cost 不足，等待下 tick
             }
 
-            // 检查并扣除能量（核心基础消耗 + 操作消耗）
+            // 检查能量（核心基础消耗 + 操作基础消耗）
+            // 注意：Spell 类型的操作会在自己的 execute() 中扣除完整的操作能量（基础 + 动态）
+            // 所以这里只检查核心基础消耗，不扣除 Spell 的操作能量，避免重复扣除
             double required = energyCost; // 核心基础消耗
-            if (top instanceof Spell spell) {
-                required += spell.getEnergy(); // 加上操作消耗
-            } else {
-                required += cost; // 非 Spell 操作按 cost 扣除
-            }
 
             if (currentEnergy < required) {
                 stateMachine.triggerMishap("能量不足：需要 " + required + "，当前只有 " + currentEnergy);
@@ -150,13 +147,12 @@ public class ShellTickHandler {
             }
 
             // 扣除能量 - 使用 container 的方法，支持背包能量模块
-            double consumed = 0;
             if (container instanceof ToolShellContainer toolShell) {
-                consumed = toolShell.consumeEnergy(required);
+                toolShell.consumeEnergy(required);
             } else {
                 ItemStack energyStack = container.getEnergyStack();
                 if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
-                    consumed = emi.consumeEnergy(energyStack, required);
+                    emi.consumeEnergy(energyStack, required);
                 }
             }
             currentEnergy = container.getEnergy();

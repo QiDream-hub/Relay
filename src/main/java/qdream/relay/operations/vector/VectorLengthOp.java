@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorLengthOp extends Spell {
 
     public VectorLengthOp() {
-        super("relay:vector_length", 1, 1, OperationSignature.builder()
+        super("relay:vector_length", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("vector", "relay:vector")
                 .producesToData("length", "relay:number")
                 .build());

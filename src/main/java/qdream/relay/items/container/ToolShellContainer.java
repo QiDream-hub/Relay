@@ -341,15 +341,22 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     /**
      * 消耗能量
-     * 
+     *
      * @param amount 需要消耗的能量
-     * @return 实际消耗的能量
+     * @return 如果能量充足并成功扣除返回 true，否则返回 false
      */
-    public double consumeEnergy(double amount) {
+    public boolean consumeEnergy(double amount) {
+        double currentEnergy = getEnergy();
+        if (currentEnergy < amount) {
+            return false;
+        }
+        
         ItemStack energyStack = getEnergyStack();
         if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
-            return emi.consumeEnergy(energyStack, amount);
+            double consumed = emi.consumeEnergy(energyStack, amount);
+            return consumed >= amount;
         }
+        
         // 如果启用背包能量模块，从背包内的能量模块扣除
         net.minecraft.world.entity.player.Player player = getOwnerPlayer();
         if (player != null) {
@@ -361,13 +368,13 @@ public class ToolShellContainer implements ShellContainer, Container {
                     double consumed = emiSlot.consumeEnergy(slot, remaining);
                     remaining -= consumed;
                     if (remaining <= 0) {
-                        return amount;
+                        return true;
                     }
                 }
             }
-            return amount - remaining;
+            return false;
         }
-        return 0;
+        return false;
     }
 
     /**

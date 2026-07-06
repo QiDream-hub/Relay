@@ -7,6 +7,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -36,6 +37,11 @@ public class SetEntityLookOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
+            return;
+        }
+
         Executable vectorExe = executor.popData();
         Executable entityExe = executor.popData();
 

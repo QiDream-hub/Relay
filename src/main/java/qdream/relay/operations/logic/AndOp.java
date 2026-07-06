@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class AndOp extends Spell {
 
     public AndOp() {
-        super("relay:and", 1, 1, OperationSignature.builder()
+        super("relay:and", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("left", "relay:boolean")
                 .consumesFromData("right", "relay:boolean")
                 .producesToData("result", "relay:boolean")

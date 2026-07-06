@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorNormalizeOp extends Spell {
 
     public VectorNormalizeOp() {
-        super("relay:vector_normalize", 1, 1, OperationSignature.builder()
+        super("relay:vector_normalize", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("vector", "relay:vector")
                 .producesToData("normalized", "relay:vector")
                 .build());

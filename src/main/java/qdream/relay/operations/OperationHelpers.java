@@ -4,6 +4,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.base.Spell;
 import qdream.relay.tools.StackTools;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
@@ -45,7 +46,7 @@ public final class OperationHelpers {
 
     /**
      * 从状态机获取 ShellContainer
-     * 
+     *
      * @param executor 状态机
      * @return ShellContainer，如果不存在返回 null
      */
@@ -58,7 +59,7 @@ public final class OperationHelpers {
 
     /**
      * 检查世界交互器是否存在
-     * 
+     *
      * @param executor      状态机
      * @param operationName 操作名称（用于错误消息）
      * @return 如果存在返回 true，否则触发事故并返回 false
@@ -69,6 +70,75 @@ public final class OperationHelpers {
             executor.triggerMishap(operationName + " 需要世界交互器");
             return false;
         }
+        return true;
+    }
+
+    /**
+     * 检查世界交互器并扣除能量
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称（用于错误消息）
+     * @param baseCost      基础能量消耗
+     * @param rangeCost     范围系数消耗（由交互器品阶决定）
+     * @return 如果检查通过并成功扣除能量返回 true，否则触发事故并返回 false
+     */
+    public static boolean checkWorldInteractorWithCost(
+            StateMachine executor,
+            String operationName,
+            double baseCost,
+            double rangeCost
+    ) {
+        ShellContainer container = getShellContainer(executor);
+        if (container == null || !container.hasWorldInteractor()) {
+            executor.triggerMishap(operationName + " 需要世界交互器");
+            return false;
+        }
+
+        // 计算总消耗
+        double totalCost = baseCost + rangeCost;
+
+        // 检查并扣除能量
+        if (!container.consumeEnergy(totalCost)) {
+            executor.triggerMishap(operationName + " 能量不足：需要 " + totalCost);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 检查能量并扣除（用于动态消耗操作）
+     * <p>
+     * 此方法会自动加上操作的基础能量消耗
+     * </p>
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称（用于错误消息）
+     * @param dynamicEnergy 动态能量值（不包含基础消耗）
+     * @return 如果能量充足并成功扣除返回 true，否则触发事故并返回 false
+     */
+    public static boolean checkEnergy(StateMachine executor, String operationName, double dynamicEnergy) {
+        ShellContainer container = getShellContainer(executor);
+        if (container == null) {
+            executor.triggerMishap(operationName + " 无法获取容器上下文");
+            return false;
+        }
+
+        // 获取操作的基础能量消耗
+        Executable top = executor.peekProgram();
+        double baseEnergy = 0;
+        if (top instanceof Spell spell) {
+            baseEnergy = spell.getEnergy();
+        }
+
+        // 总消耗 = 基础 + 动态
+        double totalEnergy = baseEnergy + dynamicEnergy;
+
+        if (!container.consumeEnergy(totalEnergy)) {
+            executor.triggerMishap(operationName + " 能量不足：需要 " + totalEnergy);
+            return false;
+        }
+
         return true;
     }
 

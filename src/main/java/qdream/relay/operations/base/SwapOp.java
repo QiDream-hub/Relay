@@ -11,7 +11,7 @@ import qdream.relay.mc.signature.OperationSignature;
 public class SwapOp extends Spell {
 
     public SwapOp() {
-        super("relay:swap", 1, 1, OperationSignature.builder()
+        super("relay:swap", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("first", "any")
                 .consumesFromData("second", "any")
                 .producesToData("second", "any")

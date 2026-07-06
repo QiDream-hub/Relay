@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorCrossOp extends Spell {
 
     public VectorCrossOp() {
-        super("relay:vector_cross", 1, 2, OperationSignature.builder()
+        super("relay:vector_cross", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("left", "relay:vector")
                 .consumesFromData("right", "relay:vector")
                 .producesToData("crossProduct", "relay:vector")

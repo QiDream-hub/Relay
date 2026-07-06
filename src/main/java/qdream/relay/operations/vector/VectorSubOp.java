@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorSubOp extends Spell {
 
     public VectorSubOp() {
-        super("relay:vector_sub", 1, 2, OperationSignature.builder()
+        super("relay:vector_sub", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("minuend", "relay:vector")
                 .consumesFromData("subtrahend", "relay:vector")
                 .producesToData("difference", "relay:vector")

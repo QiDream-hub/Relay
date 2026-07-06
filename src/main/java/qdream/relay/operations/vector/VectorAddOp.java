@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorAddOp extends Spell {
 
     public VectorAddOp() {
-        super("relay:vector_add", 1, 2, OperationSignature.builder()
+        super("relay:vector_add", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("left", "relay:vector")
                 .consumesFromData("right", "relay:vector")
                 .producesToData("sum", "relay:vector")

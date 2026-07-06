@@ -29,9 +29,9 @@ public class WorldInteractorItem extends Item implements WorldInteractorComponen
     private static final double BASE_RANGE = 4.0;
 
     /**
-     * 基础能量消耗（品阶 1）
+     * 基础能量消耗系数
      */
-    private static final double BASE_ENERGY_COST = 1.0;
+    private static final double ENERGY_COST_FACTOR = 0.5;
 
     /**
      * 固定品阶值
@@ -46,8 +46,10 @@ public class WorldInteractorItem extends Item implements WorldInteractorComponen
     public WorldInteractorItem(Properties properties, int tier) {
         super(properties);
         this.fixedTier = tier;
-        // 能量消耗与品阶成正比：tier * BASE_ENERGY_COST
-        this.fixedEnergyCost = tier * BASE_ENERGY_COST;
+        // 能量消耗与品阶的平方根成正比：sqrt(tier) * 0.5
+        // 品阶 1: 0.5 能量
+        // 品阶 64: 4.0 能量
+        this.fixedEnergyCost = Math.sqrt(tier) * ENERGY_COST_FACTOR;
     }
 
     /**

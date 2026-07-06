@@ -31,7 +31,7 @@ import java.util.List;
 public class StackRearrangeOp extends Spell {
 
     public StackRearrangeOp() {
-        super("relay:stack_rearrange", 1, 1, OperationSignature.builder()
+        super("relay:stack_rearrange", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("indices", "relay:list")
                 .consumesFromData("amount", "relay:number")
                 .consumesFromData("many", "...any")

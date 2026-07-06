@@ -29,7 +29,7 @@ import qdream.relay.types.VectorData;
 public class DetectEntityOp extends Spell {
 
     public DetectEntityOp() {
-        super("relay:detect_entity", 3, 2, OperationSignature.builder()
+        super("relay:detect_entity", 3, 5, OperationSignature.builder()
                 .consumesFromData("radius", "relay:number")
                 .consumesFromData("center", "relay:vector")
                 .producesToData("found", "relay:boolean")

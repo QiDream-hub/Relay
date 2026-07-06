@@ -35,7 +35,7 @@ import qdream.relay.types.VectorData;
 public class EntityRaycastOp extends Spell {
 
     public EntityRaycastOp() {
-        super("relay:entity_raycast", 3, 5, OperationSignature.builder()
+        super("relay:entity_raycast", 3, 8, OperationSignature.builder()
                 .consumesFromData("maxDistance", "relay:number")
                 .consumesFromData("direction", "relay:vector")
                 .consumesFromData("start", "relay:vector")

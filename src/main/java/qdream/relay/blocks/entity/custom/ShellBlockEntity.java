@@ -268,6 +268,20 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     }
 
     @Override
+    public boolean consumeEnergy(double amount) {
+        if (energy < amount) {
+            return false;
+        }
+        energy -= amount;
+        setChanged();
+        // 事件驱动：能量变化时立即同步到客户端
+        if (level != null && !level.isClientSide()) {
+            syncEnergyToClient(level, worldPosition);
+        }
+        return true;
+    }
+
+    @Override
     public boolean isClientSide() {
         return level != null && level.isClientSide();
     }

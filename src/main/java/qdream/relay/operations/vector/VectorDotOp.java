@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorDotOp extends Spell {
 
     public VectorDotOp() {
-        super("relay:vector_dot", 1, 2, OperationSignature.builder()
+        super("relay:vector_dot", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("left", "relay:vector")
                 .consumesFromData("right", "relay:vector")
                 .producesToData("dotProduct", "relay:number")

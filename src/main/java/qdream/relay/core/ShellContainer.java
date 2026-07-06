@@ -116,6 +116,13 @@ public interface ShellContainer {
     void setEnergy(double energy);
 
     /**
+     * 消耗能量
+     * @param amount 消耗的能量值
+     * @return 如果能量充足并成功扣除返回 true，否则返回 false
+     */
+    boolean consumeEnergy(double amount);
+
+    /**
      * 是否有世界交互器
      */
     boolean hasWorldInteractor();

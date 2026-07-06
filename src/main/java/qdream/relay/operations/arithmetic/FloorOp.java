@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class FloorOp extends Spell {
 
     public FloorOp() {
-        super("relay:floor", 0, 1, OperationSignature.builder()
+        super("relay:floor", 0, 0.25, OperationSignature.builder()
                 .consumesFromData("value", "relay:number")
                 .producesToData("floor", "relay:number")
                 .build());

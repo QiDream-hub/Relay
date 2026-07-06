@@ -30,7 +30,7 @@ import qdream.relay.types.VectorData;
 public class BreakBlockSilkTouchOp extends Spell {
 
     public BreakBlockSilkTouchOp() {
-        super("relay:break_block_silk_touch", 1, 1, OperationSignature.builder()
+        super("relay:break_block_silk_touch", 1, 20, OperationSignature.builder()
                 .consumesFromData("position", "relay:vector")
                 .producesToData("success", "relay:boolean")
                 .build());

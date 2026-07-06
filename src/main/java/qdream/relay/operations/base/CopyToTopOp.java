@@ -13,7 +13,7 @@ import qdream.relay.types.NumberData;
 public class CopyToTopOp extends Spell {
 
     public CopyToTopOp() {
-        super("relay:copy_to_top", 1, 1, OperationSignature.builder()
+        super("relay:copy_to_top", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("index", "relay:number")
                 .producesToData("copy", "any")
                 .build());

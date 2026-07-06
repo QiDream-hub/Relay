@@ -33,7 +33,7 @@ import qdream.relay.types.VectorData;
 public class BreakBlockFortuneOp extends Spell {
 
     public BreakBlockFortuneOp() {
-        super("relay:break_block_fortune", 2, 1, OperationSignature.builder()
+        super("relay:break_block_fortune", 2, 25, OperationSignature.builder()
                 .consumesFromData("fortune", "relay:number")
                 .consumesFromData("position", "relay:vector")
                 .producesToData("success", "relay:boolean")

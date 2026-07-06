@@ -32,7 +32,7 @@ import qdream.relay.types.VectorData;
 public class BlockRaycastOp extends Spell {
 
     public BlockRaycastOp() {
-        super("relay:block_raycast", 4, 3, OperationSignature.builder()
+        super("relay:block_raycast", 4, 6, OperationSignature.builder()
                 .consumesFromData("maxDistance", "relay:number")
                 .consumesFromData("direction", "relay:vector")
                 .consumesFromData("start", "relay:vector")

@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class OrOp extends Spell {
 
     public OrOp() {
-        super("relay:or",1, 1, OperationSignature.builder()
+        super("relay:or", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("left", "relay:boolean")
                 .consumesFromData("right", "relay:boolean")
                 .producesToData("result", "relay:boolean")
