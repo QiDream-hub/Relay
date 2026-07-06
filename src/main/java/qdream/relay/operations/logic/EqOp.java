@@ -2,8 +2,10 @@ package qdream.relay.operations.logic;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 
 /**
@@ -21,14 +23,15 @@ public class EqOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable b = executor.popData();
-        if (b == null) return;
-        
-        Executable a = executor.popData();
-        if (a == null) return;
+        Executable a = OperationHelpers.popAny(executor);
+        Executable b = OperationHelpers.popAny(executor);
 
-        boolean result = a.equals(b);
-        executor.pushData(new BooleanData(result));
+        if (!(a instanceof Operation operationA && b instanceof Operation operationB)) {
+            executor.triggerMishap("未知操作无法比较");
+            return;
+        }
+
+        executor.pushData(new BooleanData(operationA.equalsTo(operationB)));
     }
 
 }
