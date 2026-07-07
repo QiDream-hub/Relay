@@ -9,6 +9,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 
 /**
@@ -27,24 +28,14 @@ import qdream.relay.types.BooleanData;
 public class GetWorldInteractorOp extends Spell {
 
     public GetWorldInteractorOp() {
-        super("relay:get_world_interactor", 1, 1, OperationSignature.builder()
+        super("relay:get_world_interactor", 1, 0.25, OperationSignature.builder()
                 .producesToData("hasInteractor", "relay:boolean")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
-        if (!executor.hasContext("shellContainer")) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
-
-        Optional<ShellContainer> opt = executor.getContext("shellContainer", ShellContainer.class);
-        if (opt.isPresent()) {
-            executor.pushData(new BooleanData(opt.get().hasWorldInteractor()));
-        } else {
-            executor.pushData(new BooleanData(false));
-        }
+        executor.pushData(new BooleanData(OperationHelpers.checkWorldInteractor(executor,id)));
     }
 
 }

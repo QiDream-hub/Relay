@@ -3,16 +3,11 @@ package qdream.relay.operations.vector;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.core.ShellContainer;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -33,7 +28,7 @@ import qdream.relay.types.VectorData;
 public class BreakBlockFortuneOp extends Spell {
 
     public BreakBlockFortuneOp() {
-        super("relay:break_block_fortune", 2, 25, OperationSignature.builder()
+        super("relay:break_block_fortune", 1, 5, OperationSignature.builder()
                 .consumesFromData("fortune", "relay:number")
                 .consumesFromData("position", "relay:vector")
                 .producesToData("success", "relay:boolean")
@@ -43,19 +38,19 @@ public class BreakBlockFortuneOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "break_block_fortune")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 弹出参数
-        NumberData fortune = OperationHelpers.popNumber(executor, "break_block_fortune");
+        NumberData fortune = OperationHelpers.popNumber(executor, id);
         if (fortune == null) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
-        VectorData posData = OperationHelpers.popVector(executor, "break_block_fortune");
+        VectorData posData = OperationHelpers.popVector(executor, id);
         if (posData == null) {
             executor.pushData(new BooleanData(false));
             return;
@@ -68,13 +63,13 @@ public class BreakBlockFortuneOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, "break_block_fortune", sourcePos, posVec)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "break_block_fortune");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) {
             executor.pushData(new BooleanData(false));
             return;
@@ -91,7 +86,7 @@ public class BreakBlockFortuneOp extends Spell {
 
         // 破坏方块并应用时运附魔
         // 1. 先破坏方块
-        boolean destroyed = level.destroyBlock(pos, false, null, 512);  // dropResources=false，手动处理掉落
+        boolean destroyed = level.destroyBlock(pos, false, null, 512); // dropResources=false，手动处理掉落
         if (!destroyed) {
             executor.pushData(new BooleanData(false));
             return;
@@ -102,9 +97,8 @@ public class BreakBlockFortuneOp extends Spell {
         // 使用 Registry 获取附魔 - 通过 lookup 获取 HolderGetter
         var fortuneKey = net.minecraft.world.item.enchantment.Enchantments.FORTUNE;
         var holderGetter = level.registryAccess().lookup(net.minecraft.core.registries.Registries.ENCHANTMENT);
-        holderGetter.ifPresent(getter -> getter.get(fortuneKey).ifPresent(holder -> 
-            fortuneTool.enchant(holder, fortuneLevel)
-        ));
+        holderGetter.ifPresent(
+                getter -> getter.get(fortuneKey).ifPresent(holder -> fortuneTool.enchant(holder, fortuneLevel)));
 
         // 3. 手动掉落物品（应用时运）
         net.minecraft.world.level.block.Block.dropResources(state, level, pos, null, null, fortuneTool);

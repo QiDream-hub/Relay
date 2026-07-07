@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class SubOp extends Spell {
 
     public SubOp() {
-        super("relay:sub", 1, 0.25, OperationSignature.builder()
+        super("relay:sub", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("minuend", "relay:number")
                 .consumesFromData("subtrahend", "relay:number")
                 .producesToData("difference", "relay:number")

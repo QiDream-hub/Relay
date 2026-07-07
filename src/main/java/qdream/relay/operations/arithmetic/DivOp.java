@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class DivOp extends Spell {
 
     public DivOp() {
-        super("relay:div", 1, 0.25, OperationSignature.builder()
+        super("relay:div", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("dividend", "relay:number")
                 .consumesFromData("divisor", "relay:number")
                 .producesToData("quotient", "relay:number")

@@ -29,7 +29,7 @@ import qdream.relay.types.VectorData;
 public class SetEntityLookOp extends Spell {
 
     public SetEntityLookOp() {
-        super("relay:set_entity_look", 2, 0, OperationSignature.builder()
+        super("relay:set_entity_look", 1, 1, OperationSignature.builder()
                 .consumesFromData("entity", "relay:entity")
                 .consumesFromData("direction", "relay:vector")
                 .build());
@@ -42,31 +42,16 @@ public class SetEntityLookOp extends Spell {
             return;
         }
 
-        Executable vectorExe = executor.popData();
-        Executable entityExe = executor.popData();
+        EntityData popEntity = OperationHelpers.popEntity(executor, id);
+        VectorData popVector = OperationHelpers.popVector(executor, id);
 
-        if (vectorExe == null || entityExe == null) {
-            executor.triggerMishap("数据栈不足，需要 entity, vector");
-            return;
-        }
-
-        if (!(entityExe instanceof EntityData entityEx)) {
-            executor.triggerMishap("期望 entity 类型");
-            return;
-        }
-
-        if (!(vectorExe instanceof VectorData vectorEx)) {
-            executor.triggerMishap("期望 vector 类型");
-            return;
-        }
-
-        Entity entity = entityEx.getEntity();
+        Entity entity = popEntity.getEntity();
         if (entity == null) {
-            executor.triggerMishap("实体引用无效");
+            executor.triggerMishap(id+" 错误的实体");
             return;
         }
 
-        Vec3 direction = vectorEx.asVector();
+        Vec3 direction = popVector.asVector();
 
         // 验证向量合法性
         if (isInvalidVector(direction)) {
@@ -103,6 +88,6 @@ public class SetEntityLookOp extends Spell {
      */
     private boolean isInvalidVector(Vec3 vec) {
         return Double.isNaN(vec.x) || Double.isNaN(vec.y) || Double.isNaN(vec.z) ||
-               Double.isInfinite(vec.x) || Double.isInfinite(vec.y) || Double.isInfinite(vec.z);
+                Double.isInfinite(vec.x) || Double.isInfinite(vec.y) || Double.isInfinite(vec.z);
     }
 }

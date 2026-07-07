@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorSubOp extends Spell {
 
     public VectorSubOp() {
-        super("relay:vector_sub", 1, 0.25, OperationSignature.builder()
+        super("relay:vector_sub", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("minuend", "relay:vector")
                 .consumesFromData("subtrahend", "relay:vector")
                 .producesToData("difference", "relay:vector")
@@ -26,11 +26,13 @@ public class VectorSubOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_sub");
-        if (bVec == null) return;
-        
-        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_sub");
-        if (aVec == null) return;
+        VectorData bVec = OperationHelpers.popVector(executor, id);
+        if (bVec == null)
+            return;
+
+        VectorData aVec = OperationHelpers.popVector(executor, id);
+        if (aVec == null)
+            return;
 
         Vec3 result = aVec.asVector().subtract(bVec.asVector());
         executor.pushData(new VectorData(result));

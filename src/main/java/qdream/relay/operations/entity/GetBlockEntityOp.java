@@ -2,6 +2,7 @@ package qdream.relay.operations.entity;
 
 import java.util.Optional;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
@@ -41,25 +42,25 @@ public class GetBlockEntityOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "get_block_entity")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             return;
         }
 
         // 弹出参数
-        VectorData pos = OperationHelpers.popVector(executor, "get_block_entity");
+        VectorData pos = OperationHelpers.popVector(executor, id);
         if (pos == null) return;
 
         Vec3 posVec = pos.asVector();
-        net.minecraft.core.BlockPos blockPos = net.minecraft.core.BlockPos.containing(posVec);
+        BlockPos blockPos = BlockPos.containing(posVec);
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, "get_block_entity", sourcePos, posVec)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "get_block_entity");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) return;
 
         Level level = levelOpt.get();

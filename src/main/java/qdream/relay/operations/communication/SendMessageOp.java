@@ -29,7 +29,7 @@ import qdream.relay.types.BooleanData;
 public class SendMessageOp extends Spell {
 
     public SendMessageOp() {
-        super("relay:send_message", 2, 1, OperationSignature.builder()
+        super("relay:send_message", 1, 1, OperationSignature.builder()
                 .consumesFromData("recipient", "relay:entity")
                 .consumesFromData("message", "relay:string")
                 .producesToData("success", "relay:boolean")

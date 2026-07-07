@@ -17,7 +17,7 @@ import java.util.List;
 public class ListUnpackOp extends Spell {
 
     public ListUnpackOp() {
-        super("relay:list_unpack", 1, 1, OperationSignature.builder()
+        super("relay:list_unpack", 2, 0.25, OperationSignature.builder()
                 .consumesFromData("list", "relay:list")
                 .producesToData("elements", "...any")
                 .build());

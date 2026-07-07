@@ -30,18 +30,8 @@ import qdream.relay.types.VectorData;
  */
 public class PushVectorOp extends Spell {
 
-    /**
-     * 基础能量消耗
-     */
-    private static final double BASE_ENERGY = 1.0;
-
-    /**
-     * 向量模长系数
-     */
-    private static final double MAGNITUDE_MULTIPLIER = 0.5;
-
     public PushVectorOp() {
-        super("relay:push_vector", 1, BASE_ENERGY, OperationSignature.builder()
+        super("relay:push_vector", 1, 2, OperationSignature.builder()
                 .consumesFromData("target", "relay:entity")
                 .consumesFromData("push", "relay:vector")
                 .producesToData("success", "relay:boolean")
@@ -96,9 +86,8 @@ public class PushVectorOp extends Spell {
 
         // 动态计算并扣除能量：基础 + 向量模长 × 系数
         // checkEnergy 会自动加上操作的基础能量消耗
-        double dynamicEnergy = pushVector.length() * MAGNITUDE_MULTIPLIER;
+        double dynamicEnergy = pushVector.length() * 0.25;
         if (!OperationHelpers.checkEnergy(executor, id, dynamicEnergy)) {
-            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -108,6 +97,5 @@ public class PushVectorOp extends Spell {
             targetEntity.hurtMarked = true;
         }
 
-        executor.pushData(new BooleanData(true));
     }
 }

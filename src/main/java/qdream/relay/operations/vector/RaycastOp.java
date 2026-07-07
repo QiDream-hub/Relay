@@ -9,8 +9,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
-import qdream.relay.core.ShellContainer;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -31,7 +29,7 @@ import qdream.relay.types.VectorData;
 public class RaycastOp extends Spell {
 
     public RaycastOp() {
-        super("relay:raycast", 5, 3, OperationSignature.builder()
+        super("relay:raycast", 2, 0.25, OperationSignature.builder()
                 .consumesFromData("maxDistance", "relay:number")
                 .consumesFromData("direction", "relay:vector")
                 .consumesFromData("start", "relay:vector")
@@ -42,19 +40,22 @@ public class RaycastOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "raycast")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             return;
         }
 
         // 弹出参数
-        NumberData maxDistData = OperationHelpers.popNumber(executor, "raycast");
-        if (maxDistData == null) return;
+        NumberData maxDistData = OperationHelpers.popNumber(executor, id);
+        if (maxDistData == null)
+            return;
 
-        VectorData dir = OperationHelpers.popVector(executor, "raycast");
-        if (dir == null) return;
+        VectorData dir = OperationHelpers.popVector(executor, id);
+        if (dir == null)
+            return;
 
-        VectorData startData = OperationHelpers.popVector(executor, "raycast");
-        if (startData == null) return;
+        VectorData startData = OperationHelpers.popVector(executor, id);
+        if (startData == null)
+            return;
 
         double maxDist = maxDistData.asDouble();
         Vec3 direction = dir.asVector().normalize();
@@ -62,13 +63,14 @@ public class RaycastOp extends Spell {
         Vec3 end = start.add(direction.scale(maxDist));
 
         // 检查范围
-        if (!OperationHelpers.checkInRange(executor, "raycast", start, end)) {
+        if (!OperationHelpers.checkInRange(executor, id, start, end)) {
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "raycast");
-        if (levelOpt.isEmpty()) return;
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
+        if (levelOpt.isEmpty())
+            return;
 
         Level level = levelOpt.get();
 

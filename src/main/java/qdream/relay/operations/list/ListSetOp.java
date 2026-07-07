@@ -19,10 +19,10 @@ import java.util.ArrayList;
 public class ListSetOp extends Spell {
 
     public ListSetOp() {
-        super("relay:list_set", 1, 1, OperationSignature.builder()
-                .consumesFromData("list", "relay:list")
-                .consumesFromData("index", "relay:number")
+        super("relay:list_set", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("element", "any")
+                .consumesFromData("index", "relay:number")
+                .consumesFromData("list", "relay:list")
                 .producesToData("result", "relay:list")
                 .build());
     }

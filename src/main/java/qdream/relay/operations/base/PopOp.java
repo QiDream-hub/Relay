@@ -10,7 +10,7 @@ import qdream.relay.mc.signature.OperationSignature;
 public class PopOp extends Spell {
 
     public PopOp() {
-        super("relay:pop", 1, 0.25, OperationSignature.builder()
+        super("relay:pop", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("value", "any")
                 .build());
     }

@@ -15,7 +15,7 @@ import java.util.List;
 public class BatchDupOp extends Spell {
 
     public BatchDupOp() {
-        super("relay:batch_dup", 1, 0.25, OperationSignature.builder()
+        super("relay:batch_dup", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("count", "relay:number")
                 .producesToData("copies", "...any")
                 .build());

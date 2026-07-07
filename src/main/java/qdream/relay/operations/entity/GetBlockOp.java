@@ -42,12 +42,12 @@ public class GetBlockOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "get_block")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             return;
         }
 
         // 弹出参数
-        VectorData pos = OperationHelpers.popVector(executor, "get_block");
+        VectorData pos = OperationHelpers.popVector(executor, id);
         if (pos == null) return;
 
         Vec3 posVec = pos.asVector();
@@ -55,12 +55,12 @@ public class GetBlockOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, "get_block", sourcePos, posVec)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "get_block");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) return;
 
         Level level = levelOpt.get();

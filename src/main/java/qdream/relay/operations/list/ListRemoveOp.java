@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class ListRemoveOp extends Spell {
 
     public ListRemoveOp() {
-        super("relay:list_remove", 1, 1, OperationSignature.builder()
+        super("relay:list_remove", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("index", "relay:number")
                 .consumesFromData("list", "relay:list")
                 .producesToData("result", "relay:list")

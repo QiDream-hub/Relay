@@ -5,6 +5,7 @@ import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 
 /**
  * 比较两个 TypeType 是否相等的操作
@@ -19,7 +20,7 @@ import qdream.relay.mc.signature.OperationSignature;
 public class TypeEqualsOp extends Spell {
 
     public TypeEqualsOp() {
-        super("relay:type_eq", 1, 1, OperationSignature.builder()
+        super("relay:type_eq", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("type_a", "relay:type")
                 .consumesFromData("type_b", "relay:type")
                 .producesToData("result", "relay:boolean")
@@ -29,15 +30,13 @@ public class TypeEqualsOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 弹出两个类型（注意顺序：先弹出的是 type_b）
-        TypeData typeB = (TypeData) executor.popData();
+        TypeData typeB = OperationHelpers.popType(executor, id);
         if (typeB == null) {
-            executor.triggerMishap("数据栈不足，需要第二个 type");
             return;
         }
-        
-        TypeData typeA = (TypeData) executor.popData();
+
+        TypeData typeA = OperationHelpers.popType(executor, id);
         if (typeA == null) {
-            executor.triggerMishap("数据栈不足，需要第一个 type");
             return;
         }
 

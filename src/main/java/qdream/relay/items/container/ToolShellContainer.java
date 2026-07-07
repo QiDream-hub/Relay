@@ -312,10 +312,10 @@ public class ToolShellContainer implements ShellContainer {
      *
      * @return 玩家实体，如果 owner 不是玩家返回 null
      */
-    private net.minecraft.world.entity.player.Player getOwnerPlayer() {
+    private Player getOwnerPlayer() {
         Entity owner = this.owner;
-        return (owner instanceof net.minecraft.world.entity.player.Player)
-                ? (net.minecraft.world.entity.player.Player) owner
+        return (owner instanceof Player)
+                ? (Player) owner
                 : null;
     }
 
@@ -381,7 +381,7 @@ public class ToolShellContainer implements ShellContainer {
         }
         // 如果启用背包能量模块且插槽为空，检查背包
         if (isUseInventoryEnergyModule()) {
-            net.minecraft.world.entity.player.Player player = getOwnerPlayer();
+            Player player = getOwnerPlayer();
             if (player != null) {
                 double totalEnergy = 0.0;
                 var inv = player.getInventory();
@@ -421,15 +421,15 @@ public class ToolShellContainer implements ShellContainer {
         if (currentEnergy < amount) {
             return false;
         }
-        
+
         ItemStack energyStack = getEnergyStack();
         if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
             double consumed = emi.consumeEnergy(energyStack, amount);
             return consumed >= amount;
         }
-        
+
         // 如果启用背包能量模块，从背包内的能量模块扣除
-        net.minecraft.world.entity.player.Player player = getOwnerPlayer();
+        Player player = getOwnerPlayer();
         if (player != null) {
             double remaining = amount;
             var inv = player.getInventory();
@@ -555,6 +555,7 @@ public class ToolShellContainer implements ShellContainer {
 
     /**
      * 从物品堆获取 SpellDiskComponent
+     * 
      * @param stack 物品堆
      * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
      */
@@ -658,5 +659,24 @@ public class ToolShellContainer implements ShellContainer {
         }
     }
 
+    @Override
+    public ItemStack getCoreStack() {
+        return inventory.get(CORE_SLOT);
+    }
+
+    @Override
+    public ItemStack getDiskStack() {
+        return inventory.get(DISK_SLOT);
+    }
+
+    @Override
+    public ItemStack getEnergyStack() {
+        return inventory.get(ENERGY_SLOT);
+    }
+
+    @Override
+    public ItemStack getInteractorStack() {
+        return inventory.get(INTERACTOR_SLOT);
+    }
 
 }

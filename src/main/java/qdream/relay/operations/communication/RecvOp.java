@@ -16,7 +16,7 @@ import qdream.relay.types.NumberData;
 public class RecvOp extends Spell {
 
     public RecvOp() {
-        super("relay:recv", 1, 1, OperationSignature.builder()
+        super("relay:recv", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("channel", "relay:number")
                 .producesToData("data", "any")
                 .build());

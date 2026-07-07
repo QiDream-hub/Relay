@@ -16,7 +16,7 @@ import java.util.List;
 public class EvalOp extends Spell {
 
     public EvalOp() {
-        super("relay:eval", 1, 1, OperationSignature.builder()
+        super("relay:eval", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("program", "relay:list")
                 .producesToProgram("instructions", "...any")
                 .build());

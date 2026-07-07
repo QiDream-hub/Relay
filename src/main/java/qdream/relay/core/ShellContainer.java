@@ -10,50 +10,51 @@ import qdream.relay.engine.StateMachine;
  * 外壳容器接口
  * 三种外壳（方块/实体/工具）共享的统一接口
  *
- * <p>这是 Shell 的权威状态接口，所有状态调整都应通过此接口进行：</p>
+ * <p>
+ * 这是 Shell 的权威状态接口，所有状态调整都应通过此接口进行：
+ * </p>
  * <ul>
- *   <li>能量管理：{@link #getEnergy()}, {@link #addEnergy(double)}, {@link #consumeEnergy(double)}</li>
- *   <li>核心状态：{@link #getCoreCost()}, {@link #getInterval()}, {@link #getEnergyCostPerTick()}</li>
- *   <li>程序控制：{@link #loadProgramFromDisk()}</li>
- *   <li>运行状态：{@link #isEnabled()}, {@link #isInitialized()}, {@link #isRunning()}</li>
+ * <li>能量管理：{@link #getEnergy()}, {@link #addEnergy(double)},
+ * {@link #consumeEnergy(double)}</li>
+ * <li>核心状态：{@link #getCoreCost()}, {@link #getInterval()},
+ * {@link #getEnergyCostPerTick()}</li>
+ * <li>程序控制：{@link #loadProgramFromDisk()}</li>
+ * <li>运行状态：{@link #isEnabled()}, {@link #isInitialized()},
+ * {@link #isRunning()}</li>
  * </ul>
  *
- * <p>实现类不应直接访问内部物品（如能量模块、核心），所有访问都通过接口方法封装。</p>
+ * <p>
+ * 实现类不应直接访问内部物品（如能量模块、核心），所有访问都通过接口方法封装。
+ * </p>
  *
  * <h3>与 Container 接口的关系</h3>
- * <p>{@code ShellContainer} 继承自 {@code Container}，物品栏访问直接通过父接口方法。</p>
+ * <p>
+ * {@code ShellContainer} 继承自 {@code Container}，物品栏访问直接通过父接口方法。
+ * </p>
  */
 public interface ShellContainer extends Container {
 
     // ========== 物品栏访问（Container 接口方法） ==========
 
     /**
-     * 获取核心物品（插槽 0）
+     * 获取核心物品
      */
-    default ItemStack getCoreStack() {
-        return getItem(0);
-    }
+    ItemStack getCoreStack();
 
     /**
-     * 获取法术磁盘（插槽 1）
+     * 获取法术磁盘
      */
-    default ItemStack getDiskStack() {
-        return getItem(1);
-    }
+    ItemStack getDiskStack();
 
     /**
-     * 获取能量模块（插槽 2）
+     * 获取能量模块
      */
-    default ItemStack getEnergyStack() {
-        return getItem(2);
-    }
+    ItemStack getEnergyStack();
 
     /**
-     * 获取世界交互器（插槽 3）
+     * 获取世界交互器
      */
-    default ItemStack getInteractorStack() {
-        return getItem(3);
-    }
+    ItemStack getInteractorStack();
 
     // ========== 状态机访问 ==========
 
@@ -136,14 +137,19 @@ public interface ShellContainer extends Container {
     /**
      * 获取当前可用能量
      *
-     * <p>对于工具外壳，如果启用背包能量模块，返回背包内所有能量模块的总能量。</p>
+     * <p>
+     * 对于工具外壳，如果启用背包能量模块，返回背包内所有能量模块的总能量。
+     * </p>
      */
     double getEnergy();
 
     /**
      * 设置能量（内部使用）
      *
-     * <p>仅用于方块外壳同步内部字段，工具外壳不应调用此方法。</p>
+     * <p>
+     * 仅用于方块外壳同步内部字段，工具外壳不应调用此方法。
+     * </p>
+     * 
      * @param energy 能量值
      */
     void setEnergy(double energy);
@@ -186,7 +192,9 @@ public interface ShellContainer extends Container {
     /**
      * 从磁盘重新加载程序
      *
-     * <p>清空双栈后从法术磁盘重新加载程序。</p>
+     * <p>
+     * 清空双栈后从法术磁盘重新加载程序。
+     * </p>
      */
     void loadProgramFromDisk();
 

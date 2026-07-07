@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 public class BuildVectorOp extends Spell {
 
     public BuildVectorOp() {
-        super("relay:build_vector", 0, 1, OperationSignature.builder()
+        super("relay:build_vector", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("x", "relay:number")
                 .consumesFromData("y", "relay:number")
                 .consumesFromData("z", "relay:number")
@@ -25,13 +25,13 @@ public class BuildVectorOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData z = OperationHelpers.popNumber(executor, "relay:build_vector");
+        NumberData z = OperationHelpers.popNumber(executor, id);
         if (z == null) return;
 
-        NumberData y = OperationHelpers.popNumber(executor, "relay:build_vector");
+        NumberData y = OperationHelpers.popNumber(executor, id);
         if (y == null) return;
 
-        NumberData x = OperationHelpers.popNumber(executor, "relay:build_vector");
+        NumberData x = OperationHelpers.popNumber(executor, id);
         if (x == null) return;
 
         Vec3 vector = new Vec3(x.asDouble(), y.asDouble(), z.asDouble());

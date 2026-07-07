@@ -29,7 +29,7 @@ import qdream.relay.types.VectorData;
 public class DetectEntityOp extends Spell {
 
     public DetectEntityOp() {
-        super("relay:detect_entity", 3, 5, OperationSignature.builder()
+        super("relay:detect_entity", 2, 1, OperationSignature.builder()
                 .consumesFromData("radius", "relay:number")
                 .consumesFromData("center", "relay:vector")
                 .producesToData("found", "relay:boolean")
@@ -39,19 +39,19 @@ public class DetectEntityOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "relay:detect_entity")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 弹出参数
-        NumberData radius = OperationHelpers.popNumber(executor, "relay:detect_entity");
+        NumberData radius = OperationHelpers.popNumber(executor, id);
         if (radius == null) {
             executor.pushData(new BooleanData(false));
             return;
         }
-        
-        VectorData center = OperationHelpers.popVector(executor, "relay:detect_entity");
+
+        VectorData center = OperationHelpers.popVector(executor, id);
         if (center == null) {
             executor.pushData(new BooleanData(false));
             return;
@@ -63,15 +63,13 @@ public class DetectEntityOp extends Spell {
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
         Vec3 searchEdge = centerPos.add(new Vec3(radiusVal, radiusVal, radiusVal));
-        if (!OperationHelpers.checkInRange(executor, "detect_entity", sourcePos, searchEdge)) {
-            executor.pushData(new BooleanData(false));
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge)) {
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "relay:detect_entity");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) {
-            executor.pushData(new BooleanData(false));
             return;
         }
 
@@ -79,9 +77,8 @@ public class DetectEntityOp extends Spell {
 
         // 检测实体
         AABB searchBox = new AABB(
-            centerPos.x - radiusVal, centerPos.y - radiusVal, centerPos.z - radiusVal,
-            centerPos.x + radiusVal, centerPos.y + radiusVal, centerPos.z + radiusVal
-        );
+                centerPos.x - radiusVal, centerPos.y - radiusVal, centerPos.z - radiusVal,
+                centerPos.x + radiusVal, centerPos.y + radiusVal, centerPos.z + radiusVal);
 
         boolean found = !level.getEntitiesOfClass(Entity.class, searchBox).isEmpty();
         executor.pushData(new BooleanData(found));

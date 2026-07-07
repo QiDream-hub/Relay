@@ -8,6 +8,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.BlockData;
 import qdream.relay.types.EntityData;
@@ -43,12 +44,9 @@ public class GetTypeOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 弹出参数
-        Executable inputExe = executor.popData();
-
-        if (inputExe == null) {
-            executor.triggerMishap("数据栈不足，需要 entity/block_entity/block");
+        Executable inputExe = OperationHelpers.popAny(executor);
+        if (inputExe == null)
             return;
-        }
 
         // 根据输入类型提取 Identifier
         if (inputExe instanceof EntityData entityType) {

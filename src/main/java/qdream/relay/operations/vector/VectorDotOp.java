@@ -7,8 +7,6 @@ import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
 
-import net.minecraft.world.phys.Vec3;
-
 /**
  * 向量点积（内积）操作
  *
@@ -18,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorDotOp extends Spell {
 
     public VectorDotOp() {
-        super("relay:vector_dot", 1, 0.25, OperationSignature.builder()
+        super("relay:vector_dot", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("left", "relay:vector")
                 .consumesFromData("right", "relay:vector")
                 .producesToData("dotProduct", "relay:number")
@@ -27,11 +25,13 @@ public class VectorDotOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_dot");
-        if (bVec == null) return;
-        
-        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_dot");
-        if (aVec == null) return;
+        VectorData bVec = OperationHelpers.popVector(executor, id);
+        if (bVec == null)
+            return;
+
+        VectorData aVec = OperationHelpers.popVector(executor, id);
+        if (aVec == null)
+            return;
 
         double result = aVec.asVector().dot(bVec.asVector());
         executor.pushData(new NumberData(result));

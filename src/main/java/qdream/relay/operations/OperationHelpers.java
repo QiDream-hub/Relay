@@ -3,8 +3,8 @@ package qdream.relay.operations;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.tools.StackTools;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
@@ -86,8 +86,7 @@ public final class OperationHelpers {
             StateMachine executor,
             String operationName,
             double baseCost,
-            double rangeCost
-    ) {
+            double rangeCost) {
         ShellContainer container = getShellContainer(executor);
         if (container == null || !container.hasWorldInteractor()) {
             executor.triggerMishap(operationName + " 需要世界交互器");
@@ -166,15 +165,15 @@ public final class OperationHelpers {
      * @return 如果在范围内返回 true，否则返回 false
      */
     public static boolean checkInRange(StateMachine executor, String operationName,
-            net.minecraft.world.phys.Vec3 sourcePos,
-            net.minecraft.world.phys.Vec3 targetPos) {
+            Vec3 sourcePos,
+            Vec3 targetPos) {
         Optional<ItemStack> interactorOpt = getWorldInteractorStack(executor);
         if (interactorOpt.isEmpty()) {
             executor.triggerMishap(operationName + " 需要世界交互器");
             return false;
         }
         ItemStack interactor = interactorOpt.get();
-        if (!(interactor.getItem() instanceof qdream.relay.mc.component.WorldInteractorComponent component)) {
+        if (!(interactor.getItem() instanceof WorldInteractorComponent component)) {
             executor.triggerMishap(operationName + " 物品不是有效的世界交互器");
             return false;
         }
@@ -449,7 +448,7 @@ public final class OperationHelpers {
      * @return TypeData，失败返回 null
      */
     public static TypeData popType(StateMachine executor, String operationName) {
-        return popAsType(executor, TypeData.class, operationName,"relay:type");
+        return popAsType(executor, TypeData.class, operationName, "relay:type");
     }
 
     /**
@@ -460,7 +459,7 @@ public final class OperationHelpers {
      * @return TypeData，失败返回 null
      */
     public static TypeData peekType(StateMachine executor, String operationName) {
-        return peekAsType(executor, 0, TypeData.class, operationName,"relay:type");
+        return peekAsType(executor, 0, TypeData.class, operationName, "relay:type");
     }
 
     // ==================== 便捷转换方法 ====================

@@ -17,7 +17,7 @@ import qdream.relay.types.ListData;
 public class IfOp extends Spell {
 
     public IfOp() {
-        super("relay:if", 1, 1, OperationSignature.builder()
+        super("relay:if", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("condition", "relay:boolean")
                 .consumesFromProgram("trueBranch", "any")
                 .consumesFromProgram("falseBranch", "any")

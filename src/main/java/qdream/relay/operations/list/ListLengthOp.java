@@ -18,7 +18,7 @@ import java.util.List;
 public class ListLengthOp extends Spell {
 
     public ListLengthOp() {
-        super("relay:list_length", 1, 1, OperationSignature.builder()
+        super("relay:list_length", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("list", "relay:list")
                 .producesToData("size", "relay:number")
                 .build());

@@ -14,7 +14,7 @@ import qdream.relay.types.BooleanData;
 public class EqOp extends Spell {
 
     public EqOp() {
-        super("relay:eq", 1, 0.25, OperationSignature.builder()
+        super("relay:eq", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("left", "any")
                 .consumesFromData("right", "any")
                 .producesToData("result", "relay:boolean")

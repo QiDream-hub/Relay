@@ -13,7 +13,7 @@ import qdream.relay.types.NumberData;
 public class GetDataStackLengthOp extends Spell {
 
     public GetDataStackLengthOp() {
-        super("relay:get_data_stack_length", 0, 0.25, OperationSignature.builder()
+        super("relay:get_data_stack_length", 1, 0.25, OperationSignature.builder()
                 .producesToData("size", "relay:number")
                 .build());
     }

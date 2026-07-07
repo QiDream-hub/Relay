@@ -39,7 +39,7 @@ import java.util.ArrayList;
 public class ForOp extends Spell {
 
     public ForOp() {
-        super("relay:for", 1, 1, OperationSignature.builder()
+        super("relay:for", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("list", "relay:list")
                 .consumesFromProgram("body", "any", "relay:list")
                 .producesToData("element", "any")

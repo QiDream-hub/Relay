@@ -9,6 +9,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -22,7 +23,7 @@ import qdream.relay.types.VectorData;
 public class GetLookVectorOp extends Spell {
 
     public GetLookVectorOp() {
-        super("relay:get_look_vector", 1, 1, OperationSignature.builder()
+        super("relay:get_look_vector", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("entity", "relay:entity")
                 .producesToData("lookDirection", "relay:vector")
                 .build());
@@ -30,33 +31,23 @@ public class GetLookVectorOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable entityExe = executor.popData();
-        
-        if (entityExe == null) {
-            executor.triggerMishap("数据栈不足，需要 entity");
-            return;
-        }
-        
-        if (!(entityExe instanceof EntityData entityEx)) {
-            executor.triggerMishap("期望 entity 类型");
-            return;
-        }
-        
-        Entity entity = entityEx.getEntity();
+        EntityData popEntity = OperationHelpers.popEntity(executor, id);
+
+        Entity entity = popEntity.getEntity();
         if (entity == null) {
             executor.triggerMishap("实体引用无效");
             return;
         }
-        
+
         // 获取视线方向（使用 yRot 和 xRot 计算）
         float xRot = entity.getXRot();
         float yRot = entity.getYRot();
-        
+
         // 将角度转换为弧度并计算方向向量
         double x = -Math.sin(Math.toRadians(yRot)) * Math.cos(Math.toRadians(xRot));
         double y = -Math.sin(Math.toRadians(xRot));
         double z = Math.cos(Math.toRadians(yRot)) * Math.cos(Math.toRadians(xRot));
-        
+
         Vec3 lookVec = new Vec3(x, y, z).normalize();
         executor.pushData(new VectorData(lookVec));
     }

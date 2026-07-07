@@ -41,7 +41,7 @@ import qdream.relay.types.ListData;
 public class WhileOp extends Spell {
 
     public WhileOp() {
-        super("relay:while", 1, 1, OperationSignature.builder()
+        super("relay:while", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("condition", "relay:boolean")
                 .consumesFromProgram("body", "any", "relay:list")
                 .producesToProgram("body", "any")

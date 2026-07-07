@@ -41,12 +41,12 @@ public class GetEntityOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "relay:get_entity")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             return;
         }
 
         // 弹出参数
-        VectorData pos = OperationHelpers.popVector(executor, "relay:get_entity");
+        VectorData pos = OperationHelpers.popVector(executor, id);
         if (pos == null) return;
 
         Vec3 posVec = pos.asVector();
@@ -54,12 +54,12 @@ public class GetEntityOp extends Spell {
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
         Vec3 searchEdge = posVec.add(new Vec3(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS));
-        if (!OperationHelpers.checkInRange(executor, "get_entity", sourcePos, searchEdge)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge)) {
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "relay:get_entity");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) return;
 
         Level level = levelOpt.get();

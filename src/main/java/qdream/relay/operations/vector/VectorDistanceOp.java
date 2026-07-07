@@ -7,8 +7,6 @@ import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
 
-import net.minecraft.world.phys.Vec3;
-
 /**
  * 向量距离计算操作
  * 计算两个点之间的距离
@@ -19,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorDistanceOp extends Spell {
 
     public VectorDistanceOp() {
-        super("relay:vector_distance", 1, 2, OperationSignature.builder()
+        super("relay:vector_distance", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("from", "relay:vector")
                 .consumesFromData("to", "relay:vector")
                 .producesToData("distance", "relay:number")
@@ -28,11 +26,13 @@ public class VectorDistanceOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_distance");
-        if (bVec == null) return;
-        
-        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_distance");
-        if (aVec == null) return;
+        VectorData bVec = OperationHelpers.popVector(executor, id);
+        if (bVec == null)
+            return;
+
+        VectorData aVec = OperationHelpers.popVector(executor, id);
+        if (aVec == null)
+            return;
 
         double distance = aVec.asVector().distanceTo(bVec.asVector());
         executor.pushData(new NumberData(distance));

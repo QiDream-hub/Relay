@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class AddOp extends Spell {
 
     public AddOp() {
-        super("relay:add", 1, 0.25, OperationSignature.builder()
+        super("relay:add", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("augend", "relay:number")
                 .consumesFromData("addend", "relay:number")
                 .producesToData("sum", "relay:number")

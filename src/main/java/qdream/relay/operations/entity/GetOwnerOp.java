@@ -7,6 +7,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 
 /**
@@ -32,19 +33,15 @@ public class GetOwnerOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Optional<ShellContainer> containerOpt = executor.getContext("shellContainer", ShellContainer.class);
 
-        if (!containerOpt.isPresent()) {
-            executor.triggerMishap("无法获取容器：上下文缺失");
-            return;
-        }
+        ShellContainer shellContainer = OperationHelpers.getShellContainer(executor);
 
-        ShellContainer container = containerOpt.get();
-        Entity owner = container.getOwner();
+        Entity owner = shellContainer.getOwner();
         if (owner == null) {
             executor.triggerMishap("无法获取所属者");
             return;
         }
+
         executor.pushData(EntityData.from(owner, owner.level()));
     }
 }

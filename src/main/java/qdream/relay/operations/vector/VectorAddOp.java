@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorAddOp extends Spell {
 
     public VectorAddOp() {
-        super("relay:vector_add", 1, 0.25, OperationSignature.builder()
+        super("relay:vector_add", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("left", "relay:vector")
                 .consumesFromData("right", "relay:vector")
                 .producesToData("sum", "relay:vector")
@@ -26,11 +26,13 @@ public class VectorAddOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_add");
-        if (bVec == null) return;
-        
-        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_add");
-        if (aVec == null) return;
+        VectorData bVec = OperationHelpers.popVector(executor, id);
+        if (bVec == null)
+            return;
+
+        VectorData aVec = OperationHelpers.popVector(executor, id);
+        if (aVec == null)
+            return;
 
         Vec3 result = aVec.asVector().add(bVec.asVector());
         executor.pushData(new VectorData(result));

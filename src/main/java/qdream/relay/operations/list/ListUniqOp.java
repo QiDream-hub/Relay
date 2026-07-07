@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class ListUniqOp extends qdream.relay.mc.base.Spell {
 
     public ListUniqOp() {
-        super("relay:list_uniq", 3, 1, OperationSignature.builder()
+        super("relay:list_uniq", 2, 0.25, OperationSignature.builder()
                 .consumesFromData("list", "relay:list")
                 .producesToData("result", "relay:list")
                 .build());

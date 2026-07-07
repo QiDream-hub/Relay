@@ -8,7 +8,6 @@ import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.ListData;
 
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * List Append 操作 - 在列表末尾添加元素
@@ -18,20 +17,22 @@ import java.util.ArrayList;
 public class ListAppendOp extends Spell {
 
     public ListAppendOp() {
-        super("relay:list_append", 2, 1, OperationSignature.builder()
-                .consumesFromData("list", "relay:list")
+        super("relay:list_append", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("element", "any")
+                .consumesFromData("list", "relay:list")
                 .producesToData("result", "relay:list")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
-        Executable valueData = executor.popData();
-        if (valueData == null) return;
-        
+        Executable valueData = OperationHelpers.popAny(executor);
+        if (valueData == null)
+            return;
+
         ListData list = OperationHelpers.popList(executor, id);
-        if (list == null) return;
+        if (list == null)
+            return;
 
         // 创建新列表并添加原列表元素
         List<Executable> newList = list.getValue();

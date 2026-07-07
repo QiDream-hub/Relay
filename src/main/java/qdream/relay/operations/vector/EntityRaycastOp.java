@@ -3,12 +3,10 @@ package qdream.relay.operations.vector;
 import java.util.Optional;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
@@ -35,7 +33,7 @@ import qdream.relay.types.VectorData;
 public class EntityRaycastOp extends Spell {
 
     public EntityRaycastOp() {
-        super("relay:entity_raycast", 3, 8, OperationSignature.builder()
+        super("relay:entity_raycast", 2, 0.25, OperationSignature.builder()
                 .consumesFromData("maxDistance", "relay:number")
                 .consumesFromData("direction", "relay:vector")
                 .consumesFromData("start", "relay:vector")
@@ -47,19 +45,22 @@ public class EntityRaycastOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "entity_raycast")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             return;
         }
 
         // 弹出参数
-        NumberData maxDistData = OperationHelpers.popNumber(executor, "entity_raycast");
-        if (maxDistData == null) return;
+        NumberData maxDistData = OperationHelpers.popNumber(executor, id);
+        if (maxDistData == null)
+            return;
 
-        VectorData dir = OperationHelpers.popVector(executor, "entity_raycast");
-        if (dir == null) return;
+        VectorData dir = OperationHelpers.popVector(executor, id);
+        if (dir == null)
+            return;
 
-        VectorData startData = OperationHelpers.popVector(executor, "entity_raycast");
-        if (startData == null) return;
+        VectorData startData = OperationHelpers.popVector(executor, id);
+        if (startData == null)
+            return;
 
         Executable excludeExe = executor.popData();
         if (excludeExe == null || !(excludeExe instanceof EntityData excludeEx)) {
@@ -73,7 +74,7 @@ public class EntityRaycastOp extends Spell {
         Vec3 end = start.add(direction.scale(maxDist));
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "entity_raycast");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) {
             executor.pushData(NullData.INSTANCE);
             return;
@@ -98,14 +99,14 @@ public class EntityRaycastOp extends Spell {
             }
 
             // 跳过施法者骑乘的载具（参考 Hexcasting）
-            if (excludeEntity != null && 
-                entity.getRootVehicle() == excludeEntity.getRootVehicle()) {
+            if (excludeEntity != null &&
+                    entity.getRootVehicle() == excludeEntity.getRootVehicle()) {
                 continue;
             }
 
             // 使用实体的碰撞箱 + pickRadius 进行射线检测（参考 Hexcasting）
             AABB entityBox = entity.getBoundingBox().inflate(entity.getPickRadius());
-            
+
             // 计算射线与实体碰撞箱的交点
             Optional<Vec3> optionalHitPos = entityBox.clip(start, end);
             if (optionalHitPos.isEmpty()) {
@@ -113,7 +114,7 @@ public class EntityRaycastOp extends Spell {
             }
 
             Vec3 currentHitPos = optionalHitPos.get();
-            
+
             // 处理起点在碰撞箱内的情况（参考 Hexcasting）
             if (entityBox.contains(start)) {
                 if (hitDistSq >= 0) {
@@ -134,7 +135,7 @@ public class EntityRaycastOp extends Spell {
 
         // 检查击中的实体是否在范围内（参考 Hexcasting）
         if (hitEntity != null && hitPos != null) {
-            if (!OperationHelpers.checkInRange(executor, "entity_raycast", start, hitPos)) {
+            if (!OperationHelpers.checkInRange(executor, id, start, hitPos)) {
                 executor.pushData(NullData.INSTANCE);
                 return;
             }

@@ -9,7 +9,6 @@ import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.ListData;
 
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * List Add Unique 操作 - 向列表添加元素（自动去重）
@@ -19,23 +18,25 @@ import java.util.ArrayList;
 public class ListAddUniqueOp extends Spell {
 
     public ListAddUniqueOp() {
-        super("relay:list_add_unique", 3, 1, OperationSignature.builder()
-                .consumesFromData("list", "relay:list")
+        super("relay:list_add_unique", 2, 0.25, OperationSignature.builder()
                 .consumesFromData("element", "any")
+                .consumesFromData("list", "relay:list")
                 .producesToData("result", "relay:list")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
-        Executable valueData = executor.popData();
-        if (valueData == null) return;
+        Executable valueData = OperationHelpers.popAny(executor);
+        if (valueData == null)
+            return;
 
         ListData list = OperationHelpers.popList(executor, id);
-        if (list == null) return;
+        if (list == null)
+            return;
 
         List<Executable> newList = list.getValue();
-        
+
         // 检查是否已存在相同元素
         boolean isDuplicate = false;
         for (Executable existingItem : newList) {

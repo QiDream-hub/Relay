@@ -20,7 +20,7 @@ import java.util.List;
 public class ListGetOp extends Spell {
 
     public ListGetOp() {
-        super("relay:list_get", 1, 1, OperationSignature.builder()
+        super("relay:list_get", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("index", "relay:number")
                 .consumesFromData("list", "relay:list")
                 .producesToData("element", "any")

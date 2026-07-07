@@ -429,4 +429,24 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
                             new qdream.relay.networking.payloads.S2C_ShellEnergyPayload(energy));
                 });
     }
+
+    @Override
+    public ItemStack getCoreStack() {
+        return inventory.get(CORE_SLOT);
+    }
+
+    @Override
+    public ItemStack getDiskStack() {
+        return inventory.get(DISK_SLOT);
+    }
+
+    @Override
+    public ItemStack getEnergyStack() {
+        return inventory.get(ENERGY_SLOT);
+    }
+
+    @Override
+    public ItemStack getInteractorStack() {
+        return inventory.get(INTERACTOR_SLOT);
+    }
 }

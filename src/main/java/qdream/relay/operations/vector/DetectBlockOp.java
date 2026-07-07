@@ -3,12 +3,10 @@ package qdream.relay.operations.vector;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -28,7 +26,7 @@ import qdream.relay.types.VectorData;
 public class DetectBlockOp extends Spell {
 
     public DetectBlockOp() {
-        super("relay:detect_block", 3, 1, OperationSignature.builder()
+        super("relay:detect_block", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("position", "relay:vector")
                 .producesToData("exists", "relay:boolean")
                 .build());
@@ -37,13 +35,13 @@ public class DetectBlockOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "relay:detect_block")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 弹出参数
-        VectorData pos = OperationHelpers.popVector(executor, "relay:detect_block");
+        VectorData pos = OperationHelpers.popVector(executor, id);
         if (pos == null) {
             executor.pushData(new BooleanData(false));
             return;
@@ -54,13 +52,13 @@ public class DetectBlockOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, "detect_block", sourcePos, posVec)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "relay:detect_block");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) {
             executor.pushData(new BooleanData(false));
             return;

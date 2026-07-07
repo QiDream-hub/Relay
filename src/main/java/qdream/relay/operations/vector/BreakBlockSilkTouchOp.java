@@ -3,14 +3,15 @@ package qdream.relay.operations.vector;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.core.ShellContainer;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -39,13 +40,13 @@ public class BreakBlockSilkTouchOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "break_block_silk_touch")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 弹出参数
-        VectorData posData = OperationHelpers.popVector(executor, "break_block_silk_touch");
+        VectorData posData = OperationHelpers.popVector(executor, id);
         if (posData == null) {
             executor.pushData(new BooleanData(false));
             return;
@@ -57,13 +58,13 @@ public class BreakBlockSilkTouchOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, "break_block_silk_touch", sourcePos, posVec)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "break_block_silk_touch");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) {
             executor.pushData(new BooleanData(false));
             return;
@@ -87,16 +88,16 @@ public class BreakBlockSilkTouchOp extends Spell {
         }
 
         // 2. 创建带精准采集附魔的假工具（使用 enchant 方法）
-        ItemStack silkTool = new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE);
+        ItemStack silkTool = new ItemStack(Items.DIAMOND_PICKAXE);
         // 使用 Registry 获取附魔 - 通过 lookup 获取 HolderGetter
-        var silkTouchKey = net.minecraft.world.item.enchantment.Enchantments.SILK_TOUCH;
-        var holderGetter = level.registryAccess().lookup(net.minecraft.core.registries.Registries.ENCHANTMENT);
+        var silkTouchKey = Enchantments.SILK_TOUCH;
+        var holderGetter = level.registryAccess().lookup(Registries.ENCHANTMENT);
         holderGetter.ifPresent(getter -> getter.get(silkTouchKey).ifPresent(holder -> 
             silkTool.enchant(holder, 1)
         ));
 
         // 3. 手动掉落物品（应用精准采集）
-        net.minecraft.world.level.block.Block.dropResources(state, level, pos, null, null, silkTool);
+        Block.dropResources(state, level, pos, null, null, silkTool);
 
         executor.pushData(new BooleanData(true));
     }

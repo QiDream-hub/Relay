@@ -29,7 +29,7 @@ import qdream.relay.types.VectorData;
 public class BreakBlockOp extends Spell {
 
     public BreakBlockOp() {
-        super("relay:break_block", 1, 10, OperationSignature.builder()
+        super("relay:break_block", 1, 5, OperationSignature.builder()
                 .consumesFromData("position", "relay:vector")
                 .producesToData("success", "relay:boolean")
                 .build());
@@ -38,13 +38,13 @@ public class BreakBlockOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, "break_block")) {
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 弹出参数
-        VectorData posData = OperationHelpers.popVector(executor, "break_block");
+        VectorData posData = OperationHelpers.popVector(executor, id);
         if (posData == null) {
             executor.pushData(new BooleanData(false));
             return;
@@ -56,13 +56,13 @@ public class BreakBlockOp extends Spell {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, "break_block", sourcePos, posVec)) {
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, "break_block");
+        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
         if (levelOpt.isEmpty()) {
             executor.pushData(new BooleanData(false));
             return;

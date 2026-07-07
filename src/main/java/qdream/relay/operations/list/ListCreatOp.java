@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class ListCreatOp extends Spell {
     public ListCreatOp() {
-        super("relay:list_creat", 1, 1, OperationSignature.builder()
+        super("relay:list_creat", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("size", "relay:number")
                 .consumesFromData("elements", "...any")
                 .producesToData("result", "relay:list")
@@ -30,7 +30,7 @@ public class ListCreatOp extends Spell {
         NumberData sizeData = OperationHelpers.popNumber(executor, id);
         if (sizeData == null) return;
         
-        int size = (int) sizeData.asDouble();
+        int size = sizeData.asInt();
         if (executor.getDataStackSize() < size) {
             executor.triggerMishap("操作 relay:list_creat 期望数据栈大小为：" + size + "，实际为：" + executor.getDataStackSize());
             return;

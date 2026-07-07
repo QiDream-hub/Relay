@@ -13,7 +13,7 @@ import qdream.relay.operations.OperationHelpers;
 public class LtOp extends Spell {
 
     public LtOp() {
-        super("relay:lt", 1, 0.25, OperationSignature.builder()
+        super("relay:lt", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("left", "relay:number")
                 .consumesFromData("right", "relay:number")
                 .producesToData("result", "relay:boolean")

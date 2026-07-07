@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class NotOp extends Spell {
 
     public NotOp() {
-        super("relay:not", 1, 0.25, OperationSignature.builder()
+        super("relay:not", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("operand", "relay:boolean")
                 .producesToData("result", "relay:boolean")
                 .build());

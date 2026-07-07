@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.EntityData;
 
@@ -26,7 +27,7 @@ import qdream.relay.types.EntityData;
 public class IsPlayerOp extends Spell {
 
     public IsPlayerOp() {
-        super("relay:is_player", 1, 1, OperationSignature.builder()
+        super("relay:is_player", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("entity", "relay:entity")
                 .producesToData("isPlayer", "relay:boolean")
                 .build());
@@ -34,21 +35,8 @@ public class IsPlayerOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 弹出实体
-        var entityExe = executor.popData();
-        if (entityExe == null) {
-            executor.triggerMishap("无法弹出实体");
-            return;
-        }
-
-        if (!(entityExe instanceof EntityData entityIota)) {
-            executor.triggerMishap("期望 entity 类型");
-            return;
-        }
-
-        // 获取实体引用（需要世界）
-        Entity entity = entityIota.getEntity();
-
+        EntityData popEntity = OperationHelpers.popEntity(executor, id);
+        Entity entity = popEntity.getEntity();
         // 检查是否是玩家
         boolean isPlayer = (entity instanceof Player);
         executor.pushData(new BooleanData(isPlayer));

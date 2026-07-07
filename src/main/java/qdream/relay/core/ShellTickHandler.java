@@ -11,7 +11,9 @@ import qdream.relay.mc.component.EnergyModuleComponent;
  * 外壳 Tick 处理器
  * 处理三种外壳（方块/实体/工具）的通用 tick 逻辑
  * 
- * <p>所有状态访问都通过 {@link ShellContainer} 接口进行，不直接访问物品或内部字段。</p>
+ * <p>
+ * 所有状态访问都通过 {@link ShellContainer} 接口进行，不直接访问物品或内部字段。
+ * </p>
  */
 public class ShellTickHandler {
 
@@ -63,7 +65,7 @@ public class ShellTickHandler {
             tickCounter++;
             int interval = container.getInterval();
             int coreCount = container.getCoreCost();
-            
+
             if (tickCounter >= interval && coreCount > 0) {
                 tickCounter = 0;
 

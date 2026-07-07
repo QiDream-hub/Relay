@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class CeilOp extends Spell {
 
     public CeilOp() {
-        super("relay:ceil", 0, 0.25, OperationSignature.builder()
+        super("relay:ceil", 0, 0.05, OperationSignature.builder()
                 .consumesFromData("value", "relay:number")
                 .producesToData("ceil", "relay:number")
                 .build());

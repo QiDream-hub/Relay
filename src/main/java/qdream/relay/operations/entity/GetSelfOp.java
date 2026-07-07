@@ -4,12 +4,10 @@ import java.util.Optional;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import qdream.relay.core.ShellContainer;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NullData;
@@ -39,15 +37,7 @@ public class GetSelfOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        // 尝试从上下文中获取 self 实体（Entity 或 BlockEntity）
-        Optional<Object> selfObj = executor.getContext("self", Object.class);
-
-        if (!selfObj.isPresent() || selfObj.get() == null) {
-            executor.pushData(NullData.INSTANCE);
-            return;
-        }
-
-        Object self = selfObj.get();
+        Object self = OperationHelpers.getSelf(executor);
 
         // 根据类型创建对应的 Iota
         if (self instanceof Entity entity) {

@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class VectorCrossOp extends Spell {
 
     public VectorCrossOp() {
-        super("relay:vector_cross", 1, 0.25, OperationSignature.builder()
+        super("relay:vector_cross", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("left", "relay:vector")
                 .consumesFromData("right", "relay:vector")
                 .producesToData("crossProduct", "relay:vector")
@@ -26,19 +26,20 @@ public class VectorCrossOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        VectorData bVec = OperationHelpers.popVector(executor, "relay:vector_cross");
-        if (bVec == null) return;
-        
-        VectorData aVec = OperationHelpers.popVector(executor, "relay:vector_cross");
-        if (aVec == null) return;
+        VectorData bVec = OperationHelpers.popVector(executor, id);
+        if (bVec == null)
+            return;
+
+        VectorData aVec = OperationHelpers.popVector(executor, id);
+        if (aVec == null)
+            return;
 
         Vec3 av = aVec.asVector();
         Vec3 bv = bVec.asVector();
         Vec3 result = new Vec3(
-            av.y * bv.z - av.z * bv.y,
-            av.z * bv.x - av.x * bv.z,
-            av.x * bv.y - av.y * bv.x
-        );
+                av.y * bv.z - av.z * bv.y,
+                av.z * bv.x - av.x * bv.z,
+                av.x * bv.y - av.y * bv.x);
         executor.pushData(new VectorData(result));
     }
 }

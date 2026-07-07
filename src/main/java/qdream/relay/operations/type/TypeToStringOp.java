@@ -5,6 +5,7 @@ import qdream.relay.types.StringData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 
 /**
  * 将 TypeType 转换为 StringType 的操作
@@ -21,7 +22,7 @@ import qdream.relay.mc.signature.OperationSignature;
 public class TypeToStringOp extends Spell {
 
     public TypeToStringOp() {
-        super("relay:type_to_string", 1, 1, OperationSignature.builder()
+        super("relay:type_to_string", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("type", "relay:type")
                 .producesToData("string", "relay:string")
                 .build());
@@ -30,9 +31,8 @@ public class TypeToStringOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 弹出类型
-        TypeData type = (TypeData) executor.popData();
+        TypeData type = OperationHelpers.popType(executor, id);
         if (type == null) {
-            executor.triggerMishap("数据栈不足，需要 type");
             return;
         }
 

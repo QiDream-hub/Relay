@@ -4,6 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -16,7 +17,8 @@ import qdream.relay.types.VectorData;
  *
  * 示例用法：
  * 1. 获取自身眼睛位置：get_self get_entity_eye_pos
- * 2. 视线追踪起点：get_self get_entity_eye_pos get_self get_look_vector 10 block_raycast
+ * 2. 视线追踪起点：get_self get_entity_eye_pos get_self get_look_vector 10
+ * block_raycast
  */
 public class GetEntityEyePosOp extends Spell {
 
@@ -29,21 +31,11 @@ public class GetEntityEyePosOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable entityExe = executor.popData();
+        EntityData popEntity = OperationHelpers.popEntity(executor, id);
 
-        if (entityExe == null) {
-            executor.triggerMishap("数据栈不足，需要 entity");
-            return;
-        }
-
-        if (!(entityExe instanceof EntityData entityEx)) {
-            executor.triggerMishap("期望 entity 类型");
-            return;
-        }
-
-        var entity = entityEx.getEntity();
+        var entity = popEntity.getEntity();
         if (entity == null) {
-            executor.triggerMishap("实体引用无效");
+            executor.triggerMishap(id + " 错误的实体");
             return;
         }
 

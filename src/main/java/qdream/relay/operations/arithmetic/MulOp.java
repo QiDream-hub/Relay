@@ -12,7 +12,7 @@ import qdream.relay.operations.OperationHelpers;
 public class MulOp extends Spell {
 
     public MulOp() {
-        super("relay:mul", 1, 0.25, OperationSignature.builder()
+        super("relay:mul", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("multiplicand", "relay:number")
                 .consumesFromData("multiplier", "relay:number")
                 .producesToData("product", "relay:number")
