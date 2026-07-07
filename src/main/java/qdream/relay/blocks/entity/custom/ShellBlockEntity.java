@@ -17,12 +17,12 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Container;
+import net.minecraft.core.NonNullList;
 import java.util.List;
 import java.util.UUID;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.blocks.entity.RelayBlockEntities;
-import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.screen.ShellScreenHandler;
@@ -35,23 +35,19 @@ import qdream.relay.Relay;
 
 /**
  * 外壳方块实体
- * 
- * <p>
- * 使用 {@link ShellStateManager} 管理物品栏、StateMachine、Owner 状态
- * </p>
- * 
+ *
  * <h3>职责</h3>
  * <ul>
- * <li>实现 Container 接口（物品栏插槽访问）</li>
  * <li>实现 MenuProvider（GUI 支持）</li>
- * <li>实现 ShellContainer（外壳容器接口）</li>
+ * <li>实现 ShellContainer（外壳容器接口，继承自 Container）</li>
  * <li>Tick 逻辑（通过 ShellTickHandler）</li>
  * <li>NBT 持久化（ValueInput/ValueOutput）</li>
  * </ul>
  */
-public class ShellBlockEntity extends BlockEntity implements MenuProvider, Container, ShellContainer {
+public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer {
 
-    private final ShellStateManager stateManager;
+    private static final int SLOT_COUNT = 4;
+    private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final ShellTickHandler tickHandler;
     private final StateMachine stateMachine;
     private Entity owner;
@@ -66,7 +62,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     public ShellBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
-        this.stateManager = new ShellStateManager();
         this.tickHandler = new ShellTickHandler();
         this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
         this.energy = 0;
@@ -120,13 +115,13 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public int getContainerSize() {
-        return 4;
+        return SLOT_COUNT;
     }
 
     @Override
     public boolean isEmpty() {
-        for (int i = 0; i < 4; i++) {
-            if (!stateManager.getInventorySlot(i).isEmpty()) {
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            if (!inventory.get(i).isEmpty()) {
                 return false;
             }
         }
@@ -135,14 +130,15 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public ItemStack getItem(int slot) {
-        return stateManager.getInventorySlot(slot);
+        return inventory.get(slot);
     }
 
     @Override
     public ItemStack removeItem(int slot, int amount) {
-        ItemStack stack = stateManager.getInventorySlot(slot);
+        ItemStack stack = inventory.get(slot);
         if (!stack.isEmpty()) {
             ItemStack result = stack.split(amount);
+            setItem(slot, stack);
             setChanged();
             return result;
         }
@@ -151,9 +147,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public ItemStack removeItemNoUpdate(int slot) {
-        ItemStack stack = stateManager.getInventorySlot(slot);
+        ItemStack stack = inventory.get(slot);
         if (!stack.isEmpty()) {
-            stateManager.setInventorySlot(slot, ItemStack.EMPTY);
+            inventory.set(slot, ItemStack.EMPTY);
             setChanged();
             return stack;
         }
@@ -162,7 +158,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public void setItem(int slot, ItemStack stack) {
-        stateManager.setInventorySlot(slot, stack);
+        inventory.set(slot, stack);
         setChanged();
     }
 
@@ -173,8 +169,8 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public void clearContent() {
-        for (int i = 0; i < 4; i++) {
-            stateManager.setInventorySlot(i, ItemStack.EMPTY);
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            inventory.set(i, ItemStack.EMPTY);
         }
     }
 
@@ -194,23 +190,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     }
 
     @Override
-    public ItemStack getInventorySlot(int slot) {
-        return stateManager.getInventorySlot(slot);
-    }
-
-    @Override
-    public void setInventorySlot(int slot, ItemStack stack) {
-        stateManager.setInventorySlot(slot, stack);
-        setChanged();
-    }
-
-    @Override
     public Entity getOwner() {
-        // 优先返回直接持有的 owner 字段
-        if (owner != null) {
-            return owner;
-        }
-        // 延迟加载作为兜底
         if (ownerUuid != null && level != null && !level.isClientSide()) {
             Entity ownerEntity = level.getEntity(ownerUuid);
             if (ownerEntity != null) {
@@ -277,7 +257,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     public void setEnergy(double energy) {
         this.energy = energy;
         setChanged();
-        // 事件驱动：能量变化时立即同步到客户端
         if (level != null && !level.isClientSide()) {
             syncEnergyToClient(level, worldPosition);
         }
@@ -290,7 +269,6 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         }
         energy -= amount;
         setChanged();
-        // 事件驱动：能量变化时立即同步到客户端
         if (level != null && !level.isClientSide()) {
             syncEnergyToClient(level, worldPosition);
         }
@@ -304,17 +282,9 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
 
     @Override
     public boolean hasOwner() {
-        if (this.owner != null && this.owner instanceof Player) {
-            return true;
-        }
-        return false;
+        return owner instanceof Player;
     }
 
-    /**
-     * 从物品堆获取 SpellDiskComponent
-     * @param stack 物品堆
-     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
-     */
     private DiskComponent getDiskComponent(ItemStack stack) {
         if (stack.getItem() instanceof DiskComponent) {
             return (DiskComponent) stack.getItem();
@@ -323,31 +293,8 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
     }
 
     @Override
-    public ItemStack getCoreStack() {
-        return stateManager.getInventorySlot(CORE_SLOT);
-    }
-
-    @Override
-    public ItemStack getDiskStack() {
-        return stateManager.getInventorySlot(DISK_SLOT);
-    }
-
-    @Override
-    public ItemStack getEnergyStack() {
-        return stateManager.getInventorySlot(ENERGY_SLOT);
-    }
-
-    @Override
-    public ItemStack getInteractorStack() {
-        return stateManager.getInventorySlot(INTERACTOR_SLOT);
-    }
-
-    @Override
     public boolean hasWorldInteractor() {
-        if (getInteractorStack().getItem() instanceof WorldInteractorComponent) {
-            return true;
-        }
-        return false;
+        return getInteractorStack().getItem() instanceof WorldInteractorComponent;
     }
 
     @Override
@@ -364,11 +311,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         ItemStack energyStack = getEnergyStack();
         if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
             double added = emi.addEnergy(energyStack, amount);
-            setEnergy(getEnergy()); // 同步内部 energy 字段
-            setChanged();
-            if (level != null && !level.isClientSide()) {
-                syncEnergyToClient(level, worldPosition);
-            }
+            setEnergy(energy);
             return added;
         }
         return 0;
@@ -406,7 +349,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         super.saveAdditional(output);
 
         // 保存物品栏
-        ContainerHelper.saveAllItems(output, stateManager.getInventory());
+        ContainerHelper.saveAllItems(output, inventory);
 
         // 保存能量
         output.putDouble("energy", energy);
@@ -433,7 +376,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Conta
         super.loadAdditional(input);
 
         // 加载物品栏
-        ContainerHelper.loadAllItems(input, stateManager.getInventory());
+        ContainerHelper.loadAllItems(input, inventory);
 
         // 加载能量
         energy = input.getIntOr("energy", 0);

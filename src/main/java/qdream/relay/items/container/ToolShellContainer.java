@@ -5,15 +5,17 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.NonNullList;
 
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.ToolShellItem;
 import qdream.relay.core.ShellContainer;
-import qdream.relay.core.ShellStateManager;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.component.ComputingCoreComponent;
@@ -30,12 +32,8 @@ import java.util.UUID;
 /**
  * 工具外壳的 ShellContainer 实现
  *
- * <p>
- * 使用 {@link ShellStateManager} 统一管理物品栏、StateMachine、Owner 状态
- * </p>
- *
  * <h3>存储结构</h3>
- * 
+ *
  * <pre>
  * TOOL_SHELL_DATA: {
  *   "inventory": ListTag,           // 4 个插槽
@@ -54,17 +52,19 @@ import java.util.UUID;
  * }
  * </pre>
  */
-public class ToolShellContainer implements ShellContainer, Container {
+public class ToolShellContainer implements ShellContainer {
 
     public static final int CORE_SLOT = 0;
     public static final int DISK_SLOT = 1;
     public static final int ENERGY_SLOT = 2;
     public static final int INTERACTOR_SLOT = 3;
 
+    private static final int SLOT_COUNT = 4;
+
     final ToolShellItem toolShell; // package-private for direct access
     ItemStack stack; // package-private - 非 final 以支持引用更新
     private final UUID sessionId; // 会话 ID
-    private final ShellStateManager stateManager;
+    private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final StateMachine stateMachine;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
     private Entity owner;
@@ -74,7 +74,6 @@ public class ToolShellContainer implements ShellContainer, Container {
         this.toolShell = toolShell;
         this.stack = stack;
         this.sessionId = sessionId;
-        this.stateManager = new ShellStateManager();
         this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
 
         loadAllState();
@@ -159,7 +158,7 @@ public class ToolShellContainer implements ShellContainer, Container {
         }
 
         // 加载物品栏
-        stateManager.loadInventory(dataTag);
+        loadInventory(dataTag);
 
         // 加载 StateMachine
         CompoundTag machineTag = dataTag.getCompound("stateMachine").orElse(null);
@@ -191,7 +190,7 @@ public class ToolShellContainer implements ShellContainer, Container {
         CompoundTag dataTag = new CompoundTag();
 
         // 保存物品栏
-        stateManager.saveInventory(dataTag);
+        saveInventory(dataTag);
 
         // 保存 StateMachine
         CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
@@ -206,6 +205,52 @@ public class ToolShellContainer implements ShellContainer, Container {
         saveTickState();
 
         stack.set(RelayDataComponents.TOOL_SHELL_DATA, dataTag);
+    }
+
+    // ========== 物品栏加载/保存 ==========
+
+    /**
+     * 从 CompoundTag 加载物品栏
+     */
+    private void loadInventory(CompoundTag tag) {
+        ListTag listTag = tag.getList("inventory").orElse(null);
+        if (listTag == null) {
+            return;
+        }
+
+        ItemStack[] parsed = new ItemStack[inventory.size()];
+        for (int i = 0; i < Math.min(parsed.length, listTag.size()); i++) {
+            Tag element = listTag.get(i);
+            if (element instanceof CompoundTag compoundTag) {
+                var result = ItemStack.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, compoundTag);
+                parsed[i] = result.result().orElse(ItemStack.EMPTY);
+            }
+        }
+
+        for (int i = 0; i < parsed.length; i++) {
+            if (parsed[i] != null) {
+                inventory.set(i, parsed[i]);
+            }
+        }
+    }
+
+    /**
+     * 保存物品栏到 NBT
+     */
+    private void saveInventory(CompoundTag tag) {
+        ListTag listTag = new ListTag();
+
+        for (ItemStack stack : inventory) {
+            if (!stack.isEmpty()) {
+                ItemStack.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, stack)
+                        .result()
+                        .ifPresent(listTag::add);
+            } else {
+                listTag.add(new CompoundTag());
+            }
+        }
+
+        tag.put("inventory", listTag);
     }
 
     /**
@@ -275,17 +320,6 @@ public class ToolShellContainer implements ShellContainer, Container {
     }
 
     // ========== ShellContainer 接口 ==========
-
-    @Override
-    public ItemStack getInventorySlot(int slot) {
-        return stateManager.getInventorySlot(slot);
-    }
-
-    @Override
-    public void setInventorySlot(int slot, ItemStack itemStack) {
-        stateManager.setInventorySlot(slot, itemStack);
-        saveAllState();
-    }
 
     @Override
     public StateMachine getStateMachine() {
@@ -455,7 +489,7 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public boolean hasWorldInteractor() {
-        if (stateManager.getInventorySlot(INTERACTOR_SLOT).getItem() instanceof WorldInteractorComponent) {
+        if (inventory.get(INTERACTOR_SLOT).getItem() instanceof WorldInteractorComponent) {
             return true;
         }
         return false;
@@ -531,22 +565,6 @@ public class ToolShellContainer implements ShellContainer, Container {
         return null;
     }
 
-    public ItemStack getCoreStack() {
-        return getInventorySlot(CORE_SLOT);
-    }
-
-    public ItemStack getDiskStack() {
-        return getInventorySlot(DISK_SLOT);
-    }
-
-    public ItemStack getEnergyStack() {
-        return getInventorySlot(ENERGY_SLOT);
-    }
-
-    public ItemStack getInteractorStack() {
-        return getInventorySlot(INTERACTOR_SLOT);
-    }
-
     // ========== 配置项 ==========
 
     public boolean isUseInventoryEnergyModule() {
@@ -581,13 +599,13 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public int getContainerSize() {
-        return 4;
+        return SLOT_COUNT;
     }
 
     @Override
     public boolean isEmpty() {
-        for (int i = 0; i < 4; i++) {
-            if (!stateManager.getInventorySlot(i).isEmpty()) {
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            if (!inventory.get(i).isEmpty()) {
                 return false;
             }
         }
@@ -596,15 +614,15 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public ItemStack getItem(int slot) {
-        return stateManager.getInventorySlot(slot);
+        return inventory.get(slot);
     }
 
     @Override
     public ItemStack removeItem(int slot, int amount) {
-        ItemStack stack = stateManager.getInventorySlot(slot);
+        ItemStack stack = inventory.get(slot);
         if (!stack.isEmpty()) {
             ItemStack result = stack.split(amount);
-            setInventorySlot(slot, stack);
+            setItem(slot, stack);
             setChanged();
             return result;
         }
@@ -613,9 +631,9 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public ItemStack removeItemNoUpdate(int slot) {
-        ItemStack stack = stateManager.getInventorySlot(slot);
+        ItemStack stack = inventory.get(slot);
         if (!stack.isEmpty()) {
-            stateManager.setInventorySlot(slot, ItemStack.EMPTY);
+            inventory.set(slot, ItemStack.EMPTY);
             setChanged();
             return stack;
         }
@@ -624,7 +642,7 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public void setItem(int slot, ItemStack stack) {
-        stateManager.setInventorySlot(slot, stack);
+        inventory.set(slot, stack);
         setChanged();
     }
 
@@ -635,8 +653,8 @@ public class ToolShellContainer implements ShellContainer, Container {
 
     @Override
     public void clearContent() {
-        for (int i = 0; i < 4; i++) {
-            stateManager.setInventorySlot(i, ItemStack.EMPTY);
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            inventory.set(i, ItemStack.EMPTY);
         }
     }
 

@@ -210,13 +210,13 @@ public class ToolShellItem extends Item {
                 if (diskStack.isEmpty()) {
                     // 磁盘插槽为空，直接放入
                     ItemStack toInsert = other.copy();
-                    container.setInventorySlot(ToolShellContainer.DISK_SLOT, toInsert);
+                    container.setItem(ToolShellContainer.DISK_SLOT, toInsert);
                     other.shrink(other.count());
                     return true;
                 } else {
                     // 磁盘插槽已有物品，交换到鼠标
                     ItemStack existing = diskStack.copy();
-                    container.setInventorySlot(ToolShellContainer.DISK_SLOT, other.copy());
+                    container.setItem(ToolShellContainer.DISK_SLOT, other.copy());
                     carriedItem.set(existing); // 修改鼠标持有的物品，而不是 slot
                     return true;
                 }
@@ -227,7 +227,7 @@ public class ToolShellItem extends Item {
                 // 将磁盘放到鼠标拖拽中
                 ItemStack toTake = diskStack.copy();
                 carriedItem.set(toTake);
-                container.setInventorySlot(ToolShellContainer.DISK_SLOT, ItemStack.EMPTY);
+                container.setItem(ToolShellContainer.DISK_SLOT, ItemStack.EMPTY);
                 return true;
             }
         }
