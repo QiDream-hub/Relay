@@ -37,6 +37,7 @@ import qdream.relay.operations.entity.GetOwnerOp;
 import qdream.relay.operations.entity.GetSelfOp;
 import qdream.relay.operations.entity.IsPlayerOp;
 import qdream.relay.operations.type.GetTypeOp;
+import qdream.relay.operations.type.ToStringOp;
 import qdream.relay.operations.vector.BlockRaycastOp;
 import qdream.relay.operations.vector.BreakBlockFortuneOp;
 import qdream.relay.operations.vector.BreakBlockOp;
@@ -162,6 +163,8 @@ public class RelayOperations {
                 // 类型操作
                 OperationRegistry.register("relay:get_type",
                                 new OperationRegistry.OpEntry(new GetTypeOp()));
+                OperationRegistry.register("relay:to_string",
+                                new OperationRegistry.OpEntry(new ToStringOp()));
 
                 // 算术操作
                 OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new AddOp()));

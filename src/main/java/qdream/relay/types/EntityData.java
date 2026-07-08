@@ -237,10 +237,9 @@ public class EntityData extends Data {
     }
 
     @Override
-    public String toString() {
-        if (uuid == null && worldId == null) {
-            return "EntityData{null}";
-        }
-        return "EntityData{uuid=" + uuid + ", worldId=" + worldId + "}";
+    public String asString() {
+        return String.format("world:%s,uuid:%s", 
+            worldId != null ? worldId : "null",
+            uuid != null ? uuid.toString() : "null");
     }
 }

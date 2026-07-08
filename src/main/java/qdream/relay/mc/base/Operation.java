@@ -33,8 +33,6 @@ public abstract class Operation implements Executable {
         return cost;
     }
 
-    public abstract Signature getSignature();
-
     /**
      * 判断两个 Data 是否相等
      * 
@@ -42,6 +40,10 @@ public abstract class Operation implements Executable {
      * @return 如果相等返回 true，否则返回 false
      */
     public abstract boolean equalsTo(Operation other);
+
+    public abstract String asString();
+
+    public abstract Signature getSignature();
 
     // ========== JSON 序列化/反序列化 ==========
 

@@ -77,7 +77,7 @@ public class BooleanData extends Data {
     }
 
     @Override
-    public String toString() {
-        return "BooleanData{value=" + value + "}";
+    public String asString() {
+        return String.valueOf(value);
     }
 }

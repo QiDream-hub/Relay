@@ -1,6 +1,7 @@
 package qdream.relay.types;
 
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.ArrayList;
 
 import com.google.gson.JsonArray;
@@ -140,7 +141,18 @@ public class ListData extends Data {
     }
 
     @Override
-    public String toString() {
-        return "ListData{size=" + value.size() + ", elements=" + value + "}";
+    public String asString() {
+        StringJoiner joiner = new StringJoiner(",", "[", "]");
+        for (Executable executable : value) {
+            if (executable instanceof Data data) {
+                // Data 也是 Operation 的子类，必须先检查
+                joiner.add(data.asString());
+            } else if (executable instanceof Operation op) {
+                joiner.add(op.asString());
+            } else {
+                joiner.add(executable.toString());
+            }
+        }
+        return joiner.toString();
     }
 }

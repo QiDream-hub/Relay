@@ -61,7 +61,7 @@ public class NullData extends Data {
     }
 
     @Override
-    public String toString() {
-        return "NullData{}";
+    public String asString() {
+        return "null";
     }
 }

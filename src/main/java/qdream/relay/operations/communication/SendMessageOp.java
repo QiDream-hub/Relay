@@ -43,13 +43,15 @@ public class SendMessageOp extends Spell {
             return;
         }
 
-        // 先弹出消息（后压入的先弹出）
-        StringData message = OperationHelpers.popString(executor, id);
-        if (message == null) return;
-
         // 再弹出实体
         EntityData recipient = OperationHelpers.popEntity(executor, id);
-        if (recipient == null) return;
+        if (recipient == null)
+            return;
+
+        // 先弹出消息（后压入的先弹出）
+        StringData message = OperationHelpers.popString(executor, id);
+        if (message == null)
+            return;
 
         // 获取实体引用
         Entity entity = recipient.getEntity();

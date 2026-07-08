@@ -28,6 +28,7 @@ public class StringData extends Data {
         executor.pushData(this);
     }
 
+    @Override
     public String asString() {
         return value;
     }
@@ -72,8 +73,4 @@ public class StringData extends Data {
         return this.value != null ? this.value.equals(that.value) : that.value == null;
     }
 
-    @Override
-    public String toString() {
-        return "StringData{value=" + value + "}";
-    }
 }

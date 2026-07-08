@@ -211,14 +211,6 @@ public class BlockData extends Data {
     }
 
     @Override
-    public String toString() {
-        if (blockPos == null && worldId == null) {
-            return "BlockData{null}";
-        }
-        return "BlockData{pos=" + blockPos + ", worldId=" + worldId + "}";
-    }
-
-    @Override
     public boolean equalsTo(Operation other) {
         if (!(other instanceof BlockData)) {
             return false;
@@ -231,5 +223,15 @@ public class BlockData extends Data {
             return false;
         }
         return this.blockPos.equals(that.blockPos);
+    }
+
+    @Override
+    public String asString() {
+        if (blockPos == null) {
+            return String.format("{world:%s}", worldId != null ? worldId : "null");
+        }
+        return String.format("{world:%s,x:%d,y:%d,z:%d}", 
+            worldId != null ? worldId : "null",
+            blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 }

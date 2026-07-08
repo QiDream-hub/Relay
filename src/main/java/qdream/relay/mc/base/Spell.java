@@ -20,6 +20,7 @@ public abstract class Spell extends Operation {
 
     /**
      * 获取基础能量消耗
+     * 
      * @return 基础能量值
      */
     public double getEnergy() {
@@ -39,5 +40,13 @@ public abstract class Spell extends Operation {
 
         return this.getId().equals(that.getId());
 
+    }
+
+    /**
+     * 转换为字符串(默认为id)
+     */
+    @Override
+    public String asString() {
+        return id;
     }
 }

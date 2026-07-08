@@ -7,7 +7,6 @@ import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
 
-import net.minecraft.world.phys.Vec3;
 
 /**
  * 向量长度计算操作

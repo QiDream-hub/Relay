@@ -85,7 +85,7 @@ public class NumberData extends Data {
     }
 
     @Override
-    public String toString() {
-        return "NumberData{value=" + value + "}";
+    public String asString() {
+        return String.valueOf(value);
     }
 }

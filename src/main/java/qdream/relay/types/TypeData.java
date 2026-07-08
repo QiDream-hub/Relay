@@ -31,6 +31,7 @@ public class TypeData extends Data {
 
     /**
      * 比较两个 TypeData 是否相同
+     * 
      * @param other 另一个 TypeData 实例
      * @return 如果两个类型的 id 相同则返回 true
      */
@@ -81,7 +82,7 @@ public class TypeData extends Data {
     }
 
     @Override
-    public String toString() {
-        return "TypeData{id=" + value + "}";
+    public String asString() {
+        return value;
     }
 }
