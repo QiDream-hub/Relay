@@ -228,6 +228,21 @@
   "operation.relay:scan_entities.name": "范围实体扫描",
   "operation.relay:scan_entities.description": "扫描指定范围内的所有实体并返回实体列表",
 
+  "operation.relay:get_container_items.name": "获取容器物品",
+  "operation.relay:get_container_items.description": "获取容器内的所有物品，返回 SlotData 列表",
+
+  "operation.relay:merge_items.name": "合并物品",
+  "operation.relay:merge_items.description": "尝试将两个物品堆合并，返回剩余物品或 null",
+
+  "operation.relay:get_item_count.name": "获取物品数量",
+  "operation.relay:get_item_count.description": "获取物品堆的数量",
+
+  "operation.relay:get_item_type.name": "获取物品类型",
+  "operation.relay:get_item_type.description": "获取物品的注册表 ID",
+
+  "operation.relay:drop_item.name": "生成物品实体",
+  "operation.relay:drop_item.description": "在指定坐标生成物品实体",
+
   "operation.relay:break_block.name": "破坏方块",
   "operation.relay:break_block.description": "破坏指定位置的方块",
 
@@ -359,6 +374,8 @@
   "param.amount.description": "弹出数量",
   "param.many.description": "可变输入（从数据栈\n弹出的元素）",
   "param.removed.description": "被移除的元素",
+  "param.any.description": "任意数据",
+  "param.items.description": "物品列表",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
@@ -378,10 +395,10 @@
   "type.relay:list.description": "元素列表，可存储任意类型",
   "type.relay:type.name": "类型",
   "type.relay:type.description": "类型标识符，存储注册表 ID",
-  "type.relay:item.name": "物品",
-  "type.relay:item.description": "物品引用，可获取物品信息",
   "type.relay:null.name": "空值",
   "type.relay:null.description": "空值类型，表示无数据",
+  "type.relay:slot.name": "插槽",
+  "type.relay:slot.description": "容器的插槽引用",
 
   "type.any.name": "任意",
   "type....any.name": "...任意"

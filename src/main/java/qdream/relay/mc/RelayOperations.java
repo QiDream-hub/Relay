@@ -190,6 +190,8 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new MergeItemsOp()));
                 OperationRegistry.register("relay:get_item_count",
                                 new OperationRegistry.OpEntry(new GetItemCountOp()));
+                OperationRegistry.register("relay:get_item_type",
+                                new OperationRegistry.OpEntry(new GetItemTypeOp()));
                 OperationRegistry.register("relay:drop_item",
                                 new OperationRegistry.OpEntry(new DropItemOp()));
         }

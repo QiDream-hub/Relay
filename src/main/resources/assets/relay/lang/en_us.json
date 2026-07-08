@@ -228,6 +228,21 @@
   "operation.relay:scan_entities.name": "Scan Entities",
   "operation.relay:scan_entities.description": "Scan all entities within specified range and return entity list",
 
+  "operation.relay:get_container_items.name": "Get Container Items",
+  "operation.relay:get_container_items.description": "Get all items in container, returns list of SlotData",
+
+  "operation.relay:merge_items.name": "Merge Items",
+  "operation.relay:merge_items.description": "Try to merge two item stacks, returns remaining item or null",
+
+  "operation.relay:get_item_count.name": "Get Item Count",
+  "operation.relay:get_item_count.description": "Get the count of an item stack",
+
+  "operation.relay:get_item_type.name": "Get Item Type",
+  "operation.relay:get_item_type.description": "Get the registry ID of an item",
+
+  "operation.relay:drop_item.name": "Drop Item Entity",
+  "operation.relay:drop_item.description": "Spawn item entity at specified position",
+
   "operation.relay:break_block.name": "Break Block",
   "operation.relay:break_block.description": "Break block at specified position",
 
@@ -267,7 +282,7 @@
   "operation.relay:type_to_string.name": "Type To String",
   "operation.relay:type_to_string.description": "Convert type ID to string",
 
-    "operation.relay:to_string.name": "To String",
+  "operation.relay:to_string.name": "To String",
   "operation.relay:to_string.description": "Convert any type to string representation",
 
   "param.string.description": "String",
@@ -363,6 +378,8 @@
   "param.amount.description": "Amount to pop",
   "param.many.description": "Variable input (elements popped from data stack)",
   "param.removed.description": "The removed element",
+  "param.any.description": "Arbitrary data",
+  "param.items.description": "Item list",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",
@@ -378,10 +395,10 @@
   "type.relay:list.description": "Element list, can store any type",
   "type.relay:type.name": "Type",
   "type.relay:type.description": "Type identifier, stores registry ID",
-  "type.relay:item.name": "Item",
-  "type.relay:item.description": "Item reference, can access item information",
   "type.relay:null.name": "Null",
   "type.relay:null.description": "Null type, represents no data",
+  "type.relay:slot.name": "Slot",
+  "type.relay:slot.description": "Slot reference of the container",
 
   "type.any.name": "any",
   "type....any.name": "...any"

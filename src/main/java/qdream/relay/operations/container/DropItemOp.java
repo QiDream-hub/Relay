@@ -3,29 +3,29 @@ package qdream.relay.operations.container;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ContainerTools;
-import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.SlotData;
+import qdream.relay.types.VectorData;
 
 import net.minecraft.server.level.ServerLevel;
 import qdream.relay.Relay;
 
 /**
- * 将物品放到指定坐标（以物品实体方式，支持跨维度）
- * 输入：SlotData, BlockEntityData（目标位置）
+ * 在指定坐标生成物品实体（支持跨维度）
+ * 输入：SlotData（物品引用）, VectorData（目标位置）
  * 输出：无
  */
 public class DropItemOp extends Spell {
 
     public DropItemOp() {
         super("relay:drop_item", 1, 1, OperationSignature.builder()
-                .consumesFromData("item", "relay:item")
-                .consumesFromData("position", "relay:block_entity")
+                .consumesFromData("item", "relay:slot")
+                .consumesFromData("position", "relay:vector")
                 .build());
     }
 
@@ -35,7 +35,7 @@ public class DropItemOp extends Spell {
             return;
         }
 
-        BlockEntityData positionData = OperationHelpers.popBlockEntity(executor, id);
+        VectorData positionData = OperationHelpers.popVector(executor, id);
         if (positionData == null) {
             return;
         }
@@ -52,20 +52,15 @@ public class DropItemOp extends Spell {
             return;
         }
 
-        ServerLevel positionLevel = Relay.getWorld(positionData.getWorldId());
+        ServerLevel positionLevel = Relay.getWorld(itemData.getWorldId());
         if (positionLevel == null) {
-            executor.triggerMishap(id + " 目标世界不存在：" + positionData.getWorldId());
+            executor.triggerMishap(id + " 目标世界不存在：" + itemData.getWorldId());
             return;
         }
 
-        // 获取目标位置的方块实体（使用目标世界）
-        BlockEntity targetBlockEntity = positionData.getBlockEntity(positionLevel);
-        if (targetBlockEntity == null) {
-            executor.triggerMishap(id + " 目标位置不存在");
-            return;
-        }
-
-        BlockPos targetPos = targetBlockEntity.getBlockPos();
+        // 从向量获取目标位置
+        Vec3 targetVec = positionData.asVector();
+        BlockPos targetPos = BlockPos.containing(targetVec);
 
         // 获取物品堆（使用物品所在世界）
         ItemStack itemStack = itemData.getItemStack(itemLevel);
