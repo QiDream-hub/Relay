@@ -222,6 +222,12 @@
   "operation.relay:detect_entity.name": "检测实体",
   "operation.relay:detect_entity.description": "检测指定范围内是否有实体",
 
+  "operation.relay:pickup_item.name": "拾取物品",
+  "operation.relay:pickup_item.description": "将物品实体放入容器中。成功返回物品数据，失败返回 false",
+
+  "operation.relay:scan_entities.name": "范围实体扫描",
+  "operation.relay:scan_entities.description": "扫描指定范围内的所有实体并返回实体列表",
+
   "operation.relay:break_block.name": "破坏方块",
   "operation.relay:break_block.description": "破坏指定位置的方块",
 
@@ -308,6 +314,7 @@
   "param.size.description": "大小",
   "param.elements.description": "元素列表",
   "param.entity.description": "实体",
+  "param.item.description": "物品",
   "param.isPlayer.description": "是否是玩家",
   "param.owner.description": "所有者",
   "param.self.description": "自身",
@@ -343,6 +350,7 @@
   "param.type_a.description": "第一个类型",
   "param.type_b.description": "第二个类型",
   "param.block_entity.description": "获取的方块实体",
+  "param.container.description": "容器方块实体",
   "param.scalar.description": "数乘标量",
   "param.x.description": "X 坐标",
   "param.y.description": "Y 坐标",

@@ -1,5 +1,6 @@
 package qdream.relay.mc;
 
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.operations.arithmetic.AddOp;
 import qdream.relay.operations.arithmetic.CeilOp;
@@ -36,6 +37,8 @@ import qdream.relay.operations.entity.GetEntityEyePosOp;
 import qdream.relay.operations.entity.GetOwnerOp;
 import qdream.relay.operations.entity.GetSelfOp;
 import qdream.relay.operations.entity.IsPlayerOp;
+import qdream.relay.operations.entity.ScanEntitiesOp;
+import qdream.relay.operations.item.PickupItemOp;
 import qdream.relay.operations.type.GetTypeOp;
 import qdream.relay.operations.type.ToStringOp;
 import qdream.relay.operations.vector.BlockRaycastOp;
@@ -76,6 +79,7 @@ import qdream.relay.types.BooleanData;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.BlockData;
 import qdream.relay.types.EntityData;
+import qdream.relay.types.ItemData;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
@@ -123,6 +127,8 @@ public class RelayOperations {
                                 new OperationRegistry.DataEntry(() -> new BlockData(null, null, null)));
                 OperationRegistry.register("relay:type",
                                 new OperationRegistry.DataEntry(() -> new TypeData("")));
+                OperationRegistry.register("relay:item",
+                                new OperationRegistry.DataEntry(() -> new ItemData(null, null, -1, null)));
         }
 
         private static void registerOperations() {
@@ -159,6 +165,10 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new GetEntityOp()));
                 OperationRegistry.register("relay:get_block",
                                 new OperationRegistry.OpEntry(new GetBlockOp()));
+                OperationRegistry.register("relay:scan_entities",
+                                new OperationRegistry.OpEntry(new ScanEntitiesOp()));
+                OperationRegistry.register("relay:pickup_item",
+                                new OperationRegistry.OpEntry(new PickupItemOp()));
 
                 // 类型操作
                 OperationRegistry.register("relay:get_type",

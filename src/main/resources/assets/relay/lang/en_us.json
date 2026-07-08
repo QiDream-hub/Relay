@@ -222,6 +222,12 @@
   "operation.relay:detect_entity.name": "Detect Entity",
   "operation.relay:detect_entity.description": "Check if there is an entity within specified range",
 
+  "operation.relay:pickup_item.name": "Pickup Item",
+  "operation.relay:pickup_item.description": "Put item entity into container. Returns item data on success, false on failure",
+
+  "operation.relay:scan_entities.name": "Scan Entities",
+  "operation.relay:scan_entities.description": "Scan all entities within specified range and return entity list",
+
   "operation.relay:break_block.name": "Break Block",
   "operation.relay:break_block.description": "Break block at specified position",
 
@@ -312,6 +318,7 @@
   "param.size.description": "Size",
   "param.elements.description": "Elements",
   "param.entity.description": "Entity",
+  "param.item.description": "Item",
   "param.isPlayer.description": "Is player",
   "param.owner.description": "Owner",
   "param.self.description": "Self",
@@ -347,6 +354,7 @@
   "param.type_a.description": "First type",
   "param.type_b.description": "Second type",
   "param.block_entity.description": "Obtained block entity",
+  "param.container.description": "Container block entity",
   "param.scalar.description": "Scalar multiplier",
   "param.x.description": "X coordinate",
   "param.y.description": "Y coordinate",
