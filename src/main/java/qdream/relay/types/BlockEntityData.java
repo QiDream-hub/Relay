@@ -54,7 +54,7 @@ public class BlockEntityData extends Data {
         if (blockEntity == null) {
             return new BlockEntityData(null, null, null);
         }
-        String worldId = blockEntity.getLevel().dimension().registry().toString();
+        String worldId = blockEntity.getLevel().dimension().identifier().toString();
         BlockPos pos = blockEntity.getBlockPos().immutable();
         return new BlockEntityData(pos, worldId, blockEntity);
     }

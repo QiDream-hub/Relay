@@ -54,7 +54,7 @@ public class BlockData extends Data {
         if (blockState == null) {
             return new BlockData(null, null, null);
         }
-        String worldId = world.dimension().registry().toString();
+        String worldId = world.dimension().identifier().toString();
         BlockPos immutablePos = pos.immutable();
         return new BlockData(immutablePos, worldId, blockState);
     }

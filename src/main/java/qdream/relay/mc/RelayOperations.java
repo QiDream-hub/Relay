@@ -1,91 +1,17 @@
 package qdream.relay.mc;
 
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import qdream.relay.operations.arithmetic.AddOp;
-import qdream.relay.operations.arithmetic.CeilOp;
-import qdream.relay.operations.arithmetic.DivOp;
-import qdream.relay.operations.arithmetic.FloorOp;
-import qdream.relay.operations.arithmetic.ModOp;
-import qdream.relay.operations.arithmetic.MulOp;
-import qdream.relay.operations.arithmetic.SubOp;
-import qdream.relay.operations.base.BatchDupOp;
-import qdream.relay.operations.base.CopyToTopOp;
-import qdream.relay.operations.base.DupOp;
-import qdream.relay.operations.base.GetDataStackLengthOp;
-import qdream.relay.operations.base.GetProgramStackLengthOp;
-import qdream.relay.operations.base.GetWorldInteractorOp;
-import qdream.relay.operations.base.MoveToTopOp;
-import qdream.relay.operations.base.PopOp;
-import qdream.relay.operations.base.StackRearrangeOp;
-import qdream.relay.operations.base.SwapOp;
-import qdream.relay.operations.communication.PeekOp;
-import qdream.relay.operations.communication.RecvOp;
-import qdream.relay.operations.communication.SendOp;
-import qdream.relay.operations.communication.SendMessageOp;
-import qdream.relay.operations.control.EvalOp;
-import qdream.relay.operations.control.ForOp;
-import qdream.relay.operations.control.IfOp;
-import qdream.relay.operations.control.StopOp;
-import qdream.relay.operations.control.WhileOp;
-import qdream.relay.operations.entity.GetBlockEntityOp;
-import qdream.relay.operations.entity.GetBlockOp;
-import qdream.relay.operations.entity.GetEntityOp;
-import qdream.relay.operations.entity.GetEntityPosOp;
-import qdream.relay.operations.entity.DetectEntityOp;
-import qdream.relay.operations.entity.GetEntityEyePosOp;
-import qdream.relay.operations.entity.GetOwnerOp;
-import qdream.relay.operations.entity.GetSelfOp;
-import qdream.relay.operations.entity.IsPlayerOp;
-import qdream.relay.operations.entity.ScanEntitiesOp;
-import qdream.relay.operations.item.PickupItemOp;
-import qdream.relay.operations.type.GetTypeOp;
-import qdream.relay.operations.type.ToStringOp;
-import qdream.relay.operations.vector.BlockRaycastOp;
-import qdream.relay.operations.vector.BreakBlockFortuneOp;
-import qdream.relay.operations.vector.BreakBlockOp;
-import qdream.relay.operations.vector.BreakBlockSilkTouchOp;
-import qdream.relay.operations.vector.DetectBlockOp;
-import qdream.relay.operations.vector.EntityRaycastOp;
-import qdream.relay.operations.vector.GetLookVectorOp;
-import qdream.relay.operations.vector.PushVectorOp;
-import qdream.relay.operations.vector.RaycastOp;
-import qdream.relay.operations.vector.SetEntityLookOp;
-import qdream.relay.operations.vector.VectorAddOp;
-import qdream.relay.operations.vector.VectorCrossOp;
-import qdream.relay.operations.vector.VectorDistanceOp;
-import qdream.relay.operations.vector.VectorDotOp;
-import qdream.relay.operations.vector.VectorLengthOp;
-import qdream.relay.operations.vector.VectorMulOp;
-import qdream.relay.operations.vector.VectorNormalizeOp;
-import qdream.relay.operations.vector.VectorSubOp;
-import qdream.relay.operations.vector.BuildVectorOp;
-import qdream.relay.operations.logic.AndOp;
-import qdream.relay.operations.logic.EqOp;
-import qdream.relay.operations.logic.GtOp;
-import qdream.relay.operations.logic.LtOp;
-import qdream.relay.operations.logic.NotOp;
-import qdream.relay.operations.logic.OrOp;
-import qdream.relay.operations.list.ListAddUniqueOp;
-import qdream.relay.operations.list.ListAppendOp;
-import qdream.relay.operations.list.ListCreatOp;
-import qdream.relay.operations.list.ListGetOp;
-import qdream.relay.operations.list.ListLengthOp;
-import qdream.relay.operations.list.ListRemoveOp;
-import qdream.relay.operations.list.ListSetOp;
-import qdream.relay.operations.list.ListUniqOp;
-import qdream.relay.operations.list.ListUnpackOp;
-import qdream.relay.types.BooleanData;
-import qdream.relay.types.BlockEntityData;
-import qdream.relay.types.BlockData;
-import qdream.relay.types.EntityData;
-import qdream.relay.types.ItemData;
-import qdream.relay.types.ListData;
-import qdream.relay.types.NullData;
-import qdream.relay.types.NumberData;
-import qdream.relay.types.StringData;
-import qdream.relay.types.VectorData;
-import qdream.relay.types.TypeData;
+import qdream.relay.operations.arithmetic.*;
+import qdream.relay.operations.base.*;
+import qdream.relay.operations.communication.*;
+import qdream.relay.operations.container.*;
+import qdream.relay.operations.control.*;
+import qdream.relay.operations.entity.*;
+import qdream.relay.operations.type.*;
+import qdream.relay.operations.vector.*;
+import qdream.relay.operations.logic.*;
+import qdream.relay.operations.list.*;
+import qdream.relay.types.*;
 
 import java.util.ArrayList;
 
@@ -127,8 +53,8 @@ public class RelayOperations {
                                 new OperationRegistry.DataEntry(() -> new BlockData(null, null, null)));
                 OperationRegistry.register("relay:type",
                                 new OperationRegistry.DataEntry(() -> new TypeData("")));
-                OperationRegistry.register("relay:item",
-                                new OperationRegistry.DataEntry(() -> new ItemData(null, null, -1, null)));
+                OperationRegistry.register("relay:slot",
+                                new OperationRegistry.DataEntry(() -> new SlotData(null, null, -1)));
         }
 
         private static void registerOperations() {
@@ -256,5 +182,15 @@ public class RelayOperations {
                 OperationRegistry.register("relay:entity_raycast",
                                 new OperationRegistry.OpEntry(new EntityRaycastOp()));
                 OperationRegistry.register("relay:block_raycast", new OperationRegistry.OpEntry(new BlockRaycastOp()));
+
+                // 容器操作
+                OperationRegistry.register("relay:get_container_items",
+                                new OperationRegistry.OpEntry(new GetContainerItemsOp()));
+                OperationRegistry.register("relay:merge_items",
+                                new OperationRegistry.OpEntry(new MergeItemsOp()));
+                OperationRegistry.register("relay:get_item_count",
+                                new OperationRegistry.OpEntry(new GetItemCountOp()));
+                OperationRegistry.register("relay:drop_item",
+                                new OperationRegistry.OpEntry(new DropItemOp()));
         }
 }

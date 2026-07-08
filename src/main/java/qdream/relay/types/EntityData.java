@@ -58,7 +58,7 @@ public class EntityData extends Data {
         if (entity == null) {
             return new EntityData(null, null, null);
         }
-        String worldId = entity.level().dimension().registry().toString();
+        String worldId = entity.level().dimension().identifier().toString();
         return new EntityData(entity.getUUID(), worldId, entity);
     }
 

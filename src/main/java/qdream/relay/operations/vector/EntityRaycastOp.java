@@ -139,7 +139,8 @@ public class EntityRaycastOp extends Spell {
                 executor.pushData(NullData.INSTANCE);
                 return;
             }
-            executor.pushData(EntityData.from(hitEntity, level));
+            EntityData result = EntityData.from(hitEntity, level);
+            executor.pushData(result);
         } else {
             executor.pushData(NullData.INSTANCE);
         }

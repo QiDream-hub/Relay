@@ -73,7 +73,7 @@ public class GetBlockEntityOp extends Spell {
             executor.pushData(BlockEntityData.from(blockEntity, level));
         } else {
             // 返回 null BlockEntityType
-            executor.pushData(new BlockEntityData(blockPos, level.dimension().registry().toString(), null));
+            executor.pushData(new BlockEntityData(blockPos, level.dimension().identifier().toString(), null));
         }
     }
 }

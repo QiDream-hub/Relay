@@ -10,6 +10,7 @@ import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.VectorData;
 import qdream.relay.types.EntityData;
+import qdream.relay.types.SlotData;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.ListData;
 import qdream.relay.types.StringData;
@@ -460,6 +461,28 @@ public final class OperationHelpers {
      */
     public static TypeData peekType(StateMachine executor, String operationName) {
         return peekAsType(executor, 0, TypeData.class, operationName, "relay:type");
+    }
+
+    /**
+     * 弹出 TypeData 类型
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return TypeData，失败返回 null
+     */
+    public static SlotData popSlot(StateMachine executor, String operationName) {
+        return popAsType(executor, SlotData.class, operationName, "relay:slot");
+    }
+
+    /**
+     * 窥视栈顶 TypeData 类型（不弹出）
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @return TypeData，失败返回 null
+     */
+    public static SlotData peekSlot(StateMachine executor, String operationName) {
+        return peekAsType(executor, 0, SlotData.class, operationName, "relay:slot");
     }
 
     // ==================== 便捷转换方法 ====================

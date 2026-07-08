@@ -31,13 +31,13 @@ public class Relay implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	// ✅ StateMachine 默认最大程序栈数量
+	// StateMachine 默认最大程序栈数量
 	public static final int DEFAULT_MAX_PROGRAM_STACK_SIZE = 4096;
 
-	// ✅ 全局 Server 引用
+	// 全局 Server 引用
 	private static MinecraftServer SERVER_INSTANCE = null;
 
-	// ✅ 便捷方法：获取 Server
+	// 便捷方法：获取 Server
 	public static MinecraftServer getServer() {
 		if (SERVER_INSTANCE == null) {
 			throw new IllegalStateException("Server is not initialized yet!");
@@ -45,7 +45,7 @@ public class Relay implements ModInitializer {
 		return SERVER_INSTANCE;
 	}
 
-	// ✅ 便捷方法：根据 ID 获取世界
+	// 便捷方法：根据 ID 获取世界
 	public static ServerLevel getWorld(String worldId) {
 		// 解析ID
 		Identifier id = Identifier.tryParse(worldId);

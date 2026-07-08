@@ -29,7 +29,7 @@ import qdream.relay.mc.signature.DataSignature;
  * <li>执行：{@link #execute(StateMachine)} - 将自己压入数据栈</li>
  * </ul>
  */
-public class ItemData extends Data {
+public class SlotData extends Data {
     /** 容器位置 */
     private final BlockPos containerPos;
 
@@ -39,12 +39,9 @@ public class ItemData extends Data {
     /** 容器格子索引 */
     private final int slot;
 
-    /** 运行时缓存，不序列化 */
-    private transient ItemStack itemStackRef;
-
-    public ItemData(BlockPos containerPos, String worldId, int slot, ItemStack itemStackRef) {
-        super("relay:item", 0, DataSignature.builder()
-                .output("relay:item")
+    public SlotData(BlockPos containerPos, String worldId, int slot) {
+        super("relay:slot", 0, DataSignature.builder()
+                .output("relay:slot")
                 .field("world", "String")
                 .field("x", "Number")
                 .field("y", "Number")
@@ -54,37 +51,33 @@ public class ItemData extends Data {
         this.containerPos = containerPos;
         this.worldId = worldId;
         this.slot = slot;
-        this.itemStackRef = itemStackRef;
     }
 
     /**
      * 从 ItemStack 创建 ItemData（存储位置 + 世界 ID + 格子索引 + 引用）
      *
-     * @param itemStack 物品堆
+     * @param itemStack    物品堆
      * @param containerPos 容器位置
-     * @param world 世界
-     * @param slot 格子索引
+     * @param world        世界
+     * @param slot         格子索引
      * @return ItemData 实例
      */
-    public static ItemData from(ItemStack itemStack, BlockPos containerPos, Level world, int slot) {
-        if (itemStack == null || itemStack.isEmpty()) {
-            return new ItemData(null, null, -1, null);
-        }
-        String worldId = world.dimension().registry().toString();
+    public static SlotData from(BlockPos containerPos, Level world, int slot) {
+        String worldId = world.dimension().identifier().toString();
         BlockPos immutablePos = containerPos.immutable();
-        return new ItemData(immutablePos, worldId, slot, itemStack);
+        return new SlotData(immutablePos, worldId, slot);
     }
 
     /**
      * 从坐标和格子索引创建 ItemData（用于反序列化，不保持引用）
      *
      * @param containerPos 容器位置
-     * @param worldId 世界 ID
-     * @param slot 格子索引
+     * @param worldId      世界 ID
+     * @param slot         格子索引
      * @return ItemData 实例
      */
-    public static ItemData fromContainer(BlockPos containerPos, String worldId, int slot) {
-        return new ItemData(containerPos, worldId, slot, null);
+    public static SlotData fromContainer(BlockPos containerPos, String worldId, int slot) {
+        return new SlotData(containerPos, worldId, slot);
     }
 
     @Override
@@ -99,10 +92,6 @@ public class ItemData extends Data {
      * @return 物品堆，如果容器不存在或格子为空返回 EMPTY
      */
     public ItemStack getItemStack(Level world) {
-        // 如果有缓存引用，先验证是否仍然有效
-        if (itemStackRef != null && !itemStackRef.isEmpty()) {
-            return itemStackRef;
-        }
 
         // 缓存失效，通过 BlockPos 查询容器
         if (containerPos == null || world == null || slot < 0) {
@@ -156,14 +145,7 @@ public class ItemData extends Data {
      * 是否是 null 引用
      */
     public boolean isNull() {
-        return containerPos == null && worldId == null && slot < 0 && itemStackRef == null;
-    }
-
-    /**
-     * 更新物品堆引用缓存
-     */
-    public void refreshCache(ItemStack itemStack) {
-        this.itemStackRef = itemStack;
+        return containerPos == null && worldId == null && slot < 0;
     }
 
     @Override
@@ -193,7 +175,7 @@ public class ItemData extends Data {
     public Data fromNbt(CompoundTag tag) {
         CompoundTag valueTag = tag.getCompound("value").orElse(null);
         if (valueTag == null) {
-            return new ItemData(null, null, -1, null);
+            return new SlotData(null, null, -1);
         }
 
         String worldId = null;
@@ -214,7 +196,7 @@ public class ItemData extends Data {
             slot = valueTag.getInt("slot").orElse(-1);
         }
 
-        return ItemData.fromContainer(containerPos, worldId, slot);
+        return SlotData.fromContainer(containerPos, worldId, slot);
     }
 
     @Override
@@ -254,14 +236,14 @@ public class ItemData extends Data {
 
             int slot = valueObject.has("slot") ? valueObject.get("slot").getAsInt() : -1;
 
-            return ItemData.fromContainer(containerPos, worldId, slot);
+            return SlotData.fromContainer(containerPos, worldId, slot);
         }
-        return new ItemData(null, null, -1, null);
+        return new SlotData(null, null, -1);
     }
 
     @Override
     public boolean equalsTo(Operation other) {
-        if (!(other instanceof ItemData that)) {
+        if (!(other instanceof SlotData that)) {
             return false;
         }
         if (this.slot != that.slot) {
