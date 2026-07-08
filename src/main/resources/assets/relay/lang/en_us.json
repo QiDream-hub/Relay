@@ -261,8 +261,10 @@
   "operation.relay:type_to_string.name": "Type To String",
   "operation.relay:type_to_string.description": "Convert type ID to string",
 
-  "param.string.description": "String",
+    "operation.relay:to_string.name": "To String",
+  "operation.relay:to_string.description": "Convert any type to string representation",
 
+  "param.string.description": "String",
   "param.augend.description": "Augend",
   "param.addend.description": "Addend",
   "param.sum.description": "Sum",
@@ -368,6 +370,8 @@
   "type.relay:list.description": "Element list, can store any type",
   "type.relay:type.name": "Type",
   "type.relay:type.description": "Type identifier, stores registry ID",
+  "type.relay:item.name": "Item",
+  "type.relay:item.description": "Item reference, can access item information",
   "type.relay:null.name": "Null",
   "type.relay:null.description": "Null type, represents no data",
 

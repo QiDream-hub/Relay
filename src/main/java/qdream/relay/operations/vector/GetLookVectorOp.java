@@ -1,11 +1,8 @@
 package qdream.relay.operations.vector;
 
-import java.util.Optional;
-
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;

@@ -25,7 +25,7 @@ import qdream.relay.types.StringData;
 public class ToStringOp extends Spell {
 
     public ToStringOp() {
-        super("relay:to_string", 1, 1, OperationSignature.builder()
+        super("relay:to_string", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("any", "relay:any")
                 .producesToData("string", "relay:string")
                 .build());

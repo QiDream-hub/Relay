@@ -1,9 +1,9 @@
 package qdream.relay.operations.vector;
 
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -20,7 +20,7 @@ import qdream.relay.types.VectorData;
  *
  * 行为：
  * - vector 会被归一化作为方向向量
- * - 设置实体的 yRot (水平旋转) 和 xRot (垂直旋转)
+ * - 使用 Entity.lookAt() 方法设置实体朝向
  *
  * 验证：
  * - 向量不能为零向量
@@ -30,8 +30,8 @@ public class SetEntityLookOp extends Spell {
 
     public SetEntityLookOp() {
         super("relay:set_entity_look", 1, 1, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
                 .consumesFromData("direction", "relay:vector")
+                .consumesFromData("entity", "relay:entity")
                 .build());
     }
 
@@ -42,12 +42,15 @@ public class SetEntityLookOp extends Spell {
             return;
         }
 
-        EntityData popEntity = OperationHelpers.popEntity(executor, id);
         VectorData popVector = OperationHelpers.popVector(executor, id);
+        EntityData popEntity = OperationHelpers.popEntity(executor, id);
+        if (popEntity == null || popVector == null) {
+            return;
+        }
 
         Entity entity = popEntity.getEntity();
         if (entity == null) {
-            executor.triggerMishap(id+" 错误的实体");
+            executor.triggerMishap(id + " 错误的实体");
             return;
         }
 
@@ -67,20 +70,12 @@ public class SetEntityLookOp extends Spell {
 
         direction = direction.normalize();
 
-        // 计算 yaw (yRot) 和 pitch (xRot)
-        double x = direction.x;
-        double y = direction.y;
-        double z = direction.z;
+        // 计算目标点：从实体眼睛位置沿方向向量延伸
+        Vec3 eyePos = entity.getEyePosition();
+        Vec3 targetPos = eyePos.add(direction);
 
-        // yaw: 水平旋转角度，从 -z 轴开始顺时针
-        double yaw = Math.toDegrees(Math.atan2(-x, z));
-
-        // pitch: 垂直旋转角度，向上为正
-        double horizontalDist = Math.sqrt(x * x + z * z);
-        double pitch = Math.toDegrees(Math.atan2(y, horizontalDist));
-
-        entity.setYRot((float) yaw);
-        entity.setXRot((float) pitch);
+        // 使用 lookAt 方法设置朝向，自动处理客户端同步
+        entity.lookAt(EntityAnchorArgument.Anchor.EYES, targetPos);
     }
 
     /**

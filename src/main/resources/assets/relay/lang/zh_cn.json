@@ -257,8 +257,10 @@
   "operation.relay:type_to_string.name": "类型转字符串",
   "operation.relay:type_to_string.description": "将类型 ID 转换为字符串",
 
-  "param.string.description": "字符串",
+  "operation.relay:to_string.name": "转字符串",
+  "operation.relay:to_string.description": "将任意类型转换为字符串表示",
 
+  "param.string.description": "字符串",
   "param.augend.description": "被加数",
   "param.addend.description": "加数",
   "param.sum.description": "和",
@@ -368,6 +370,8 @@
   "type.relay:list.description": "元素列表，可存储任意类型",
   "type.relay:type.name": "类型",
   "type.relay:type.description": "类型标识符，存储注册表 ID",
+  "type.relay:item.name": "物品",
+  "type.relay:item.description": "物品引用，可获取物品信息",
   "type.relay:null.name": "空值",
   "type.relay:null.description": "空值类型，表示无数据",
 
