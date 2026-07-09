@@ -5,15 +5,76 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import qdream.relay.Relay;
 import qdream.relay.types.SlotData;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 容器操作工具类
+ * 提供容器和物品堆的获取、合并、查询等操作
+ */
 public class ContainerTools {
     private ContainerTools() {
     }
 
+    /**
+     * 根据 SlotData 获取容器
+     * 通过 BlockPos + 世界 ID 获取方块容器
+     *
+     * @param slotData 槽位数据
+     * @return 容器实例，如果找不到返回 null
+     */
+    public static Container getContainer(SlotData slotData) {
+        if (slotData == null) {
+            return null;
+        }
+
+        String worldId = slotData.getWorldId();
+        if (worldId == null) {
+            return null;
+        }
+
+        Level level = Relay.getWorld(worldId);
+        if (level == null) {
+            return null;
+        }
+
+        BlockPos containerPos = slotData.getContainerPos();
+        if (containerPos != null) {
+            var blockEntity = level.getBlockEntity(containerPos);
+            if (blockEntity instanceof Container container) {
+                return container;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 根据 SlotData 获取物品堆
+     *
+     * @param slotData 槽位数据
+     * @return 物品堆，如果找不到返回 ItemStack.EMPTY
+     */
+    public static ItemStack getItemStack(SlotData slotData) {
+        if (slotData == null) {
+            return ItemStack.EMPTY;
+        }
+
+        Container container = getContainer(slotData);
+        if (container == null) {
+            return ItemStack.EMPTY;
+        }
+
+        int slot = slotData.getSlot();
+        if (slot < 0 || slot >= container.getContainerSize()) {
+            return ItemStack.EMPTY;
+        }
+
+        return container.getItem(slot);
+    }
 
     /**
      * 合并物品的结果
@@ -31,14 +92,14 @@ public class ContainerTools {
      */
     public static List<Integer> tryInsertIntoContainer(Container container, ItemStack itemStack) {
         List<Integer> slots = new ArrayList<>();
-        
+
         // 第一阶段：尝试放入可堆叠的槽位
         for (int i = 0; i < container.getContainerSize() && !itemStack.isEmpty(); i++) {
             ItemStack existingStack = container.getItem(i);
             if (!existingStack.isEmpty() && ItemStack.isSameItemSameComponents(existingStack, itemStack)) {
                 int maxStackSize = Math.min(container.getMaxStackSize(existingStack), existingStack.getMaxStackSize());
                 int space = maxStackSize - existingStack.getCount();
-                
+
                 if (space > 0) {
                     int amountToInsert = Math.min(space, itemStack.getCount());
                     existingStack.grow(amountToInsert);
@@ -48,20 +109,20 @@ public class ContainerTools {
                 }
             }
         }
-        
+
         // 第二阶段：尝试放入空槽位
         for (int i = 0; i < container.getContainerSize() && !itemStack.isEmpty(); i++) {
             ItemStack existingStack = container.getItem(i);
             if (existingStack.isEmpty()) {
                 int maxStackSize = Math.min(container.getMaxStackSize(itemStack), itemStack.getMaxStackSize());
                 int amountToInsert = Math.min(maxStackSize, itemStack.getCount());
-                
+
                 container.setItem(i, itemStack.split(amountToInsert));
                 slots.add(i);
                 container.setChanged();
             }
         }
-        
+
         return slots;
     }
 

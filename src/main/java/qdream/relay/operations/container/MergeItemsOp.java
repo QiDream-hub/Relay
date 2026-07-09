@@ -23,7 +23,7 @@ public class MergeItemsOp extends Spell {
         super("relay:merge_items", 2, 0.25, OperationSignature.builder()
                 .consumesFromData("target_item", "relay:slot")
                 .consumesFromData("source_item", "relay:slot")
-                .producesToData("result", "boolean|relay:item")
+                .producesToData("result", "relay:boolean", "relay:slot")
                 .build());
     }
 

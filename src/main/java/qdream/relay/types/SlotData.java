@@ -152,14 +152,16 @@ public class SlotData extends Data {
     public void toNbt(CompoundTag tag) {
         super.toNbt(tag);
         CompoundTag valueTag = new CompoundTag();
-        if (worldId != null) {
-            valueTag.putString("world", worldId);
-        }
 
         valueTag.putInt("x", 0);
         valueTag.putInt("y", 0);
         valueTag.putInt("z", 0);
         valueTag.putInt("slot", -1);
+        valueTag.putString("world", "");
+        if (worldId != null) {
+            valueTag.putString("world", worldId);
+        }
+
         if (containerPos != null) {
             valueTag.putInt("x", containerPos.getX());
             valueTag.putInt("y", containerPos.getY());
@@ -203,6 +205,13 @@ public class SlotData extends Data {
     public void toJson(JsonObject json) {
         super.toJson(json);
         JsonObject valueObject = new JsonObject();
+
+        valueObject.addProperty("world", "");
+        valueObject.addProperty("x", 0);
+        valueObject.addProperty("y", 0);
+        valueObject.addProperty("z", 0);
+        valueObject.addProperty("slot", -1);
+
         if (worldId != null) {
             valueObject.addProperty("world", worldId);
         }
@@ -212,7 +221,9 @@ public class SlotData extends Data {
             valueObject.addProperty("y", containerPos.getY());
             valueObject.addProperty("z", containerPos.getZ());
         }
-        valueObject.addProperty("slot", slot);
+        if (slot >= 0) {
+            valueObject.addProperty("slot", slot);
+        }
         json.add("value", valueObject);
     }
 

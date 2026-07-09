@@ -213,6 +213,9 @@
   "operation.relay:block_raycast.name": "方块射线追踪",
   "operation.relay:block_raycast.description": "从起点沿方向发射射线，返回命中的方块位置",
 
+  "operation.relay:block_face_raycast.name": "方块面射线追踪",
+  "operation.relay:block_face_raycast.description": "从起点沿方向发射射线，返回命中的方块面",
+
   "operation.relay:entity_raycast.name": "实体射线追踪",
   "operation.relay:entity_raycast.description": "从起点沿方向发射射线，返回命中的实体",
 
@@ -232,7 +235,7 @@
   "operation.relay:get_container_items.description": "获取容器内的所有物品，返回 SlotData 列表",
 
   "operation.relay:merge_items.name": "合并物品",
-  "operation.relay:merge_items.description": "尝试将两个物品堆合并，返回剩余物品或 null",
+  "operation.relay:merge_items.description": "尝试将两个物品堆合并，返回剩余物品或是否成功",
 
   "operation.relay:get_item_count.name": "获取物品数量",
   "operation.relay:get_item_count.description": "获取物品堆的数量",
@@ -280,6 +283,9 @@
 
   "operation.relay:to_string.name": "转字符串",
   "operation.relay:to_string.description": "将任意类型转换为字符串表示",
+
+  "operation.relay:place_block.name": "放置方块",
+  "operation.relay:place_block.description": "在指定坐标放置方块",
 
   "param.string.description": "字符串",
   "param.augend.description": "被加数",
@@ -376,6 +382,10 @@
   "param.removed.description": "被移除的元素",
   "param.any.description": "任意数据",
   "param.items.description": "物品列表",
+  "param.entities.description": "实体列表",
+  "param.hitFace.description": "方块的面",
+  "param.source_item.description": "合并物品",
+  "param.target_item.description": "被合并物品",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",

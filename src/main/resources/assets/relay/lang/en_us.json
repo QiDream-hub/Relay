@@ -213,6 +213,9 @@
   "operation.relay:block_raycast.name": "Block Raycast",
   "operation.relay:block_raycast.description": "Cast a ray from origin along direction, return hit block position",
 
+  "operation.relay:block_face_raycast.name": "Block Face Raycast",
+  "operation.relay:block_face_raycast.description": "Cast a ray from origin along direction, return hit block face",
+
   "operation.relay:entity_raycast.name": "Entity Raycast",
   "operation.relay:entity_raycast.description": "Cast a ray from origin along direction, return hit entity",
 
@@ -232,7 +235,7 @@
   "operation.relay:get_container_items.description": "Get all items in container, returns list of SlotData",
 
   "operation.relay:merge_items.name": "Merge Items",
-  "operation.relay:merge_items.description": "Try to merge two item stacks, returns remaining item or null",
+  "operation.relay:merge_items.description": "Attempt to merge two item stacks, returning the remaining items or whether the operation was successful.",
 
   "operation.relay:get_item_count.name": "Get Item Count",
   "operation.relay:get_item_count.description": "Get the count of an item stack",
@@ -380,6 +383,10 @@
   "param.removed.description": "The removed element",
   "param.any.description": "Arbitrary data",
   "param.items.description": "Item list",
+  "param.entities.description": "Entity List",
+  "param.hitFace.description": "Face of the Block",
+  "param.source_item.description": "Source item to merge",
+  "param.target_item.description": "Target item to be merged into",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",

@@ -3,6 +3,7 @@ package qdream.relay.mc;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.operations.arithmetic.*;
 import qdream.relay.operations.base.*;
+import qdream.relay.operations.block.*;
 import qdream.relay.operations.communication.*;
 import qdream.relay.operations.container.*;
 import qdream.relay.operations.control.*;
@@ -178,10 +179,14 @@ public class RelayOperations {
                 OperationRegistry.register("relay:break_block_silk_touch",
                                 new OperationRegistry.OpEntry(new BreakBlockSilkTouchOp()));
 
+                // 放置方块
+                OperationRegistry.register("relay:place_block", new OperationRegistry.OpEntry(new PlaceBlockOp()));
+
                 // 视线追踪操作
                 OperationRegistry.register("relay:entity_raycast",
                                 new OperationRegistry.OpEntry(new EntityRaycastOp()));
                 OperationRegistry.register("relay:block_raycast", new OperationRegistry.OpEntry(new BlockRaycastOp()));
+                OperationRegistry.register("relay:block_face_raycast", new OperationRegistry.OpEntry(new BlockFaceRaycastOp()));
 
                 // 容器操作
                 OperationRegistry.register("relay:get_container_items",
