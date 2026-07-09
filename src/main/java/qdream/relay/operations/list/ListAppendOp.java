@@ -7,6 +7,7 @@ import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.ListData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,8 +35,8 @@ public class ListAppendOp extends Spell {
         if (list == null)
             return;
 
-        // 创建新列表并添加原列表元素
-        List<Executable> newList = list.getValue();
+        // 创建新列表，复制原列表元素，然后添加新元素（保持不可变性）
+        List<Executable> newList = new ArrayList<>(list.getValue());
         newList.add(valueData);
         executor.pushData(new ListData(newList));
     }

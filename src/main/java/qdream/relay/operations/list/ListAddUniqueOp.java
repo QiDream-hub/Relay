@@ -8,6 +8,7 @@ import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.ListData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +36,8 @@ public class ListAddUniqueOp extends Spell {
         if (list == null)
             return;
 
-        List<Executable> newList = list.getValue();
+        // 创建新列表（保持不可变性）
+        List<Executable> newList = new ArrayList<>(list.getValue());
 
         // 检查是否已存在相同元素
         boolean isDuplicate = false;

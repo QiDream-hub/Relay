@@ -143,7 +143,7 @@ public class RelayOperations {
                 OperationRegistry.register("relay:list_remove", new OperationRegistry.OpEntry(new ListRemoveOp()));
                 OperationRegistry.register("relay:list_set", new OperationRegistry.OpEntry(new ListSetOp()));
                 OperationRegistry.register("relay:list_length", new OperationRegistry.OpEntry(new ListLengthOp()));
-                OperationRegistry.register("relay:list_creat", new OperationRegistry.OpEntry(new ListCreatOp()));
+                OperationRegistry.register("relay:list_creat", new OperationRegistry.OpEntry(new ListCreateOp()));
                 OperationRegistry.register("relay:list_unpack", new OperationRegistry.OpEntry(new ListUnpackOp()));
                 OperationRegistry.register("relay:list_uniq", new OperationRegistry.OpEntry(new ListUniqOp()));
 

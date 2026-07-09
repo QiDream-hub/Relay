@@ -16,8 +16,8 @@ import java.util.List;
  * 输入：size (数值), elements (任意数量的元素)
  * 输出：新列表
  */
-public class ListCreatOp extends Spell {
-    public ListCreatOp() {
+public class ListCreateOp extends Spell {
+    public ListCreateOp() {
         super("relay:list_creat", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("size", "relay:number")
                 .consumesFromData("elements", "...any")
