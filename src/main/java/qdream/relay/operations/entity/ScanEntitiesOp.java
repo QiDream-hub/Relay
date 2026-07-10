@@ -44,15 +44,15 @@ public class ScanEntitiesOp extends Spell {
             return;
         }
 
-        // 弹出参数
-        NumberData radiusData = OperationHelpers.popNumber(executor, id);
-        if (radiusData == null) {
+        VectorData centerData = OperationHelpers.popVector(executor, id);
+        if (centerData == null) {
             executor.pushData(new ListData(new ArrayList<>()));
             return;
         }
 
-        VectorData centerData = OperationHelpers.popVector(executor, id);
-        if (centerData == null) {
+        // 弹出参数
+        NumberData radiusData = OperationHelpers.popNumber(executor, id);
+        if (radiusData == null) {
             executor.pushData(new ListData(new ArrayList<>()));
             return;
         }
@@ -79,9 +79,8 @@ public class ScanEntitiesOp extends Spell {
 
         // 创建搜索区域
         AABB searchBox = new AABB(
-            center.x - radius, center.y - radius, center.z - radius,
-            center.x + radius, center.y + radius, center.z + radius
-        );
+                center.x - radius, center.y - radius, center.z - radius,
+                center.x + radius, center.y + radius, center.z + radius);
 
         // 获取区域内的所有实体
         List<Entity> entities = level.getEntities(null, searchBox);

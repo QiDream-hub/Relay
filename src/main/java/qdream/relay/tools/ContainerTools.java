@@ -77,12 +77,6 @@ public class ContainerTools {
     }
 
     /**
-     * 合并物品的结果
-     */
-    public record MergeResult(boolean fullyMerged, SlotData remaining) {
-    }
-
-    /**
      * 尝试将物品放入容器
      * 先尝试放入可堆叠的槽位中，再尝试放入空的槽位，返回实际放入的槽位列表
      *
@@ -148,33 +142,44 @@ public class ContainerTools {
     }
 
     /**
-     * 尝试合并两个物品（支持任意两个容器的物品堆叠）
+     * 尝试将源物品移动到目标槽位
+     * 支持堆叠到已有物品或放入空槽
      *
      * @param targetContainer 目标容器
-     * @param targetPos       目标容器位置
-     * @param targetSlot      目标槽位（已有的物品）
+     * @param targetSlot      目标槽位
      * @param sourceContainer 源容器
-     * @param sourcePos       源容器位置
-     * @param sourceSlot      源槽位（要合并的物品）
-     * @param world           世界
-     * @return MergeResult 对象，包含是否完全合并和剩余的物品
+     * @param sourceSlot      源槽位
+     * @return 源物品剩余的数量，0 表示完全移动
      */
-    public static MergeResult tryMergeItems(
-            Container targetContainer, BlockPos targetPos, int targetSlot,
-            Container sourceContainer, BlockPos sourcePos, int sourceSlot,
-            Level world) {
+    public static int moveItems(
+            Container targetContainer, int targetSlot,
+            Container sourceContainer, int sourceSlot) {
         ItemStack targetStack = targetContainer.getItem(targetSlot);
         ItemStack sourceStack = sourceContainer.getItem(sourceSlot);
 
-        if (targetStack.isEmpty() || sourceStack.isEmpty()) {
-            return new MergeResult(false, null);
+        if (sourceStack.isEmpty()) {
+            return 0;
+        }
+
+        // 如果目标槽位为空，尝试直接放入
+        if (targetStack.isEmpty()) {
+            int maxStackSize = Math.min(
+                    targetContainer.getMaxStackSize(sourceStack),
+                    sourceStack.getMaxStackSize());
+            int amountToMove = Math.min(maxStackSize, sourceStack.getCount());
+            
+            targetContainer.setItem(targetSlot, sourceStack.split(amountToMove));
+            targetContainer.setChanged();
+            sourceContainer.setChanged();
+            return sourceStack.getCount();
         }
 
         // 检查是否可以堆叠（同物品、同 NBT、同组件）
         if (!ItemStack.isSameItemSameComponents(targetStack, sourceStack)) {
-            return new MergeResult(false, SlotData.from(sourcePos, world, sourceSlot));
+            return sourceStack.getCount();
         }
 
+        // 计算目标槽位的剩余空间
         int maxStackSize = Math.min(
                 Math.min(targetContainer.getMaxStackSize(targetStack), targetStack.getMaxStackSize()),
                 Math.min(sourceContainer.getMaxStackSize(sourceStack), sourceStack.getMaxStackSize()));
@@ -182,23 +187,24 @@ public class ContainerTools {
 
         if (spaceInTarget <= 0) {
             // 目标槽位已满
-            return new MergeResult(false, SlotData.from(sourcePos, world, sourceSlot));
+            return sourceStack.getCount();
         }
 
+        // 执行堆叠
         if (sourceStack.getCount() <= spaceInTarget) {
             // 源物品可以完全合并到目标
             targetStack.grow(sourceStack.getCount());
             sourceContainer.setItem(sourceSlot, ItemStack.EMPTY);
             targetContainer.setChanged();
             sourceContainer.setChanged();
-            return new MergeResult(true, null);
+            return 0;
         } else {
             // 只能部分合并
             targetStack.grow(spaceInTarget);
             sourceStack.shrink(spaceInTarget);
             targetContainer.setChanged();
             sourceContainer.setChanged();
-            return new MergeResult(false, SlotData.from(sourcePos, world, sourceSlot));
+            return sourceStack.getCount();
         }
     }
 

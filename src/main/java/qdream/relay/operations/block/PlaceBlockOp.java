@@ -61,28 +61,23 @@ public class PlaceBlockOp extends Spell {
 
         // 获取源位置用于计算放置方向
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        
+
         // 计算从源位置指向目标位置的方向（使用 Vec3i 重载版本）
         Direction direction = Direction.getNearest(pos.subtract(BlockPos.containing(sourcePos)), Direction.UP);
-        
+
         // 创建 BlockHitResult 用于模拟玩家放置
         BlockHitResult hitResult = new BlockHitResult(vec3, direction, pos, false);
-        
+
         // 创建 BlockPlaceContext
         BlockPlaceContext context = new BlockPlaceContext(
-            level,
-            null, // 玩家为 null（无主操作）
-            InteractionHand.MAIN_HAND,
-            itemStack,
-            hitResult
-        );
-        
+                level,
+                null, // 玩家为 null（无主操作）
+                InteractionHand.MAIN_HAND,
+                itemStack,
+                hitResult);
+
         // 使用 BlockItem 的放置逻辑（处理朝向、特殊方块等）
-        InteractionResult result = blockItem.useOn(context);
-        
-        if (result.consumesAction()) {
-            itemStack.shrink(1);
-        }
+        blockItem.useOn(context);
     }
 
 }

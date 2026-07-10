@@ -234,8 +234,8 @@
   "operation.relay:get_container_items.name": "Get Container Items",
   "operation.relay:get_container_items.description": "Get all items in container, returns list of SlotData",
 
-  "operation.relay:merge_items.name": "Merge Items",
-  "operation.relay:merge_items.description": "Attempt to merge two item stacks, returning the remaining items or whether the operation was successful.",
+  "operation.relay:move_items.name": "Move Items",
+  "operation.relay:move_items.description": "Attempt to move source item to target slot (stack or fill empty), returns remaining count of source item",
 
   "operation.relay:get_item_count.name": "Get Item Count",
   "operation.relay:get_item_count.description": "Get the count of an item stack",

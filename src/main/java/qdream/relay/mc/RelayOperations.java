@@ -191,8 +191,8 @@ public class RelayOperations {
                 // 容器操作
                 OperationRegistry.register("relay:get_container_items",
                                 new OperationRegistry.OpEntry(new GetContainerItemsOp()));
-                OperationRegistry.register("relay:merge_items",
-                                new OperationRegistry.OpEntry(new MergeItemsOp()));
+                OperationRegistry.register("relay:move_items",
+                                new OperationRegistry.OpEntry(new MoveItemsOp()));
                 OperationRegistry.register("relay:get_item_count",
                                 new OperationRegistry.OpEntry(new GetItemCountOp()));
                 OperationRegistry.register("relay:get_item_type",

@@ -1,29 +1,31 @@
 package qdream.relay.operations.container;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ContainerTools;
-import qdream.relay.types.BooleanData;
+import qdream.relay.types.NumberData;
 import qdream.relay.types.SlotData;
 
 import net.minecraft.server.level.ServerLevel;
 import qdream.relay.Relay;
 
 /**
- * 合并两个物品操作（支持任意两个容器的物品堆叠，跨维度支持）
- * 输入：SlotData（目标物品），SlotData（源物品）
- * 输出：BooleanData（完全合并返回 true），如果部分合并则返回剩余的 SlotData
+ * 移动物品操作（支持任意两个容器的物品移动，跨维度支持）
+ * 尝试将 source_item 移动到 target_item（堆叠或放入空槽）
+ * 输入：SlotData（目标容器/槽位），SlotData（源物品）
+ * 输出：NumberData（source_item 剩余的数量，0 表示完全移动）
  */
-public class MergeItemsOp extends Spell {
+public class MoveItemsOp extends Spell {
 
-    public MergeItemsOp() {
-        super("relay:merge_items", 2, 0.25, OperationSignature.builder()
+    public MoveItemsOp() {
+        super("relay:move_items", 2, 0.25, OperationSignature.builder()
                 .consumesFromData("target_item", "relay:slot")
                 .consumesFromData("source_item", "relay:slot")
-                .producesToData("result", "relay:boolean", "relay:slot")
+                .producesToData("remaining", "relay:number")
                 .build());
     }
 
@@ -80,25 +82,21 @@ public class MergeItemsOp extends Spell {
             return;
         }
 
-        // 执行合并（支持跨容器、跨维度）
-        ContainerTools.MergeResult result = ContainerTools.tryMergeItems(
+        // 获取源物品堆
+        ItemStack sourceStack = sourceContainer.getItem(sourceItem.getSlot());
+        if (sourceStack.isEmpty()) {
+            executor.pushData(new NumberData(0));
+            return;
+        }
+
+        // 执行物品移动（支持跨容器、跨维度）
+        int remaining = ContainerTools.moveItems(
                 targetContainer,
-                targetItem.getContainerPos(),
                 targetItem.getSlot(),
                 sourceContainer,
-                sourceItem.getContainerPos(),
-                sourceItem.getSlot(),
-                targetLevel);
+                sourceItem.getSlot());
 
-        if (result.fullyMerged()) {
-            executor.pushData(new BooleanData(true));
-        } else {
-            // 返回剩余的物品
-            if (result.remaining() != null) {
-                executor.pushData(result.remaining());
-            } else {
-                executor.pushData(new BooleanData(false));
-            }
-        }
+        // 返回剩余的物品数量
+        executor.pushData(new NumberData(remaining));
     }
 }

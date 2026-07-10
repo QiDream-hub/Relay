@@ -234,8 +234,8 @@
   "operation.relay:get_container_items.name": "获取容器物品",
   "operation.relay:get_container_items.description": "获取容器内的所有物品，返回 SlotData 列表",
 
-  "operation.relay:merge_items.name": "合并物品",
-  "operation.relay:merge_items.description": "尝试将两个物品堆合并，返回剩余物品或是否成功",
+  "operation.relay:move_items.name": "移动物品",
+  "operation.relay:move_items.description": "尝试将源物品移动到目标槽位（堆叠或放入空槽），返回源物品剩余的数量",
 
   "operation.relay:get_item_count.name": "获取物品数量",
   "operation.relay:get_item_count.description": "获取物品堆的数量",
