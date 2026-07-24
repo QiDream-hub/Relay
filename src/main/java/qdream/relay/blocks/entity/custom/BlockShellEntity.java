@@ -16,7 +16,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.Container;
 import net.minecraft.core.NonNullList;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +43,7 @@ import qdream.relay.Relay;
  * <li>NBT 持久化（ValueInput/ValueOutput）</li>
  * </ul>
  */
-public class ShellBlockEntity extends BlockEntity implements MenuProvider, ShellContainer {
+public class BlockShellEntity extends BlockEntity implements MenuProvider, ShellContainer {
 
     private static final int SLOT_COUNT = 4;
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
@@ -60,7 +59,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     public static final int ENERGY_SLOT = 2;
     public static final int INTERACTOR_SLOT = 3;
 
-    public ShellBlockEntity(BlockPos pos, BlockState state) {
+    public BlockShellEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SHELL_BLOCK_ENTITY, pos, state);
         this.tickHandler = new ShellTickHandler();
         this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
@@ -83,7 +82,7 @@ public class ShellBlockEntity extends BlockEntity implements MenuProvider, Shell
     /**
      * Tick 方法
      */
-    public static void tick(Level world, BlockPos pos, BlockState state, ShellBlockEntity entity) {
+    public static void tick(Level world, BlockPos pos, BlockState state, BlockShellEntity entity) {
         // 在 tick 前设置上下文（level 和 self）
         var machine = entity.stateMachine;
         if (machine.isRunning()) {

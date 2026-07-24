@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.Relay;
-import qdream.relay.blocks.entity.custom.ShellBlockEntity;
+import qdream.relay.blocks.entity.custom.BlockShellEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.DiskItem;
@@ -172,10 +172,10 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         Item item = stack.getItem();
 
         return switch (slot) {
-            case ShellBlockEntity.CORE_SLOT -> item instanceof ComputingCoreComponent;
-            case ShellBlockEntity.DISK_SLOT -> item instanceof DiskItem;
-            case ShellBlockEntity.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
-            case ShellBlockEntity.INTERACTOR_SLOT -> item instanceof WorldInteractorComponent; // 世界交互器插槽允许任意物品
+            case BlockShellEntity.CORE_SLOT -> item instanceof ComputingCoreComponent;
+            case BlockShellEntity.DISK_SLOT -> item instanceof DiskItem;
+            case BlockShellEntity.ENERGY_SLOT -> item instanceof EnergyModuleComponent;
+            case BlockShellEntity.INTERACTOR_SLOT -> item instanceof WorldInteractorComponent; // 世界交互器插槽允许任意物品
             default -> false;
         };
     }

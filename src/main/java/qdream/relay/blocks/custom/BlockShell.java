@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import com.mojang.serialization.MapCodec;
 
 import qdream.relay.blocks.entity.RelayBlockEntities;
-import qdream.relay.blocks.entity.custom.ShellBlockEntity;
+import qdream.relay.blocks.entity.custom.BlockShellEntity;
 
 /**
  * 外壳方块
@@ -53,12 +53,12 @@ public class BlockShell extends BaseEntityBlock {
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new ShellBlockEntity(pos, state);
+        return new BlockShellEntity(pos, state);
     }
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, RelayBlockEntities.SHELL_BLOCK_ENTITY, ShellBlockEntity::tick);
+        return createTickerHelper(type, RelayBlockEntities.SHELL_BLOCK_ENTITY, BlockShellEntity::tick);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class BlockShell extends BaseEntityBlock {
         super.setPlacedBy(world, pos, state, placer, stack);
         if (!world.isClientSide()) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (blockEntity instanceof ShellBlockEntity shell) {
+            if (blockEntity instanceof BlockShellEntity shell) {
                 shell.setOwner(placer);
             }
         }
@@ -84,7 +84,7 @@ public class BlockShell extends BaseEntityBlock {
         }
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof ShellBlockEntity shell) {
+        if (blockEntity instanceof BlockShellEntity shell) {
             player.openMenu(shell);
         }
 

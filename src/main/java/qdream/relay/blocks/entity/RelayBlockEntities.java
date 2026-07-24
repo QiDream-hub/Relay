@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Block;
 
 import qdream.relay.Relay;
 import qdream.relay.blocks.RelayBlocks;
-import qdream.relay.blocks.entity.custom.ShellBlockEntity;
+import qdream.relay.blocks.entity.custom.BlockShellEntity;
 import qdream.relay.blocks.entity.custom.SpellEditorBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 
@@ -18,8 +18,8 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
  */
 public class RelayBlockEntities {
 
-    public static final BlockEntityType<ShellBlockEntity> SHELL_BLOCK_ENTITY =
-            register("shell", ShellBlockEntity::new, RelayBlocks.BLOCK_SHELL_BLOCK);
+    public static final BlockEntityType<BlockShellEntity> SHELL_BLOCK_ENTITY =
+            register("shell", BlockShellEntity::new, RelayBlocks.BLOCK_SHELL_BLOCK);
     public static final BlockEntityType<SpellEditorBlockEntity> SPELL_EDITOR_BLOCK_ENTITY =
             register("spell_editor", SpellEditorBlockEntity::new, RelayBlocks.SPELL_EDITOR_BLOCK);
 

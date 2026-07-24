@@ -3,6 +3,7 @@ package qdream.relay.mc;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.Relay;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -24,17 +25,25 @@ public class StateMachineNbtSerializer {
 
         ListTag programList = new ListTag();
         for (Executable iota : machine.getProgramStackSnapshot()) {
-            CompoundTag itemTag = new CompoundTag();
-            ((Operation) iota).toNbt(itemTag);
-            programList.add(itemTag);
+            if (iota != null) {
+                CompoundTag itemTag = new CompoundTag();
+                ((Operation) iota).toNbt(itemTag);
+                programList.add(itemTag);
+            } else {
+                Relay.LOGGER.warn("Skipping null executable in programStack");
+            }
         }
         tag.put("programStack", programList);
 
         ListTag dataList = new ListTag();
         for (Executable data : machine.getDataStackSnapshot()) {
-            CompoundTag itemTag = new CompoundTag();
-            ((Operation) data).toNbt(itemTag);
-            dataList.add(itemTag);
+            if (data != null) {
+                CompoundTag itemTag = new CompoundTag();
+                ((Operation) data).toNbt(itemTag);
+                dataList.add(itemTag);
+            } else {
+                Relay.LOGGER.warn("Skipping null executable in dataStack");
+            }
         }
         tag.put("dataStack", dataList);
 

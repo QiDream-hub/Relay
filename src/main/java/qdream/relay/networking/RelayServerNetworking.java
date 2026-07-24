@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.Component.RelayDataComponents;
-import qdream.relay.blocks.entity.custom.ShellBlockEntity;
+import qdream.relay.blocks.entity.custom.BlockShellEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.items.DiskItem;
 import qdream.relay.networking.payloads.*;
@@ -92,8 +92,8 @@ public class RelayServerNetworking {
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
                     ShellContainer container = handler.getContainer();
-                    if (container instanceof ShellBlockEntity shell) {
-                        shell.loadProgramFromDisk();
+                    if (container != null) {
+                        container.loadProgramFromDisk();
                         // updateStatus() 已移除，核心状态由 ShellTickHandler 在 tick 时自动更新
                     }
                 }
