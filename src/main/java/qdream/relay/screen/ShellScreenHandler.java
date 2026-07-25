@@ -58,6 +58,8 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     private final DataSlot coreCostSlot = DataSlot.standalone();
     private final DataSlot localCoreCostSlot = DataSlot.standalone(); // 本地核心数量
     private final DataSlot initializedSlot = DataSlot.standalone();
+    private final DataSlot energyCostSlot = DataSlot.standalone(); // 能量消耗（整数部分）
+    private final DataSlot energyCostFracSlot = DataSlot.standalone(); // 能量消耗（小数部分*1000）
 
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
     private double syncedEnergy = 0.0;
@@ -85,6 +87,8 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         this.addDataSlot(coreCostSlot);
         this.addDataSlot(localCoreCostSlot);
         this.addDataSlot(initializedSlot);
+        this.addDataSlot(energyCostSlot);
+        this.addDataSlot(energyCostFracSlot);
 
         // 初始化同步槽的值（确保 GUI 打开时立即显示正确状态）
         if (container != null) {
@@ -92,6 +96,9 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             coreCostSlot.set(container.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
             initializedSlot.set(container.isInitialized() ? 1 : 0);
+            double energyCost = container.getEnergyCostPerTick();
+            energyCostSlot.set((int) energyCost);
+            energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
             syncedEnergy = container.getEnergy();
         }
 
@@ -193,6 +200,9 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             coreCostSlot.set(container.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
             initializedSlot.set(container.isInitialized() ? 1 : 0);
+            double energyCost = container.getEnergyCostPerTick();
+            energyCostSlot.set((int) energyCost);
+            energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
         }
     }
 
@@ -245,6 +255,13 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     /** 获取同步的初始化状态 */
     public boolean isSyncedInitialized() {
         return initializedSlot.get() != 0;
+    }
+
+    /** 获取同步的能量消耗（每 tick） */
+    public double getSyncedEnergyCost() {
+        int intPart = energyCostSlot.get();
+        int fracPart = energyCostFracSlot.get();
+        return intPart + (fracPart / 1000.0);
     }
 
     /**

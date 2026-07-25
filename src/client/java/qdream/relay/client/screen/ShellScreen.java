@@ -148,9 +148,9 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         graphics.text(this.font, coreText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
-        double energy = this.menu.getSyncedEnergy();
-        String energyText = energy > 0 ? "§7能量: §e" + energy : "§7能量: §8无";
-        graphics.text(this.font, energyText, x, currentY, 0xFFFFFFFF);
+        double energyCost = this.menu.getSyncedEnergyCost();
+        String energyCostText = energyCost > 0 ? "§7能耗：§e" + energyCost + " /tick" : "§7 能耗：§8无";
+        graphics.text(this.font, energyCostText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
         boolean initialized = this.menu.isSyncedInitialized();
