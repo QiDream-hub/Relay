@@ -17,6 +17,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.ToolShellItem;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
+import qdream.relay.core.ExecutionStats;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
@@ -67,6 +68,7 @@ public class ToolShellContainer implements ShellContainer {
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final StateMachine stateMachine;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
+    private final ExecutionStats executionStats = new ExecutionStats();
     private Entity owner;
     private UUID ownerUuid;
 
@@ -149,7 +151,7 @@ public class ToolShellContainer implements ShellContainer {
     // ========== 状态加载/保存 ==========
 
     /**
-     * 加载所有状态（物品栏、StateMachine、Owner、Tick 状态）
+     * 加载所有状态（物品栏、StateMachine、Owner、Tick 状态、执行统计）
      */
     private void loadAllState() {
         CompoundTag dataTag = stack.get(RelayDataComponents.TOOL_SHELL_DATA);
@@ -178,6 +180,12 @@ public class ToolShellContainer implements ShellContainer {
 
         // 加载 Tick 状态
         loadTickState();
+
+        // 加载执行统计
+        CompoundTag statsTag = dataTag.getCompound("executionStats").orElse(null);
+        if (statsTag != null) {
+            executionStats.fromNbt(statsTag);
+        }
     }
 
     /**
@@ -203,6 +211,10 @@ public class ToolShellContainer implements ShellContainer {
 
         // 保存 Tick 状态
         saveTickState();
+
+        // 保存执行统计
+        CompoundTag statsTag = executionStats.toNbt();
+        dataTag.put("executionStats", statsTag);
 
         stack.set(RelayDataComponents.TOOL_SHELL_DATA, dataTag);
     }
@@ -289,7 +301,7 @@ public class ToolShellContainer implements ShellContainer {
      * 不再每 tick 保存状态，由 PlayerShellData 管理保存时机
      * </p>
      */
-    public void tick(Level world, Entity player) {
+    public void tick(Level world, Player player) {
         // 设置 enabled 状态
         StateMachine machine = getStateMachine();
         if (machine.isRunning() && !isEnabled()) {
@@ -305,6 +317,16 @@ public class ToolShellContainer implements ShellContainer {
 
         // 执行 tick
         tickHandler.tick(this);
+        
+        // 程序执行完毕后打印统计信息（仅当启用统计信息时）
+        if (isStatusInfo() && machine.isRunning() && tickHandler.isInitialized()) {
+            String[] formatStatsPanel = executionStats.formatStatsPanel();
+            player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
+            for (String string : formatStatsPanel) {
+                player.sendSystemMessage(Component.literal(string));
+            }
+            player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
+        }
     }
 
     /**
@@ -555,7 +577,7 @@ public class ToolShellContainer implements ShellContainer {
 
     /**
      * 从物品堆获取 SpellDiskComponent
-     * 
+     *
      * @param stack 物品堆
      * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
      */
@@ -564,6 +586,13 @@ public class ToolShellContainer implements ShellContainer {
             return (DiskComponent) stack.getItem();
         }
         return null;
+    }
+
+    // ========== ShellContainer 接口：执行统计 ==========
+
+    @Override
+    public ExecutionStats getExecutionStats() {
+        return executionStats;
     }
 
     // ========== 配置项 ==========

@@ -198,6 +198,15 @@ public interface ShellContainer extends Container {
      */
     void loadProgramFromDisk();
 
+    // ========== 执行统计 ==========
+
+    /**
+     * 获取执行统计信息
+     *
+     * @return ExecutionStats 实例
+     */
+    ExecutionStats getExecutionStats();
+
     // ========== 标记变更 ==========
 
     /**

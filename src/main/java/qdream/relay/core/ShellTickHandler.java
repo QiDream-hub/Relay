@@ -10,7 +10,7 @@ import qdream.relay.mc.component.EnergyModuleComponent;
 /**
  * 外壳 Tick 处理器
  * 处理三种外壳（方块/实体/工具）的通用 tick 逻辑
- * 
+ *
  * <p>
  * 所有状态访问都通过 {@link ShellContainer} 接口进行，不直接访问物品或内部字段。
  * </p>
@@ -75,6 +75,10 @@ public class ShellTickHandler {
 
                 // 执行 tick - mc 层负责控制执行节奏和能量扣除
                 runTick(container, coreCount);
+
+                // 统计：tick 次数
+                ExecutionStats stats = container.getExecutionStats();
+                stats.incrementRunCount();
             }
         }
     }
@@ -89,8 +93,16 @@ public class ShellTickHandler {
     private void runTick(ShellContainer container, int coreCount) {
         var stateMachine = container.getStateMachine();
         double energyCostPerTick = container.getEnergyCostPerTick();
+        ExecutionStats stats = container.getExecutionStats();
 
         int usedCost = 0;
+        int executedOps = 0;
+
+        // 检查能量（核心基础消耗）- 每 tick 只检查一次
+        if (!container.hasEnoughEnergy(energyCostPerTick)) {
+            stateMachine.triggerMishap("能量不足：需要 " + energyCostPerTick + "，当前只有 " + container.getEnergy());
+            return;
+        }
 
         while (usedCost < coreCount && stateMachine.isRunning()) {
             // 预检查栈顶操作的 cost
@@ -106,12 +118,6 @@ public class ShellTickHandler {
 
             if (usedCost + cost > coreCount) {
                 break; // cost 不足，等待下 tick
-            }
-
-            // 检查能量（核心基础消耗）
-            if (!container.hasEnoughEnergy(energyCostPerTick)) {
-                stateMachine.triggerMishap("能量不足：需要 " + energyCostPerTick + "，当前只有 " + container.getEnergy());
-                return;
             }
 
             // 执行单个操作
@@ -135,10 +141,19 @@ public class ShellTickHandler {
                 debugCallback.onStackChange(stateMachine, "afterStep", currentOp);
             }
 
-            // 扣除能量 - 通过 container 接口，支持背包能量模块
-            container.consumeEnergy(energyCostPerTick);
+            executedOps++;
             usedCost += cost;
         }
+
+        // 统计：核心基础能量消耗（每 tick 只扣除一次）
+        if (executedOps > 0) {
+            stats.addCoreEnergy(energyCostPerTick);
+            // 扣除能量 - 通过 container 接口，支持背包能量模块
+            container.consumeEnergy(energyCostPerTick);
+        }
+
+        // 统计：操作执行次数
+        stats.incrementOperations(executedOps);
 
         // 程序执行完毕后，清空数据栈（避免下次运行时使用遗留数据）
         if (!stateMachine.isRunning()) {

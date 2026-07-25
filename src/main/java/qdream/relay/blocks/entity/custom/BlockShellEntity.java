@@ -24,6 +24,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ShellContainer;
+import qdream.relay.core.ExecutionStats;
 import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.mc.component.WorldInteractorComponent;
@@ -51,6 +52,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final ShellTickHandler tickHandler;
     private final StateMachine stateMachine;
+    private final ExecutionStats executionStats = new ExecutionStats();
     private Entity owner;
     private UUID ownerUuid;
     private double energy;
@@ -406,6 +408,14 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
+
+    // ========== ShellContainer 接口：执行统计 ==========
+
+    @Override
+    public ExecutionStats getExecutionStats() {
+        return executionStats;
+    }
+
     // ========== NBT 序列化与反序列化 ==========
 
     @Override
@@ -438,6 +448,10 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 保存 TickHandler 状态
         output.putInt("tickCounter", tickHandler.getTickCounter());
         output.putBoolean("initialized", tickHandler.isInitialized());
+
+        // 保存执行统计
+        CompoundTag statsTag = executionStats.toNbt();
+        output.store("executionStats", CompoundTag.CODEC, statsTag);
     }
 
     @Override
@@ -481,6 +495,11 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 加载 TickHandler 状态
         tickHandler.setTickCounter(input.getIntOr("tickCounter", 0));
         tickHandler.setInitialized(input.getBooleanOr("initialized", false));
+
+        // 加载执行统计
+        input.read("executionStats", CompoundTag.CODEC).ifPresent(statsTag -> {
+            executionStats.fromNbt((CompoundTag) statsTag);
+        });
     }
 
     // ========== 网络同步 ==========

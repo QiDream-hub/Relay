@@ -117,6 +117,7 @@ public class ToolShellItem extends Item {
             } else {
                 player.sendSystemMessage(Component.literal("§e[工具外壳] 未插入法术磁盘"));
             }
+            container.getExecutionStats().reset();
         }
 
         return InteractionResult.SUCCESS;

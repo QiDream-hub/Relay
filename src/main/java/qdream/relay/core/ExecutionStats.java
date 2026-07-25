@@ -1,5 +1,7 @@
 package qdream.relay.core;
 
+import net.minecraft.nbt.CompoundTag;
+
 /**
  * 程序执行统计信息
  * <p>
@@ -17,7 +19,7 @@ public class ExecutionStats {
     /** 实际执行的操作数量 */
     private int executedOperationCount;
 
-    /** 程序运行次数（从启动到停止的次数） */
+    /** 经历的 tick 次数 */
     private int runCount;
 
     public ExecutionStats() {
@@ -28,7 +30,25 @@ public class ExecutionStats {
     }
 
     /**
-     * 添加能量消耗
+     * 添加核心基础能量消耗
+     *
+     * @param cost 核心消耗的能量
+     */
+    public void addCoreEnergy(double cost) {
+        this.coreEnergyCost += cost;
+    }
+
+    /**
+     * 添加操作额外能量消耗
+     *
+     * @param cost 操作消耗的能量
+     */
+    public void addOperationEnergy(double cost) {
+        this.operationEnergyCost += cost;
+    }
+
+    /**
+     * 添加能量消耗（旧方法，保留兼容性）
      *
      * @param coreCost      核心基础消耗
      * @param operationCost 操作额外消耗（世界交互器等）
@@ -39,7 +59,7 @@ public class ExecutionStats {
     }
 
     /**
-     * 递增程序运行次数
+     * 递增 tick 计数
      */
     public void incrementRunCount() {
         this.runCount++;
@@ -52,6 +72,27 @@ public class ExecutionStats {
      */
     public void addExecutedOperations(int count) {
         this.executedOperationCount += count;
+    }
+
+    /**
+     * 递增执行的操作数量
+     *
+     * @return 新的操作计数
+     */
+    public int incrementOperations() {
+        this.executedOperationCount++;
+        return this.executedOperationCount;
+    }
+
+    /**
+     * 递增执行的操作数量（批量）
+     *
+     * @param count 操作数量
+     * @return 新的操作计数
+     */
+    public int incrementOperations(int count) {
+        this.executedOperationCount += count;
+        return this.executedOperationCount;
     }
 
     /**
@@ -81,13 +122,6 @@ public class ExecutionStats {
     }
 
     /**
-     * 获取总能量消耗
-     */
-    public double getTotalEnergyCost() {
-        return coreEnergyCost + operationEnergyCost;
-    }
-
-    /**
      * 获取执行的操作数量
      */
     public int getExecutedOperationCount() {
@@ -95,10 +129,50 @@ public class ExecutionStats {
     }
 
     /**
-     * 获取程序运行次数
+     * 获取经历的 tick 次数
      */
     public int getRunCount() {
         return runCount;
+    }
+
+    // ========== NBT 序列化 ==========
+
+    /**
+     * 将统计信息序列化为 NBT
+     *
+     * @return 包含统计数据的 CompoundTag
+     */
+    public CompoundTag toNbt() {
+        CompoundTag tag = new CompoundTag();
+        tag.putDouble("CoreEnergy", coreEnergyCost);
+        tag.putDouble("OperationEnergy", operationEnergyCost);
+        tag.putInt("ExecutedOperations", executedOperationCount);
+        tag.putInt("RunCount", runCount);
+        return tag;
+    }
+
+    /**
+     * 从 NBT 加载统计信息
+     *
+     * @param tag 包含统计数据的 CompoundTag
+     */
+    public void fromNbt(CompoundTag tag) {
+        this.coreEnergyCost = tag.getDouble("CoreEnergy").orElse(0.0);
+        this.operationEnergyCost = tag.getDouble("OperationEnergy").orElse(0.0);
+        this.executedOperationCount = tag.getInt("ExecutedOperations").orElse(0);
+        this.runCount = tag.getInt("RunCount").orElse(0);
+    }
+
+    /**
+     * 从 NBT 创建 ExecutionStats 实例
+     *
+     * @param tag 包含统计数据的 CompoundTag
+     * @return ExecutionStats 实例
+     */
+    public static ExecutionStats fromNbtStatic(CompoundTag tag) {
+        ExecutionStats stats = new ExecutionStats();
+        stats.fromNbt(tag);
+        return stats;
     }
 
     /**
@@ -106,12 +180,11 @@ public class ExecutionStats {
      */
     public String[] formatStatsPanel() {
         return new String[] {
-                "§7运行次数：§f" + runCount,
+                "§7Tick 次数：§f" + runCount,
                 "§7执行操作：§f" + executedOperationCount,
                 "§7能量消耗:",
                 "  §7核心：§f" + String.format("%.1f", coreEnergyCost),
                 "  §7操作：§f" + String.format("%.1f", operationEnergyCost),
-                "  §7总计：§f" + String.format("%.1f", getTotalEnergyCost()),
         };
     }
 }

@@ -112,6 +112,18 @@ public class RelayDataComponents {
     );
 
     /**
+     * 执行统计组件 - 存储为 CompoundTag
+     * 用于 ShellContainer 存储程序执行统计信息
+     * 结构：{ coreEnergy: double, operationEnergy: double, executedOperations: int, runCount: int }
+     */
+    public static final DataComponentType<CompoundTag> EXECUTION_STATS = register(
+            "execution_stats",
+            builder -> builder
+                    .persistent(CompoundTag.CODEC)
+                    .networkSynchronized(createNbtStreamCodec())
+    );
+
+    /**
      * 世界交互器品阶组件 - 存储为 Integer
      * 用于 world_interactor 物品存储品阶（1-64）
      */
@@ -243,8 +255,9 @@ public class RelayDataComponents {
         var ______ = TOOL_SHELL_CONFIG;
         var _______ = TOOL_SHELL_TICK_STATE;
         var ________ = TOOL_SHELL_SESSION_ID;
-        var _________ = WORLD_INTERACTOR_TIER;
-        var __________ = WORLD_INTERACTION_RANGE;
+        var _________ = EXECUTION_STATS;
+        var __________ = WORLD_INTERACTOR_TIER;
+        var ___________ = WORLD_INTERACTION_RANGE;
     }
 
     /**
