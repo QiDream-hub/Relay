@@ -8,6 +8,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ContainerTools;
 import qdream.relay.types.BlockEntityData;
@@ -68,14 +69,14 @@ public class PickupItemOp extends Spell {
         }
 
         // 弹出 BlockEntityData
-        BlockEntityData blockEntityData = OperationHelpers.popBlockEntity(executor, id);
+        BlockEntityData blockEntityData = StackHelpers.popBlockEntity(executor, id);
         if (blockEntityData == null || blockEntityData.isNull()) {
             executor.triggerMishap(id + " 错误的容器");
             return;
         }
 
         // 弹出 EntityData
-        EntityData entityData = OperationHelpers.popEntity(executor, id);
+        EntityData entityData = StackHelpers.popEntity(executor, id);
         if (entityData == null || entityData.isNull()) {
             executor.triggerMishap(id + " 错误的实体");
             return;

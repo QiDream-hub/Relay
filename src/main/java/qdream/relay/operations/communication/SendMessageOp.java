@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.StringData;
@@ -44,12 +45,12 @@ public class SendMessageOp extends Spell {
         }
 
         // 再弹出实体
-        EntityData recipient = OperationHelpers.popEntity(executor, id);
+        EntityData recipient = StackHelpers.popEntity(executor, id);
         if (recipient == null)
             return;
 
         // 先弹出消息（后压入的先弹出）
-        StringData message = OperationHelpers.popString(executor, id);
+        StringData message = StackHelpers.popString(executor, id);
         if (message == null)
             return;
 

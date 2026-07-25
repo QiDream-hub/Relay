@@ -13,6 +13,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
@@ -46,7 +47,7 @@ public class GetEntityOp extends Spell {
         }
 
         // 弹出参数
-        VectorData pos = OperationHelpers.popVector(executor, id);
+        VectorData pos = StackHelpers.popVector(executor, id);
         if (pos == null) return;
 
         Vec3 posVec = pos.asVector();

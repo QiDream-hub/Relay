@@ -13,6 +13,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
@@ -46,15 +47,15 @@ public class BlockFaceRaycastOp extends Spell {
         }
 
         // 弹出参数
-        NumberData maxDist = OperationHelpers.popNumber(executor, id);
+        NumberData maxDist = StackHelpers.popNumber(executor, id);
         if (maxDist == null)
             return;
 
-        VectorData dir = OperationHelpers.popVector(executor, id);
+        VectorData dir = StackHelpers.popVector(executor, id);
         if (dir == null)
             return;
 
-        VectorData start = OperationHelpers.popVector(executor, id);
+        VectorData start = StackHelpers.popVector(executor, id);
         if (start == null)
             return;
 

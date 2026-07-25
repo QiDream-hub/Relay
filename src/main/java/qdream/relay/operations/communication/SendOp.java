@@ -6,7 +6,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -26,9 +26,9 @@ public class SendOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
 
-        NumberData channel = OperationHelpers.popNumber(executor, id);
+        NumberData channel = StackHelpers.popNumber(executor, id);
 
-        Executable data = OperationHelpers.popAny(executor);
+        Executable data = StackHelpers.popAny(executor);
 
         int ch = channel.asInt();
         boolean success = CommunicationSystem.send(ch, data);

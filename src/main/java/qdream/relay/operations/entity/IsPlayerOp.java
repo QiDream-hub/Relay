@@ -7,7 +7,7 @@ import net.minecraft.world.level.Level;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.EntityData;
 
@@ -35,7 +35,7 @@ public class IsPlayerOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        EntityData popEntity = OperationHelpers.popEntity(executor, id);
+        EntityData popEntity = StackHelpers.popEntity(executor, id);
         Entity entity = popEntity.getEntity();
         // 检查是否是玩家
         boolean isPlayer = (entity instanceof Player);

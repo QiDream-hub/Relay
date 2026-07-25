@@ -4,7 +4,7 @@ import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 
 /**
  * Or 操作 - 逻辑或
@@ -21,10 +21,10 @@ public class OrOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        BooleanData b = OperationHelpers.popBoolean(executor, id);
+        BooleanData b = StackHelpers.popBoolean(executor, id);
         if (b == null) return;
         
-        BooleanData a = OperationHelpers.popBoolean(executor, id);
+        BooleanData a = StackHelpers.popBoolean(executor, id);
         if (a == null) return;
 
         boolean result = a.asBoolean() || b.asBoolean();

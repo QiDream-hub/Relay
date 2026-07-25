@@ -8,7 +8,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.BlockData;
 import qdream.relay.types.EntityData;
@@ -44,7 +44,7 @@ public class GetTypeOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 弹出参数
-        Executable inputExe = OperationHelpers.popAny(executor);
+        Executable inputExe = StackHelpers.popAny(executor);
         if (inputExe == null)
             return;
 

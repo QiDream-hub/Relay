@@ -3,7 +3,7 @@ package qdream.relay.operations.base;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
 
 /**
@@ -21,7 +21,7 @@ public class CopyToTopOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData indexData = OperationHelpers.popNumber(executor, id);
+        NumberData indexData = StackHelpers.popNumber(executor, id);
         if (indexData == null) {
             return;
         }
@@ -29,7 +29,7 @@ public class CopyToTopOp extends Spell {
         int index = indexData.asInt();
 
         // 获取目标位置的元素并复制一份到栈顶
-        var target = OperationHelpers.getDataAt(executor, index, id);
+        var target = StackHelpers.getDataAt(executor, index, id);
         if (target == null) {
             return;
         }

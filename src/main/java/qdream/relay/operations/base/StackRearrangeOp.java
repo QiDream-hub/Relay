@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
 
@@ -42,12 +42,12 @@ public class StackRearrangeOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 1. 弹出索引列表
-        ListData indicesList = OperationHelpers.popList(executor, id);
+        ListData indicesList = StackHelpers.popList(executor, id);
         if (indicesList == null)
             return;
 
         // 2. 弹出数量
-        NumberData amountData = OperationHelpers.popNumber(executor, id);
+        NumberData amountData = StackHelpers.popNumber(executor, id);
         if (amountData == null)
             return;
 

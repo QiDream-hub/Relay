@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -31,7 +31,7 @@ public class GetEntityEyePosOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        EntityData popEntity = OperationHelpers.popEntity(executor, id);
+        EntityData popEntity = StackHelpers.popEntity(executor, id);
 
         var entity = popEntity.getEntity();
         if (entity == null) {

@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.ListData;
 
@@ -50,7 +50,7 @@ public class WhileOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        BooleanData condition = OperationHelpers.popBoolean(executor, id);
+        BooleanData condition = StackHelpers.popBoolean(executor, id);
         if (condition == null) return;
         
         Executable body = executor.peekProgram();

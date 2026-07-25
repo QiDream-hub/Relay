@@ -13,6 +13,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.VectorData;
@@ -44,7 +45,7 @@ public class BreakBlockOp extends Spell {
         }
 
         // 弹出参数
-        VectorData posData = OperationHelpers.popVector(executor, id);
+        VectorData posData = StackHelpers.popVector(executor, id);
         if (posData == null) {
             executor.pushData(new BooleanData(false));
             return;

@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class EvalOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        ListData list = OperationHelpers.popList(executor, id);
+        ListData list = StackHelpers.popList(executor, id);
         if (list == null) return;
 
         List<Executable> reversed = list.getValue();

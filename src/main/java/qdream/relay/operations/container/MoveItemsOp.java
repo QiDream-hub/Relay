@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ContainerTools;
 import qdream.relay.types.NumberData;
@@ -35,12 +36,12 @@ public class MoveItemsOp extends Spell {
             return;
         }
 
-        SlotData sourceItem = OperationHelpers.popSlot(executor, id);
+        SlotData sourceItem = StackHelpers.popSlot(executor, id);
         if (sourceItem == null) {
             return;
         }
 
-        SlotData targetItem = OperationHelpers.popSlot(executor, id);
+        SlotData targetItem = StackHelpers.popSlot(executor, id);
         if (targetItem == null) {
             return;
         }

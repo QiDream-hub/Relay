@@ -3,7 +3,7 @@ package qdream.relay.operations.vector;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
 
@@ -27,11 +27,11 @@ public class VectorMulOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        VectorData vec = OperationHelpers.popVector(executor, id);
+        VectorData vec = StackHelpers.popVector(executor, id);
         if (vec == null)
             return;
 
-        NumberData num = OperationHelpers.popNumber(executor, id);
+        NumberData num = StackHelpers.popNumber(executor, id);
         if (num == null)
             return;
 

@@ -12,6 +12,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
@@ -45,15 +46,15 @@ public class RaycastOp extends Spell {
         }
 
         // 弹出参数
-        NumberData maxDistData = OperationHelpers.popNumber(executor, id);
+        NumberData maxDistData = StackHelpers.popNumber(executor, id);
         if (maxDistData == null)
             return;
 
-        VectorData dir = OperationHelpers.popVector(executor, id);
+        VectorData dir = StackHelpers.popVector(executor, id);
         if (dir == null)
             return;
 
-        VectorData startData = OperationHelpers.popVector(executor, id);
+        VectorData startData = StackHelpers.popVector(executor, id);
         if (startData == null)
             return;
 

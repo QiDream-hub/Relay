@@ -4,7 +4,7 @@ import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 
 /**
  * Mul 操作 - 乘法
@@ -21,10 +21,10 @@ public class MulOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData b = OperationHelpers.popNumber(executor, id);
+        NumberData b = StackHelpers.popNumber(executor, id);
         if (b == null) return;
         
-        NumberData a = OperationHelpers.popNumber(executor, id);
+        NumberData a = StackHelpers.popNumber(executor, id);
         if (a == null) return;
 
         double result = a.asDouble() * b.asDouble();

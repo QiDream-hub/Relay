@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
@@ -44,13 +45,13 @@ public class BreakBlockFortuneOp extends Spell {
         }
 
         // 弹出参数
-        NumberData fortune = OperationHelpers.popNumber(executor, id);
+        NumberData fortune = StackHelpers.popNumber(executor, id);
         if (fortune == null) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
-        VectorData posData = OperationHelpers.popVector(executor, id);
+        VectorData posData = StackHelpers.popVector(executor, id);
         if (posData == null) {
             executor.pushData(new BooleanData(false));
             return;

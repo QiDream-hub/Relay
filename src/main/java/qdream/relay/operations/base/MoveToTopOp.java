@@ -3,7 +3,7 @@ package qdream.relay.operations.base;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
 
 /**
@@ -21,7 +21,7 @@ public class MoveToTopOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData indexData = OperationHelpers.popNumber(executor, id);
+        NumberData indexData = StackHelpers.popNumber(executor, id);
         if (indexData == null) {
             return;
         }
@@ -29,7 +29,7 @@ public class MoveToTopOp extends Spell {
         int index = indexData.asInt();
 
         // 移除目标位置的元素并压入栈顶
-        var target = OperationHelpers.removeDataAt(executor, index, id);
+        var target = StackHelpers.removeDataAt(executor, index, id);
         if (target == null) {
             return;
         }

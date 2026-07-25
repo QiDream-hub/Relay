@@ -6,7 +6,7 @@ import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.StringData;
 
 /**
@@ -34,7 +34,7 @@ public class ToStringOp extends Spell {
     @Override
     public void execute(StateMachine executor) {
         // 弹出任意类型
-        Executable input = OperationHelpers.popAny(executor);
+        Executable input = StackHelpers.popAny(executor);
         if (input == null) {
             return;
         }

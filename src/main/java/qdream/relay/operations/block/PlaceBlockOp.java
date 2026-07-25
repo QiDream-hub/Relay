@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ContainerTools;
 import qdream.relay.types.SlotData;
@@ -31,8 +32,8 @@ public class PlaceBlockOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        SlotData popSlot = OperationHelpers.popSlot(executor, id);
-        VectorData popVector = OperationHelpers.popVector(executor, id);
+        SlotData popSlot = StackHelpers.popSlot(executor, id);
+        VectorData popVector = StackHelpers.popVector(executor, id);
         if (popSlot == null || popVector == null) {
             return;
         }

@@ -12,6 +12,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
@@ -45,13 +46,13 @@ public class DetectEntityOp extends Spell {
         }
 
         // 弹出参数
-        NumberData radius = OperationHelpers.popNumber(executor, id);
+        NumberData radius = StackHelpers.popNumber(executor, id);
         if (radius == null) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
-        VectorData center = OperationHelpers.popVector(executor, id);
+        VectorData center = StackHelpers.popVector(executor, id);
         if (center == null) {
             executor.pushData(new BooleanData(false));
             return;

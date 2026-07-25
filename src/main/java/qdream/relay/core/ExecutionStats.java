@@ -13,8 +13,11 @@ public class ExecutionStats {
     /** 运算核心消耗的能量 */
     private double coreEnergyCost;
 
-    /** 操作消耗的能量（世界交互器额外消耗） */
+    /** 基础操作消耗的能量（操作本身的 cost） */
     private double operationEnergyCost;
+
+    /** 世界交互器额外消耗的能量 */
+    private double worldInteractorEnergyCost;
 
     /** 实际执行的操作数量 */
     private int executedOperationCount;
@@ -25,6 +28,7 @@ public class ExecutionStats {
     public ExecutionStats() {
         this.coreEnergyCost = 0.0;
         this.operationEnergyCost = 0.0;
+        this.worldInteractorEnergyCost = 0.0;
         this.executedOperationCount = 0;
         this.runCount = 0;
     }
@@ -39,10 +43,31 @@ public class ExecutionStats {
     }
 
     /**
-     * 添加操作额外能量消耗
+     * 添加操作基础能量消耗
      *
-     * @param cost 操作消耗的能量
+     * @param cost 操作本身的基础消耗
      */
+    public void addBaseOperationEnergy(double cost) {
+        this.operationEnergyCost += cost;
+    }
+
+    /**
+     * 添加世界交互器额外能量消耗
+     *
+     * @param cost 世界交互器的额外消耗
+     */
+    public void addWorldInteractorEnergy(double cost) {
+        this.worldInteractorEnergyCost += cost;
+    }
+
+    /**
+     * 添加操作能量消耗（旧方法，保留兼容性）
+     * 拆分为基础操作消耗和世界交互器消耗
+     *
+     * @param cost 操作总消耗（将同时计入 baseOperationEnergyCost 和 worldInteractorEnergyCost）
+     * @deprecated 使用 {@link #addBaseOperationEnergy(double)} 和 {@link #addWorldInteractorEnergy(double)}
+     */
+    @Deprecated
     public void addOperationEnergy(double cost) {
         this.operationEnergyCost += cost;
     }
@@ -52,10 +77,25 @@ public class ExecutionStats {
      *
      * @param coreCost      核心基础消耗
      * @param operationCost 操作额外消耗（世界交互器等）
+     * @deprecated 使用 {@link #addEnergyCost(double, double, double)} 或分别调用各方法
      */
+    @Deprecated
     public void addEnergyCost(double coreCost, double operationCost) {
         this.coreEnergyCost += coreCost;
-        this.operationEnergyCost += operationCost;
+        this.worldInteractorEnergyCost += operationCost;
+    }
+
+    /**
+     * 添加能量消耗（新版本，三分离）
+     *
+     * @param coreCost           核心基础消耗
+     * @param baseOperationCost  基础操作消耗
+     * @param worldInteractorCost 世界交互器额外消耗
+     */
+    public void addEnergyCost(double coreCost, double baseOperationCost, double worldInteractorCost) {
+        this.coreEnergyCost += coreCost;
+        this.operationEnergyCost += baseOperationCost;
+        this.worldInteractorEnergyCost += worldInteractorCost;
     }
 
     /**
@@ -101,6 +141,7 @@ public class ExecutionStats {
     public void reset() {
         this.coreEnergyCost = 0.0;
         this.operationEnergyCost = 0.0;
+        this.worldInteractorEnergyCost = 0.0;
         this.executedOperationCount = 0;
         this.runCount = 0;
     }
@@ -115,10 +156,17 @@ public class ExecutionStats {
     }
 
     /**
-     * 获取操作消耗的能量（世界交互器额外消耗）
+     * 获取基础操作消耗的能量（操作本身的 cost）
      */
     public double getOperationEnergyCost() {
         return operationEnergyCost;
+    }
+
+    /**
+     * 获取世界交互器额外消耗的能量
+     */
+    public double getWorldInteractorEnergyCost() {
+        return worldInteractorEnergyCost;
     }
 
     /**
@@ -145,7 +193,8 @@ public class ExecutionStats {
     public CompoundTag toNbt() {
         CompoundTag tag = new CompoundTag();
         tag.putDouble("CoreEnergy", coreEnergyCost);
-        tag.putDouble("OperationEnergy", operationEnergyCost);
+        tag.putDouble("BaseOperationEnergy", operationEnergyCost);
+        tag.putDouble("WorldInteractorEnergy", worldInteractorEnergyCost);
         tag.putInt("ExecutedOperations", executedOperationCount);
         tag.putInt("RunCount", runCount);
         return tag;
@@ -158,13 +207,14 @@ public class ExecutionStats {
      */
     public void fromNbt(CompoundTag tag) {
         this.coreEnergyCost = tag.getDouble("CoreEnergy").orElse(0.0);
-        this.operationEnergyCost = tag.getDouble("OperationEnergy").orElse(0.0);
+        this.operationEnergyCost = tag.getDouble("BaseOperationEnergy").orElse(0.0);
+        this.worldInteractorEnergyCost = tag.getDouble("WorldInteractorEnergy").orElse(0.0);
         this.executedOperationCount = tag.getInt("ExecutedOperations").orElse(0);
         this.runCount = tag.getInt("RunCount").orElse(0);
     }
 
     /**
-     * 从 NBT 创建 ExecutionStats 实例
+     * 从 NBT 创建 ExecutionStats 实例（兼容旧格式）
      *
      * @param tag 包含统计数据的 CompoundTag
      * @return ExecutionStats 实例
@@ -185,6 +235,7 @@ public class ExecutionStats {
                 "§7能量消耗:",
                 "  §7核心：§f" + String.format("%.1f", coreEnergyCost),
                 "  §7操作：§f" + String.format("%.1f", operationEnergyCost),
+                "  §7世界交互器：§f" + String.format("%.1f", worldInteractorEnergyCost),
         };
     }
 }

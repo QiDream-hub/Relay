@@ -5,7 +5,7 @@ import qdream.relay.types.VectorData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 
 import net.minecraft.world.phys.Vec3;
 
@@ -25,13 +25,13 @@ public class BuildVectorOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData z = OperationHelpers.popNumber(executor, id);
+        NumberData z = StackHelpers.popNumber(executor, id);
         if (z == null) return;
 
-        NumberData y = OperationHelpers.popNumber(executor, id);
+        NumberData y = StackHelpers.popNumber(executor, id);
         if (y == null) return;
 
-        NumberData x = OperationHelpers.popNumber(executor, id);
+        NumberData x = StackHelpers.popNumber(executor, id);
         if (x == null) return;
 
         Vec3 vector = new Vec3(x.asDouble(), y.asDouble(), z.asDouble());

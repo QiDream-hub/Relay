@@ -5,7 +5,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.core.CommunicationSystem;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
 
 /**
@@ -24,7 +24,7 @@ public class PeekOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        NumberData channel = OperationHelpers.popNumber(executor, id);
+        NumberData channel = StackHelpers.popNumber(executor, id);
         if (channel == null) return;
 
         int ch = channel.asInt();

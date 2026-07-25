@@ -7,6 +7,7 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ContainerTools;
 import qdream.relay.types.SlotData;
@@ -35,12 +36,12 @@ public class DropItemOp extends Spell {
             return;
         }
 
-        VectorData positionData = OperationHelpers.popVector(executor, id);
+        VectorData positionData = StackHelpers.popVector(executor, id);
         if (positionData == null) {
             return;
         }
 
-        SlotData itemData = OperationHelpers.popSlot(executor, id);
+        SlotData itemData = StackHelpers.popSlot(executor, id);
         if (itemData == null) {
             return;
         }

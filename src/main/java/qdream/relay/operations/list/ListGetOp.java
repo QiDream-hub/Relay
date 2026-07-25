@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
@@ -31,13 +31,13 @@ public class ListGetOp extends Spell {
     public void execute(StateMachine executor) {
 
         // 弹出并消耗索引
-        NumberData index = OperationHelpers.popNumber(executor, id);
+        NumberData index = StackHelpers.popNumber(executor, id);
         if (index == null)
             return;
 
         // 栈顶是索引，栈顶 +1 是列表
         // 使用 peek 读取列表（不消耗）
-        ListData list = OperationHelpers.peekList(executor, id);
+        ListData list = StackHelpers.peekList(executor, id);
         if (list == null)
             return;
 

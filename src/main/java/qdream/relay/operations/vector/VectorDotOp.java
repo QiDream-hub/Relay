@@ -3,7 +3,7 @@ package qdream.relay.operations.vector;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
-import qdream.relay.operations.OperationHelpers;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
 
@@ -25,11 +25,11 @@ public class VectorDotOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
-        VectorData bVec = OperationHelpers.popVector(executor, id);
+        VectorData bVec = StackHelpers.popVector(executor, id);
         if (bVec == null)
             return;
 
-        VectorData aVec = OperationHelpers.popVector(executor, id);
+        VectorData aVec = StackHelpers.popVector(executor, id);
         if (aVec == null)
             return;
 

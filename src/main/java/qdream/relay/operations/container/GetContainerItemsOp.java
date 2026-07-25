@@ -5,6 +5,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ContainerTools;
 import qdream.relay.types.BlockEntityData;
@@ -36,7 +37,7 @@ public class GetContainerItemsOp extends Spell {
             return;
         }
 
-        BlockEntityData containerData = OperationHelpers.popBlockEntity(executor, id);
+        BlockEntityData containerData = StackHelpers.popBlockEntity(executor, id);
         if (containerData == null) {
             return;
         }

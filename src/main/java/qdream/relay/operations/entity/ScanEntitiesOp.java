@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.ListData;
@@ -44,14 +45,14 @@ public class ScanEntitiesOp extends Spell {
             return;
         }
 
-        VectorData centerData = OperationHelpers.popVector(executor, id);
+        VectorData centerData = StackHelpers.popVector(executor, id);
         if (centerData == null) {
             executor.pushData(new ListData(new ArrayList<>()));
             return;
         }
 
         // 弹出参数
-        NumberData radiusData = OperationHelpers.popNumber(executor, id);
+        NumberData radiusData = StackHelpers.popNumber(executor, id);
         if (radiusData == null) {
             executor.pushData(new ListData(new ArrayList<>()));
             return;
