@@ -99,7 +99,7 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         // 信息渲染
         graphics.fill(left + STATUS_X - 4, top + STATUS_Y - 4 + BUTTON_HEIGHT,
                 left + this.imageWidth - 6, top + STATUS_Y + 48 + BUTTON_HEIGHT, STATUS_BG_COLOR);
-        graphics.outline(left + STATUS_X - 4, top + STATUS_Y - 4+ BUTTON_HEIGHT,
+        graphics.outline(left + STATUS_X - 4, top + STATUS_Y - 4 + BUTTON_HEIGHT,
                 this.imageWidth - STATUS_X - 2, 52, BORDER_COLOR);
     }
 
@@ -138,7 +138,13 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         currentY += lineHeight;
 
         int coreCount = this.menu.getSyncedCoreCount();
-        String coreText = coreCount > 0 ? "§7核心: §f" + coreCount : "§7核心: §8未安装";
+
+        String coreText;
+        if (coreCount > 0) {
+            coreText = "§7核心：§f" + coreCount;
+        } else {
+            coreText = "§7核心：§8未安装";
+        }
         graphics.text(this.font, coreText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 

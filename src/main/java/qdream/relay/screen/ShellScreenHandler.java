@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.Relay;
 import qdream.relay.blocks.entity.custom.BlockShellEntity;
 import qdream.relay.core.ShellContainer;
+import qdream.relay.core.ShellCoreGroupManager;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.component.EnergyModuleComponent;
@@ -55,6 +56,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     // 数据同步槽（服务端 → 客户端）
     private final DataSlot enabledSlot = DataSlot.standalone();
     private final DataSlot coreCostSlot = DataSlot.standalone();
+    private final DataSlot localCoreCostSlot = DataSlot.standalone(); // 本地核心数量
     private final DataSlot initializedSlot = DataSlot.standalone();
 
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
@@ -81,12 +83,14 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         // 注册数据同步槽
         this.addDataSlot(enabledSlot);
         this.addDataSlot(coreCostSlot);
+        this.addDataSlot(localCoreCostSlot);
         this.addDataSlot(initializedSlot);
 
         // 初始化同步槽的值（确保 GUI 打开时立即显示正确状态）
         if (container != null) {
             enabledSlot.set(container.isEnabled() ? 1 : 0);
             coreCostSlot.set(container.getCoreCost());
+            localCoreCostSlot.set(getLocalCoreCost());
             initializedSlot.set(container.isInitialized() ? 1 : 0);
             syncedEnergy = container.getEnergy();
         }
@@ -187,8 +191,27 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         if (container != null) {
             enabledSlot.set(container.isEnabled() ? 1 : 0);
             coreCostSlot.set(container.getCoreCost());
+            localCoreCostSlot.set(getLocalCoreCost());
             initializedSlot.set(container.isInitialized() ? 1 : 0);
         }
+    }
+
+    /**
+     * 获取本地核心数量（当前方块的核心插槽中的核心数量）
+     */
+    private int getLocalCoreCost() {
+        if (container == null) {
+            return 0;
+        }
+        ItemStack coreStack = container.getCoreStack();
+        return !coreStack.isEmpty() ? coreStack.getCount() : 0;
+    }
+
+    /**
+     * 获取本地核心数量
+     */
+    public int getLocalCoreCount() {
+        return localCoreCostSlot.get();
     }
 
     /**

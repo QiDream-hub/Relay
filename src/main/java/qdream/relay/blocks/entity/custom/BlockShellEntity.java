@@ -31,6 +31,8 @@ import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.Relay;
+import qdream.relay.core.ShellCoreGroupManager;
+import net.minecraft.core.Direction;
 
 /**
  * 外壳方块实体
@@ -53,6 +55,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     private UUID ownerUuid;
     private double energy;
     private boolean enabled;
+    private UUID coreGroupId; // 所属核心共享组 ID
 
     public static final int CORE_SLOT = 0;
     public static final int DISK_SLOT = 1;
@@ -65,6 +68,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
         this.energy = 0;
         this.enabled = false;
+        this.coreGroupId = null;
 
         // 设置事故回调
         stateMachine.setMishapHandler(reason -> {
@@ -77,6 +81,11 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public void setRemoved() {
         super.setRemoved();
+
+        // 方块被破坏时，从组中移除
+        if (level != null && !level.isClientSide() && coreGroupId != null) {
+            ShellCoreGroupManager.onBlockRemoved(level, worldPosition, this);
+        }
     }
 
     /**
@@ -210,17 +219,83 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public int getCoreCost() {
-        ItemStack coreStack = getCoreStack();
-        return !coreStack.isEmpty() ? coreStack.getCount() : 0;
+        if (coreGroupId == null || level == null || level.isClientSide()) {
+            ItemStack coreStack = getCoreStack();
+            return !coreStack.isEmpty() ? coreStack.getCount() : 0;
+        }
+
+        // 使用 SavedData 获取组的所有成员，然后计算总 cost
+        int totalCost = 0;
+        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
+        
+        for (BlockPos memberPos : members) {
+            BlockEntity be = level.getBlockEntity(memberPos);
+            if (be instanceof BlockShellEntity shell) {
+                ItemStack coreStack = shell.getCoreStack();
+                if (!coreStack.isEmpty()) {
+                    totalCost += coreStack.getCount();
+                }
+            }
+        }
+        
+        return totalCost;
     }
 
     @Override
     public int getInterval() {
-        ItemStack coreStack = getCoreStack();
-        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
-            return core.getInterval(coreStack);
+        if (coreGroupId == null || level == null || level.isClientSide()) {
+            ItemStack coreStack = getCoreStack();
+            if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+                return core.getInterval(coreStack);
+            }
+            return 0;
         }
-        return 0;
+
+        // 使用 SavedData 获取组的所有成员，然后计算最大 interval
+        int maxInterval = 0;
+        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
+        
+        for (BlockPos memberPos : members) {
+            BlockEntity be = level.getBlockEntity(memberPos);
+            if (be instanceof BlockShellEntity shell) {
+                ItemStack coreStack = shell.getCoreStack();
+                if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+                    int interval = core.getInterval(coreStack);
+                    if (interval > maxInterval) {
+                        maxInterval = interval;
+                    }
+                }
+            }
+        }
+        
+        return maxInterval;
+    }
+
+    @Override
+    public double getEnergyCostPerTick() {
+        if (coreGroupId == null || level == null || level.isClientSide()) {
+            ItemStack coreStack = getCoreStack();
+            if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+                return core.getEnergyCost(coreStack);
+            }
+            return 0.0;
+        }
+
+        // 使用 SavedData 获取组的所有成员，然后计算总能量消耗
+        double totalEnergyCost = 0.0;
+        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
+        
+        for (BlockPos memberPos : members) {
+            BlockEntity be = level.getBlockEntity(memberPos);
+            if (be instanceof BlockShellEntity shell) {
+                ItemStack coreStack = shell.getCoreStack();
+                if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+                    totalEnergyCost += core.getEnergyCost(coreStack);
+                }
+            }
+        }
+        
+        return totalEnergyCost;
     }
 
     @Override
@@ -295,16 +370,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     public boolean hasWorldInteractor() {
         return getInteractorStack().getItem() instanceof WorldInteractorComponent;
     }
-
-    @Override
-    public double getEnergyCostPerTick() {
-        ItemStack coreStack = getCoreStack();
-        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
-            return core.getEnergyCost(coreStack);
-        }
-        return 0;
-    }
-
     @Override
     public double addEnergy(double amount) {
         ItemStack energyStack = getEnergyStack();
@@ -365,6 +430,11 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             output.putString("owner", owner.getUUID().toString());
         }
 
+        // 保存核心组 ID
+        if (coreGroupId != null) {
+            output.putString("coreGroupId", coreGroupId.toString());
+        }
+
         // 保存 TickHandler 状态
         output.putInt("tickCounter", tickHandler.getTickCounter());
         output.putBoolean("initialized", tickHandler.isInitialized());
@@ -393,6 +463,16 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         if (!uuidStr.isEmpty()) {
             try {
                 ownerUuid = java.util.UUID.fromString(uuidStr);
+            } catch (IllegalArgumentException e) {
+                // UUID 格式错误，忽略
+            }
+        }
+
+        // 加载核心组 ID
+        String groupIdStr = input.getString("coreGroupId").orElse("");
+        if (!groupIdStr.isEmpty()) {
+            try {
+                coreGroupId = java.util.UUID.fromString(groupIdStr);
             } catch (IllegalArgumentException e) {
                 // UUID 格式错误，忽略
             }
@@ -447,5 +527,20 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public ItemStack getInteractorStack() {
         return inventory.get(INTERACTOR_SLOT);
+    }
+    
+    /**
+     * 获取核心组 ID
+     */
+    public UUID getCoreGroupId() {
+        return coreGroupId;
+    }
+    
+    /**
+     * 设置核心组 ID
+     */
+    public void setCoreGroupId(UUID groupId) {
+        this.coreGroupId = groupId;
+        setChanged();
     }
 }

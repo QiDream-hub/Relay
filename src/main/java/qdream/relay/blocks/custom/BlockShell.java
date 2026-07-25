@@ -19,10 +19,18 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+
+import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.Iterator;
+
 import com.mojang.serialization.MapCodec;
 
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.blocks.entity.custom.BlockShellEntity;
+import qdream.relay.core.ShellCoreGroupManager;
 
 /**
  * 外壳方块
@@ -73,6 +81,9 @@ public class BlockShell extends BaseEntityBlock {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof BlockShellEntity shell) {
                 shell.setOwner(placer);
+
+                // 检测相邻方块并加入核心共享组（6 向检测）
+                ShellCoreGroupManager.onBlockPlaced(world, pos, shell);
             }
         }
     }
@@ -90,4 +101,5 @@ public class BlockShell extends BaseEntityBlock {
 
         return InteractionResult.CONSUME;
     }
+    
 }
