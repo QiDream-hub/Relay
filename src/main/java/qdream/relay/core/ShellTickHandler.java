@@ -5,6 +5,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.component.EnergyModuleComponent;
 
 /**
@@ -118,6 +119,12 @@ public class ShellTickHandler {
 
             if (usedCost + cost > coreCount) {
                 break; // cost 不足，等待下 tick
+            }
+
+            if (top instanceof Spell spell) {
+                double energy = spell.getEnergy();
+                container.consumeEnergy(energy);
+                stats.addOperationEnergy(energy);
             }
 
             // 执行单个操作

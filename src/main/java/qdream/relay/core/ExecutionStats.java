@@ -47,7 +47,7 @@ public class ExecutionStats {
      *
      * @param cost 操作本身的基础消耗
      */
-    public void addBaseOperationEnergy(double cost) {
+    public void addOperationEnergy(double cost) {
         this.operationEnergyCost += cost;
     }
 
@@ -58,18 +58,6 @@ public class ExecutionStats {
      */
     public void addWorldInteractorEnergy(double cost) {
         this.worldInteractorEnergyCost += cost;
-    }
-
-    /**
-     * 添加操作能量消耗（旧方法，保留兼容性）
-     * 拆分为基础操作消耗和世界交互器消耗
-     *
-     * @param cost 操作总消耗（将同时计入 baseOperationEnergyCost 和 worldInteractorEnergyCost）
-     * @deprecated 使用 {@link #addBaseOperationEnergy(double)} 和 {@link #addWorldInteractorEnergy(double)}
-     */
-    @Deprecated
-    public void addOperationEnergy(double cost) {
-        this.operationEnergyCost += cost;
     }
 
     /**
