@@ -201,6 +201,11 @@ public class ToolShellItem extends Item {
             } else {
                 return false;
             }
+        } else {
+            // 关键修复：更新容器持有的 ItemStack 引用
+            // 因为物品在背包中移动后，Minecraft 会创建新的 ItemStack 实例
+            // 但容器可能持有旧的引用，导致状态保存到错误的 ItemStack
+            container.updateStackReference(self);
         }
 
         ItemStack diskStack = container.getDiskStack(); // ToolShell 中的磁盘
