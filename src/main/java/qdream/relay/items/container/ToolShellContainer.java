@@ -596,6 +596,20 @@ public class ToolShellContainer implements ShellContainer {
         stack.set(RelayDataComponents.TOOL_SHELL_CONFIG, configTag);
     }
 
+    public boolean isStatusInfo() {
+        CompoundTag configTag = stack.get(RelayDataComponents.TOOL_SHELL_CONFIG);
+        if (configTag == null) {
+            return false;
+        }
+        return configTag.getBoolean("statusInfo").orElse(false);
+    }
+
+    public void setStatusInfo(boolean enabled) {
+        CompoundTag configTag = stack.getOrDefault(RelayDataComponents.TOOL_SHELL_CONFIG, new CompoundTag());
+        configTag.putBoolean("statusInfo", enabled);
+        stack.set(RelayDataComponents.TOOL_SHELL_CONFIG, configTag);
+    }
+
     // ========== Container 接口实现 ==========
 
     @Override

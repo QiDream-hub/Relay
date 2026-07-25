@@ -60,6 +60,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
     private final DataSlot initializedSlot = DataSlot.standalone();
     private final DataSlot useInventoryEnergySlot = DataSlot.standalone();
     private final DataSlot debugOutputSlot = DataSlot.standalone();
+    private final DataSlot statusInfoSlot = DataSlot.standalone();
 
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
     private double syncedEnergy = 0.0;
@@ -92,6 +93,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         this.addDataSlot(initializedSlot);
         this.addDataSlot(useInventoryEnergySlot);
         this.addDataSlot(debugOutputSlot);
+        this.addDataSlot(statusInfoSlot);
 
         // 初始化同步槽的值
         if (container != null) {
@@ -203,6 +205,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
             if (container instanceof ToolShellContainer tc) {
                 useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
                 debugOutputSlot.set(tc.isDebugOutputEnabled() ? 1 : 0);
+                statusInfoSlot.set(tc.isStatusInfo() ? 1 : 0);
             }
             syncedEnergy = container.getEnergy();
         }
@@ -238,6 +241,11 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         return debugOutputSlot.get() != 0;
     }
 
+    /** 获取是否启用统计信息（从 DataSlot 读取） */
+    public boolean isStatusInfo() {
+        return statusInfoSlot.get() != 0;
+    }
+
     /** 设置是否使用背包能量模块 */
     public void setUseInventoryEnergyModule(boolean use) {
         if (container instanceof ToolShellContainer tc) {
@@ -253,6 +261,15 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         if (container instanceof ToolShellContainer tc) {
             tc.setDebugOutputEnabled(enabled);
             debugOutputSlot.set(enabled ? 1 : 0);
+            tc.setChanged();
+        }
+    }
+
+    /** 设置是否启用统计信息 */
+    public void setStatusInfo(boolean enabled) {
+        if (container instanceof ToolShellContainer tc) {
+            tc.setStatusInfo(enabled);
+            statusInfoSlot.set(enabled ? 1 : 0);
             tc.setChanged();
         }
     }

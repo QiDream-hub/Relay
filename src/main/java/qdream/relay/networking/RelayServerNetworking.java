@@ -183,11 +183,11 @@ public class RelayServerNetworking {
             });
         });
 
-        // 注册 C2S_ToolShellConfigPayload
+        // 注册 C2S_ToolShellConfigPayload - 统一配置更新
         PayloadTypeRegistry.serverboundPlay().register(C2S_ToolShellConfigPayload.TYPE,
                 C2S_ToolShellConfigPayload.CODEC);
 
-        // 注册服务端接收处理器 - 工具外壳配置更新
+        // 注册服务端接收处理器 - 工具外壳配置更新（统一处理所有配置项）
         ServerPlayNetworking.registerGlobalReceiver(C2S_ToolShellConfigPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             if (player == null)
@@ -195,24 +195,10 @@ public class RelayServerNetworking {
 
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.ToolShellScreenHandler handler) {
+                    // 统一设置所有配置项
                     handler.setUseInventoryEnergyModule(payload.useInventoryEnergyModule());
-                }
-            });
-        });
-
-        // 注册 C2S_ToolShellDebugOutput
-        PayloadTypeRegistry.serverboundPlay().register(C2S_ToolShellDebugOutput.TYPE,
-                C2S_ToolShellDebugOutput.CODEC);
-
-        // 注册服务端接收处理器 - 工具外壳调试输出开关
-        ServerPlayNetworking.registerGlobalReceiver(C2S_ToolShellDebugOutput.TYPE, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player == null)
-                return;
-
-            context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.ToolShellScreenHandler handler) {
-                    handler.setDebugOutputEnabled(payload.enabled());
+                    handler.setDebugOutputEnabled(payload.debugOutputEnabled());
+                    handler.setStatusInfo(payload.statusInfoEnabled());
                 }
             });
         });

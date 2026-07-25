@@ -10,7 +10,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import qdream.relay.networking.payloads.C2S_ToolShellConfigPayload;
-import qdream.relay.networking.payloads.C2S_ToolShellDebugOutput;
 import qdream.relay.screen.ToolShellScreenHandler;
 
 /**
@@ -36,6 +35,7 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
     // 配置按钮
     private Button useInventoryEnergyButton;
     private Button debugOutputButton;
+    private Button statusInfoButton;
 
     public ToolShellScreen(ToolShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -55,24 +55,30 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
 
         // 初始化时使用默认文本，extractRenderState 会每帧同步实际状态
         useInventoryEnergyButton = Button.builder(
-            getUseInventoryEnergyLabel(),
-            btn -> toggleUseInventoryEnergy()
-        )
-        .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
-        .build();
+                getUseInventoryEnergyLabel(),
+                btn -> toggleUseInventoryEnergy())
+                .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
+                .build();
 
         this.addRenderableWidget(useInventoryEnergyButton);
 
         // 配置按钮:是否启用调试输出
         buttonY += buttonHeight + 8;
         debugOutputButton = Button.builder(
-            getDebugOutputLabel(),
-            btn -> toggleDebugOutput()
-        )
-        .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
-        .build();
-
+                getDebugOutputLabel(),
+                btn -> toggleDebugOutput())
+                .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
+                .build();
         this.addRenderableWidget(debugOutputButton);
+
+        // 配置按钮:是否启用统计信息
+        buttonY += buttonHeight + 8;
+        statusInfoButton = Button.builder(
+                getStatusLabel(),
+                btn -> toggleStatusInfo())
+                .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
+                .build();
+        this.addRenderableWidget(statusInfoButton);
     }
 
     private Component getUseInventoryEnergyLabel() {
@@ -85,23 +91,40 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         return Component.literal(debugEnabled ? "§c 调试输出:开" : "§7 调试输出:关");
     }
 
+    private Component getStatusLabel() {
+        boolean debugEnabled = this.menu.isStatusInfo();
+        return Component.literal(debugEnabled ? "§c 统计信息:开" : "§7 统计信息:关");
+    }
+
     /**
-     * 切换配置
+     * 切换配置 - 使用统一网络包发送所有配置项
      */
     private void toggleUseInventoryEnergy() {
         boolean newValue = !this.menu.isUseInventoryEnergyModule();
-        // 发送网络包到服务端
-        ClientPlayNetworking.send(new C2S_ToolShellConfigPayload(newValue));
+        sendConfigUpdate(newValue, this.menu.isDebugOutputEnabled(), this.menu.isStatusInfo());
         // 立即更新本地 UI（不等待服务端同步）
         this.menu.setUseInventoryEnergyModule(newValue);
     }
 
     private void toggleDebugOutput() {
         boolean newValue = !this.menu.isDebugOutputEnabled();
-        // 发送网络包到服务端
-        ClientPlayNetworking.send(new C2S_ToolShellDebugOutput(newValue));
+        sendConfigUpdate(this.menu.isUseInventoryEnergyModule(), newValue, this.menu.isStatusInfo());
         // 立即更新本地 UI（不等待服务端同步）
         this.menu.setDebugOutputEnabled(newValue);
+    }
+
+    private void toggleStatusInfo() {
+        boolean newValue = !this.menu.isStatusInfo();
+        sendConfigUpdate(this.menu.isUseInventoryEnergyModule(), this.menu.isDebugOutputEnabled(), newValue);
+        // 立即更新本地 UI（不等待服务端同步）
+        this.menu.setStatusInfo(newValue);
+    }
+
+    /**
+     * 发送统一配置更新网络包
+     */
+    private void sendConfigUpdate(boolean useInventoryEnergy, boolean debugOutput, boolean statusInfo) {
+        ClientPlayNetworking.send(new C2S_ToolShellConfigPayload(useInventoryEnergy, debugOutput, statusInfo));
     }
 
     @Override
@@ -130,6 +153,9 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         }
         if (debugOutputButton != null) {
             debugOutputButton.setMessage(getDebugOutputLabel());
+        }
+        if (statusInfoButton != null) {
+            statusInfoButton.setMessage(getStatusLabel());
         }
 
         super.extractRenderState(graphics, mouseX, mouseY, delta);
