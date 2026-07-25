@@ -34,8 +34,8 @@ import qdream.relay.items.container.ToolShellContainer;
  *
  * 玩家 tick
  *   └─→ 遍历 Map 中所有 Container
- *        ├─ 程序运行中 → tick()
- *        └─ 程序已结束 → 从 Map 移除并保存
+ *        ├─ canExecute()=true → tick()
+ *        └─ canExecute()=false → 跳过（未启用/未初始化/程序未运行）
  *
  * 玩家下线/物品丢弃
  *   └─→ 所有 Container 保存并清空
@@ -203,6 +203,7 @@ public class PlayerShellData {
      * Tick 所有活跃的 Container
      * <p>程序执行完毕的 Container 会自动从 Map 移除并保存</p>
      * <p>每 tick 检查 ItemStack 引用一致性，如果物品被移动导致引用失效，会尝试从玩家物品栏重新获取</p>
+     * <p>仅当 {@link ShellContainer#canExecute()} 为 true 时才执行 tick</p>
      */
     public void tickAll() {
         if (player.level().isClientSide()) {
@@ -237,12 +238,14 @@ public class PlayerShellData {
                 container.updateStackReference(actualStack);
             }
 
-            // 执行 tick
-            container.tick(player.level(), player);
+            // 检查是否可以执行（已启用 + 已初始化 + 正在运行）
+            if (container.canExecute()) {
+                container.tick(player.level(), player);
 
-            // 程序执行完毕后标记移除
-            if (!container.getStateMachine().isRunning()) {
-                toRemove.add(sessionId);
+                // 程序执行完毕后标记移除
+                if (!container.getStateMachine().isRunning()) {
+                    toRemove.add(sessionId);
+                }
             }
         }
 

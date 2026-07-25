@@ -107,7 +107,7 @@ public class ToolShellItem extends Item {
                     // 清空双栈后加载新程序
                     machine.clear();
                     machine.loadProgram(program);
-                    container.setInitialized(true);
+                    container.setInitialized(true); // 设置已初始化，canExecute() 将返回 true
                     if (container.isDebugOutputEnabled()) {
                         player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
                     }

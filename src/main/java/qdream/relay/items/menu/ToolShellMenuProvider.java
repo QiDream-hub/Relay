@@ -36,10 +36,13 @@ public class ToolShellMenuProvider implements MenuProvider {
 
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-        ToolShellItem toolShellItem = (ToolShellItem) toolShell.getItem();
         // 从 PlayerShellData 获取缓存的 Container，确保 GUI 操作同步到正确的状态
         if (player instanceof PlayerShellDataAccessor accessor) {
-            ToolShellContainer container = accessor.relay$getShellData().getOrCreateContainer(toolShell);
+            var shellData = accessor.relay$getShellData();
+            
+            // 获取或创建容器（统一使用 activeShells）
+            ToolShellContainer container = shellData.getOrCreateContainer(toolShell);
+            
             return new ToolShellScreenHandler(syncId, inv, container, toolShell);
         }
         return null;

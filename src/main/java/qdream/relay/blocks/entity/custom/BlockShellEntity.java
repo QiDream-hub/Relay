@@ -310,11 +310,24 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         tickHandler.setInitialized(initialized);
     }
 
+    /**
+     * 获取 GUI 开关状态
+     * <p>
+     * 此字段仅用于 GUI 显示，不直接影响执行逻辑
+     * 执行逻辑由 {@link #canExecute()} 综合判断
+     * </p>
+     */
     @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    /**
+     * 设置 GUI 开关状态
+     * <p>
+     * 此方法仅改变 GUI 显示状态，不会清空程序栈
+     * </p>
+     */
     @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;

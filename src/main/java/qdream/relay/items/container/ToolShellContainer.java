@@ -302,13 +302,8 @@ public class ToolShellContainer implements ShellContainer {
      * </p>
      */
     public void tick(Level world, Player player) {
-        // 设置 enabled 状态
-        StateMachine machine = getStateMachine();
-        if (machine.isRunning() && !isEnabled()) {
-            setEnabled(true);
-        }
-
         // 设置上下文
+        StateMachine machine = getStateMachine();
         if (machine.isRunning()) {
             machine.setContext("shellContainer", this);
             machine.setContext("level", world);
@@ -317,9 +312,9 @@ public class ToolShellContainer implements ShellContainer {
 
         // 执行 tick
         tickHandler.tick(this);
-        
+
         // 程序执行完毕后打印统计信息（仅当启用统计信息时）
-        if (isStatusInfo() && machine.isRunning() && tickHandler.isInitialized()) {
+        if (isStatusInfo()) {
             String[] formatStatsPanel = executionStats.formatStatsPanel();
             player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
             for (String string : formatStatsPanel) {
@@ -374,25 +369,20 @@ public class ToolShellContainer implements ShellContainer {
         saveTickState();
     }
 
-    @Override
-    public boolean isEnabled() {
-        CompoundTag stateTag = stack.get(RelayDataComponents.TOOL_SHELL_TICK_STATE);
-        if (stateTag == null) {
-            return false;
-        }
-        return stateTag.getBoolean("enabled").orElse(false);
-    }
+    // ========== 注意：ToolShell 没有 isEnabled/setEnabled 方法 ==========
+    // isEnabled/setEnabled 仅用于 BlockShell 的 GUI 开关
+    // ToolShell 右键启动后直接执行，由 canExecute() = isInitialized() && isRunning() 判断
 
+    /**
+     * 是否可以执行 tick
+     * <p>
+     * ToolShell 没有 GUI 开关，只需判断已初始化 + 正在运行
+     * </p>
+     */
     @Override
-    public void setEnabled(boolean enabled) {
-        CompoundTag stateTag = stack.getOrDefault(RelayDataComponents.TOOL_SHELL_TICK_STATE, new CompoundTag());
-        stateTag.putBoolean("enabled", enabled);
-        if (!enabled) {
-            StateMachine machine = getStateMachine();
-            machine.clear();
-        }
-        stack.set(RelayDataComponents.TOOL_SHELL_TICK_STATE, stateTag);
-        saveTickState();
+    public boolean canExecute() {
+        // isEnabled() 默认返回 true，所以 canExecute() = isInitialized() && isRunning()
+        return isInitialized() && isRunning();
     }
 
     @Override

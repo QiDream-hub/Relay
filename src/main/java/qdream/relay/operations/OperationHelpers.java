@@ -60,38 +60,16 @@ public final class OperationHelpers {
             executor.triggerMishap(operationName + " 需要世界交互器");
             return false;
         }
-        return true;
-    }
-
-    /**
-     * 检查世界交互器并扣除能量
-     *
-     * @param executor      状态机
-     * @param operationName 操作名称（用于错误消息）
-     * @param baseCost      基础能量消耗
-     * @param rangeCost     范围系数消耗（由交互器品阶决定）
-     * @return 如果检查通过并成功扣除能量返回 true，否则触发事故并返回 false
-     */
-    public static boolean checkWorldInteractorWithCost(
-            StateMachine executor,
-            String operationName,
-            double baseCost,
-            double rangeCost) {
-        ShellContainer container = getShellContainer(executor);
-        if (container == null || !container.hasWorldInteractor()) {
-            executor.triggerMishap(operationName + " 需要世界交互器");
-            return false;
+        // 扣除世界交互器的能量消耗
+        ItemStack interactorStack = container.getWorldInteractorStack();
+        if (interactorStack.getItem() instanceof WorldInteractorComponent component) {
+            double energyCost = component.getEnergyCost(interactorStack);
+            if (!container.consumeEnergy(energyCost)) {
+                executor.triggerMishap(operationName + " 能量不足：需要 " + energyCost);
+                return false;
+            }
+            container.getExecutionStats().addWorldInteractorEnergy(energyCost);
         }
-
-        // 计算总消耗
-        double totalCost = baseCost + rangeCost;
-
-        // 检查并扣除能量
-        if (!container.consumeEnergy(totalCost)) {
-            executor.triggerMishap(operationName + " 能量不足：需要 " + totalCost);
-            return false;
-        }
-
         return true;
     }
 

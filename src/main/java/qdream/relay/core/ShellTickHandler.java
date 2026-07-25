@@ -1,12 +1,9 @@
 package qdream.relay.core;
 
-import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Spell;
-import qdream.relay.mc.component.EnergyModuleComponent;
 
 /**
  * 外壳 Tick 处理器
@@ -53,34 +50,25 @@ public class ShellTickHandler {
             return;
         }
 
-        // 未启用时不执行
-        if (!container.isEnabled()) {
+        // 检查是否可以执行（已启用 + 已初始化 + 正在运行）
+        if (!container.canExecute()) {
             return;
         }
 
-        // 从 container 同步 initialized 状态（权威来源）
-        this.initialized = container.isInitialized();
-
         // 执行状态机
-        if (initialized && container.isRunning()) {
-            tickCounter++;
-            int interval = container.getInterval();
-            int coreCount = container.getCoreCost();
+        tickCounter++;
+        int interval = container.getInterval();
+        int coreCount = container.getCoreCost();
 
-            if (tickCounter >= interval && coreCount > 0) {
-                tickCounter = 0;
+        if (tickCounter >= interval && coreCount > 0) {
+            tickCounter = 0;
 
-                // 设置上下文 - 传递世界交互器等信息给操作
-                var stateMachine = container.getStateMachine();
-                stateMachine.setContext("shellContainer", container);
+            // 执行 tick - mc 层负责控制执行节奏和能量扣除
+            runTick(container, coreCount);
 
-                // 执行 tick - mc 层负责控制执行节奏和能量扣除
-                runTick(container, coreCount);
-
-                // 统计：tick 次数
-                ExecutionStats stats = container.getExecutionStats();
-                stats.incrementRunCount();
-            }
+            // 统计：tick 次数
+            ExecutionStats stats = container.getExecutionStats();
+            stats.incrementRunCount();
         }
     }
 
