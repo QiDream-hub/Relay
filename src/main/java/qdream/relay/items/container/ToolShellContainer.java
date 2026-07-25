@@ -70,7 +70,6 @@ public class ToolShellContainer implements ShellContainer {
     private final ShellTickHandler tickHandler = new ShellTickHandler();
     private final ExecutionStats executionStats = new ExecutionStats();
     private Entity owner;
-    private UUID ownerUuid;
 
     public ToolShellContainer(ToolShellItem toolShell, ItemStack stack, UUID sessionId) {
         this.toolShell = toolShell;
@@ -166,16 +165,6 @@ public class ToolShellContainer implements ShellContainer {
         CompoundTag machineTag = dataTag.getCompound("stateMachine").orElse(null);
         if (machineTag != null) {
             StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, machineTag);
-        }
-
-        // 加载 Owner
-        String uuidStr = dataTag.getString("owner").orElse("");
-        if (!uuidStr.isEmpty()) {
-            try {
-                ownerUuid = java.util.UUID.fromString(uuidStr);
-            } catch (IllegalArgumentException e) {
-                // UUID 格式错误，忽略
-            }
         }
 
         // 加载 Tick 状态
@@ -485,9 +474,6 @@ public class ToolShellContainer implements ShellContainer {
     @Override
     public void setOwner(Entity owner) {
         this.owner = owner;
-        if (owner != null) {
-            this.ownerUuid = owner.getUUID();
-        }
         saveAllState();
     }
 

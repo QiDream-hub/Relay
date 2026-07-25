@@ -10,9 +10,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.Relay;
+import qdream.relay.core.PlayerShellDataAccessor;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.DiskItem;
+import qdream.relay.items.ToolShellItem;
 import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
@@ -102,6 +104,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
             if (container instanceof ToolShellContainer tc) {
                 useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
                 debugOutputSlot.set(tc.isDebugOutputEnabled() ? 1 : 0);
+                statusInfoSlot.set(tc.isStatusInfo() ? 1 : 0);
             }
             syncedEnergy = container.getEnergy();
         }
@@ -120,14 +123,50 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         // 玩家主物品栏（3 行 x9 列）
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, INVENTORY_SLOT_X + x * SLOT_SIZE,
-                        INVENTORY_SLOT_Y + y * SLOT_SIZE));
+                final int slotIndex = x + y * 9 + 9;
+                this.addSlot(new Slot(playerInventory, slotIndex, INVENTORY_SLOT_X + x * SLOT_SIZE,
+                        INVENTORY_SLOT_Y + y * SLOT_SIZE) {
+                    @Override
+                    public boolean mayPickup(Player player) {
+                        ItemStack stack = playerInventory.getItem(slotIndex);
+                        if (!stack.isEmpty() && stack.getItem() instanceof ToolShellItem) {
+                            return false;
+                        }
+                        return super.mayPickup(player);
+                    }
+
+                    @Override
+                    public boolean mayPlace(ItemStack stack) {
+                        if (!stack.isEmpty() && stack.getItem() instanceof ToolShellItem) {
+                            return false;
+                        }
+                        return super.mayPlace(stack);
+                    }
+                });
             }
         }
 
         // 玩家热键栏（1 行 x9 列）
         for (int x = 0; x < 9; ++x) {
-            this.addSlot(new Slot(playerInventory, x, INVENTORY_SLOT_X + x * SLOT_SIZE, HOTBAR_SLOT_Y));
+            final int slotIndex = x;
+            this.addSlot(new Slot(playerInventory, slotIndex, INVENTORY_SLOT_X + x * SLOT_SIZE, HOTBAR_SLOT_Y) {
+                @Override
+                public boolean mayPickup(Player player) {
+                    ItemStack stack = playerInventory.getItem(slotIndex);
+                    if (!stack.isEmpty() && stack.getItem() instanceof ToolShellItem) {
+                        return false;
+                    }
+                    return super.mayPickup(player);
+                }
+
+                @Override
+                public boolean mayPlace(ItemStack stack) {
+                    if (!stack.isEmpty() && stack.getItem() instanceof ToolShellItem) {
+                        return false;
+                    }
+                    return super.mayPlace(stack);
+                }
+            });
         }
     }
 
@@ -286,6 +325,33 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
      */
     public ItemStack getToolShell() {
         return toolShell;
+    }
+
+    /**
+     * 当玩家关闭 GUI 时调用
+     * <p>
+     * 保存最终状态并清理没有程序的 Container
+     * </p>
+     *
+     * @param player 玩家实体
+     */
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+
+        // 确保最终状态已保存
+        if (container instanceof ToolShellContainer tc) {
+            tc.saveAllState();
+
+            // 如果容器没有运行程序，从 activeShells 移除
+            // 避免 GUI 打开后没有程序导致 Container 永久存在
+            if (!tc.isInitialized() && !tc.isRunning()) {
+                if (player instanceof PlayerShellDataAccessor accessor) {
+                    var shellData = accessor.relay$getShellData();
+                    shellData.removeContainer(tc.getSessionId());
+                }
+            }
+        }
     }
 
     /**
