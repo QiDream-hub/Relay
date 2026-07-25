@@ -370,7 +370,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public boolean hasWorldInteractor() {
-        return getInteractorStack().getItem() instanceof WorldInteractorComponent;
+        return getWorldInteractorStack().getItem() instanceof WorldInteractorComponent;
     }
     @Override
     public double addEnergy(double amount) {
@@ -544,7 +544,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     }
 
     @Override
-    public ItemStack getInteractorStack() {
+    public ItemStack getWorldInteractorStack() {
         return inventory.get(INTERACTOR_SLOT);
     }
     

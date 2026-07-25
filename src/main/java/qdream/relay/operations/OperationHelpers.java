@@ -142,7 +142,7 @@ public final class OperationHelpers {
         if (container == null) {
             return Optional.empty();
         }
-        return Optional.of(container.getInteractorStack());
+        return Optional.of(container.getWorldInteractorStack());
     }
 
     /**

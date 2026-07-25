@@ -718,7 +718,7 @@ public class ToolShellContainer implements ShellContainer {
     }
 
     @Override
-    public ItemStack getInteractorStack() {
+    public ItemStack getWorldInteractorStack() {
         return inventory.get(INTERACTOR_SLOT);
     }
 

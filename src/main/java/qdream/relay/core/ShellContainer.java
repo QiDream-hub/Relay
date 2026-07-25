@@ -54,7 +54,7 @@ public interface ShellContainer extends Container {
     /**
      * 获取世界交互器
      */
-    ItemStack getInteractorStack();
+    ItemStack getWorldInteractorStack();
 
     // ========== 状态机访问 ==========
 
