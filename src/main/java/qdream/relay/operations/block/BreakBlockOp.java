@@ -80,7 +80,7 @@ public class BreakBlockOp extends Spell {
 
         // 破坏方块（基础版本，无附魔）
         // destroyBlock 参数：位置，是否掉落物品，破坏者实体，更新限制
-        boolean destroyed = level.destroyBlock(pos, true, null, 512);
+        boolean destroyed = level.destroyBlock(pos, true, OperationHelpers.getOwner(executor), 512);
         executor.pushData(new BooleanData(destroyed));
     }
 }

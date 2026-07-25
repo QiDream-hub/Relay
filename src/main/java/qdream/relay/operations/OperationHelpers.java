@@ -1,14 +1,13 @@
 package qdream.relay.operations;
 
 import qdream.relay.core.ShellContainer;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.component.WorldInteractorComponent;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
@@ -91,20 +90,13 @@ public final class OperationHelpers {
             return false;
         }
 
-        // 获取操作的基础能量消耗
-        Executable top = executor.peekProgram();
-        double baseEnergy = 0;
-        if (top instanceof Spell spell) {
-            baseEnergy = spell.getEnergy();
-        }
-
-        // 总消耗 = 基础 + 动态
-        double totalEnergy = baseEnergy + dynamicEnergy;
-
-        if (!container.consumeEnergy(totalEnergy)) {
-            executor.triggerMishap(operationName + " 能量不足：需要 " + totalEnergy);
+        if (!container.consumeEnergy(dynamicEnergy)) {
+            executor.triggerMishap(operationName + " 能量不足：需要 " + dynamicEnergy);
             return false;
         }
+
+        // 记录能量消耗
+        container.getExecutionStats().addOperationEnergy(dynamicEnergy);
 
         return true;
     }
@@ -177,6 +169,21 @@ public final class OperationHelpers {
      */
     public static Object getSelf(StateMachine executor) {
         return executor.getContext("self", Object.class).orElse(null);
+    }
+
+    /**
+     * 获取所属者引用
+     *
+     * @param executor 状态机
+     * @return owner 所属者引用 只返回玩家,其余返回null
+     */
+    public static Player getOwner(StateMachine executor) {
+        ShellContainer shellContainer = getShellContainer(executor);
+        Entity owner = shellContainer.getOwner();
+        if (owner instanceof Player player) {
+            return player;
+        }
+        return null;
     }
 
     /**

@@ -57,7 +57,7 @@ public class BreakBlockFortuneOp extends Spell {
             return;
         }
 
-        int fortuneLevel = (int) fortune.asDouble();
+        int fortuneLevel = fortune.asInt();
         Vec3 posVec = posData.asVector();
         // 使用 containing 正确处理负数坐标（向下取整而非向零取整）
         BlockPos pos = BlockPos.containing(posVec);
@@ -87,11 +87,14 @@ public class BreakBlockFortuneOp extends Spell {
 
         // 破坏方块并应用时运附魔
         // 1. 先破坏方块
-        boolean destroyed = level.destroyBlock(pos, false, null, 512); // dropResources=false，手动处理掉落
+        boolean destroyed = level.destroyBlock(pos, false, OperationHelpers.getOwner(executor), 512); // dropResources=false，手动处理掉落
         if (!destroyed) {
             executor.pushData(new BooleanData(false));
             return;
         }
+
+        // 破坏成功,根据时运等级额外消耗能量(2的fortuneLevel次方额外消耗)
+        OperationHelpers.checkEnergy(executor, id, 1 << fortuneLevel);
 
         // 2. 创建带时运附魔的假工具（使用 enchant 方法）
         ItemStack fortuneTool = new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE);

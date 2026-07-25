@@ -82,7 +82,7 @@ public class BreakBlockSilkTouchOp extends Spell {
 
         // 破坏方块并应用精准采集附魔
         // 1. 先破坏方块
-        boolean destroyed = level.destroyBlock(pos, false, null, 512);  // dropResources=false，手动处理掉落
+        boolean destroyed = level.destroyBlock(pos, false, OperationHelpers.getOwner(executor), 512); // dropResources=false，手动处理掉落
         if (!destroyed) {
             executor.pushData(new BooleanData(false));
             return;
@@ -93,9 +93,7 @@ public class BreakBlockSilkTouchOp extends Spell {
         // 使用 Registry 获取附魔 - 通过 lookup 获取 HolderGetter
         var silkTouchKey = Enchantments.SILK_TOUCH;
         var holderGetter = level.registryAccess().lookup(Registries.ENCHANTMENT);
-        holderGetter.ifPresent(getter -> getter.get(silkTouchKey).ifPresent(holder -> 
-            silkTool.enchant(holder, 1)
-        ));
+        holderGetter.ifPresent(getter -> getter.get(silkTouchKey).ifPresent(holder -> silkTool.enchant(holder, 1)));
 
         // 3. 手动掉落物品（应用精准采集）
         Block.dropResources(state, level, pos, null, null, silkTool);
