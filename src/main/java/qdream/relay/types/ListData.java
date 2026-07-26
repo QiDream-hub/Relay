@@ -155,4 +155,9 @@ public class ListData extends Data {
         }
         return joiner.toString();
     }
+
+    @Override
+    public boolean asBoolean() {
+        return !value.isEmpty();
+    }
 }

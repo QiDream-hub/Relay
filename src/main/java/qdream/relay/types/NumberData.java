@@ -88,4 +88,9 @@ public class NumberData extends Data {
     public String asString() {
         return String.valueOf(value);
     }
+
+    @Override
+    public boolean asBoolean() {
+        return value != 0;
+    }
 }

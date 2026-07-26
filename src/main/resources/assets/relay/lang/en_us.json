@@ -6,7 +6,7 @@
   "item.relay.computing_core_16": "Computing Core XVI",
   "item.relay.computing_core_32": "Computing Core XXXII",
   "item.relay.computing_core_64": "Computing Core LXIV",
-  "item.relay.spell_disk": "Spell Disk",
+  "item.relay.spell_disk": "Disk",
   "item.relay.energy_module": "Energy Module",
   "item.relay.energy_module.energy": "Energy: §e%s",
   "item.relay.energy_module.charge": "§7Shift+Right-click: Charge with amethysts from inventory",
@@ -287,6 +287,9 @@
 
   "operation.relay:to_string.name": "To String",
   "operation.relay:to_string.description": "Convert any type to string representation",
+
+  "operation.relay:to_bool.name": "To Bool",
+  "operation.relay:to_bool.description": "Convert any type to boolean value",
 
   "param.string.description": "String",
   "param.augend.description": "Augend",

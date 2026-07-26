@@ -85,4 +85,9 @@ public class TypeData extends Data {
     public String asString() {
         return value;
     }
+
+    @Override
+    public boolean asBoolean() {
+        return value != null && !value.isEmpty();
+    }
 }

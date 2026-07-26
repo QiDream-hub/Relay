@@ -230,8 +230,13 @@ public class BlockEntityData extends Data {
         if (blockPos == null) {
             return String.format("{world:%s}", worldId != null ? worldId : "null");
         }
-        return String.format("{world:%s,x:%d,y:%d,z:%d}", 
+        return String.format("{world:%s,x:%d,y:%d,z:%d}",
             worldId != null ? worldId : "null",
             blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return blockPos != null;
     }
 }

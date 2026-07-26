@@ -99,4 +99,9 @@ public class VectorData extends Data {
     public String asString() {
         return String.format("{x:%.1f,y:%.1f,z:%.1f}", vec3.x, vec3.y, vec3.z);
     }
+
+    @Override
+    public boolean asBoolean() {
+        return vec3.x != 0 || vec3.y != 0 || vec3.z != 0;
+    }
 }

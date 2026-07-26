@@ -73,4 +73,9 @@ public class StringData extends Data {
         return this.value != null ? this.value.equals(that.value) : that.value == null;
     }
 
+    @Override
+    public boolean asBoolean() {
+        return value != null && !value.isEmpty();
+    }
+
 }

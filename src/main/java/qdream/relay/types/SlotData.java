@@ -278,4 +278,9 @@ public class SlotData extends Data {
                 worldId != null ? worldId : "null",
                 containerPos.getX(), containerPos.getY(), containerPos.getZ(), slot);
     }
+
+    @Override
+    public boolean asBoolean() {
+        return containerPos != null && slot >= 0;
+    }
 }

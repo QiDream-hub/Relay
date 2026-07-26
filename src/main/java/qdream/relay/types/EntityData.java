@@ -238,8 +238,13 @@ public class EntityData extends Data {
 
     @Override
     public String asString() {
-        return String.format("world:%s,uuid:%s", 
+        return String.format("world:%s,uuid:%s",
             worldId != null ? worldId : "null",
             uuid != null ? uuid.toString() : "null");
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return uuid != null;
     }
 }

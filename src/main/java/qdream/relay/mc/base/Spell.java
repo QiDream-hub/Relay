@@ -42,6 +42,11 @@ public abstract class Spell extends Operation {
 
     }
 
+    @Override
+    public boolean asBoolean() {
+        return true;
+    }
+
     /**
      * 转换为字符串(默认为id)
      */

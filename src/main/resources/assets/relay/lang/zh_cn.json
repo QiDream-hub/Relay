@@ -6,7 +6,7 @@
   "item.relay.computing_core_16": "运算核心 XVI",
   "item.relay.computing_core_32": "运算核心 XXXII",
   "item.relay.computing_core_64": "运算核心 LXIV",
-  "item.relay.spell_disk": "法术磁盘",
+  "item.relay.spell_disk": "磁盘",
   "item.relay.energy_module": "能量模块",
   "item.relay.energy_module.energy": "能量：§e%s",
   "item.relay.energy_module.charge": "§7Shift+ 右键：使用背包内紫水晶充能",
@@ -283,6 +283,9 @@
 
   "operation.relay:to_string.name": "转字符串",
   "operation.relay:to_string.description": "将任意类型转换为字符串表示",
+
+  "operation.relay:to_bool.name": "转布尔",
+  "operation.relay:to_bool.description": "将任意类型转换为布尔值",
 
   "operation.relay:place_block.name": "放置方块",
   "operation.relay:place_block.description": "在指定坐标放置方块",

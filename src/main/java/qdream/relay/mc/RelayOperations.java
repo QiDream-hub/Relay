@@ -102,6 +102,8 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new GetTypeOp()));
                 OperationRegistry.register("relay:to_string",
                                 new OperationRegistry.OpEntry(new ToStringOp()));
+                OperationRegistry.register("relay:to_bool",
+                                new OperationRegistry.OpEntry(new ToBooleanOp()));
 
                 // 算术操作
                 OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new AddOp()));

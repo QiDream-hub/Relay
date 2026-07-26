@@ -43,6 +43,11 @@ public abstract class Operation implements Executable {
 
     public abstract String asString();
 
+    /**
+     * 转换为布尔值
+     */
+    public abstract boolean asBoolean();
+
     public abstract Signature getSignature();
 
     // ========== JSON 序列化/反序列化 ==========

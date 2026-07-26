@@ -64,4 +64,9 @@ public class NullData extends Data {
     public String asString() {
         return "null";
     }
+
+    @Override
+    public boolean asBoolean() {
+        return false;
+    }
 }
