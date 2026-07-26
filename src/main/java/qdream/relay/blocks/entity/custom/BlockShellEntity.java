@@ -516,9 +516,9 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 保存开关状态
         output.putBoolean("enabled", enabled);
 
-        // 保存所有者信息
-        if (owner != null) {
-            output.putString("owner", owner.getUUID().toString());
+        // 保存所有者信息 - 使用 ownerUuid 判断，确保玩家离线后仍能保存
+        if (ownerUuid != null) {
+            output.putString("owner", ownerUuid.toString());
         }
 
         // 保存核心组 ID
