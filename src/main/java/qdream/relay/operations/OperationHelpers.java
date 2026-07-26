@@ -118,6 +118,10 @@ public final class OperationHelpers {
     /**
      * 检查目标位置是否在世界交互器范围内
      *
+     * <p>
+     * 此方法会检查世界交互器是否存在，如果不存在会触发事故。
+     * </p>
+     *
      * @param executor      状态机
      * @param operationName 操作名称
      * @param sourcePos     源位置
@@ -138,7 +142,8 @@ public final class OperationHelpers {
             return false;
         }
         if (!component.isInRange(interactor, sourcePos, targetPos)) {
-            executor.triggerMishap(operationName + " 超出世界交互器范围");
+            executor.triggerMishap(operationName + " 超出世界交互器范围：" + 
+                    String.format("%.1f > %.1f", sourcePos.distanceTo(targetPos), component.getRange(interactor)));
             return false;
         }
         return true;

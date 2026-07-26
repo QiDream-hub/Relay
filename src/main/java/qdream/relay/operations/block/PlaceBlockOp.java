@@ -5,13 +5,13 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Spell;
 import qdream.relay.mc.signature.OperationSignature;
@@ -32,6 +32,10 @@ public class PlaceBlockOp extends Spell {
 
     @Override
     public void execute(StateMachine executor) {
+        // 检查世界交互器
+        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
+            return;
+        }
         SlotData popSlot = StackHelpers.popSlot(executor, id);
         VectorData popVector = StackHelpers.popVector(executor, id);
         if (popSlot == null || popVector == null) {
@@ -51,17 +55,20 @@ public class PlaceBlockOp extends Spell {
 
         Vec3 vec3 = popVector.getVec3();
 
-        Vec3 selfPosition = OperationHelpers.getSelfPosition(executor);
-        boolean checkInRange = OperationHelpers.checkInRange(executor, id, selfPosition, vec3);
-        if (!checkInRange) {
+        // 获取源位置用于计算放置方向
+        Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
+
+        // 检查放置地点是否在范围内
+        if (!OperationHelpers.checkInRange(executor, id, sourcePos, vec3)) {
             return;
         }
+        // // 检查容器是否在范围内
+        // if (!OperationHelpers.checkInRange(executor, id, sourcePos, popSlot.getContainerPos().getCenter())) {
+        //     return;
+        // }
 
         // 使用 containing 正确处理负数坐标（向下取整而非向零取整）
         BlockPos pos = BlockPos.containing(vec3);
-
-        // 获取源位置用于计算放置方向
-        Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
 
         // 计算从源位置指向目标位置的方向（使用 Vec3i 重载版本）
         Direction direction = Direction.getNearest(pos.subtract(BlockPos.containing(sourcePos)), Direction.UP);
