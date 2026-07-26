@@ -9,10 +9,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import qdream.relay.client.screen.SpellEditorScreen;
+import qdream.relay.client.screen.ShellScreen;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.networking.payloads.S2C_ShellEnergyPayload;
+import qdream.relay.networking.payloads.S2C_ShellLogPayload;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 
 /**
@@ -50,6 +52,23 @@ public class RelayClientNetworking {
                 if (mc.player != null
                         && mc.player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
                     handler.setSyncedEnergy(payload.energy());
+                }
+            });
+        });
+        
+        // 注册 S2C_ShellLogPayload 客户端接收器
+        ClientPlayNetworking.registerGlobalReceiver(S2C_ShellLogPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.player != null
+                        && mc.player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                    handler.setSyncedLogs(payload.logs());
+                    // 通知 GUI 重绘
+                    if (mc.screen instanceof ShellScreen shellScreen) {
+                        if (shellScreen.getLogWidget() != null) {
+                            shellScreen.getLogWidget().scrollToBottom();
+                        }
+                    }
                 }
             });
         });

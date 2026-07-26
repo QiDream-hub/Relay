@@ -34,6 +34,7 @@ import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.Relay;
 import qdream.relay.core.ShellCoreGroupManager;
 import net.minecraft.core.Direction;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 外壳方块实体
@@ -49,15 +50,23 @@ import net.minecraft.core.Direction;
 public class BlockShellEntity extends BlockEntity implements MenuProvider, ShellContainer {
 
     private static final int SLOT_COUNT = 4;
+    private static final int LOG_BUFFER_SIZE = 200; // 日志缓冲区大小
+
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final ShellTickHandler tickHandler;
     private final StateMachine stateMachine;
     private final ExecutionStats executionStats = new ExecutionStats();
-    private Entity owner;
+    private Player owner;
     private UUID ownerUuid;
     private double energy;
     private boolean enabled;
     private UUID coreGroupId; // 所属核心共享组 ID
+
+    /**
+     * 日志缓冲区 - 存储最近的调试输出
+     * 使用 ConcurrentLinkedQueue 保证线程安全
+     */
+    private final ConcurrentLinkedQueue<String> logBuffer = new ConcurrentLinkedQueue<>();
 
     public static final int CORE_SLOT = 0;
     public static final int DISK_SLOT = 1;
@@ -74,10 +83,52 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
         // 设置事故回调
         stateMachine.setMishapHandler(reason -> {
-            if (level != null && !level.isClientSide()) {
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            // 延迟获取 level，因为在构造函数中 level 为 null
+            if (getLevel() != null && !getLevel().isClientSide()) {
+                addLogEntry(String.format("§c§lMISHAP§r§c: %s", reason));
+                // 同步日志到客户端
+                syncLogsToClient(getLevel(), worldPosition);
             }
+            setEnabled(false);
         });
+    }
+
+    /**
+     * 格式化日志条目
+     */
+    private String formatLogEntry(String phase, Executable executable) {
+        long tick = (getLevel() != null) ? getLevel().getGameTime() : 0;
+        String id = "unknown";
+        if (executable instanceof qdream.relay.mc.base.Operation op) {
+            id = op.getClass().getSimpleName();
+        }
+        return String.format("[T%d] %s %s", tick, phase, id);
+    }
+
+    /**
+     * 添加日志条目到缓冲区
+     */
+    private void addLogEntry(String log) {
+        while (logBuffer.size() >= LOG_BUFFER_SIZE) {
+            logBuffer.poll(); // 移除最旧的日志
+        }
+        logBuffer.offer(log);
+    }
+
+    /**
+     * 获取日志缓冲区内容
+     * 
+     * @return 日志列表（按时间顺序）
+     */
+    public java.util.List<String> getLogBuffer() {
+        return new java.util.ArrayList<>(logBuffer);
+    }
+
+    /**
+     * 清空日志缓冲区
+     */
+    public void clearLogBuffer() {
+        logBuffer.clear();
     }
 
     @Override
@@ -200,18 +251,24 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     }
 
     @Override
-    public Entity getOwner() {
-        if (ownerUuid != null && level != null && !level.isClientSide()) {
-            Entity ownerEntity = level.getEntity(ownerUuid);
-            if (ownerEntity != null) {
-                owner = ownerEntity;
+    public Player getOwner() {
+        // 优先返回缓存的 owner（玩家仍在线）
+        if (owner != null) {
+            return owner;
+        }
+        // 玩家可能离线后重新上线，尝试从 UUID 恢复
+        if (ownerUuid != null) {
+            Player playerByUUID = getLevel().getPlayerByUUID(ownerUuid);
+            if (playerByUUID != null) {
+                owner = playerByUUID;
+                return owner;
             }
         }
-        return owner;
+        return null;
     }
 
     @Override
-    public void setOwner(Entity owner) {
+    public void setOwner(Player owner) {
         this.owner = owner;
         if (owner != null) {
             this.ownerUuid = owner.getUUID();
@@ -229,7 +286,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 使用 SavedData 获取组的所有成员，然后计算总 cost
         int totalCost = 0;
         List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
-        
+
         for (BlockPos memberPos : members) {
             BlockEntity be = level.getBlockEntity(memberPos);
             if (be instanceof BlockShellEntity shell) {
@@ -239,7 +296,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 }
             }
         }
-        
+
         return totalCost;
     }
 
@@ -256,7 +313,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 使用 SavedData 获取组的所有成员，然后计算最大 interval
         int maxInterval = 0;
         List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
-        
+
         for (BlockPos memberPos : members) {
             BlockEntity be = level.getBlockEntity(memberPos);
             if (be instanceof BlockShellEntity shell) {
@@ -269,7 +326,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 }
             }
         }
-        
+
         return maxInterval;
     }
 
@@ -286,7 +343,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 使用 SavedData 获取组的所有成员，然后计算总能量消耗
         double totalEnergyCost = 0.0;
         List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
-        
+
         for (BlockPos memberPos : members) {
             BlockEntity be = level.getBlockEntity(memberPos);
             if (be instanceof BlockShellEntity shell) {
@@ -296,7 +353,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 }
             }
         }
-        
+
         return totalEnergyCost;
     }
 
@@ -339,12 +396,19 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public double getEnergy() {
-        return energy;
+        ItemStack energyStack = getEnergyStack();
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            return emi.getStoredEnergy(energyStack);
+        }
+        return 0;
     }
 
     @Override
     public void setEnergy(double energy) {
-        this.energy = energy;
+        ItemStack energyStack = getEnergyStack();
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            emi.setStoredEnergy(energyStack, energy);
+        }
         setChanged();
         if (level != null && !level.isClientSide()) {
             syncEnergyToClient(level, worldPosition);
@@ -353,15 +417,12 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public boolean consumeEnergy(double amount) {
-        if (energy < amount) {
-            return false;
+        ItemStack energyStack = getEnergyStack();
+        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
+            double consumed = emi.consumeEnergy(energyStack, amount);
+            return consumed >= amount;
         }
-        energy -= amount;
-        setChanged();
-        if (level != null && !level.isClientSide()) {
-            syncEnergyToClient(level, worldPosition);
-        }
-        return true;
+        return false;
     }
 
     @Override
@@ -371,7 +432,12 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public boolean hasOwner() {
-        return owner instanceof Player;
+        // 优先检查缓存的 owner
+        if (owner instanceof Player) {
+            return true;
+        }
+        // 如果 ownerUuid 存在，说明有保存的所有者（玩家可能暂时离线）
+        return ownerUuid != null;
     }
 
     private DiskComponent getDiskComponent(ItemStack stack) {
@@ -385,12 +451,14 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     public boolean hasWorldInteractor() {
         return getWorldInteractorStack().getItem() instanceof WorldInteractorComponent;
     }
+
     @Override
     public double addEnergy(double amount) {
         ItemStack energyStack = getEnergyStack();
         if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
             double added = emi.addEnergy(energyStack, amount);
-            setEnergy(energy);
+            // 同步到客户端
+            setEnergy(emi.getStoredEnergy(energyStack));
             return added;
         }
         return 0;
@@ -541,6 +609,25 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 });
     }
 
+    /**
+     * 同步日志到客户端
+     */
+    public void syncLogsToClient(Level world, BlockPos pos) {
+        if (world.isClientSide()) {
+            return;
+        }
+
+        java.util.List<String> logs = getLogBuffer();
+        net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) world;
+        net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(pos);
+        serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
+                .forEach(player -> {
+                    net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(
+                            player,
+                            new qdream.relay.networking.payloads.S2C_ShellLogPayload(logs));
+                });
+    }
+
     @Override
     public ItemStack getCoreStack() {
         return inventory.get(CORE_SLOT);
@@ -560,14 +647,14 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     public ItemStack getWorldInteractorStack() {
         return inventory.get(INTERACTOR_SLOT);
     }
-    
+
     /**
      * 获取核心组 ID
      */
     public UUID getCoreGroupId() {
         return coreGroupId;
     }
-    
+
     /**
      * 设置核心组 ID
      */

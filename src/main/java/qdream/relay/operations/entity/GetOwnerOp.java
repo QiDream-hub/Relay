@@ -3,6 +3,7 @@ package qdream.relay.operations.entity;
 import java.util.Optional;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
@@ -34,11 +35,8 @@ public class GetOwnerOp extends Instruction {
     @Override
     public void execute(StateMachine executor) {
 
-        ShellContainer shellContainer = OperationHelpers.getShellContainer(executor);
-
-        Entity owner = shellContainer.getOwner();
+        Player owner = OperationHelpers.getOwner(executor);
         if (owner == null) {
-            executor.triggerMishap("无法获取所属者");
             return;
         }
 

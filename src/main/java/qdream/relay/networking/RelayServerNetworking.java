@@ -27,6 +27,9 @@ public class RelayServerNetworking {
         // 注册 S2C_ShellEnergyPayload (服务端到客户端)
         PayloadTypeRegistry.clientboundPlay().register(S2C_ShellEnergyPayload.TYPE, S2C_ShellEnergyPayload.CODEC);
 
+        // 注册 S2C_ShellLogPayload (服务端到客户端 - 日志同步)
+        PayloadTypeRegistry.clientboundPlay().register(S2C_ShellLogPayload.TYPE, S2C_ShellLogPayload.CODEC);
+
         // 注册 S2C_SyncSpellDiskPayload (服务端到客户端)
         PayloadTypeRegistry.clientboundPlay().register(S2C_SyncSpellDiskPayload.TYPE, S2C_SyncSpellDiskPayload.CODEC);
 
@@ -199,6 +202,29 @@ public class RelayServerNetworking {
                     handler.setUseInventoryEnergyModule(payload.useInventoryEnergyModule());
                     handler.setDebugOutputEnabled(payload.debugOutputEnabled());
                     handler.setStatusInfo(payload.statusInfoEnabled());
+                }
+            });
+        });
+        
+        // 注册 C2S_RequestShellLogPayload - 客户端请求日志同步
+        PayloadTypeRegistry.serverboundPlay().register(C2S_RequestShellLogPayload.TYPE,
+                C2S_RequestShellLogPayload.CODEC);
+        
+        // 注册服务端接收处理器 - 请求日志同步
+        ServerPlayNetworking.registerGlobalReceiver(C2S_RequestShellLogPayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player == null)
+                return;
+
+            context.server().execute(() -> {
+                if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                    ShellContainer container = handler.getContainer();
+                    if (container instanceof BlockShellEntity blockEntity) {
+                        // 每 10 tick 同步一次日志
+                        if (blockEntity.getLevel().getGameTime() % 10 == 0) {
+                            blockEntity.syncLogsToClient(blockEntity.getLevel(), blockEntity.getBlockPos());
+                        }
+                    }
                 }
             });
         });

@@ -9,7 +9,9 @@ import net.minecraft.world.entity.player.Inventory;
 
 import qdream.relay.networking.payloads.C2S_ToggleShellPayload;
 import qdream.relay.networking.payloads.C2S_InitializeShellPayload;
+import qdream.relay.networking.payloads.C2S_RequestShellLogPayload;
 import qdream.relay.screen.ShellScreenHandler;
+import qdream.relay.client.screen.widget.LogWidget;
 
 /**
  * 外壳方块屏幕
@@ -24,10 +26,16 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     private static final int LABEL_X = 12;
     private static final int LABEL_START_Y = 14;
     private static final int LABEL_SPACING_Y = 30;
-    private static final int STATUS_X = 116; // 复位按钮 - 开关按钮左侧 右侧，按钮下方
-    private static final int STATUS_Y = 38; // 复位按钮 - 开关按钮左侧 按钮下方开始
+    private static final int STATUS_X = 116;
+    private static final int STATUS_Y = 38;
     private static final int BUTTON_WIDTH = 50;
     private static final int BUTTON_HEIGHT = 20;
+
+    // 日志窗口布局 - 放在屏幕左边，插槽标签下方
+    private static final int LOG_WINDOW_X = 8;
+    private static final int LOG_WINDOW_Y = 130; 
+    private static final int LOG_WINDOW_WIDTH = 260;
+    private static final int LOG_WINDOW_HEIGHT = 280;
 
     // 复位按钮 - 开关按钮左侧 颜色
     private static final int BG_COLOR = 0xFF1A1A2E;
@@ -41,6 +49,9 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     // 复位按钮 - 开关按钮左侧 开关按钮
     private Button toggleButton;
     private Button initButton;
+
+    // 日志窗口 Widget（包级可见，供 RelayClientNetworking 访问）
+    private LogWidget logWidget;
 
     public ShellScreen(ShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -65,6 +76,16 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
         this.addRenderableWidget(initButton);
+
+        // 日志窗口 Widget
+        logWidget = new LogWidget(
+                LOG_WINDOW_X,
+                LOG_WINDOW_Y,
+                LOG_WINDOW_WIDTH,
+                LOG_WINDOW_HEIGHT,
+                this.font,
+                () -> this.menu.getSyncedLogs());
+        this.addRenderableWidget(logWidget);
     }
 
     private Component getToggleLabel() {
@@ -72,7 +93,7 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     }
 
     private Component getResetLabel() {
-        return Component.literal("§e 复位");
+        return Component.literal("§e 重载程序");
     }
 
     private void onReset() {
@@ -123,6 +144,12 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         }
 
         renderStatusInfo(graphics, left + STATUS_X, top + STATUS_Y + BUTTON_HEIGHT);
+
+        // 定期请求日志同步（每 10 tick）
+        if (this.minecraft != null && this.minecraft.level != null &&
+                this.minecraft.level.getGameTime() % 10 == 0) {
+            ClientPlayNetworking.send(new C2S_RequestShellLogPayload());
+        }
     }
 
     /**
@@ -161,5 +188,26 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    /**
+     * 获取日志窗口 Widget（供网络包处理器访问）
+     */
+    public LogWidget getLogWidget() {
+        return logWidget;
+    }
+
+    /**
+     * 处理滚轮事件 - 滚动日志
+     */
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        // 检查鼠标是否在日志窗口上方
+        if (logWidget != null && logWidget.isMouseOver(mouseX - this.leftPos, mouseY - this.topPos)) {
+            if (logWidget.handleScroll(verticalAmount)) {
+                return true;
+            }
+        }
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 }

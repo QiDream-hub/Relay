@@ -63,6 +63,10 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
     private double syncedEnergy = 0.0;
+    
+    // 日志变更标记
+    private boolean logsChanged = false;
+    private java.util.List<String> syncedLogs = new java.util.ArrayList<>();
 
     /**
      * 客户端构造方法（没有实际容器）
@@ -203,7 +207,44 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             double energyCost = container.getEnergyCostPerTick();
             energyCostSlot.set((int) energyCost);
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
+            
+            // 同步日志（每 tick 检查变更）
+            if (container instanceof BlockShellEntity blockEntity) {
+                java.util.List<String> currentLogs = blockEntity.getLogBuffer();
+                if (!currentLogs.equals(syncedLogs)) {
+                    syncedLogs = currentLogs;
+                    logsChanged = true;
+                }
+            }
         }
+    }
+    
+    /**
+     * 获取同步的日志内容
+     */
+    public java.util.List<String> getSyncedLogs() {
+        return syncedLogs;
+    }
+    
+    /**
+     * 设置同步的日志内容（客户端调用）
+     */
+    public void setSyncedLogs(java.util.List<String> logs) {
+        this.syncedLogs = logs;
+    }
+    
+    /**
+     * 标记日志已同步（客户端调用）
+     */
+    public void markLogsSynced() {
+        this.logsChanged = false;
+    }
+    
+    /**
+     * 检查日志是否有变更（服务端调用）
+     */
+    public boolean hasLogsChanged() {
+        return logsChanged;
     }
 
     /**

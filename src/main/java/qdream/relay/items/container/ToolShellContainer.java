@@ -69,7 +69,7 @@ public class ToolShellContainer implements ShellContainer {
     private final StateMachine stateMachine;
     private final ShellTickHandler tickHandler = new ShellTickHandler();
     private final ExecutionStats executionStats = new ExecutionStats();
-    private Entity owner;
+    private Player owner;
 
     public ToolShellContainer(ToolShellItem toolShell, ItemStack stack, UUID sessionId) {
         this.toolShell = toolShell;
@@ -294,7 +294,6 @@ public class ToolShellContainer implements ShellContainer {
         // 设置上下文
         StateMachine machine = getStateMachine();
         if (machine.isRunning()) {
-            machine.setContext("shellContainer", this);
             machine.setContext("level", world);
             machine.setContext("self", player);
         }
@@ -311,18 +310,6 @@ public class ToolShellContainer implements ShellContainer {
             }
             player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
         }
-    }
-
-    /**
-     * 获取玩家实体（用于背包能量模块访问）
-     *
-     * @return 玩家实体，如果 owner 不是玩家返回 null
-     */
-    private Player getOwnerPlayer() {
-        Entity owner = this.owner;
-        return (owner instanceof Player)
-                ? (Player) owner
-                : null;
     }
 
     // ========== ShellContainer 接口 ==========
@@ -382,10 +369,9 @@ public class ToolShellContainer implements ShellContainer {
         }
         // 如果启用背包能量模块且插槽为空，检查背包
         if (isUseInventoryEnergyModule()) {
-            Player player = getOwnerPlayer();
-            if (player != null) {
+            if (owner != null) {
                 double totalEnergy = 0.0;
-                var inv = player.getInventory();
+                var inv = owner.getInventory();
                 for (int i = 0; i < inv.getContainerSize(); i++) {
                     ItemStack slot = inv.getItem(i);
                     if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {
@@ -430,10 +416,9 @@ public class ToolShellContainer implements ShellContainer {
         }
 
         // 如果启用背包能量模块，从背包内的能量模块扣除
-        Player player = getOwnerPlayer();
-        if (player != null) {
+        if (owner != null) {
             double remaining = amount;
-            var inv = player.getInventory();
+            var inv = owner.getInventory();
             for (int i = 0; i < inv.getContainerSize(); i++) {
                 ItemStack slot = inv.getItem(i);
                 if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {
@@ -467,12 +452,12 @@ public class ToolShellContainer implements ShellContainer {
     }
 
     @Override
-    public Entity getOwner() {
+    public Player getOwner() {
         return owner;
     }
 
     @Override
-    public void setOwner(Entity owner) {
+    public void setOwner(Player owner) {
         this.owner = owner;
         saveAllState();
     }
@@ -510,10 +495,9 @@ public class ToolShellContainer implements ShellContainer {
         }
         // 如果启用背包能量模块，添加到背包内的能量模块
         if (isUseInventoryEnergyModule()) {
-            net.minecraft.world.entity.player.Player player = getOwnerPlayer();
-            if (player != null) {
+            if (owner != null) {
                 double remaining = amount;
-                var inv = player.getInventory();
+                var inv = owner.getInventory();
                 for (int i = 0; i < inv.getContainerSize(); i++) {
                     ItemStack slot = inv.getItem(i);
                     if (!slot.isEmpty() && slot.getItem() instanceof EnergyModuleComponent emiSlot) {

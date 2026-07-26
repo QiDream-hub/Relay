@@ -142,7 +142,7 @@ public final class OperationHelpers {
             return false;
         }
         if (!component.isInRange(interactor, sourcePos, targetPos)) {
-            executor.triggerMishap(operationName + " 超出世界交互器范围：" + 
+            executor.triggerMishap(operationName + " 超出世界交互器范围：" +
                     String.format("%.1f > %.1f", sourcePos.distanceTo(targetPos), component.getRange(interactor)));
             return false;
         }
@@ -184,11 +184,12 @@ public final class OperationHelpers {
      */
     public static Player getOwner(StateMachine executor) {
         ShellContainer shellContainer = getShellContainer(executor);
-        Entity owner = shellContainer.getOwner();
-        if (owner instanceof Player player) {
-            return player;
+        Player owner = shellContainer.getOwner();
+        if (owner == null) {
+            executor.triggerMishap("无法获取所属者");
+            return null;
         }
-        return null;
+        return owner;
     }
 
     /**

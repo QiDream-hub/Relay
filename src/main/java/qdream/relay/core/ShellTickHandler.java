@@ -55,6 +55,8 @@ public class ShellTickHandler {
             return;
         }
 
+        container.getStateMachine().setContext("shellContainer", container);
+
         // 执行状态机
         tickCounter++;
         int interval = container.getInterval();

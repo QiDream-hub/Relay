@@ -65,7 +65,8 @@ public class BlockShell extends BaseEntityBlock {
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state,
+            BlockEntityType<T> type) {
         return createTickerHelper(type, RelayBlockEntities.SHELL_BLOCK_ENTITY, BlockShellEntity::tick);
     }
 
@@ -80,7 +81,11 @@ public class BlockShell extends BaseEntityBlock {
         if (!world.isClientSide()) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof BlockShellEntity shell) {
-                shell.setOwner(placer);
+                if (!(placer instanceof Player player)) {
+                    shell.setOwner(null);
+                } else {
+                    shell.setOwner(player);
+                }
 
                 // 检测相邻方块并加入核心共享组（6 向检测）
                 ShellCoreGroupManager.onBlockPlaced(world, pos, shell);
@@ -89,7 +94,8 @@ public class BlockShell extends BaseEntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
+            BlockHitResult hit) {
         if (world.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
@@ -101,5 +107,5 @@ public class BlockShell extends BaseEntityBlock {
 
         return InteractionResult.CONSUME;
     }
-    
+
 }

@@ -2,8 +2,7 @@ package qdream.relay.core;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.entity.Entity;
-
+import net.minecraft.world.entity.player.Player;
 import qdream.relay.engine.StateMachine;
 
 /**
@@ -69,16 +68,16 @@ public interface ShellContainer extends Container {
     /**
      * 获取所有者实体（玩家或其他实体）
      *
-     * @return 所有者实体，如果未设置返回 null
+     * @return 所有者，如果未设置返回 null
      */
-    Entity getOwner();
+    Player getOwner();
 
     /**
      * 设置所有者实体
      *
      * @param owner 所有者实体
      */
-    void setOwner(Entity owner);
+    void setOwner(Player owner);
 
     /**
      * 是否有所有者
