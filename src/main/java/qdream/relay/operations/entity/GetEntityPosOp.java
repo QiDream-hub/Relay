@@ -1,7 +1,7 @@
 package qdream.relay.operations.entity;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.EntityData;
@@ -19,7 +19,7 @@ import qdream.relay.types.VectorData;
  * 2. 获取实体坐标并存储：get_self get_entity_pos some_list list_append
  * 3. 检查坐标高度：get_self get_entity_pos get_y 64 gt
  */
-public class GetEntityPosOp extends Spell {
+public class GetEntityPosOp extends Instruction {
 
     public GetEntityPosOp() {
         super("relay:get_entity_pos", 1, 1, OperationSignature.builder()

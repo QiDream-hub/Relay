@@ -2,14 +2,14 @@ package qdream.relay.operations.logic;
 
 import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Or 操作 - 逻辑或
  */
-public class OrOp extends Spell {
+public class OrOp extends Instruction {
 
     public OrOp() {
         super("relay:or", 1, 0.05, OperationSignature.builder()

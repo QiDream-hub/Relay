@@ -6,7 +6,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -50,7 +50,7 @@ import qdream.relay.Relay;
  * <li>需要世界交互器</li>
  * </ul>
  */
-public class PickupItemOp extends Spell {
+public class PickupItemOp extends Instruction {
 
     public PickupItemOp() {
         super("relay:pickup_item", 1, 2, OperationSignature.builder()

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -27,7 +27,7 @@ import qdream.relay.types.VectorData;
  * - 向量不能为零向量
  * - 向量分量不能为 NaN 或 Infinity
  */
-public class SetEntityLookOp extends Spell {
+public class SetEntityLookOp extends Instruction {
 
     public SetEntityLookOp() {
         super("relay:set_entity_look", 1, 1, OperationSignature.builder()

@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -31,7 +31,7 @@ import qdream.relay.types.VectorData;
  * 2. 检查是否是空气：some_vector get_block is_air if ...
  * 3. 获取坐标并存储：get_self get_entity_pos get_block some_list list_append
  */
-public class GetBlockOp extends Spell {
+public class GetBlockOp extends Instruction {
 
     public GetBlockOp() {
         super("relay:get_block", 1, 1, OperationSignature.builder()

@@ -1,7 +1,7 @@
 package qdream.relay.operations.vector;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.VectorData;
@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
  * 弹出：vector
  * 压入：vector (归一化后的向量)
  */
-public class VectorNormalizeOp extends Spell {
+public class VectorNormalizeOp extends Instruction {
 
     public VectorNormalizeOp() {
         super("relay:vector_normalize", 1, 0.05, OperationSignature.builder()

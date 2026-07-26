@@ -6,7 +6,7 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BooleanData;
@@ -24,7 +24,7 @@ import qdream.relay.types.VectorData;
  *
  * 能量消耗：基础 1 + 向量模长 × 0.5
  */
-public class PushVectorOp extends Spell {
+public class PushVectorOp extends Instruction {
 
     public PushVectorOp() {
         super("relay:push_vector", 1, 2, OperationSignature.builder()

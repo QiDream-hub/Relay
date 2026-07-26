@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * 输入：列表
  * 输出：去重后的新列表
  */
-public class ListUniqOp extends qdream.relay.mc.base.Spell {
+public class ListUniqOp extends qdream.relay.mc.base.Instruction {
 
     public ListUniqOp() {
         super("relay:list_uniq", 2, 0.25, OperationSignature.builder()

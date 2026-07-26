@@ -4,7 +4,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.EntityData;
@@ -17,7 +17,7 @@ import qdream.relay.types.VectorData;
  * 弹出：entity
  * 压入：vector (视线方向，已归一化)
  */
-public class GetLookVectorOp extends Spell {
+public class GetLookVectorOp extends Instruction {
 
     public GetLookVectorOp() {
         super("relay:get_look_vector", 1, 0.25, OperationSignature.builder()

@@ -4,7 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.StringData;
@@ -22,7 +22,7 @@ import qdream.relay.types.StringData;
  * 3. 向量转字符串：{1,2,3} to_string → "{x:1.0,y:2.0,z:3.0}"
  * 4. 操作转字符串：relay:add to_string → "relay:add"
  */
-public class ToStringOp extends Spell {
+public class ToStringOp extends Instruction {
 
     public ToStringOp() {
         super("relay:to_string", 1, 0.05, OperationSignature.builder()

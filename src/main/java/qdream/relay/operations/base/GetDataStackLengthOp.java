@@ -1,7 +1,7 @@
 package qdream.relay.operations.base;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.types.NumberData;
 
@@ -10,7 +10,7 @@ import qdream.relay.types.NumberData;
  * 输入：无
  * 输出：数据栈长度（数值）
  */
-public class GetDataStackLengthOp extends Spell {
+public class GetDataStackLengthOp extends Instruction {
 
     public GetDataStackLengthOp() {
         super("relay:get_data_stack_length", 1, 0.25, OperationSignature.builder()

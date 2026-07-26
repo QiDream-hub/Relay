@@ -5,7 +5,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -21,7 +21,7 @@ import qdream.relay.Relay;
  * 输入：SlotData（物品引用）, VectorData（目标位置）
  * 输出：无
  */
-public class DropItemOp extends Spell {
+public class DropItemOp extends Instruction {
 
     public DropItemOp() {
         super("relay:drop_item", 1, 1, OperationSignature.builder()

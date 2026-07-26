@@ -2,14 +2,14 @@ package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Add 操作 - 加法
  */
-public class AddOp extends Spell {
+public class AddOp extends Instruction {
 
     public AddOp() {
         super("relay:add", 1, 0.05, OperationSignature.builder()

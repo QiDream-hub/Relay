@@ -3,14 +3,14 @@ package qdream.relay.operations.logic;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Lt 操作 - 小于比较
  */
-public class LtOp extends Spell {
+public class LtOp extends Instruction {
 
     public LtOp() {
         super("relay:lt", 1, 0.05, OperationSignature.builder()

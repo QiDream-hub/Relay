@@ -2,7 +2,7 @@ package qdream.relay.operations.control;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
@@ -38,7 +38,7 @@ import qdream.relay.types.ListData;
  * 条件值必须在每次 body 执行后被重新计算并压入数据栈，否则循环将无限执行或立即结束。
  * </p>
  */
-public class WhileOp extends Spell {
+public class WhileOp extends Instruction {
 
     public WhileOp() {
         super("relay:while", 1, 0.25, OperationSignature.builder()

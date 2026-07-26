@@ -2,7 +2,7 @@ package qdream.relay.operations.list;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * 输入：列表，索引（数值），值
  * 输出：新列表
  */
-public class ListSetOp extends Spell {
+public class ListSetOp extends Instruction {
 
     public ListSetOp() {
         super("relay:list_set", 1, 0.25, OperationSignature.builder()

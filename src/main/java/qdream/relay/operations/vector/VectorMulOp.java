@@ -1,7 +1,7 @@
 package qdream.relay.operations.vector;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
  * 弹出：number, vector
  * 压入：vector (向量 * 标量)
  */
-public class VectorMulOp extends Spell {
+public class VectorMulOp extends Instruction {
 
     public VectorMulOp() {
         super("relay:vector_mul", 1, 0.05, OperationSignature.builder()

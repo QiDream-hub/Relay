@@ -6,7 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BlockEntityData;
@@ -32,7 +32,7 @@ import qdream.relay.types.TypeData;
  * 3. 获取方块 ID：some_vector get_block get_type
  * 4. 比较类型：get_entity get_type some_string eq if ...
  */
-public class GetTypeOp extends Spell {
+public class GetTypeOp extends Instruction {
 
     public GetTypeOp() {
         super("relay:get_type", 1, 1, OperationSignature.builder()

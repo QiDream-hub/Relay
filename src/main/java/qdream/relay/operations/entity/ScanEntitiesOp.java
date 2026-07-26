@@ -9,7 +9,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -27,7 +27,7 @@ import qdream.relay.types.VectorData;
  *
  * 需要世界交互器，并检查范围
  */
-public class ScanEntitiesOp extends Spell {
+public class ScanEntitiesOp extends Instruction {
 
     public ScanEntitiesOp() {
         super("relay:scan_entities", 2, 1, OperationSignature.builder()

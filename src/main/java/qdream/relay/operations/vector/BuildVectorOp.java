@@ -3,7 +3,7 @@ package qdream.relay.operations.vector;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * BuildVector 操作 - 从三个数字构建向量
  */
-public class BuildVectorOp extends Spell {
+public class BuildVectorOp extends Instruction {
 
     public BuildVectorOp() {
         super("relay:build_vector", 1, 0.05, OperationSignature.builder()

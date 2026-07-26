@@ -13,7 +13,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -21,7 +21,7 @@ import qdream.relay.tools.ContainerTools;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.VectorData;
 
-public class PlaceBlockOp extends Spell {
+public class PlaceBlockOp extends Instruction {
 
     public PlaceBlockOp() {
         super("relay:place_block", 1, 1, OperationSignature.builder()

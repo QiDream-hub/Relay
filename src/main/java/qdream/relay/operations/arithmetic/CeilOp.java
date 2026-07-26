@@ -2,14 +2,14 @@ package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Ceil 操作 - 取顶（向上取整）
  */
-public class CeilOp extends Spell {
+public class CeilOp extends Instruction {
 
     public CeilOp() {
         super("relay:ceil", 0, 0.05, OperationSignature.builder()

@@ -2,7 +2,7 @@ package qdream.relay.operations.base;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.types.NumberData;
 
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 批量复制操作 - 复制数据栈顶部 N 个元素
  */
-public class BatchDupOp extends Spell {
+public class BatchDupOp extends Instruction {
 
     public BatchDupOp() {
         super("relay:batch_dup", 1, 0.05, OperationSignature.builder()

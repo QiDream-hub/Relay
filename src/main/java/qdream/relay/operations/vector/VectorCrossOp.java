@@ -1,7 +1,7 @@
 package qdream.relay.operations.vector;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.VectorData;
@@ -14,7 +14,7 @@ import net.minecraft.world.phys.Vec3;
  * 弹出：vector, vector
  * 压入：vector (垂直于两个输入向量的新向量)
  */
-public class VectorCrossOp extends Spell {
+public class VectorCrossOp extends Instruction {
 
     public VectorCrossOp() {
         super("relay:vector_cross", 1, 0.05, OperationSignature.builder()

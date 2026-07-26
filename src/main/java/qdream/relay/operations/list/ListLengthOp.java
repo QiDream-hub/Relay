@@ -2,7 +2,7 @@ package qdream.relay.operations.list;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -15,7 +15,7 @@ import java.util.List;
  * 输入：列表
  * 输出：数值（长度）
  */
-public class ListLengthOp extends Spell {
+public class ListLengthOp extends Instruction {
 
     public ListLengthOp() {
         super("relay:list_length", 1, 0.25, OperationSignature.builder()

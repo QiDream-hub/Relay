@@ -3,7 +3,7 @@ package qdream.relay.core;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 
 /**
  * 外壳 Tick 处理器
@@ -109,7 +109,7 @@ public class ShellTickHandler {
                 break; // cost 不足，等待下 tick
             }
 
-            if (top instanceof Spell spell) {
+            if (top instanceof Instruction spell) {
                 double energy = spell.getEnergy();
                 container.consumeEnergy(energy);
                 stats.addOperationEnergy(energy);

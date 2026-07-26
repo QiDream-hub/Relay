@@ -3,14 +3,14 @@ package qdream.relay.operations.logic;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Gt 操作 - 大于比较
  */
-public class GtOp extends Spell {
+public class GtOp extends Instruction {
 
     public GtOp() {
         super("relay:gt", 1, 0.05, OperationSignature.builder()

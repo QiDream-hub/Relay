@@ -4,7 +4,7 @@ import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.core.CommunicationSystem;
@@ -13,7 +13,7 @@ import qdream.relay.core.CommunicationSystem;
  * Send 操作 - 发送数据到频道
  * 弹出：频道号、数据
  */
-public class SendOp extends Spell {
+public class SendOp extends Instruction {
 
     public SendOp() {
         super("relay:send", 1, 1, OperationSignature.builder()

@@ -3,7 +3,7 @@ package qdream.relay.operations.container;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -20,7 +20,7 @@ import qdream.relay.Relay;
  * 输入：SlotData（目标容器/槽位），SlotData（源物品）
  * 输出：NumberData（source_item 剩余的数量，0 表示完全移动）
  */
-public class MoveItemsOp extends Spell {
+public class MoveItemsOp extends Instruction {
 
     public MoveItemsOp() {
         super("relay:move_items", 2, 0.25, OperationSignature.builder()

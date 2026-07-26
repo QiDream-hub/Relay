@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -31,7 +31,7 @@ import qdream.relay.types.VectorData;
  * 2. 检查是否存在方块实体：some_vector get_block_entity is_null if ...
  * 3. 获取坐标并存储：get_self get_entity_pos get_block_entity some_list list_append
  */
-public class GetBlockEntityOp extends Spell {
+public class GetBlockEntityOp extends Instruction {
 
     public GetBlockEntityOp() {
         super("relay:get_block_entity", 1, 1, OperationSignature.builder()

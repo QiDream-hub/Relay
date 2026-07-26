@@ -1,7 +1,7 @@
 package qdream.relay.operations.vector;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
@@ -14,7 +14,7 @@ import qdream.relay.types.VectorData;
  * 弹出：vector
  * 压入：number (向量的模长)
  */
-public class VectorLengthOp extends Spell {
+public class VectorLengthOp extends Instruction {
 
     public VectorLengthOp() {
         super("relay:vector_length", 1, 0.05, OperationSignature.builder()

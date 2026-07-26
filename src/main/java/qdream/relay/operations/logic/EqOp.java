@@ -3,7 +3,7 @@ package qdream.relay.operations.logic;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
@@ -11,7 +11,7 @@ import qdream.relay.types.BooleanData;
 /**
  * Eq 操作 - 等于比较
  */
-public class EqOp extends Spell {
+public class EqOp extends Instruction {
 
     public EqOp() {
         super("relay:eq", 1, 0.05, OperationSignature.builder()

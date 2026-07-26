@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
@@ -24,7 +24,7 @@ import qdream.relay.types.EntityData;
  * 1. 检测主人是否是玩家：get_owner is_player if { ... }
  * 2. 检测实体类型：some_entity is_player
  */
-public class IsPlayerOp extends Spell {
+public class IsPlayerOp extends Instruction {
 
     public IsPlayerOp() {
         super("relay:is_player", 1, 0.05, OperationSignature.builder()

@@ -2,14 +2,14 @@ package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Mul 操作 - 乘法
  */
-public class MulOp extends Spell {
+public class MulOp extends Instruction {
 
     public MulOp() {
         super("relay:mul", 1, 0.05, OperationSignature.builder()

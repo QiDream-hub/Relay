@@ -1,7 +1,7 @@
 package qdream.relay.operations.container;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -16,7 +16,7 @@ import qdream.relay.Relay;
  * 输入：SlotData（物品引用）
  * 输出：TypeData（物品类型）
  */
-public class GetItemTypeOp extends Spell {
+public class GetItemTypeOp extends Instruction {
 
     public GetItemTypeOp() {
         super("relay:get_item_type", 1, 0.1, OperationSignature.builder()

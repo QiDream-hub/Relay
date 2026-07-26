@@ -2,14 +2,14 @@ package qdream.relay.operations.logic;
 
 import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Not 操作 - 逻辑非
  */
-public class NotOp extends Spell {
+public class NotOp extends Instruction {
 
     public NotOp() {
         super("relay:not", 1, 0.05, OperationSignature.builder()

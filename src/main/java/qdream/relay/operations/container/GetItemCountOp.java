@@ -1,7 +1,7 @@
 package qdream.relay.operations.container;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -17,7 +17,7 @@ import qdream.relay.Relay;
  * 输入：SlotData
  * 输出：NumberData（物品数量）
  */
-public class GetItemCountOp extends Spell {
+public class GetItemCountOp extends Instruction {
 
     public GetItemCountOp() {
         super("relay:get_item_count", 1, 0.1, OperationSignature.builder()

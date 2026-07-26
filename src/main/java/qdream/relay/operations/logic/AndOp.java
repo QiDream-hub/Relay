@@ -2,14 +2,14 @@ package qdream.relay.operations.logic;
 
 import qdream.relay.types.BooleanData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * And 操作 - 逻辑与
  */
-public class AndOp extends Spell {
+public class AndOp extends Instruction {
 
     public AndOp() {
         super("relay:and", 1, 0.05, OperationSignature.builder()

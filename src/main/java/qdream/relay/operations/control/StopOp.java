@@ -1,14 +1,14 @@
 package qdream.relay.operations.control;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 
 /**
  * Stop 操作 - 强制终止程序
  * 清空程序栈和数据栈
  */
-public class StopOp extends Spell {
+public class StopOp extends Instruction {
 
     public StopOp() {
         super("relay:stop", 1, 1, OperationSignature.builder().build());

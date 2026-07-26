@@ -2,7 +2,7 @@ package qdream.relay.operations.base;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -28,7 +28,7 @@ import java.util.List;
  * 4. 根据 indices 从临时数组取元素（索引从 1 开始）
  * 5. 将结果压回数据栈
  */
-public class StackRearrangeOp extends Spell {
+public class StackRearrangeOp extends Instruction {
 
     public StackRearrangeOp() {
         super("relay:stack_rearrange", 1, 0.05, OperationSignature.builder()

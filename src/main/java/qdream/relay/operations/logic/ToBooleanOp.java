@@ -3,7 +3,7 @@ package qdream.relay.operations.logic;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
@@ -31,7 +31,7 @@ import qdream.relay.types.BooleanData;
  * 3. 列表转布尔：[] to_bool → false, [1] to_bool → true
  * 4. 布尔自身：true to_bool → true, false to_bool → false
  */
-public class ToBooleanOp extends Spell {
+public class ToBooleanOp extends Instruction {
 
     public ToBooleanOp() {
         super("relay:to_bool", 0, 0.05, OperationSignature.builder()

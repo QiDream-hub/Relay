@@ -3,7 +3,7 @@ package qdream.relay.operations.list;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -16,7 +16,7 @@ import java.util.List;
  * 输入：列表，值
  * 输出：新列表（如果元素已存在则不添加）
  */
-public class ListAddUniqueOp extends Spell {
+public class ListAddUniqueOp extends Instruction {
 
     public ListAddUniqueOp() {
         super("relay:list_add_unique", 2, 0.25, OperationSignature.builder()

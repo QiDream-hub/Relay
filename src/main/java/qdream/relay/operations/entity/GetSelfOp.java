@@ -5,7 +5,7 @@ import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.BlockEntityData;
@@ -27,7 +27,7 @@ import qdream.relay.types.NullData;
  * 2. 检查是否是方块实体：get_self is_block_entity if { ... }
  * 3. 对实体进行操作：get_self some_entity_op
  */
-public class GetSelfOp extends Spell {
+public class GetSelfOp extends Instruction {
 
     public GetSelfOp() {
         super("relay:get_self", 1, 1, OperationSignature.builder()

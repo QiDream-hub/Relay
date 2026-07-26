@@ -6,13 +6,13 @@ import qdream.relay.mc.signature.OperationSignature;
  * 指令类型基类（无状态单例操作）
  * 序列化/反序列化直接继承 Operation 的默认实现（仅处理 id）。
  */
-public abstract class Spell extends Operation {
+public abstract class Instruction extends Operation {
     // 操作消耗的能量
     protected final double energy;
 
     protected final OperationSignature signature;
 
-    public Spell(String id, int cost, double energy, OperationSignature signature) {
+    public Instruction(String id, int cost, double energy, OperationSignature signature) {
         super(id, cost);
         this.energy = energy;
         this.signature = signature;
@@ -34,7 +34,7 @@ public abstract class Spell extends Operation {
 
     @Override
     public boolean equalsTo(Operation other) {
-        if (!(other instanceof Spell that)) {
+        if (!(other instanceof Instruction that)) {
             return false;
         }
 

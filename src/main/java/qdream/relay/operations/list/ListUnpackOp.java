@@ -2,7 +2,7 @@ package qdream.relay.operations.list;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -14,7 +14,7 @@ import java.util.List;
  * 输入：列表
  * 输出：多个值（列表中的每个元素）
  */
-public class ListUnpackOp extends Spell {
+public class ListUnpackOp extends Instruction {
 
     public ListUnpackOp() {
         super("relay:list_unpack", 2, 0.25, OperationSignature.builder()

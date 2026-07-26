@@ -1,7 +1,7 @@
 package qdream.relay.operations.base;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
@@ -10,7 +10,7 @@ import qdream.relay.types.NumberData;
  * 移到栈顶操作 - 将指定位置的值移到栈顶
  * 位置从 0 开始计数，0 表示栈顶，1 表示栈顶下一个元素
  */
-public class MoveToTopOp extends Spell {
+public class MoveToTopOp extends Instruction {
 
     public MoveToTopOp() {
         super("relay:move_to_top", 1, 0.05, OperationSignature.builder()

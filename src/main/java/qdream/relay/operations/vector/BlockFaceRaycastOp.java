@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -28,7 +28,7 @@ import qdream.relay.types.VectorData;
  *
  * 需要世界交互器，并检查范围
  */
-public class BlockFaceRaycastOp extends Spell {
+public class BlockFaceRaycastOp extends Instruction {
 
     public BlockFaceRaycastOp() {
         super("relay:block_face_raycast", 2, 0.25, OperationSignature.builder()

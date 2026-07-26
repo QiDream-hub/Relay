@@ -5,7 +5,7 @@ import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
@@ -23,7 +23,7 @@ import qdream.relay.types.EntityData;
  * 2. 检查是否有主人：get_owner is_null if ...
  * 3. 对主人进行操作：get_owner some_entity_op
  */
-public class GetOwnerOp extends Spell {
+public class GetOwnerOp extends Instruction {
 
     public GetOwnerOp() {
         super("relay:get_owner", 1, 1, OperationSignature.builder()

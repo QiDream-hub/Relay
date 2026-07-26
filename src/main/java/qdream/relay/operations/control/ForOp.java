@@ -2,7 +2,7 @@ package qdream.relay.operations.control;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * 第 4 轮：空列表 → 遍历结束
  * </pre>
  */
-public class ForOp extends Spell {
+public class ForOp extends Instruction {
 
     public ForOp() {
         super("relay:for", 1, 0.25, OperationSignature.builder()

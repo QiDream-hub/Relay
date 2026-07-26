@@ -3,7 +3,7 @@ package qdream.relay.operations.container;
 import net.minecraft.world.Container;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -22,7 +22,7 @@ import java.util.List;
  * 输入：BlockEntityData（容器）
  * 输出：ListData（包含 SlotData 的列表）
  */
-public class GetContainerItemsOp extends Spell {
+public class GetContainerItemsOp extends Instruction {
 
     public GetContainerItemsOp() {
         super("relay:get_container_items", 1, 0.5, OperationSignature.builder()

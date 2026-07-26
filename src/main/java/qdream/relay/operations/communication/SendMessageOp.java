@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -27,7 +27,7 @@ import qdream.relay.types.BooleanData;
  * 1. 向主人发送消息：get_owner "Hello!" send_message
  * 2. 检查发送结果：get_owner "Hello!" send_message if { ... }
  */
-public class SendMessageOp extends Spell {
+public class SendMessageOp extends Instruction {
 
     public SendMessageOp() {
         super("relay:send_message", 1, 1, OperationSignature.builder()

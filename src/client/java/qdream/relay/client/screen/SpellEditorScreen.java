@@ -31,7 +31,7 @@ import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
@@ -193,7 +193,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             var signature = operation.getSignature();
             InfoContent operationInfo = InfoUtils.buildOperationInfo(opId,
                     signature instanceof OperationSignature opSig ? opSig : null);
-            if (operation instanceof Spell spell) {
+            if (operation instanceof Instruction spell) {
                 operationInfo.pushLine("计算开销:" + spell.getCost() + " 能量消耗:" + spell.getEnergy(), TITLE_COLOR);
             }
             return operationInfo;

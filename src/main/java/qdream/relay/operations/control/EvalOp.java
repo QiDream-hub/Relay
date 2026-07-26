@@ -2,7 +2,7 @@ package qdream.relay.operations.control;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -13,7 +13,7 @@ import java.util.List;
  * Eval 操作 - 将列表反转后压入程序栈
  * 实现控制流的核心操作
  */
-public class EvalOp extends Spell {
+public class EvalOp extends Instruction {
 
     public EvalOp() {
         super("relay:eval", 1, 0.25, OperationSignature.builder()

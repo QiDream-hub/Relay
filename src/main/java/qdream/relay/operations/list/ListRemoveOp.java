@@ -2,7 +2,7 @@ package qdream.relay.operations.list;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * 输入：列表（栈顶 +1），索引（栈顶）
  * 输出：新列表（移除元素后的副本）、被移除的元素
  */
-public class ListRemoveOp extends Spell {
+public class ListRemoveOp extends Instruction {
 
     public ListRemoveOp() {
         super("relay:list_remove", 1, 0.25, OperationSignature.builder()

@@ -2,14 +2,14 @@ package qdream.relay.operations.arithmetic;
 
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
 /**
  * Floor 操作 - 取底（向下取整）
  */
-public class FloorOp extends Spell {
+public class FloorOp extends Instruction {
 
     public FloorOp() {
         super("relay:floor", 1, 0.05, OperationSignature.builder()

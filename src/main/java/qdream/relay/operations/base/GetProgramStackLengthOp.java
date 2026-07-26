@@ -1,7 +1,7 @@
 package qdream.relay.operations.base;
 
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Spell;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.types.NumberData;
 
@@ -10,7 +10,7 @@ import qdream.relay.types.NumberData;
  * 输入：无
  * 输出：程序栈长度（数值）
  */
-public class GetProgramStackLengthOp extends Spell {
+public class GetProgramStackLengthOp extends Instruction {
 
     public GetProgramStackLengthOp() {
         super("relay:get_program_stack_length", 1, 0.25, OperationSignature.builder()
