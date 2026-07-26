@@ -4,7 +4,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -33,7 +32,6 @@ import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.Relay;
 import qdream.relay.core.ShellCoreGroupManager;
-import net.minecraft.core.Direction;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -257,8 +255,9 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             return owner;
         }
         // 玩家可能离线后重新上线，尝试从 UUID 恢复
-        if (ownerUuid != null) {
-            Player playerByUUID = getLevel().getPlayerByUUID(ownerUuid);
+        if (ownerUuid != null && getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            // 使用 Server 级别的 PlayerList 查询，跨所有维度
+            Player playerByUUID = serverLevel.getServer().getPlayerList().getPlayer(ownerUuid);
             if (playerByUUID != null) {
                 owner = playerByUUID;
                 return owner;
@@ -559,7 +558,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             try {
                 ownerUuid = java.util.UUID.fromString(uuidStr);
             } catch (IllegalArgumentException e) {
-                // UUID 格式错误，忽略
+                throw new IllegalArgumentException(e.getMessage());
             }
         }
 

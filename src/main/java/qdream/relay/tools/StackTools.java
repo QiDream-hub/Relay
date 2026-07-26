@@ -2,7 +2,8 @@ package qdream.relay.tools;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Instruction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,47 +21,97 @@ public final class StackTools {
 
     /**
      * 获取可执行单元的 ID
-     * 优先尝试转换为 Operation 获取 ID，失败则返回简单类名
+     * 优先尝试转换为 Data 或 Instruction 获取 ID，失败则返回简单类名
      *
      * @param exe 可执行单元
      * @return ID 或类名
      */
     public static String getId(Executable exe) {
-        if (exe instanceof Operation op) {
-            return op.getId();
+        if (exe instanceof Data data) {
+            return data.getId();
+        } else if (exe instanceof Instruction instr) {
+            return instr.getId();
+        } else {
+            return exe.getClass().getSimpleName();
         }
-        return exe.getClass().getSimpleName();
     }
 
-    // ==================== 操作 ID 提取 ====================
+    /**
+     * 获取可执行单元的显示名称翻译键
+     * 根据类型返回不同的翻译键：
+     * - Data: "type.{id}.name"
+     * - Instruction: "operation.{id}.name"
+     *
+     * @param exe 可执行单元
+     * @return 翻译键
+     */
+    public static String getNameKey(Executable exe) {
+        if (exe instanceof Data data) {
+            return "type." + data.getId() + ".name";
+        } else if (exe instanceof Instruction instr) {
+            return "operation." + instr.getId() + ".name";
+        } else {
+            return exe.getClass().getSimpleName();
+        }
+    }
+
+    // ==================== 通过 ID 获取显示名称 ====================
 
     /**
-     * 获取数据栈中所有操作的 ID 列表
+     * 获取类型 ID 的显示名称（从语言文件）
+     * 用于编辑器等客户端 UI
+     *
+     * @param typeId 类型 ID（如 "relay:number"）
+     * @return 显示名称，如果语言文件不存在则返回 ID
+     */
+    public static String getTypeDisplayName(String typeId) {
+        String key = "type." + typeId + ".name";
+        String name = net.minecraft.network.chat.Component.translatable(key).getString();
+        return name.equals(key) ? typeId : name;
+    }
+
+    /**
+     * 获取操作 ID 的显示名称（从语言文件）
+     * 用于编辑器等客户端 UI
+     *
+     * @param opId 操作 ID（如 "relay:add"）
+     * @return 显示名称，如果语言文件不存在则返回 ID
+     */
+    public static String getOperationDisplayName(String opId) {
+        String key = "operation." + opId + ".name";
+        String name = net.minecraft.network.chat.Component.translatable(key).getString();
+        return name.equals(key) ? opId : name;
+    }
+
+    // ==================== 指令 ID 提取 ====================
+
+    /**
+     * 获取数据栈中所有指令的 ID 列表
      *
      * @param executor 状态机
-     * @return 操作 ID 列表（只包含 Operation 类型）
+     * @return 指令 ID 列表（只包含 Instruction 类型）
      */
-    public static List<String> getDataStackOperationIds(StateMachine executor) {
+    public static List<String> getDataStackInstructionIds(StateMachine executor) {
         List<String> ids = new ArrayList<>();
         for (Executable exe : executor.getDataStackSnapshot()) {
-            if (exe instanceof Operation op) {
-                ids.add(op.getId());
+            if (exe instanceof Instruction instr) {
+                ids.add(instr.getId());
             }
         }
         return ids;
     }
 
     /**
-     * 获取程序栈中所有操作的 ID 列表
+     * 获取程序栈中所有指令的 ID 列表
      *
      * @param executor 状态机
-     * @return 操作 ID 列表（只包含 Operation 类型）
+     * @return 指令 ID 列表（只包含 Instruction 类型）
      */
-    public static List<String> getProgramStackOperationIds(StateMachine executor) {
+    public static List<String> getProgramStackInstructionIds(StateMachine executor) {
         List<String> ids = new ArrayList<>();
         for (Executable exe : executor.getProgramStackSnapshot()) {
-            if (exe instanceof Operation op) {
-                ids.add(op.getId());
+            if (exe instanceof Instruction instr) {
+                ids.add(instr.getId());
             }
         }
         return ids;
@@ -72,13 +123,13 @@ public final class StackTools {
      * 获取数据栈中所有可执行单元的 ID 或类型名
      *
      * @param executor 状态机
-     * @return ID/类型名列表（Operation 返回 ID，其他返回类名）
+     * @return ID/类型名列表（Instruction 返回 ID，其他返回类名）
      */
     public static List<String> getDataStackIds(StateMachine executor) {
         List<String> ids = new ArrayList<>();
         for (Executable exe : executor.getDataStackSnapshot()) {
-            if (exe instanceof Operation op) {
-                ids.add("§e" + op.getId());
+            if (exe instanceof Instruction instr) {
+                ids.add("§e" + instr.getId());
             } else {
                 ids.add("§f" + exe.getClass().getSimpleName());
             }
@@ -90,13 +141,13 @@ public final class StackTools {
      * 获取程序栈中所有可执行单元的 ID 或类型名
      *
      * @param executor 状态机
-     * @return ID/类型名列表（Operation 返回 ID，其他返回类名）
+     * @return ID/类型名列表（Instruction 返回 ID，其他返回类名）
      */
     public static List<String> getProgramStackIds(StateMachine executor) {
         List<String> ids = new ArrayList<>();
         for (Executable exe : executor.getProgramStackSnapshot()) {
-            if (exe instanceof Operation op) {
-                ids.add("§e" + op.getId());
+            if (exe instanceof Instruction instr) {
+                ids.add("§e" + instr.getId());
             } else {
                 ids.add("§f" + exe.getClass().getSimpleName());
             }
@@ -142,8 +193,8 @@ public final class StackTools {
                 sb.append("§8, ");
             }
             Executable exe = stack.get(i);
-            if (exe instanceof Operation op) {
-                sb.append("§e").append(op.getId());
+            if (exe instanceof Instruction instr) {
+                sb.append("§e").append(instr.getId());
             } else {
                 sb.append("§f").append(exe.getClass().getSimpleName());
             }

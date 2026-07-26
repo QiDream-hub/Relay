@@ -6,7 +6,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import qdream.relay.client.screen.widget.info.InfoUtils;
+import qdream.relay.tools.StackTools;
 
 import java.util.HashMap;
 import java.util.List;
@@ -129,7 +129,7 @@ public class TypeListWidget extends AbstractWidget {
      * 获取类型的显示名称（从语言文件）
      */
     private String getDisplayName(String typeId) {
-        return displayNameCache.computeIfAbsent(typeId, InfoUtils::getTypeDisplayName);
+        return displayNameCache.computeIfAbsent(typeId, StackTools::getTypeDisplayName);
     }
 
     /** 获取可视区域内可显示的最大行数 */

@@ -53,13 +53,13 @@ public class DiskItem extends Item implements DiskComponent {
             
             for (int i = 0; i < displayCount; i++) {
                 Executable exec = program.get(i);
-                // 使用工具类获取 ID
-                String id = StackTools.getId(exec);
+                // 使用工具类获取显示名称翻译键
+                String nameKey = StackTools.getNameKey(exec);
                 // 从语言文件获取显示名称
-                String nameKey = "operation.relay:" + id + ".name";
                 Component name = Component.translatable(nameKey);
                 // 如果翻译键不存在，显示 ID
                 if (name.getString().equals(nameKey)) {
+                    String id = StackTools.getId(exec);
                     name = Component.literal(id);
                 }
                 textConsumer.accept(Component.literal("  • ").withStyle(ChatFormatting.GRAY)
