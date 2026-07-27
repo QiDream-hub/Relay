@@ -55,13 +55,9 @@ public class DiskItem extends Item implements DiskComponent {
                 Executable exec = program.get(i);
                 // 使用工具类获取显示名称翻译键
                 String nameKey = StackTools.getNameKey(exec);
-                // 从语言文件获取显示名称
+                // 创建翻译组件（客户端渲染时会自动解析为本地化文本）
+                // 不要调用 .getString() 检查 - 服务器端无法解析翻译键是正常的
                 Component name = Component.translatable(nameKey);
-                // 如果翻译键不存在，显示 ID
-                if (name.getString().equals(nameKey)) {
-                    String id = StackTools.getId(exec);
-                    name = Component.literal(id);
-                }
                 textConsumer.accept(Component.literal("  • ").withStyle(ChatFormatting.GRAY)
                         .append(name.copy().withStyle(ChatFormatting.WHITE)));
             }

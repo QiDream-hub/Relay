@@ -93,8 +93,14 @@ public class BreakBlockFortuneOp extends Instruction {
             return;
         }
 
-        // 破坏成功,根据时运等级额外消耗能量(2的fortuneLevel次方额外消耗)
-        OperationHelpers.checkEnergy(executor, id, 1 << fortuneLevel);
+        // 破坏成功，根据时运等级额外消耗能量 (2 的 fortuneLevel 次方额外消耗)
+        // 检查 fortuneLevel 范围，避免移位溢出（long 最大 63 位，double 精确表示最大 53 位）
+        if (fortuneLevel < 0 || fortuneLevel > 53) {
+            executor.triggerMishap("时运等级超出有效范围 (0-53): " + fortuneLevel);
+            executor.pushData(new BooleanData(false));
+            return;
+        }
+        OperationHelpers.checkEnergy(executor, id, (double) (1L << fortuneLevel));
 
         // 2. 创建带时运附魔的假工具（使用 enchant 方法）
         ItemStack fortuneTool = new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE);
