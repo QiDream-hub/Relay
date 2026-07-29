@@ -13,6 +13,7 @@
   "item.relay.computing_core.interval": "执行间隔：§e%d tick",
   "item.relay.computing_core.tps": "执行频率：§e%s TPS",
   "item.relay.computing_core.energy_cost": "能量消耗：§c%s 能量/次",
+  "item.relay.computing_core.cost": "运行资源：§b%d",
   "item.relay.computing_core.desc": "§8 高速核心消耗更多能量",
   "item.relay.world_interactor_1": "世界交互器 I",
   "item.relay.world_interactor_2": "世界交互器 II",

@@ -21,33 +21,39 @@ import qdream.relay.mc.component.ComputingCoreComponent;
  */
 public abstract class ComputingCoreItem extends Item implements ComputingCoreComponent {
 
-    public ComputingCoreItem(Properties properties) {
-        super(properties);
-    }
+	public ComputingCoreItem(Properties properties) {
+		super(properties);
+	}
 
-    @Override
-    public int getCost(ItemStack stack) {
-        return stack.getCount();
-    }
+	@Override
+	public int getCost(ItemStack stack) {
+		int count = stack.getCount();
+		return Math.multiplyExact(count, count);
+	}
 
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay displayComponent,
-            Consumer<Component> textConsumer, TooltipFlag type) {
-        int interval = getInterval(stack);
-        double tps = 20.0 / interval; // 每秒执行次数
-        double energyCost = getEnergyCost(stack);
+	@Override
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay displayComponent,
+			Consumer<Component> textConsumer, TooltipFlag type) {
+		int interval = getInterval(stack);
+		double tps = 20.0 / interval; // 每秒执行次数
+		double energyCost = getEnergyCost(stack);
+		int cost = getCost(stack);
 
-        textConsumer.accept(
-                Component.translatable("item.relay.computing_core.interval", interval)
-                        .withStyle(ChatFormatting.GOLD));
-        textConsumer.accept(
-                Component.translatable("item.relay.computing_core.tps", String.format("%.2f", tps))
-                        .withStyle(ChatFormatting.GRAY));
-        textConsumer.accept(
-                Component.translatable("item.relay.computing_core.energy_cost", String.format("%.1f", energyCost))
-                        .withStyle(ChatFormatting.RED));
-        textConsumer.accept(
-                Component.translatable("item.relay.computing_core.desc")
-                        .withStyle(ChatFormatting.DARK_GRAY));
-    }
+		textConsumer.accept(
+				Component.translatable("item.relay.computing_core.interval", interval)
+						.withStyle(ChatFormatting.GOLD));
+		textConsumer.accept(
+				Component.translatable("item.relay.computing_core.tps", String.format("%.2f", tps))
+						.withStyle(ChatFormatting.GRAY));
+		textConsumer.accept(
+				Component.translatable("item.relay.computing_core.energy_cost",
+						String.format("%.1f", energyCost))
+						.withStyle(ChatFormatting.RED));
+		textConsumer.accept(
+				Component.translatable("item.relay.computing_core.cost", cost)
+						.withStyle(ChatFormatting.BLUE));
+		textConsumer.accept(
+				Component.translatable("item.relay.computing_core.desc")
+						.withStyle(ChatFormatting.DARK_GRAY));
+	}
 }

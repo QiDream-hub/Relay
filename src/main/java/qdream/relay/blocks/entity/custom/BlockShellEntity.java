@@ -279,7 +279,12 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     public int getCoreCost() {
         if (coreGroupId == null || level == null || level.isClientSide()) {
             ItemStack coreStack = getCoreStack();
-            return !coreStack.isEmpty() ? coreStack.getCount() : 0;
+            if (!coreStack.isEmpty()) {
+                if (coreStack.getItem() instanceof ComputingCoreComponent component) {
+                    return component.getCost(coreStack);
+                }
+            }
+            return 0;
         }
 
         // 使用 SavedData 获取组的所有成员，然后计算总 cost

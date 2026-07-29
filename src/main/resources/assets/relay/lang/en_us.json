@@ -13,6 +13,7 @@
   "item.relay.computing_core.interval": "Interval: §e%d tick",
   "item.relay.computing_core.tps": "Frequency: §e%s TPS",
   "item.relay.computing_core.energy_cost": "Energy Cost: §c%s energy/op",
+  "item.relay.computing_core.cost": "Running Cost: §b%d",
   "item.relay.computing_core.desc": "§8High-speed cores consume more energy",
   "item.relay.world_interactor_1": "World Interactor I",
   "item.relay.world_interactor_2": "World Interactor II",

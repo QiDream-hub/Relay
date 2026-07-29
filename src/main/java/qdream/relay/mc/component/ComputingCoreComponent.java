@@ -35,6 +35,14 @@ public interface ComputingCoreComponent {
     int getCost(ItemStack stack);
 
     /**
+     * 设置执行成本
+     *
+     * @param stack 物品堆
+     * @return 是否设置成功
+     */
+    boolean setCost(ItemStack stack);
+
+    /**
      * 获取能量消耗
      *
      * @param stack 物品堆

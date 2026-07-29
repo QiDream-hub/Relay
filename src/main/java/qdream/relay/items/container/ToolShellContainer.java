@@ -322,7 +322,12 @@ public class ToolShellContainer implements ShellContainer {
     @Override
     public int getCoreCost() {
         ItemStack coreStack = getCoreStack();
-        return !coreStack.isEmpty() ? coreStack.getCount() : 0;
+        if (!coreStack.isEmpty()) {
+            if (coreStack.getItem() instanceof ComputingCoreComponent component) {
+                return component.getCost(coreStack);
+            }
+        }
+        return 0;
     }
 
     @Override

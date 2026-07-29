@@ -6,20 +6,20 @@ import qdream.relay.Component.RelayDataComponents;
 /**
  * 固定间隔的计算核心物品
  * 当前 7 种核心使用此实现（64/32/16/8/4/2/1）
- * energyCost 与 interval 倒序对应（interval 64→energyCost 0.5, interval 1→energyCost 32）
+ * 
+ * <p>能量消耗使用 1.3 次方曲线：前期适中，后期升高</p>
+ * <p>公式：{@code energyCost = baseEnergyCost * count^1.3}</p>
+ * <p>其中 {@code baseEnergyCost = 1.0 / interval}</p>
  */
 public class FixedIntervalCoreItem extends ComputingCoreItem {
 
     private final int fixedInterval;
-    private final double fixedEnergyCost;
+    private final double baseEnergyCost;
 
     public FixedIntervalCoreItem(Properties properties, int interval) {
         super(properties);
         this.fixedInterval = interval;
-        // energyCost 与 interval 倒序：32.0/interval
-        // 核心_1 (interval=64): 0.5 能量
-        // 核心_64 (interval=1): 32 能量
-        this.fixedEnergyCost = 32.0 / interval;
+        this.baseEnergyCost = 1.0 / interval;
     }
 
     @Override
@@ -37,14 +37,20 @@ public class FixedIntervalCoreItem extends ComputingCoreItem {
 
     @Override
     public double getEnergyCost(ItemStack stack) {
-        // 优先读取 DataComponent（允许动态修改），否则返回固定值
-        Double energyCost = stack.get(RelayDataComponents.ENERGY_COST);
-        return energyCost != null ? energyCost : fixedEnergyCost;
+        int count = stack.getCount();
+        // 1.3 次方曲线：前期适中，后期升高
+        return baseEnergyCost * Math.pow(count, 1.3);
     }
 
     @Override
     public boolean setEnergyCost(ItemStack stack, double energyCost) {
         // 固定能量消耗核心不允许修改，返回 false
+        return false;
+    }
+
+    @Override
+    public boolean setCost(ItemStack stack) {
+        // 固定核心不允许修改，返回 false
         return false;
     }
 }
