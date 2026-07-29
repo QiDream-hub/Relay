@@ -374,11 +374,10 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     /**
      * 获取 GUI 开关状态
      * <p>
-     * 此字段仅用于 GUI 显示，不直接影响执行逻辑
-     * 执行逻辑由 {@link #canExecute()} 综合判断
+     * 此字段用于 GUI 显示和执行控制
+     * 当 enabled=false 时，{@link #canExecute()} 返回 false，tick 逻辑跳过
      * </p>
      */
-    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -386,16 +385,22 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     /**
      * 设置 GUI 开关状态
      * <p>
-     * 此方法仅改变 GUI 显示状态，不会清空程序栈
+     * 切换开关时，会立即影响 {@link #canExecute()} 的判断结果
+     * 关闭后程序仍在栈中，但未清空，再次开启可继续执行
      * </p>
      */
-    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         setChanged();
         if (level != null && !level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
+    }
+
+    @Override
+    public boolean canExecute() {
+        // BlockShell 需要检查 GUI 开关状态
+        return isEnabled() && isInitialized() && isRunning();
     }
 
     @Override

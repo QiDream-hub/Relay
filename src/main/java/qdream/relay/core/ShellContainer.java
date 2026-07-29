@@ -116,32 +116,6 @@ public interface ShellContainer extends Container {
     void setInitialized(boolean initialized);
 
     /**
-     * 获取 GUI 开关状态
-     * <p>
-     * 此状态仅用于 BlockShell 的 GUI 显示
-     * ToolShell 不支持 GUI 开关，始终返回 true
-     * </p>
-     *
-     * @return GUI 开关状态，默认返回 true
-     */
-    default boolean isEnabled() {
-        return true;
-    }
-
-    /**
-     * 设置 GUI 开关状态
-     * <p>
-     * 此方法仅用于 BlockShell 的 GUI 控制
-     * ToolShell 不支持 GUI 开关，默认不执行任何操作
-     * </p>
-     *
-     * @param enabled 开关状态
-     */
-    default void setEnabled(boolean enabled) {
-        // 默认不执行任何操作，由 BlockShellEntity 重写实现
-    }
-
-    /**
      * 是否正在运行（状态机程序栈非空）
      */
     default boolean isRunning() {
@@ -151,13 +125,15 @@ public interface ShellContainer extends Container {
     /**
      * 是否可以执行 tick
      * <p>
-     * 综合判断：已启用 + 已初始化 + 正在运行
+     * 综合判断：已初始化 + 正在运行
+     * </p>
+     * <p>
      * </p>
      *
      * @return 如果满足所有条件返回 true
      */
     default boolean canExecute() {
-        return isEnabled() && isInitialized() && isRunning();
+        return isInitialized() && isRunning();
     }
 
     // ========== 能量管理 ==========

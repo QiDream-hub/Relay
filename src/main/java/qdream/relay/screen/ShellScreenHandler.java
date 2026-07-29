@@ -50,7 +50,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     private static final int HOTBAR_SLOT_Y = 198;
     private static final int SLOT_SIZE = 18;
 
-    private final ShellContainer container;
+    private final BlockShellEntity blockEntity;
     private final Container wrapper;
 
     // 数据同步槽（服务端 → 客户端）
@@ -63,7 +63,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
     private double syncedEnergy = 0.0;
-    
+
     // 日志变更标记
     private boolean logsChanged = false;
     private java.util.List<String> syncedLogs = new java.util.ArrayList<>();
@@ -80,9 +80,9 @@ public class ShellScreenHandler extends AbstractContainerMenu {
      */
     public ShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container) {
         super(RelayScreenHandlers.SHELL_SCREEN_HANDLER, syncId);
-        this.container = container;
+        this.blockEntity = container instanceof BlockShellEntity be ? be : null;
         // ShellBlockEntity 已实现 Container，直接使用；客户端使用空容器
-        this.wrapper = container != null ? (Container) container : new EmptyShellContainer();
+        this.wrapper = blockEntity != null ? (Container) blockEntity : new EmptyShellContainer();
 
         checkContainerSize(this.wrapper, CONTAINER_SLOT_COUNT);
 
@@ -95,15 +95,15 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         this.addDataSlot(energyCostFracSlot);
 
         // 初始化同步槽的值（确保 GUI 打开时立即显示正确状态）
-        if (container != null) {
-            enabledSlot.set(container.isEnabled() ? 1 : 0);
-            coreCostSlot.set(container.getCoreCost());
+        if (blockEntity != null) {
+            enabledSlot.set(blockEntity.isEnabled() ? 1 : 0);
+            coreCostSlot.set(blockEntity.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
-            initializedSlot.set(container.isInitialized() ? 1 : 0);
-            double energyCost = container.getEnergyCostPerTick();
+            initializedSlot.set(blockEntity.isInitialized() ? 1 : 0);
+            double energyCost = blockEntity.getEnergyCostPerTick();
             energyCostSlot.set((int) energyCost);
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
-            syncedEnergy = container.getEnergy();
+            syncedEnergy = blockEntity.getEnergy();
         }
 
         // 外壳 4 个插槽（垂直排列）
@@ -199,47 +199,45 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     public void broadcastChanges() {
         super.broadcastChanges();
         // 从服务端同步状态到客户端
-        if (container != null) {
-            enabledSlot.set(container.isEnabled() ? 1 : 0);
-            coreCostSlot.set(container.getCoreCost());
+        if (blockEntity != null) {
+            enabledSlot.set(blockEntity.isEnabled() ? 1 : 0);
+            coreCostSlot.set(blockEntity.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
-            initializedSlot.set(container.isInitialized() ? 1 : 0);
-            double energyCost = container.getEnergyCostPerTick();
+            initializedSlot.set(blockEntity.isInitialized() ? 1 : 0);
+            double energyCost = blockEntity.getEnergyCostPerTick();
             energyCostSlot.set((int) energyCost);
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
-            
+
             // 同步日志（每 tick 检查变更）
-            if (container instanceof BlockShellEntity blockEntity) {
-                java.util.List<String> currentLogs = blockEntity.getLogBuffer();
-                if (!currentLogs.equals(syncedLogs)) {
-                    syncedLogs = currentLogs;
-                    logsChanged = true;
-                }
+            java.util.List<String> currentLogs = blockEntity.getLogBuffer();
+            if (!currentLogs.equals(syncedLogs)) {
+                syncedLogs = currentLogs;
+                logsChanged = true;
             }
         }
     }
-    
+
     /**
      * 获取同步的日志内容
      */
     public java.util.List<String> getSyncedLogs() {
         return syncedLogs;
     }
-    
+
     /**
      * 设置同步的日志内容（客户端调用）
      */
     public void setSyncedLogs(java.util.List<String> logs) {
         this.syncedLogs = logs;
     }
-    
+
     /**
      * 标记日志已同步（客户端调用）
      */
     public void markLogsSynced() {
         this.logsChanged = false;
     }
-    
+
     /**
      * 检查日志是否有变更（服务端调用）
      */
@@ -251,10 +249,10 @@ public class ShellScreenHandler extends AbstractContainerMenu {
      * 获取本地核心数量（当前方块的核心插槽中的核心数量）
      */
     private int getLocalCoreCost() {
-        if (container == null) {
+        if (blockEntity == null) {
             return 0;
         }
-        ItemStack coreStack = container.getCoreStack();
+        ItemStack coreStack = blockEntity.getCoreStack();
         return !coreStack.isEmpty() ? coreStack.getCount() : 0;
     }
 
@@ -306,10 +304,10 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     }
 
     /**
-     * 获取实际的 ShellContainer（可能为 null）
+     * 获取 BlockShellEntity（仅服务端有效，客户端返回 null）
      */
-    public ShellContainer getContainer() {
-        return container;
+    public BlockShellEntity getBlockEntity() {
+        return blockEntity;
     }
 
     /**

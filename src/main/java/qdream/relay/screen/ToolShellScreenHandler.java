@@ -58,7 +58,6 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
     // 数据同步槽（服务端 → 客户端）
     // 注意：enabled/initialized/useInventoryEnergy/debugOutputEnabled 使用 DataSlot 同步
     // 能量值通过网络包同步（DataSlot 只同步 16 位，不适合 double）
-    private final DataSlot enabledSlot = DataSlot.standalone();
     private final DataSlot initializedSlot = DataSlot.standalone();
     private final DataSlot useInventoryEnergySlot = DataSlot.standalone();
     private final DataSlot debugOutputSlot = DataSlot.standalone();
@@ -91,7 +90,6 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         checkContainerSize(this.wrapper, CONTAINER_SLOT_COUNT);
 
         // 注册数据同步槽
-        this.addDataSlot(enabledSlot);
         this.addDataSlot(initializedSlot);
         this.addDataSlot(useInventoryEnergySlot);
         this.addDataSlot(debugOutputSlot);
@@ -99,7 +97,6 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
 
         // 初始化同步槽的值
         if (container != null) {
-            enabledSlot.set(container.isEnabled() ? 1 : 0);
             initializedSlot.set(container.isInitialized() ? 1 : 0);
             if (container instanceof ToolShellContainer tc) {
                 useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
@@ -239,7 +236,6 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         super.broadcastChanges();
         // 从服务端同步状态到客户端
         if (container != null) {
-            enabledSlot.set(container.isEnabled() ? 1 : 0);
             initializedSlot.set(container.isInitialized() ? 1 : 0);
             if (container instanceof ToolShellContainer tc) {
                 useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
@@ -248,11 +244,6 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
             }
             syncedEnergy = container.getEnergy();
         }
-    }
-
-    /** 获取当前启用状态（读取同步槽） */
-    public boolean isEnabled() {
-        return enabledSlot.get() != 0;
     }
 
     /** 获取同步的能量值 */

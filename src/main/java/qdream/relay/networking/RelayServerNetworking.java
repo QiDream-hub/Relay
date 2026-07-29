@@ -74,9 +74,9 @@ public class RelayServerNetworking {
 
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
-                    ShellContainer container = handler.getContainer();
-                    if (container != null) {
-                        container.setEnabled(!container.isEnabled());
+                    qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
+                    if (blockEntity != null) {
+                        blockEntity.setEnabled(!blockEntity.isEnabled());
                     }
                 }
             });
@@ -94,9 +94,9 @@ public class RelayServerNetworking {
 
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
-                    ShellContainer container = handler.getContainer();
-                    if (container != null) {
-                        container.loadProgramFromDisk();
+                    qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
+                    if (blockEntity != null) {
+                        blockEntity.loadProgramFromDisk();
                         // updateStatus() 已移除，核心状态由 ShellTickHandler 在 tick 时自动更新
                     }
                 }
@@ -205,11 +205,11 @@ public class RelayServerNetworking {
                 }
             });
         });
-        
+
         // 注册 C2S_RequestShellLogPayload - 客户端请求日志同步
         PayloadTypeRegistry.serverboundPlay().register(C2S_RequestShellLogPayload.TYPE,
                 C2S_RequestShellLogPayload.CODEC);
-        
+
         // 注册服务端接收处理器 - 请求日志同步
         ServerPlayNetworking.registerGlobalReceiver(C2S_RequestShellLogPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
@@ -218,8 +218,8 @@ public class RelayServerNetworking {
 
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
-                    ShellContainer container = handler.getContainer();
-                    if (container instanceof BlockShellEntity blockEntity) {
+                    qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
+                    if (blockEntity != null) {
                         // 每 10 tick 同步一次日志
                         if (blockEntity.getLevel().getGameTime() % 10 == 0) {
                             blockEntity.syncLogsToClient(blockEntity.getLevel(), blockEntity.getBlockPos());
