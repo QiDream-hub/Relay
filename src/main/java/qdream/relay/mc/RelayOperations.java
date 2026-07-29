@@ -12,6 +12,7 @@ import qdream.relay.operations.type.*;
 import qdream.relay.operations.vector.*;
 import qdream.relay.operations.logic.*;
 import qdream.relay.operations.list.*;
+import qdream.relay.operations.spawn.*;
 import qdream.relay.types.*;
 
 import java.util.ArrayList;
@@ -201,5 +202,11 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new GetItemTypeOp()));
                 OperationRegistry.register("relay:drop_item",
                                 new OperationRegistry.OpEntry(new DropItemOp()));
+
+                // 生成实体操作
+                OperationRegistry.register("relay:spawn_shell",
+                                new OperationRegistry.OpEntry(new SpawnShellOp()));
+                OperationRegistry.register("relay:remove_shell",
+                                new OperationRegistry.OpEntry(new RemoveShellOp()));
         }
 }

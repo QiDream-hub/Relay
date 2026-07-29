@@ -268,6 +268,12 @@
   "operation.relay:push_vector.name": "Push Entity",
   "operation.relay:push_vector.description": "Apply push force to an entity",
 
+  "operation.relay:spawn_shell.name": "Spawn Shell",
+  "operation.relay:spawn_shell.description": "Spawn a programmable shell entity at specified position",
+
+  "operation.relay:remove_shell.name": "Remove Shell",
+  "operation.relay:remove_shell.description": "Remove specified shell entity and return 90% of remaining energy",
+
   "operation.relay:get_block.name": "Get Block",
   "operation.relay:get_block.description": "Get block state from coordinates",
 
@@ -391,6 +397,15 @@
   "param.hitFace.description": "Face of the Block",
   "param.source_item.description": "Source item to merge",
   "param.target_item.description": "Target item to be merged into",
+
+  "param.position.description": "Position",
+  "param.coreCost.description": "Core cost (1-8)",
+  "param.interval.description": "Execution interval (1-100 tick)",
+  "param.range.description": "Interaction range (8-128 blocks)",
+  "param.energy.description": "Prepaid energy (at least 100)",
+  "param.program.description": "Program list",
+  "param.entity.description": "Spawned entity reference",
+  "param.returnedEnergy.description": "Returned energy amount",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",

@@ -264,6 +264,12 @@
 
   "operation.relay:push_vector.name": "推动实体",
   "operation.relay:push_vector.description": "向实体施加推力",
+
+  "operation.relay:spawn_shell.name": "召唤外壳",
+  "operation.relay:spawn_shell.description": "在指定位置召唤一个可编程的外壳实体",
+
+  "operation.relay:remove_shell.name": "移除外壳",
+  "operation.relay:remove_shell.description": "移除指定的外壳实体并返还 90% 剩余能量",
   "operation.relay:get_block.name": "获取方块",
   "operation.relay:get_block.description": "从坐标获取方块状态",
 
@@ -390,6 +396,15 @@
   "param.hitFace.description": "方块的面",
   "param.source_item.description": "合并物品",
   "param.target_item.description": "被合并物品",
+
+  "param.position.description": "位置",
+  "param.coreCost.description": "核心数量（1-8）",
+  "param.interval.description": "执行间隔（1-100 tick）",
+  "param.range.description": "交互范围（8-128 方块）",
+  "param.energy.description": "预付能量（至少 100）",
+  "param.program.description": "程序列表",
+  "param.entity.description": "召唤的实体引用",
+  "param.returnedEnergy.description": "返还的能量值",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",

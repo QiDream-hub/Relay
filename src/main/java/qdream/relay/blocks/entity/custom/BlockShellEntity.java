@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.ContainerHelper;
@@ -459,6 +460,33 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public boolean hasWorldInteractor() {
         return getWorldInteractorStack().getItem() instanceof WorldInteractorComponent;
+    }
+
+    @Override
+    public boolean isWorldInRange(Vec3 sourcePos, Vec3 targetPos) {
+        ItemStack interactorStack = getWorldInteractorStack();
+        if (!interactorStack.isEmpty() && interactorStack.getItem() instanceof WorldInteractorComponent wic) {
+            return wic.isInRange(interactorStack, sourcePos, targetPos);
+        }
+        return false;
+    }
+
+    @Override
+    public double getWorldInteractorEnergyCost() {
+        ItemStack interactorStack = getWorldInteractorStack();
+        if (!interactorStack.isEmpty() && interactorStack.getItem() instanceof WorldInteractorComponent wic) {
+            return wic.getEnergyCost(interactorStack);
+        }
+        return 0.0;
+    }
+
+    @Override
+    public double getWorldInteractorRange() {
+        ItemStack interactorStack = getWorldInteractorStack();
+        if (!interactorStack.isEmpty() && interactorStack.getItem() instanceof WorldInteractorComponent wic) {
+            return wic.getRange(interactorStack);
+        }
+        return 0.0;
     }
 
     @Override

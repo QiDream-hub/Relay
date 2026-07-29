@@ -2,6 +2,7 @@ package qdream.relay.core;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.player.Player;
 import qdream.relay.engine.StateMachine;
 
@@ -184,12 +185,27 @@ public interface ShellContainer extends Container {
         return getEnergy() >= amount;
     }
 
-    // ========== 世界交互 ==========
+    // ========== 世界交互器 ==========
 
     /**
      * 是否有世界交互器
      */
     boolean hasWorldInteractor();
+
+    /**
+     * 是否在世界交互器的范围内
+     */
+    boolean isWorldInRange(Vec3 sourcePos, Vec3 targetPos);
+
+    /**
+     * 获取世界交互器每次的消耗
+     */
+    double getWorldInteractorEnergyCost();
+
+    /**
+     * 获取世界交互器的范围
+     */
+    double getWorldInteractorRange();
 
     // ========== 程序控制 ==========
 

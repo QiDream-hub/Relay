@@ -60,15 +60,12 @@ public final class OperationHelpers {
             return false;
         }
         // 扣除世界交互器的能量消耗
-        ItemStack interactorStack = container.getWorldInteractorStack();
-        if (interactorStack.getItem() instanceof WorldInteractorComponent component) {
-            double energyCost = component.getEnergyCost(interactorStack);
-            if (!container.consumeEnergy(energyCost)) {
-                executor.triggerMishap(operationName + " 能量不足：需要 " + energyCost);
-                return false;
-            }
-            container.getExecutionStats().addWorldInteractorEnergy(energyCost);
+        double energyCost = container.getWorldInteractorEnergyCost();
+        if (!container.consumeEnergy(energyCost)) {
+            executor.triggerMishap(operationName + " 能量不足：需要 " + energyCost);
+            return false;
         }
+        container.getExecutionStats().addWorldInteractorEnergy(energyCost);
         return true;
     }
 
@@ -102,20 +99,6 @@ public final class OperationHelpers {
     }
 
     /**
-     * 获取世界交互器物品栈
-     *
-     * @param executor 状态机
-     * @return 世界交互器物品栈，如果不存在返回空 Optional
-     */
-    public static Optional<ItemStack> getWorldInteractorStack(StateMachine executor) {
-        ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            return Optional.empty();
-        }
-        return Optional.of(container.getWorldInteractorStack());
-    }
-
-    /**
      * 检查目标位置是否在世界交互器范围内
      *
      * <p>
@@ -131,19 +114,15 @@ public final class OperationHelpers {
     public static boolean checkInRange(StateMachine executor, String operationName,
             Vec3 sourcePos,
             Vec3 targetPos) {
-        Optional<ItemStack> interactorOpt = getWorldInteractorStack(executor);
-        if (interactorOpt.isEmpty()) {
-            executor.triggerMishap(operationName + " 需要世界交互器");
+
+        ShellContainer container = getShellContainer(executor);
+        if (container == null) {
+            executor.triggerMishap(operationName + " 无法获取容器上下文");
             return false;
         }
-        ItemStack interactor = interactorOpt.get();
-        if (!(interactor.getItem() instanceof WorldInteractorComponent component)) {
-            executor.triggerMishap(operationName + " 物品不是有效的世界交互器");
-            return false;
-        }
-        if (!component.isInRange(interactor, sourcePos, targetPos)) {
+        if (!container.isWorldInRange(sourcePos, targetPos)) {
             executor.triggerMishap(operationName + " 超出世界交互器范围：" +
-                    String.format("%.1f > %.1f", sourcePos.distanceTo(targetPos), component.getRange(interactor)));
+                    String.format("%.1f > %.1f", sourcePos.distanceTo(targetPos), container.getWorldInteractorRange()));
             return false;
         }
         return true;
@@ -207,5 +186,66 @@ public final class OperationHelpers {
             return Vec3.atCenterOf(pos);
         }
         return new Vec3(0, 0, 0);
+    }
+
+    // ==================== 能量管理相关 ====================
+
+    /**
+     * 检查是否有足够能量（不扣除）
+     *
+     * @param executor 状态机
+     * @param amount   需要的能量值
+     * @return 如果能量充足返回 true
+     */
+    public static boolean hasEnoughEnergy(StateMachine executor, double amount) {
+        ShellContainer container = getShellContainer(executor);
+        if (container == null) {
+            return false;
+        }
+        return container.getEnergy() >= amount;
+    }
+
+    /**
+     * 获取可用能量
+     *
+     * @param executor 状态机
+     * @return 当前可用能量，无法获取返回 0
+     */
+    public static double getAvailableEnergy(StateMachine executor) {
+        ShellContainer container = getShellContainer(executor);
+        if (container == null) {
+            return 0;
+        }
+        return container.getEnergy();
+    }
+
+    /**
+     * 消耗能量
+     *
+     * @param executor 状态机
+     * @param amount   消耗的能量值
+     * @return 如果成功扣除返回 true
+     */
+    public static boolean consumeEnergy(StateMachine executor, double amount) {
+        ShellContainer container = getShellContainer(executor);
+        if (container == null) {
+            return false;
+        }
+        return container.consumeEnergy(amount);
+    }
+
+    /**
+     * 添加能量（返还能量时使用）
+     *
+     * @param executor 状态机
+     * @param amount   添加的能量值
+     * @return 实际添加的能量值
+     */
+    public static double addEnergy(StateMachine executor, double amount) {
+        ShellContainer container = getShellContainer(executor);
+        if (container == null) {
+            return 0;
+        }
+        return container.addEnergy(amount);
     }
 }

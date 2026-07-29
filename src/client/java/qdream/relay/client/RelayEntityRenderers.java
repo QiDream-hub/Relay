@@ -1,5 +1,9 @@
 package qdream.relay.client;
 
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import qdream.relay.client.renderer.ShellEntityRenderer;
+import qdream.relay.entities.RelayEntities;
+
 /**
  * 客户端渲染器注册
  * 注意：26.1.2 API 变化较大，实体渲染器暂时简化实现
@@ -7,7 +11,7 @@ package qdream.relay.client;
 public class RelayEntityRenderers {
 
     public static void register() {
-        // TODO: 26.1.2 客户端渲染器注册
-        // 实体外壳的粒子效果已在 EntityShell.tick() 中处理
+        // 注册 Shell 实体渲染器（粒子效果）
+        EntityRendererRegistry.register(RelayEntities.ENTITY_SHELL, ShellEntityRenderer::new);
     }
 }

@@ -3,6 +3,7 @@ package qdream.relay.items.container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -344,15 +345,10 @@ public class ToolShellContainer implements ShellContainer {
         return tickHandler.isInitialized();
     }
 
-    @Override
     public void setInitialized(boolean initialized) {
         tickHandler.setInitialized(initialized);
         saveTickState();
     }
-
-    // ========== 注意：ToolShell 没有 isEnabled/setEnabled 方法 ==========
-    // isEnabled/setEnabled 仅用于 BlockShell 的 GUI 开关
-    // ToolShell 右键启动后直接执行，由 canExecute() = isInitialized() && isRunning() 判断
 
     /**
      * 是否可以执行 tick
@@ -362,7 +358,6 @@ public class ToolShellContainer implements ShellContainer {
      */
     @Override
     public boolean canExecute() {
-        // isEnabled() 默认返回 true，所以 canExecute() = isInitialized() && isRunning()
         return isInitialized() && isRunning();
     }
 
@@ -479,6 +474,33 @@ public class ToolShellContainer implements ShellContainer {
     public boolean hasWorldInteractor() {
         if (inventory.get(INTERACTOR_SLOT).getItem() instanceof WorldInteractorComponent) {
             return true;
+        }
+        return false;
+    }
+
+    @Override
+    public double getWorldInteractorRange() {
+        ItemStack stack = getWorldInteractorStack();
+        if (stack.getItem() instanceof WorldInteractorComponent component) {
+            return component.getRange(stack);
+        }
+        return 0;
+    }
+
+    @Override
+    public double getWorldInteractorEnergyCost() {
+        ItemStack stack = getWorldInteractorStack();
+        if (stack.getItem() instanceof WorldInteractorComponent component) {
+            return component.getEnergyCost(stack);
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean isWorldInRange(Vec3 sourcePos, Vec3 targetPos) {
+        ItemStack stack = getWorldInteractorStack();
+        if (stack.getItem() instanceof WorldInteractorComponent component) {
+            return component.isInRange(stack, sourcePos, targetPos);
         }
         return false;
     }
