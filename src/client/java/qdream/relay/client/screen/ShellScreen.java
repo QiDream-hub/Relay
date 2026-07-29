@@ -12,6 +12,7 @@ import qdream.relay.networking.payloads.C2S_InitializeShellPayload;
 import qdream.relay.networking.payloads.C2S_RequestShellLogPayload;
 import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.client.screen.widget.LogWidget;
+import qdream.relay.client.screen.widget.SlotWidget;
 
 /**
  * 外壳方块屏幕
@@ -53,6 +54,9 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     // 日志窗口 Widget（包级可见，供 RelayClientNetworking 访问）
     private LogWidget logWidget;
 
+    // 插槽 Widget 数组
+    private SlotWidget[] slotWidgets;
+
     public ShellScreen(ShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
@@ -86,6 +90,15 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
                 this.font,
                 () -> this.menu.getSyncedLogs());
         this.addRenderableWidget(logWidget);
+
+        // 插槽 Widget (4 个垂直排列)
+        slotWidgets = new SlotWidget[4];
+        int slotX = this.leftPos + 50;
+        int slotY = this.topPos + 12;
+        for (int i = 0; i < 4; i++) {
+            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i]);
+            this.addRenderableWidget(slotWidgets[i]);
+        }
     }
 
     private Component getToggleLabel() {
@@ -176,7 +189,7 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         currentY += lineHeight;
 
         double energyCost = this.menu.getSyncedEnergyCost();
-        String energyCostText = energyCost > 0 ? "§7能耗：§e" + energyCost + " /tick" : "§7 能耗：§8无";
+        String energyCostText = energyCost > 0 ? "§7能耗：§e" + energyCost + " /tick" : "§7能耗：§8无";
         graphics.text(this.font, energyCostText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 

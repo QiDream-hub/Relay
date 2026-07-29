@@ -2,7 +2,6 @@ package qdream.relay.client.screen;
 
 import java.util.List;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -11,11 +10,9 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.Relay;
@@ -25,6 +22,7 @@ import qdream.relay.client.screen.widget.editor.TypeListWidget;
 import qdream.relay.client.screen.widget.info.HoverInfoWidget;
 import qdream.relay.client.screen.widget.info.HoverInfoWidget.InfoContent;
 import qdream.relay.client.screen.widget.info.InfoUtils;
+import qdream.relay.client.screen.widget.SlotWidget;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.OperationRegistry;
@@ -74,6 +72,10 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     private static final int INVENTORY_SEPARATOR_COLOR = 0xFF505050;
     private static final int TITLE_COLOR = 0xFF00FF00;
 
+    // 磁盘插槽位置（与 ScreenHandler 一致）
+    private static final int DISK_SLOT_X = 160;
+    private static final int DISK_SLOT_Y = 18;
+
     // 自定义 Widget
     private OperationListWidget operationListWidget;
     private TypeListWidget typeListWidget;
@@ -82,6 +84,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     private Button loadButton;
     private Button formatButton;
     private HoverInfoWidget hoverInfoWidget;
+    private SlotWidget diskSlotWidget;
 
     public SpellEditorScreen(SpellEditorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -164,6 +167,11 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
                 0 + PANEL_PADDING, editorY + BUTTON_HEIGHT + LIST_GAP,
                 150, 160, this.font);
         this.addRenderableWidget(hoverInfoWidget);
+
+        // 磁盘插槽 Widget (与 ScreenHandler 中的 DISK_SLOT 位置一致)
+        diskSlotWidget = new SlotWidget(
+                left + DISK_SLOT_X, top + DISK_SLOT_Y, "法术磁盘");
+        this.addRenderableWidget(diskSlotWidget);
 
         // 初始加载程序
         loadProgramFromServer();
@@ -371,6 +379,9 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, INVENTORY_SEPARATOR_COLOR);
 
         graphics.text(this.font, "JSON 编辑器", left + PANEL_WIDTH + PANEL_PADDING, top + 5, 0xFFFFFF00);
+
+        // 磁盘提示文字
+        graphics.text(this.font, "磁盘:", left + DISK_SLOT_X - 25, top + DISK_SLOT_Y, TITLE_COLOR);
     }
 
     // ==================== 事件转发 ====================

@@ -9,6 +9,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import qdream.relay.client.screen.widget.SlotWidget;
 import qdream.relay.networking.payloads.C2S_ToolShellConfigPayload;
 import qdream.relay.screen.ToolShellScreenHandler;
 
@@ -36,6 +37,8 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
     private Button useInventoryEnergyButton;
     private Button debugOutputButton;
     private Button statusInfoButton;
+
+    private SlotWidget[] slotWidgets;
 
     public ToolShellScreen(ToolShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -79,6 +82,15 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
                 .bounds(buttonX, buttonY, buttonWidth, buttonHeight)
                 .build();
         this.addRenderableWidget(statusInfoButton);
+
+        // 插槽 Widget (4 个垂直排列)
+        slotWidgets = new SlotWidget[4];
+        int slotX = this.leftPos + 50;
+        int slotY = this.topPos + 12;
+        for (int i = 0; i < 4; i++) {
+            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i]);
+            this.addRenderableWidget(slotWidgets[i]);
+        }
     }
 
     private Component getUseInventoryEnergyLabel() {
