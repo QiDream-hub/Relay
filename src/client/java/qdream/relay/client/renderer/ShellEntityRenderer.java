@@ -9,7 +9,7 @@ import qdream.relay.entities.EntityShell;
 
 /**
  * Shell 实体渲染器
- * 仅显示粒子效果，无实体模型
+ * 无实体模型，仅渲染粒子效果（粒子在 Entity.tick() 中生成）
  */
 public class ShellEntityRenderer extends EntityRenderer<EntityShell, EntityRenderState> {
 
@@ -23,8 +23,13 @@ public class ShellEntityRenderer extends EntityRenderer<EntityShell, EntityRende
     }
 
     @Override
+    public void extractRenderState(EntityShell entity, EntityRenderState state, float tickProgress) {
+        super.extractRenderState(entity, state, tickProgress);
+    }
+
+    @Override
     public boolean shouldRender(EntityShell entity, Frustum frustum, double camX, double camY, double camZ) {
-        // 始终渲染（用于粒子效果）
+        // 始终渲染以确保粒子效果可见
         return true;
     }
 }

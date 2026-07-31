@@ -18,7 +18,7 @@ import qdream.relay.engine.StateMachine;
  * {@link #consumeEnergy(double)}</li>
  * <li>核心状态：{@link #getCoreCost()}, {@link #getInterval()},
  * {@link #getEnergyCostPerTick()}</li>
- * <li>程序控制：{@link #loadProgramFromDisk()}</li>
+ * <li>程序控制：{@link #loadProgram()}</li>
  * <li>运行状态：{@link #canExecute()}, {@link #isInitialized()},
  * {@link #isRunning()}</li>
  * <li>GUI 开关（仅 BlockShell）：{@link #isEnabled()}, {@link #setEnabled(boolean)}</li>
@@ -100,7 +100,7 @@ public interface ShellContainer extends Container {
     int getInterval();
 
     /**
-     * 获取每 tick 基础能量消耗（由核心品阶决定）
+     * 获取每 tick 基础能量消耗
      */
     double getEnergyCostPerTick();
 
@@ -206,17 +206,6 @@ public interface ShellContainer extends Container {
      * 获取世界交互器的范围
      */
     double getWorldInteractorRange();
-
-    // ========== 程序控制 ==========
-
-    /**
-     * 从磁盘重新加载程序
-     *
-     * <p>
-     * 清空双栈后从法术磁盘重新加载程序。
-     * </p>
-     */
-    void loadProgramFromDisk();
 
     // ========== 执行统计 ==========
 

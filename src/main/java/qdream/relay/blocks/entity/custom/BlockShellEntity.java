@@ -501,7 +501,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         return 0;
     }
 
-    @Override
     public void loadProgramFromDisk() {
         if (level == null || level.isClientSide()) {
             return;

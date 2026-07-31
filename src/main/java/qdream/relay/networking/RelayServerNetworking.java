@@ -97,7 +97,6 @@ public class RelayServerNetworking {
                     qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
                     if (blockEntity != null) {
                         blockEntity.loadProgramFromDisk();
-                        // updateStatus() 已移除，核心状态由 ShellTickHandler 在 tick 时自动更新
                     }
                 }
             });

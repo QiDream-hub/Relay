@@ -541,27 +541,6 @@ public class ToolShellContainer implements ShellContainer {
         return 0;
     }
 
-    @Override
-    public void loadProgramFromDisk() {
-        ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty()) {
-            return;
-        }
-
-        DiskComponent diskComponent = getDiskComponent(diskStack);
-        if (diskComponent == null) {
-            return;
-        }
-
-        getStateMachine().clear();
-        List<Executable> program = diskComponent.getProgram(diskStack);
-        if (!program.isEmpty()) {
-            getStateMachine().loadProgram(program);
-            setInitialized(true);
-            saveAllState();
-        }
-    }
-
     /**
      * 从物品堆获取 SpellDiskComponent
      *

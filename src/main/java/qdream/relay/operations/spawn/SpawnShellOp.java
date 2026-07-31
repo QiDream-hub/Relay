@@ -151,7 +151,7 @@ public class SpawnShellOp extends Instruction {
         shellEntity.setCoreCost(coreCost);
         shellEntity.setInterval(interval);
         shellEntity.setRange(range);
-        shellEntity.setEnergy(energy); // 预付能量
+        shellEntity.setEnergy(energy);
 
         // 设置 Owner
         var owner = OperationHelpers.getOwner(executor);

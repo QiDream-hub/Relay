@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.particles.ParticleTypes;
 
 import java.util.UUID;
 
@@ -25,8 +26,6 @@ import qdream.relay.core.ExecutionStats;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.Relay;
 import qdream.relay.mc.component.ComputingCoreComponent;
-import qdream.relay.mc.component.EnergyModuleComponent;
-import qdream.relay.mc.component.DiskComponent;
 
 /**
  * 外壳实体
@@ -58,6 +57,8 @@ public class EntityShell extends Entity implements ShellContainer {
     // 同步数据
     private static final EntityDataAccessor<Boolean> DATA_ENABLED = SynchedEntityData.defineId(EntityShell.class,
             EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Float> DATA_ENERGY = SynchedEntityData.defineId(EntityShell.class,
+            EntityDataSerializers.FLOAT);
 
     public EntityShell(EntityType<?> type, Level level) {
         super(type, level);
@@ -66,8 +67,8 @@ public class EntityShell extends Entity implements ShellContainer {
         // 设置事故回调
         stateMachine.setMishapHandler(reason -> {
             if (!level().isClientSide()) {
-                getOwner().sendSystemMessage(Component.literal("[实体]:" + reason));
-                remove(getRemovalReason());
+                getOwner().sendSystemMessage(Component.literal(String.format("§c§lMISHAP§r§c[实体]: %s", reason)));
+                discard();
             }
         });
     }
@@ -75,6 +76,7 @@ public class EntityShell extends Entity implements ShellContainer {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(DATA_ENABLED, true);
+        builder.define(DATA_ENERGY, 0.0f);
     }
 
     // ========== Tick 逻辑 ==========
@@ -84,39 +86,107 @@ public class EntityShell extends Entity implements ShellContainer {
         super.tick();
 
         if (level().isClientSide()) {
+            spawnParticles();
             return;
         }
 
-        // 设置上下文
+        // 服务端：执行 tick 逻辑
         var machine = getStateMachine();
         if (machine.isRunning()) {
             machine.setContext("level", level());
             machine.setContext("self", this);
         }
-
-        // 执行 tick
+        // 执行前检查是否还有能量
+        if (getEnergy() < getEnergyCostPerTick()) {
+            machine.clear();
+            discard();
+        }
         tickHandler.tick(this);
 
-        // 粒子效果 - 运行时产生粒子
-        if (isRunning()) {
-            spawnParticles();
+        // 服务端：每 5 tick 同步一次能量到客户端（使用同步数据字段）
+        if (level().getGameTime() % 5 == 0) {
+            entityData.set(DATA_ENERGY, (float) getEnergy());
         }
     }
 
     /**
-     * 生成粒子效果
+     * 生成粒子效果（仅在客户端调用）
+     * <p>
+     * 粒子特征：
+     * - 白色粒子 (END_ROD): 每 10 能量 1 个，表示基础能量
+     * - 金色粒子 (GLOW): 每 100 能量 1 个，表示高能量
+     * - 粒子在实体周围的随机范围内生成，向上飘散
+     * - 本体位置始终有 1 个静止粒子
+     * </p>
      */
     private void spawnParticles() {
-        if (level().isClientSide()) {
-            // 客户端生成简单粒子
-            for (int i = 0; i < 2; i++) {
+        // 从同步数据字段读取能量值（避免客户端本地值为 0）
+        double energy = entityData.get(DATA_ENERGY);
+
+        // 粒子数量上限
+        int maxWhiteParticles = 10;
+        int maxGoldParticles = 20;
+
+        double x = getX();
+        double y = getY();
+        double z = getZ();
+
+        var random = level().getRandom();
+
+        int goldCount = Math.min((int) (energy / 1000.0), maxGoldParticles);
+        // 每 5 tick 生成一次粒子效果（避免粒子重叠）
+        if (level().getGameTime() % 16 == 0) {
+            for (int i = 0; i < goldCount; i++) {
+                // 随机范围：X/Z 方向 ±0.4，Y 方向 [y-0.6, y+0.4]
+                double offsetX = random.nextFloat() * 0.8 - 0.4;
+                double offsetY = random.nextFloat() * 1.0 - 0.6 + 0.5;
+                double offsetZ = random.nextFloat() * 0.8 - 0.4;
+
+                // 更快的向上速度
+                double velX = (random.nextFloat() - 0.5) * 0.08;
+                double velY = 0.06 + random.nextFloat() * 0.08;
+                double velZ = (random.nextFloat() - 0.5) * 0.08;
+
                 level().addParticle(
-                        net.minecraft.core.particles.ParticleTypes.END_ROD,
-                        getX() + random.nextFloat() * 1.2 - 0.6,
-                        getY() + random.nextFloat() * 1.2 - 0.6,
-                        getZ() + random.nextFloat() * 1.2 - 0.6,
-                        0, 0, 0);
+                        ParticleTypes.GLOW,
+                        x + offsetX,
+                        y + offsetY,
+                        z + offsetZ,
+                        velX, velY, velZ);
             }
+        }
+
+        if (level().getGameTime() % 5 == 0) {
+            double remainingEnergy = energy - (goldCount * 1000.0);
+            int whiteCount = Math.min((int) (remainingEnergy / 100.0), maxWhiteParticles);
+            for (int i = 0; i < whiteCount; i++) {
+                // 随机范围：X/Z 方向 ±0.6，Y 方向 [y-0.8, y+0.2]
+                double offsetX = random.nextFloat() * 1.2 - 0.6;
+                double offsetY = random.nextFloat() * 1.0 - 0.8 + 0.8;
+                double offsetZ = random.nextFloat() * 1.2 - 0.6;
+
+                // 向上飘散
+                double velX = (random.nextFloat() - 0.5) * 0.05;
+                double velY = 0.03 + random.nextFloat() * 0.05;
+                double velZ = (random.nextFloat() - 0.5) * 0.05;
+
+                level().addParticle(
+                        ParticleTypes.ENCHANT,
+                        x + offsetX,
+                        y + offsetY,
+                        z + offsetZ,
+                        velX, velY, velZ);
+            }
+        }
+
+        // 本体位置始终有 1 个静止粒子（表示实体存在）
+        if (level().getGameTime() % 10 == 0) {
+            level().addParticle(
+                    ParticleTypes.END_ROD,
+                    x,
+                    y + 0.5,
+                    z,
+                    0.0, 0.0, 0.0);
         }
     }
 
@@ -204,11 +274,7 @@ public class EntityShell extends Entity implements ShellContainer {
 
     @Override
     public double getEnergyCostPerTick() {
-        ItemStack coreStack = getCoreStack();
-        if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
-            return core.getEnergyCost(coreStack);
-        }
-        return 0.0;
+        return (1.0 / interval) * Math.pow(coreCost, 1.3);
     }
 
     @Override
@@ -233,11 +299,7 @@ public class EntityShell extends Entity implements ShellContainer {
 
     @Override
     public double getEnergy() {
-        ItemStack energyStack = getEnergyStack();
-        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
-            return emi.getStoredEnergy(energyStack);
-        }
-        return energy;
+        return this.energy;
     }
 
     @Override
@@ -247,12 +309,6 @@ public class EntityShell extends Entity implements ShellContainer {
 
     @Override
     public boolean consumeEnergy(double amount) {
-        ItemStack energyStack = getEnergyStack();
-        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
-            double consumed = emi.consumeEnergy(energyStack, amount);
-            return consumed >= amount;
-        }
-        // 从内部能量池扣除
         if (this.energy >= amount) {
             this.energy -= amount;
             return true;
@@ -262,11 +318,6 @@ public class EntityShell extends Entity implements ShellContainer {
 
     @Override
     public double addEnergy(double amount) {
-        ItemStack energyStack = getEnergyStack();
-        if (!energyStack.isEmpty() && energyStack.getItem() instanceof EnergyModuleComponent emi) {
-            return emi.addEnergy(energyStack, amount);
-        }
-        // 添加到内部能量池
         this.energy += amount;
         return amount;
     }
@@ -292,27 +343,6 @@ public class EntityShell extends Entity implements ShellContainer {
     @Override
     public double getWorldInteractorRange() {
         return range;
-    }
-
-    @Override
-    public void loadProgramFromDisk() {
-        if (level().isClientSide()) {
-            return;
-        }
-
-        ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty()) {
-            return;
-        }
-
-        DiskComponent diskComponent = (DiskComponent) diskStack.getItem();
-
-        getStateMachine().clear();
-        var program = diskComponent.getProgram(diskStack);
-        if (!program.isEmpty()) {
-            getStateMachine().loadProgram(program);
-            setInitialized(true);
-        }
     }
 
     @Override
