@@ -30,6 +30,7 @@
   "block.relay.block_shell.initialized": "外壳 (已初始化)",
   "block.relay.block_shell.active": "外壳 (运行中)",
   "block.relay.spell_editor_block": "法术编辑器",
+  "entity.relay.entity_shell": "外壳实体",
   "itemGroup.relay.creative_tab": "Relay",
   "container.relay.shell": "外壳",
   "container.relay.tool_shell": "工具外壳",
@@ -396,14 +397,10 @@
   "param.hitFace.description": "方块的面",
   "param.source_item.description": "合并物品",
   "param.target_item.description": "被合并物品",
-
-  "param.position.description": "位置",
-  "param.coreCost.description": "核心数量（1-8）",
+  "param.coreCost.description": "运算资源（1-8）",
   "param.interval.description": "执行间隔（1-100 tick）",
   "param.range.description": "交互范围（8-128 方块）",
   "param.energy.description": "预付能量（至少 100）",
-  "param.program.description": "程序列表",
-  "param.entity.description": "召唤的实体引用",
   "param.returnedEnergy.description": "返还的能量值",
 
   "type.relay:number.name": "数字",

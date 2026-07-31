@@ -30,6 +30,7 @@
   "block.relay.block_shell.initialized": "Shell (Initialized)",
   "block.relay.block_shell.active": "Shell (Active)",
   "block.relay.spell_editor_block": "Spell Editor",
+  "entity.relay.entity_shell": "Shell Entity",
   "itemGroup.relay.creative_tab": "Relay",
   "container.relay.shell": "Shell",
   "container.relay.tool_shell": "Tool Shell",
@@ -397,14 +398,10 @@
   "param.hitFace.description": "Face of the Block",
   "param.source_item.description": "Source item to merge",
   "param.target_item.description": "Target item to be merged into",
-
-  "param.position.description": "Position",
   "param.coreCost.description": "Core cost (1-8)",
   "param.interval.description": "Execution interval (1-100 tick)",
   "param.range.description": "Interaction range (8-128 blocks)",
   "param.energy.description": "Prepaid energy (at least 100)",
-  "param.program.description": "Program list",
-  "param.entity.description": "Spawned entity reference",
   "param.returnedEnergy.description": "Returned energy amount",
 
   "type.relay:number.name": "Number",

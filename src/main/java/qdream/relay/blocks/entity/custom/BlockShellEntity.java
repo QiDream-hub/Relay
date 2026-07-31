@@ -542,34 +542,33 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 保存物品栏
         ContainerHelper.saveAllItems(output, inventory);
 
-        // 保存能量
-        output.putDouble("energy", energy);
+        // 保存配置到统一的 CompoundTag
+        CompoundTag configTag = new CompoundTag();
+        configTag.putDouble("Energy", energy);
+        configTag.putBoolean("Enabled", enabled);
+        output.store("Config", CompoundTag.CODEC, configTag);
 
         // 保存状态机状态
         CompoundTag machineTag = StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
-        output.store("stateMachine", CompoundTag.CODEC, machineTag);
-
-        // 保存开关状态
-        output.putBoolean("enabled", enabled);
+        output.store("StateMachine", CompoundTag.CODEC, machineTag);
 
         // 保存所有者信息 - 使用 ownerUuid 判断，确保玩家离线后仍能保存
         if (ownerUuid != null) {
-            output.putString("owner", ownerUuid.toString());
+            output.putString("OwnerUUID", ownerUuid.toString());
         }
 
         // 保存核心组 ID
         if (coreGroupId != null) {
-            output.putString("coreGroupId", coreGroupId.toString());
+            output.putString("CoreGroupId", coreGroupId.toString());
         }
 
-        // 保存 TickHandler 状态
-        output.putInt("tickCounter", tickHandler.getTickCounter());
-        output.putBoolean("initialized", tickHandler.isInitialized());
-        output.putInt("accumulatedCost", tickHandler.getAccumulatedCost());
+        // 保存 TickHandler 状态（使用 ShellTickHandler 自己的序列化方法）
+        CompoundTag tickHandlerTag = tickHandler.toNbt();
+        output.store("TickHandler", CompoundTag.CODEC, tickHandlerTag);
 
         // 保存执行统计
         CompoundTag statsTag = executionStats.toNbt();
-        output.store("executionStats", CompoundTag.CODEC, statsTag);
+        output.store("ExecutionStats", CompoundTag.CODEC, statsTag);
     }
 
     @Override
@@ -579,19 +578,19 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 加载物品栏
         ContainerHelper.loadAllItems(input, inventory);
 
-        // 加载能量
-        energy = input.getIntOr("energy", 0);
+        // 加载配置从统一的 CompoundTag
+        input.read("Config", CompoundTag.CODEC).ifPresent(configTag -> {
+            energy = configTag.getDouble("Energy").orElse(0.0);
+            enabled = configTag.getBoolean("Enabled").orElse(false);
+        });
 
         // 加载状态机状态
-        input.read("stateMachine", CompoundTag.CODEC).ifPresent(machineTag -> {
+        input.read("StateMachine", CompoundTag.CODEC).ifPresent(machineTag -> {
             StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, (CompoundTag) machineTag);
         });
 
-        // 加载开关状态
-        enabled = input.getBooleanOr("enabled", false);
-
         // 加载所有者信息
-        String uuidStr = input.getString("owner").orElse("");
+        String uuidStr = input.getString("OwnerUUID").orElse("");
         if (!uuidStr.isEmpty()) {
             try {
                 ownerUuid = java.util.UUID.fromString(uuidStr);
@@ -601,7 +600,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
 
         // 加载核心组 ID
-        String groupIdStr = input.getString("coreGroupId").orElse("");
+        String groupIdStr = input.getString("CoreGroupId").orElse("");
         if (!groupIdStr.isEmpty()) {
             try {
                 coreGroupId = java.util.UUID.fromString(groupIdStr);
@@ -610,13 +609,13 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             }
         }
 
-        // 加载 TickHandler 状态
-        tickHandler.setTickCounter(input.getIntOr("tickCounter", 0));
-        tickHandler.setInitialized(input.getBooleanOr("initialized", false));
-        tickHandler.setAccumulatedCost(input.getIntOr("accumulatedCost", 0));
+        // 加载 TickHandler 状态（使用 ShellTickHandler 自己的反序列化方法）
+        input.read("TickHandler", CompoundTag.CODEC).ifPresent(tag -> {
+            tickHandler.fromNbt(tag);
+        });
 
         // 加载执行统计
-        input.read("executionStats", CompoundTag.CODEC).ifPresent(statsTag -> {
+        input.read("ExecutionStats", CompoundTag.CODEC).ifPresent(statsTag -> {
             executionStats.fromNbt((CompoundTag) statsTag);
         });
     }

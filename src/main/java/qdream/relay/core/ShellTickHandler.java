@@ -1,5 +1,6 @@
 package qdream.relay.core;
 
+import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
@@ -236,5 +237,31 @@ public class ShellTickHandler {
      */
     public DebugCallback getDebugCallback() {
         return debugCallback;
+    }
+
+    // ========== NBT 序列化 ==========
+
+    /**
+     * 将 TickHandler 状态序列化为 NBT
+     *
+     * @return 包含状态数据的 CompoundTag
+     */
+    public CompoundTag toNbt() {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("tickCounter", tickCounter);
+        tag.putBoolean("initialized", initialized);
+        tag.putInt("accumulatedCost", accumulatedCost);
+        return tag;
+    }
+
+    /**
+     * 从 NBT 加载 TickHandler 状态
+     *
+     * @param tag 包含状态数据的 CompoundTag
+     */
+    public void fromNbt(CompoundTag tag) {
+        this.tickCounter = tag.getInt("tickCounter").orElse(0);
+        this.initialized = tag.getBoolean("initialized").orElse(false);
+        this.accumulatedCost = tag.getInt("accumulatedCost").orElse(0);
     }
 }

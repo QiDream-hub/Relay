@@ -364,12 +364,13 @@ public class EntityShell extends Entity implements ShellContainer {
 
     @Override
     protected void addAdditionalSaveData(ValueOutput output) {
-
-        // 保存配置
-        output.putInt("CoreCost", coreCost);
-        output.putInt("Interval", interval);
-        output.putInt("Range", range);
-        output.putDouble("Energy", energy);
+        // 保存配置到统一的 CompoundTag
+        CompoundTag configTag = new CompoundTag();
+        configTag.putInt("CoreCost", coreCost);
+        configTag.putInt("Interval", interval);
+        configTag.putInt("Range", range);
+        configTag.putDouble("Energy", energy);
+        output.store("Config", CompoundTag.CODEC, configTag);
 
         // 保存所有者
         if (ownerUuid != null) {
@@ -380,6 +381,10 @@ public class EntityShell extends Entity implements ShellContainer {
         CompoundTag machineTag = qdream.relay.mc.StateMachineNbtSerializer.INSTANCE.serialize(stateMachine);
         output.store("StateMachine", CompoundTag.CODEC, machineTag);
 
+        // 保存 TickHandler 状态（使用 ShellTickHandler 自己的序列化方法）
+        CompoundTag tickHandlerTag = tickHandler.toNbt();
+        output.store("TickHandler", CompoundTag.CODEC, tickHandlerTag);
+
         // 保存执行统计
         CompoundTag statsTag = executionStats.toNbt();
         output.store("ExecutionStats", CompoundTag.CODEC, statsTag);
@@ -387,12 +392,13 @@ public class EntityShell extends Entity implements ShellContainer {
 
     @Override
     protected void readAdditionalSaveData(ValueInput input) {
-
-        // 加载配置
-        coreCost = input.getIntOr("CoreCost", 1);
-        interval = input.getIntOr("Interval", 20);
-        range = input.getIntOr("Range", 32);
-        energy = input.getDoubleOr("Energy", 0.0);
+        // 加载配置从统一的 CompoundTag
+        input.read("Config", CompoundTag.CODEC).ifPresent(configTag -> {
+            coreCost = configTag.getInt("CoreCost").orElse(1);
+            interval = configTag.getInt("Interval").orElse(20);
+            range = configTag.getInt("Range").orElse(32);
+            energy = configTag.getDouble("Energy").orElse(0.0);
+        });
 
         // 加载所有者
         String uuidStr = input.getString("OwnerUUID").orElse("");
@@ -407,6 +413,11 @@ public class EntityShell extends Entity implements ShellContainer {
         // 加载状态机
         input.read("StateMachine", CompoundTag.CODEC).ifPresent(tag -> {
             qdream.relay.mc.StateMachineNbtSerializer.INSTANCE.deserialize(stateMachine, tag);
+        });
+
+        // 加载 TickHandler 状态（使用 ShellTickHandler 自己的反序列化方法）
+        input.read("TickHandler", CompoundTag.CODEC).ifPresent(tag -> {
+            tickHandler.fromNbt(tag);
         });
 
         // 加载执行统计
