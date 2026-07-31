@@ -565,6 +565,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 保存 TickHandler 状态
         output.putInt("tickCounter", tickHandler.getTickCounter());
         output.putBoolean("initialized", tickHandler.isInitialized());
+        output.putInt("accumulatedCost", tickHandler.getAccumulatedCost());
 
         // 保存执行统计
         CompoundTag statsTag = executionStats.toNbt();
@@ -612,6 +613,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 加载 TickHandler 状态
         tickHandler.setTickCounter(input.getIntOr("tickCounter", 0));
         tickHandler.setInitialized(input.getBooleanOr("initialized", false));
+        tickHandler.setAccumulatedCost(input.getIntOr("accumulatedCost", 0));
 
         // 加载执行统计
         input.read("executionStats", CompoundTag.CODEC).ifPresent(statsTag -> {

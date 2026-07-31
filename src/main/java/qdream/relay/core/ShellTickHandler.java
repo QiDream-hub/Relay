@@ -60,13 +60,13 @@ public class ShellTickHandler {
         // 执行状态机
         tickCounter++;
         int interval = container.getInterval();
-        int coreCount = container.getCoreCost();
+        int coreCost = container.getCoreCost();
 
-        if (tickCounter >= interval && coreCount > 0) {
+        if (tickCounter >= interval && coreCost > 0) {
             tickCounter = 0;
 
             // 执行 tick - mc 层负责控制执行节奏和能量扣除
-            runTick(container, coreCount);
+            runTick(container, coreCost);
 
             // 统计：tick 次数
             ExecutionStats stats = container.getExecutionStats();
@@ -75,27 +75,56 @@ public class ShellTickHandler {
     }
 
     /**
+     * 累计的 coreCost，用于支持高 cost 操作
+     * 当单个操作需要的 cost 超过单 tick 的 coreCost 时，会累积多 tick 再执行
+     */
+    private int accumulatedCost = 0;
+
+    /**
+     * 获取累计的 coreCost
+     *
+     * @return 累计的 coreCost 值
+     */
+    public int getAccumulatedCost() {
+        return accumulatedCost;
+    }
+
+    /**
+     * 设置累计的 coreCost
+     *
+     * @param accumulatedCost 累计的 coreCost 值
+     */
+    public void setAccumulatedCost(int accumulatedCost) {
+        this.accumulatedCost = accumulatedCost;
+    }
+
+    /**
      * 执行一个 tick 的逻辑
      * mc 层负责：控制每 tick 执行的操作数、扣除能量
      *
      * @param container 外壳容器
-     * @param coreCount 核心数量（每 tick 最大可执行操作数）
+     * @param coreCost 核心数量（每 tick 最大可执行操作数）
      */
-    private void runTick(ShellContainer container, int coreCount) {
+    private void runTick(ShellContainer container, int coreCost) {
         var stateMachine = container.getStateMachine();
         double energyCostPerTick = container.getEnergyCostPerTick();
         ExecutionStats stats = container.getExecutionStats();
 
-        int usedCost = 0;
         int executedOps = 0;
 
         // 检查能量（核心基础消耗）- 每 tick 只检查一次
         if (!container.hasEnoughEnergy(energyCostPerTick)) {
             stateMachine.triggerMishap("能量不足：需要 " + energyCostPerTick + "，当前只有 " + container.getEnergy());
+            // 能量不足时重置状态，避免空转
+            container.setInitialized(false);
+            accumulatedCost = 0;
             return;
         }
 
-        while (usedCost < coreCount && stateMachine.isRunning()) {
+        // 累加本 tick 的 coreCost
+        accumulatedCost += coreCost;
+
+        while (stateMachine.isRunning()) {
             // 预检查栈顶操作的 cost
             Executable top = stateMachine.peekProgram();
             if (top == null) {
@@ -107,14 +136,20 @@ public class ShellTickHandler {
                 cost = op.getCost();
             }
 
-            if (usedCost + cost > coreCount) {
-                break; // cost 不足，等待下 tick
+            if (cost > accumulatedCost) {
+                // cost 不足，保留剩余的 accumulatedCost 到下一 tick
+                break;
             }
 
+            // 检查操作能量（在消耗 accumulatedCost 之前检查）
             if (top instanceof Instruction spell) {
-                double energy = spell.getEnergy();
-                container.consumeEnergy(energy);
-                stats.addOperationEnergy(energy);
+                double opEnergy = spell.getEnergy();
+                if (!container.hasEnoughEnergy(opEnergy)) {
+                    stateMachine.triggerMishap("操作能量不足：需要 " + opEnergy + "，当前只有 " + container.getEnergy());
+                    container.setInitialized(false);
+                    accumulatedCost = 0;
+                    return;
+                }
             }
 
             // 执行单个操作
@@ -138,24 +173,30 @@ public class ShellTickHandler {
                 debugCallback.onStackChange(stateMachine, "afterStep", currentOp);
             }
 
+            // 扣除操作能量并统计
+            if (top instanceof Instruction spell) {
+                double opEnergy = spell.getEnergy();
+                container.consumeEnergy(opEnergy);
+                stats.addOperationEnergy(opEnergy);
+            }
+
             executedOps++;
-            usedCost += cost;
+            accumulatedCost -= cost;
         }
 
-        // 统计：核心基础能量消耗（每 tick 只扣除一次）
+        // 统计：核心基础能量消耗 = 本 tick 实际消耗的 accumulatedCost
         if (executedOps > 0) {
-            stats.addCoreEnergy(energyCostPerTick);
-            // 扣除能量 - 通过 container 接口，支持背包能量模块
             container.consumeEnergy(energyCostPerTick);
+            stats.addCoreEnergy(energyCostPerTick);
         }
 
         // 统计：操作执行次数
         stats.incrementOperations(executedOps);
 
-        // 程序执行完毕后，清空数据栈（避免下次运行时使用遗留数据）
+        // 程序执行完毕后，重置初始化状态和累计 cost
         if (!stateMachine.isRunning()) {
-            stateMachine.clear();
             container.setInitialized(false);
+            accumulatedCost = 0;
         }
 
         container.setChanged();

@@ -270,6 +270,7 @@ public class ToolShellContainer implements ShellContainer {
         if (stateTag != null) {
             tickHandler.setTickCounter(stateTag.getInt("tickCounter").orElse(0));
             tickHandler.setInitialized(stateTag.getBoolean("initialized").orElse(false));
+            tickHandler.setAccumulatedCost(stateTag.getInt("accumulatedCost").orElse(0));
         }
     }
 
@@ -280,6 +281,7 @@ public class ToolShellContainer implements ShellContainer {
         CompoundTag stateTag = stack.getOrDefault(RelayDataComponents.TOOL_SHELL_TICK_STATE, new CompoundTag());
         stateTag.putInt("tickCounter", tickHandler.getTickCounter());
         stateTag.putBoolean("initialized", tickHandler.isInitialized());
+        stateTag.putInt("accumulatedCost", tickHandler.getAccumulatedCost());
         stack.set(RelayDataComponents.TOOL_SHELL_TICK_STATE, stateTag);
     }
 
