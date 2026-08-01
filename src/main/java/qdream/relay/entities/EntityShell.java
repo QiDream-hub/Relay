@@ -384,10 +384,6 @@ public class EntityShell extends Entity implements ShellContainer {
         // 保存 TickHandler 状态（使用 ShellTickHandler 自己的序列化方法）
         CompoundTag tickHandlerTag = tickHandler.toNbt();
         output.store("TickHandler", CompoundTag.CODEC, tickHandlerTag);
-
-        // 保存执行统计
-        CompoundTag statsTag = executionStats.toNbt();
-        output.store("ExecutionStats", CompoundTag.CODEC, statsTag);
     }
 
     @Override
@@ -418,11 +414,6 @@ public class EntityShell extends Entity implements ShellContainer {
         // 加载 TickHandler 状态（使用 ShellTickHandler 自己的反序列化方法）
         input.read("TickHandler", CompoundTag.CODEC).ifPresent(tag -> {
             tickHandler.fromNbt(tag);
-        });
-
-        // 加载执行统计
-        input.read("ExecutionStats", CompoundTag.CODEC).ifPresent(tag -> {
-            executionStats.fromNbt(tag);
         });
     }
 

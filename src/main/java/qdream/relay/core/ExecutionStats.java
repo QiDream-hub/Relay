@@ -1,7 +1,5 @@
 package qdream.relay.core;
 
-import net.minecraft.nbt.CompoundTag;
-
 /**
  * 程序执行统计信息
  * <p>
@@ -169,48 +167,6 @@ public class ExecutionStats {
      */
     public int getRunCount() {
         return runCount;
-    }
-
-    // ========== NBT 序列化 ==========
-
-    /**
-     * 将统计信息序列化为 NBT
-     *
-     * @return 包含统计数据的 CompoundTag
-     */
-    public CompoundTag toNbt() {
-        CompoundTag tag = new CompoundTag();
-        tag.putDouble("CoreEnergy", coreEnergyCost);
-        tag.putDouble("BaseOperationEnergy", operationEnergyCost);
-        tag.putDouble("WorldInteractorEnergy", worldInteractorEnergyCost);
-        tag.putInt("ExecutedOperations", executedOperationCount);
-        tag.putInt("RunCount", runCount);
-        return tag;
-    }
-
-    /**
-     * 从 NBT 加载统计信息
-     *
-     * @param tag 包含统计数据的 CompoundTag
-     */
-    public void fromNbt(CompoundTag tag) {
-        this.coreEnergyCost = tag.getDouble("CoreEnergy").orElse(0.0);
-        this.operationEnergyCost = tag.getDouble("BaseOperationEnergy").orElse(0.0);
-        this.worldInteractorEnergyCost = tag.getDouble("WorldInteractorEnergy").orElse(0.0);
-        this.executedOperationCount = tag.getInt("ExecutedOperations").orElse(0);
-        this.runCount = tag.getInt("RunCount").orElse(0);
-    }
-
-    /**
-     * 从 NBT 创建 ExecutionStats 实例（兼容旧格式）
-     *
-     * @param tag 包含统计数据的 CompoundTag
-     * @return ExecutionStats 实例
-     */
-    public static ExecutionStats fromNbtStatic(CompoundTag tag) {
-        ExecutionStats stats = new ExecutionStats();
-        stats.fromNbt(tag);
-        return stats;
     }
 
     /**

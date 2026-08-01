@@ -170,12 +170,6 @@ public class ToolShellContainer implements ShellContainer {
 
         // 加载 Tick 状态
         loadTickState();
-
-        // 加载执行统计
-        CompoundTag statsTag = dataTag.getCompound("executionStats").orElse(null);
-        if (statsTag != null) {
-            executionStats.fromNbt(statsTag);
-        }
     }
 
     /**
@@ -201,10 +195,6 @@ public class ToolShellContainer implements ShellContainer {
 
         // 保存 Tick 状态
         saveTickState();
-
-        // 保存执行统计
-        CompoundTag statsTag = executionStats.toNbt();
-        dataTag.put("executionStats", statsTag);
 
         stack.set(RelayDataComponents.TOOL_SHELL_DATA, dataTag);
     }
