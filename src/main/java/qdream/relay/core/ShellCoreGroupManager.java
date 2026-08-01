@@ -2,6 +2,7 @@ package qdream.relay.core;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.blocks.entity.custom.BlockShellEntity;
@@ -35,13 +36,15 @@ public class ShellCoreGroupManager {
 
     /**
      * 获取或创建 SavedData
+     * 每个维度有自己独立的 SavedData 实例
      */
     public static ShellCoreGroupSavedData getOrCreate(Level level) {
         if (level.isClientSide()) {
             return null;
         }
-        
-        return level.getServer().overworld().getDataStorage().computeIfAbsent(ShellCoreGroupSavedData.TYPE);
+
+        // 使用当前维度的数据存储，而不是主世界
+        return ((ServerLevel) level).getDataStorage().computeIfAbsent(ShellCoreGroupSavedData.TYPE);
     }
 
     /**

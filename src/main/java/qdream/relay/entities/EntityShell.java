@@ -68,7 +68,6 @@ public class EntityShell extends Entity implements ShellContainer {
         stateMachine.setMishapHandler(reason -> {
             if (!level().isClientSide()) {
                 getOwner().sendSystemMessage(Component.literal(String.format("§c§lMISHAP§r§c[实体]: %s", reason)));
-                discard();
             }
         });
     }
