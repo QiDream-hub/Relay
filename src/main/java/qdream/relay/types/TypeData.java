@@ -25,7 +25,11 @@ public class TypeData extends Data {
         executor.pushData(this);
     }
 
-    public String getId() {
+    /**
+     * 获取存储的类型 ID
+     * @return 存储的类型 ID（如 "relay:number"）
+     */
+    public String getValue() {
         return value;
     }
 

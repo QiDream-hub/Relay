@@ -8,12 +8,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.NonNullList;
 
 import qdream.relay.Component.RelayDataComponents;
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.ToolShellItem;
 import qdream.relay.core.ShellContainer;
@@ -28,7 +26,6 @@ import qdream.relay.tools.StackTools;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.Relay;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
