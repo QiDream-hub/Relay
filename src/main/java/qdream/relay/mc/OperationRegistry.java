@@ -6,7 +6,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import qdream.relay.Relay;
 import qdream.relay.engine.Executable;
+import qdream.relay.mc.base.Operation;
 
 /**
  * 统一注册表
@@ -39,10 +41,14 @@ public class OperationRegistry {
         }
 
         @Override
-        public Executable create() { return singleton; }
+        public Executable create() {
+            return singleton;
+        }
 
         @Override
-        public boolean isDataType() { return false; }
+        public boolean isDataType() {
+            return false;
+        }
     }
 
     /**
@@ -56,10 +62,14 @@ public class OperationRegistry {
         }
 
         @Override
-        public Executable create() { return factory.get(); }
+        public Executable create() {
+            return factory.get();
+        }
 
         @Override
-        public boolean isDataType() { return true; }
+        public boolean isDataType() {
+            return true;
+        }
     }
 
     /**
@@ -67,17 +77,23 @@ public class OperationRegistry {
      */
     private static final Map<String, Entry> REGISTRY = new HashMap<>();
 
-    private OperationRegistry() {}
+    private OperationRegistry() {
+    }
 
     // ========== 注册 ==========
 
     /**
      * 注册条目
-     * @param id 注册 ID，如 "relay:add" 或 "relay:number"
+     * 
      * @param entry 注册条目
      */
-    public static void register(String id, Entry entry) {
-        REGISTRY.put(id, entry);
+    public static void register(Entry entry) {
+        Executable executable = entry.create();
+        if (executable instanceof Operation op) {
+            REGISTRY.put(op.getId(), entry);
+            return;
+        }
+        Relay.LOGGER.warn("法术注册错误:" + executable.getClass().getSimpleName());
     }
 
     // ========== 查找 ==========
@@ -111,9 +127,9 @@ public class OperationRegistry {
      */
     public static Set<String> getAllOperationIds() {
         return REGISTRY.entrySet().stream()
-            .filter(e -> !e.getValue().isDataType())
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toSet());
+                .filter(e -> !e.getValue().isDataType())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -121,9 +137,9 @@ public class OperationRegistry {
      */
     public static Set<String> getAllDataIds() {
         return REGISTRY.entrySet().stream()
-            .filter(e -> e.getValue().isDataType())
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toSet());
+                .filter(e -> e.getValue().isDataType())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
     /**

@@ -36,186 +36,185 @@ public class RelayOperations {
 
         private static void registerDataTypes() {
                 // 基础类型 - 工厂方法创建默认值实例
-                OperationRegistry.register("relay:number",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new NumberData(0)));
-                OperationRegistry.register("relay:boolean",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new BooleanData(false)));
-                OperationRegistry.register("relay:string",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new StringData("")));
-                OperationRegistry.register("relay:vector",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new VectorData(new Vec3(0, 0, 0))));
-                OperationRegistry.register("relay:entity",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new EntityData(null, null, null)));
-                OperationRegistry.register("relay:null",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> NullData.INSTANCE));
-                OperationRegistry.register("relay:list",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new ListData(new ArrayList<>())));
-                OperationRegistry.register("relay:block_entity",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new BlockEntityData(null, null, null)));
-                OperationRegistry.register("relay:block",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new BlockData(null, null, null)));
-                OperationRegistry.register("relay:type",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new TypeData("")));
-                OperationRegistry.register("relay:slot",
+                OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new SlotData(null, null, -1)));
         }
 
         private static void registerOperations() {
                 // 基础操作
-                OperationRegistry.register("relay:pop", new OperationRegistry.OpEntry(new Pop()));
-                OperationRegistry.register("relay:dup", new OperationRegistry.OpEntry(new Dup()));
-                OperationRegistry.register("relay:swap", new OperationRegistry.OpEntry(new Swap()));
-                OperationRegistry.register("relay:batch_dup", new OperationRegistry.OpEntry(new BatchDup()));
-                OperationRegistry.register("relay:move_to_top", new OperationRegistry.OpEntry(new MoveToTop()));
-                OperationRegistry.register("relay:copy_to_top", new OperationRegistry.OpEntry(new CopyToTop()));
-                OperationRegistry.register("relay:stack_rearrange",
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Pop()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Dup()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Swap()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new BatchDup()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new MoveToTop()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new CopyToTop()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new StackRearrange()));
-                OperationRegistry.register("relay:get_data_stack_length",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetDataStackLength()));
-                OperationRegistry.register("relay:get_program_stack_length",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetProgramStackLength()));
-                OperationRegistry.register("relay:get_world_interactor",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new CheckWorldInteractor()));
-                OperationRegistry.register("relay:get_self",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetSelf()));
-                OperationRegistry.register("relay:get_entity_pos",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetEntityPos()));
-                OperationRegistry.register("relay:get_entity_eye_pos",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetEntityEyePos()));
-                OperationRegistry.register("relay:get_owner",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetOwner()));
-                OperationRegistry.register("relay:is_player",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new IsPlayer()));
 
                 // 实体获取操作
-                OperationRegistry.register("relay:get_block_entity",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetBlockEntity()));
-                OperationRegistry.register("relay:get_entity",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetEntity()));
-                OperationRegistry.register("relay:get_block",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetBlock()));
-                OperationRegistry.register("relay:scan_entities",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new ScanEntities()));
-                OperationRegistry.register("relay:pickup_item",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new PickupItem()));
 
                 // 类型操作
-                OperationRegistry.register("relay:get_type",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetType()));
-                OperationRegistry.register("relay:to_string",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new ToString()));
-                OperationRegistry.register("relay:to_bool",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new ToBoolean()));
 
                 // 算术操作
-                OperationRegistry.register("relay:add", new OperationRegistry.OpEntry(new Add()));
-                OperationRegistry.register("relay:sub", new OperationRegistry.OpEntry(new Sub()));
-                OperationRegistry.register("relay:mul", new OperationRegistry.OpEntry(new Mul()));
-                OperationRegistry.register("relay:div", new OperationRegistry.OpEntry(new Div()));
-                OperationRegistry.register("relay:mod", new OperationRegistry.OpEntry(new Mod()));
-                OperationRegistry.register("relay:floor", new OperationRegistry.OpEntry(new Floor()));
-                OperationRegistry.register("relay:ceil", new OperationRegistry.OpEntry(new Ceil()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Add()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Sub()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Mul()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Div()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Mod()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Floor()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Ceil()));
 
                 // 逻辑操作
-                OperationRegistry.register("relay:and", new OperationRegistry.OpEntry(new And()));
-                OperationRegistry.register("relay:or", new OperationRegistry.OpEntry(new Or()));
-                OperationRegistry.register("relay:not", new OperationRegistry.OpEntry(new Not()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new And()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Or()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Not()));
 
                 // 比较操作
-                OperationRegistry.register("relay:eq", new OperationRegistry.OpEntry(new Eq()));
-                OperationRegistry.register("relay:lt", new OperationRegistry.OpEntry(new Lt()));
-                OperationRegistry.register("relay:gt", new OperationRegistry.OpEntry(new Gt()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Eq()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Lt()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Gt()));
 
                 // 控制流
-                OperationRegistry.register("relay:eval", new OperationRegistry.OpEntry(new Eval()));
-                OperationRegistry.register("relay:if", new OperationRegistry.OpEntry(new If()));
-                OperationRegistry.register("relay:for", new OperationRegistry.OpEntry(new For()));
-                OperationRegistry.register("relay:while", new OperationRegistry.OpEntry(new While()));
-                OperationRegistry.register("relay:stop", new OperationRegistry.OpEntry(new Stop()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Eval()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new If()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new For()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new While()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Stop()));
 
                 // 通信操作
-                OperationRegistry.register("relay:send", new OperationRegistry.OpEntry(new Send()));
-                OperationRegistry.register("relay:recv", new OperationRegistry.OpEntry(new Recv()));
-                OperationRegistry.register("relay:peek", new OperationRegistry.OpEntry(new Peek()));
-                OperationRegistry.register("relay:send_message", new OperationRegistry.OpEntry(new SendMessage()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Send()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Recv()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Peek()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new SendMessage()));
 
                 // 列表操作
-                OperationRegistry.register("relay:list_append", new OperationRegistry.OpEntry(new ListAppend()));
-                OperationRegistry.register("relay:list_add_unique",
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListAppend()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new ListAddUnique()));
-                OperationRegistry.register("relay:list_get", new OperationRegistry.OpEntry(new ListGet()));
-                OperationRegistry.register("relay:list_remove", new OperationRegistry.OpEntry(new ListRemove()));
-                OperationRegistry.register("relay:list_set", new OperationRegistry.OpEntry(new ListSet()));
-                OperationRegistry.register("relay:list_length", new OperationRegistry.OpEntry(new ListLength()));
-                OperationRegistry.register("relay:list_creat", new OperationRegistry.OpEntry(new ListCreate()));
-                OperationRegistry.register("relay:list_unpack", new OperationRegistry.OpEntry(new ListUnpack()));
-                OperationRegistry.register("relay:list_uniq", new OperationRegistry.OpEntry(new ListUniq()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListGet()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListRemove()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListSet()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListLength()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListCreate()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListUnpack()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new ListUniq()));
 
                 // 向量操作
-                OperationRegistry.register("relay:vector_add", new OperationRegistry.OpEntry(new VectorAdd()));
-                OperationRegistry.register("relay:vector_sub", new OperationRegistry.OpEntry(new VectorSub()));
-                OperationRegistry.register("relay:vector_mul", new OperationRegistry.OpEntry(new VectorMul()));
-                OperationRegistry.register("relay:vector_dot", new OperationRegistry.OpEntry(new VectorDot()));
-                OperationRegistry.register("relay:vector_cross", new OperationRegistry.OpEntry(new VectorCross()));
-                OperationRegistry.register("relay:vector_normalize",
+                OperationRegistry.register(new OperationRegistry.OpEntry(new VectorAdd()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new VectorSub()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new VectorMul()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new VectorDot()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new VectorCross()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new VectorNormalize()));
-                OperationRegistry.register("relay:vector_length", new OperationRegistry.OpEntry(new VectorLength()));
-                OperationRegistry.register("relay:vector_distance",
+                OperationRegistry.register(new OperationRegistry.OpEntry(new VectorLength()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new VectorDistance()));
-                OperationRegistry.register("relay:build_vector", new OperationRegistry.OpEntry(new BuildVector()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new BuildVector()));
 
                 // 世界交互操作（需要世界交互器）
-                OperationRegistry.register("relay:raycast", new OperationRegistry.OpEntry(new Raycast()));
-                OperationRegistry.register("relay:detect_block", new OperationRegistry.OpEntry(new DetectBlock()));
-                OperationRegistry.register("relay:detect_entity", new OperationRegistry.OpEntry(new DetectEntity()));
-                OperationRegistry.register("relay:push_vector", new OperationRegistry.OpEntry(new PushVector()));
-                OperationRegistry.register("relay:get_look_vector",
+                OperationRegistry.register(new OperationRegistry.OpEntry(new Raycast()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new DetectBlock()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new DetectEntity()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new PushVector()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetLookVector()));
 
                 // 实体朝向操作
-                OperationRegistry.register("relay:set_entity_look",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new SetEntityLook()));
 
                 // 挖掘方块操作
-                OperationRegistry.register("relay:break_block", new OperationRegistry.OpEntry(new BreakBlock()));
-                OperationRegistry.register("relay:break_block_fortune",
+                OperationRegistry.register(new OperationRegistry.OpEntry(new BreakBlock()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new BreakBlockFortune()));
-                OperationRegistry.register("relay:break_block_silk_touch",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new BreakBlockSilkTouch()));
 
                 // 放置方块
-                OperationRegistry.register("relay:place_block", new OperationRegistry.OpEntry(new PlaceBlock()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new PlaceBlock()));
 
                 // 视线追踪操作
-                OperationRegistry.register("relay:entity_raycast",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new EntityRaycast()));
-                OperationRegistry.register("relay:block_raycast", new OperationRegistry.OpEntry(new BlockRaycast()));
-                OperationRegistry.register("relay:block_face_raycast", new OperationRegistry.OpEntry(new BlockFaceRaycast()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new BlockRaycast()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new BlockFaceRaycast()));
 
                 // 容器操作
-                OperationRegistry.register("relay:get_container_items",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetContainerItems()));
-                OperationRegistry.register("relay:move_items",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new MoveItems()));
-                OperationRegistry.register("relay:get_item_count",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetItemCount()));
-                OperationRegistry.register("relay:get_item_type",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetItemType()));
-                OperationRegistry.register("relay:drop_item",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new DropItem()));
 
-                // 生成实体操作
-                OperationRegistry.register("relay:spawn_shell",
-                                new OperationRegistry.OpEntry(new SpawnShell()));
-                OperationRegistry.register("relay:remove_shell",
-                                new OperationRegistry.OpEntry(new RemoveShell()));
-
                 // EntityShell 控制操作
-                OperationRegistry.register("relay:entity_shell_add_energy",
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SpawnShell()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new RemoveShell()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new EntityShellAddEnergy()));
-                OperationRegistry.register("relay:entity_shell_get_energy",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new EntityShellGetEnergy()));
-                OperationRegistry.register("relay:entity_shell_reset",
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new EntityShellReset()));
         }
 }
