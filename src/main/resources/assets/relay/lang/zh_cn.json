@@ -125,13 +125,13 @@
   "operation.relay:stop.name": "停止",
   "operation.relay:stop.description": "停止程序执行",
 
-  "operation.relay:send.name": "发送",
+  "operation.relay:send.name": "发送数据",
   "operation.relay:send.description": "向通信频道发送数据",
 
-  "operation.relay:recv.name": "接收",
+  "operation.relay:recv.name": "接收数据",
   "operation.relay:recv.description": "从通信频道接收数据",
 
-  "operation.relay:peek.name": "查看",
+  "operation.relay:peek.name": "查看信道",
   "operation.relay:peek.description": "查看通信频道顶部数据但不移除",
 
   "operation.relay:send_message.name": "发送消息",
@@ -179,8 +179,8 @@
   "operation.relay:get_entity_eye_pos.name": "获取实体眼睛位置",
   "operation.relay:get_entity_eye_pos.description": "获取实体当前的眼睛位置坐标（用于射线追踪等视线相关操作）",
 
-  "operation.relay:get_world_interactor.name": "检查世界交互器",
-  "operation.relay:get_world_interactor.description": "检查是否有世界交互器",
+  "operation.relay:check_world_interactor.name": "检查世界交互器",
+  "operation.relay:check_world_interactor.description": "检查是否有世界交互器",
 
   "operation.relay:vector_add.name": "向量加法",
   "operation.relay:vector_add.description": "计算两个向量的和",
@@ -275,10 +275,6 @@
   "operation.relay:entity_shell_get_energy.description": "获取外壳实体的当前能量",
   "operation.relay:entity_shell_reset.name": "复位外壳",
   "operation.relay:entity_shell_reset.description": "清除当前程序并加载新程序到外壳实体",
-  "operation.relay:entity_shell_stop.name": "停止外壳",
-  "operation.relay:entity_shell_stop.description": "停止外壳实体的运行",
-  "operation.relay:entity_shell_start.name": "启动外壳",
-  "operation.relay:entity_shell_start.description": "加载程序并启动外壳实体运行",
 
   "operation.relay:remove_shell.name": "移除外壳",
   "operation.relay:remove_shell.description": "移除指定的外壳实体并返还 90% 剩余能量",
@@ -379,7 +375,6 @@
   "param.direction.description": "方向",
   "param.start.description": "起点",
   "param.hitPos.description": "击中位置",
-  "param.exclude.description": "排除的实体",
   "param.hitEntity.description": "击中的实体",
   "param.exists.description": "是否存在",
   "param.fortune.description": "时运等级",

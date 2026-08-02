@@ -1,0 +1,40 @@
+package qdream.relay.operations.vector;
+
+import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
+import qdream.relay.types.VectorData;
+
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * 向量加法操作
+ *
+ * 弹出：vector, vector
+ * 压入：vector (两个向量的和)
+ */
+public class VectorAdd extends Instruction {
+
+    public VectorAdd() {
+        super("relay:vector_add", 1, 0.05, OperationSignature.builder()
+                .consumesFromData("left", "relay:vector")
+                .consumesFromData("right", "relay:vector")
+                .producesToData("sum", "relay:vector")
+                .build());
+    }
+
+    @Override
+    public void execute(StateMachine executor) {
+        VectorData bVec = StackHelpers.popVector(executor, id);
+        if (bVec == null)
+            return;
+
+        VectorData aVec = StackHelpers.popVector(executor, id);
+        if (aVec == null)
+            return;
+
+        Vec3 result = aVec.asVector().add(bVec.asVector());
+        executor.pushData(new VectorData(result));
+    }
+}

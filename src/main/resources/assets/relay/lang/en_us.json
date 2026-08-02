@@ -125,13 +125,13 @@
   "operation.relay:stop.name": "Stop",
   "operation.relay:stop.description": "Stop program execution",
 
-  "operation.relay:send.name": "Send",
+  "operation.relay:send.name": "Send data",
   "operation.relay:send.description": "Send data to a communication channel",
 
-  "operation.relay:recv.name": "Receive",
+  "operation.relay:recv.name": "Receive data",
   "operation.relay:recv.description": "Receive data from a communication channel",
 
-  "operation.relay:peek.name": "Peek",
+  "operation.relay:peek.name": "Peek channel",
   "operation.relay:peek.description": "Peek top data from channel without removing",
 
   "operation.relay:send_message.name": "Send Message",
@@ -179,8 +179,8 @@
   "operation.relay:get_entity_eye_pos.name": "Get Entity Eye Position",
   "operation.relay:get_entity_eye_pos.description": "Get the current eye position of an entity (for raycast and vision-related operations)",
 
-  "operation.relay:get_world_interactor.name": "Get World Interactor",
-  "operation.relay:get_world_interactor.description": "Get the currently active world interactor",
+  "operation.relay:check_world_interactor.name": "Check World Interactor",
+  "operation.relay:check_world_interactor.description": "Check the currently active world interactor",
 
   "operation.relay:vector_add.name": "Vector Add",
   "operation.relay:vector_add.description": "Calculate sum of two vectors",
@@ -278,8 +278,6 @@
   "operation.relay:entity_shell_get_energy.description": "Get current energy of a shell entity",
   "operation.relay:entity_shell_reset.name": "Reset Shell",
   "operation.relay:entity_shell_reset.description": "Clear current program and load new program to shell entity",
-  "operation.relay:entity_shell_stop.name": "Stop Shell",
-  "operation.relay:entity_shell_stop.description": "Stop shell entity execution",
   "operation.relay:entity_shell_start.name": "Start Shell",
   "operation.relay:entity_shell_start.description": "Load program and start shell entity execution",
 
@@ -380,7 +378,6 @@
   "param.direction.description": "Direction",
   "param.start.description": "Start point",
   "param.hitPos.description": "Hit position",
-  "param.exclude.description": "Excluded entity",
   "param.hitEntity.description": "Hit entity",
   "param.exists.description": "Exists status",
   "param.fortune.description": "Fortune level",

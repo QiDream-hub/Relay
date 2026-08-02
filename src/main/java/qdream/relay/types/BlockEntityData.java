@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
@@ -76,18 +77,18 @@ public class BlockEntityData extends Data {
      * 
      * @return 方块实体引用，如果不存在则返回 null
      */
-    public BlockEntity getBlockEntity(Level world) {
+    public BlockEntity getBlockEntity() {
         // 如果有缓存引用，先验证是否仍然有效
         if (blockEntityRef != null && !blockEntityRef.isRemoved()) {
             return blockEntityRef;
         }
 
         // 缓存失效，通过 BlockPos 查询
-        if (blockPos == null || world == null) {
+        if (blockPos == null || worldId == null) {
             return null;
         }
 
-        return world.getBlockEntity(blockPos);
+        return Relay.getWorld(worldId).getBlockEntity(blockPos);
     }
 
     /**
@@ -231,8 +232,8 @@ public class BlockEntityData extends Data {
             return String.format("{world:%s}", worldId != null ? worldId : "null");
         }
         return String.format("{world:%s,x:%d,y:%d,z:%d}",
-            worldId != null ? worldId : "null",
-            blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                worldId != null ? worldId : "null",
+                blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
     @Override
