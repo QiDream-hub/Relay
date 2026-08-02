@@ -209,6 +209,9 @@
   "operation.relay:build_vector.name": "构建向量",
   "operation.relay:build_vector.description": "从三个数字构建向量 (X, Y, Z)",
 
+  "operation.relay:vector_split.name": "向量拆分",
+  "operation.relay:vector_split.description": "将向量拆分为三个数字 (X, Y, Z)",
+
   "operation.relay:raycast.name": "射线追踪",
   "operation.relay:raycast.description": "从起点沿方向发射射线，返回命中的方块位置",
 

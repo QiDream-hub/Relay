@@ -24,6 +24,7 @@ public class TypeListWidget extends AbstractWidget {
     private static final int LINE_HEIGHT = 11;
     private static final int PADDING = 3;
     private static final int HEADER_HEIGHT = 16;
+    private static final int SCROLLBAR_WIDTH = 4;
 
     private static final int BG_COLOR = 0xFF1E1E1E;
     private static final int HEADER_BG = 0xFF252525;
@@ -32,9 +33,9 @@ public class TypeListWidget extends AbstractWidget {
     private static final int HOVER_COLOR = 0xFFCCCCFF;
     private static final int HOVER_BG = 0x308080FF;
     private static final int SELECTED_BG = 0x408080FF;
-    private static final int SCROLLBAR_COLOR = 0xFF505050;
-    private static final int SCROLLBAR_HOVER = 0xFF707070;
-    private static final int SCROLLBAR_BG = 0xFF2A2A2A;
+    private static final int SCROLLBAR_COLOR = 0xFF808080;
+    private static final int SCROLLBAR_HOVER = 0xFF909090;
+    private static final int SCROLLBAR_BG = 0xFF303030;
 
     private final Font font;
     private final List<String> dataTypes;
@@ -57,6 +58,15 @@ public class TypeListWidget extends AbstractWidget {
 
     /** 滚动条悬停状态 */
     private boolean scrollbarHovered = false;
+
+    /** 是否在拖拽滚动条 */
+    private boolean draggingScrollbar = false;
+
+    /** 拖动滚动条时的初始鼠标 Y 位置 */
+    private double dragStartY = 0;
+
+    /** 拖动滚动条时的初始滚动偏移 */
+    private int dragStartScrollOffset = 0;
 
     /**
      * 获取滚动偏移量
@@ -165,7 +175,39 @@ public class TypeListWidget extends AbstractWidget {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (!this.visible) return false;
-        
+
+        // 检查是否点击在滚动条区域
+        int scrollbarX = getX() + this.width - SCROLLBAR_WIDTH;
+        int scrollAreaTop = getY() + HEADER_HEIGHT + PADDING;
+        int scrollAreaHeight = this.height - HEADER_HEIGHT - PADDING * 2;
+
+        if (event.button() == 0
+                && event.x() >= scrollbarX && event.x() <= scrollbarX + SCROLLBAR_WIDTH
+                && event.y() >= scrollAreaTop && event.y() <= scrollAreaTop + scrollAreaHeight) {
+
+            // 计算滑块位置，只有点击在滑块上才开始拖拽
+            int maxScroll = getMaxScroll();
+            if (maxScroll > 0) {
+                float ratio = (float) getVisibleLineCount() / dataTypes.size();
+                int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
+                float scrollRatio = (float) scrollOffset / maxScroll;
+                int thumbY = scrollAreaTop + (int) ((scrollAreaHeight - thumbHeight) * scrollRatio);
+
+                // 点击在滑块上：开始拖拽
+                if (event.y() >= thumbY && event.y() <= thumbY + thumbHeight) {
+                    this.draggingScrollbar = true;
+                    this.dragStartY = event.y();
+                    this.dragStartScrollOffset = this.scrollOffset;
+                    return true;
+                }
+            }
+
+            // 点击在轨道上：分页滚动，不设置 draggingScrollbar
+            pageScroll(event.y() < (scrollAreaTop + scrollAreaHeight) / 2 ? -1 : 1);
+            return true;
+        }
+
+        // 点击列表条目
         if (event.button() == 0) {
             int index = getEntryAt(event.x(), event.y());
             if (index >= 0 && index < dataTypes.size()) {
@@ -176,6 +218,72 @@ public class TypeListWidget extends AbstractWidget {
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * 处理滚动条拖拽
+     */
+    private void handleScrollbarDrag(double mouseY) {
+        int maxScroll = getMaxScroll();
+        if (maxScroll <= 0) return;
+
+        int scrollAreaTop = getY() + HEADER_HEIGHT + PADDING;
+        int scrollAreaHeight = this.height - HEADER_HEIGHT - PADDING * 2;
+
+        // 计算滑块高度
+        float ratio = (float) getVisibleLineCount() / dataTypes.size();
+        int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
+        int effectiveHeight = scrollAreaHeight - thumbHeight;
+
+        // 计算鼠标移动距离
+        double deltaY = mouseY - this.dragStartY;
+
+        // 将鼠标移动距离转换为滚动偏移
+        float scrollRatio = effectiveHeight > 0 ? (float) deltaY / effectiveHeight : 0;
+        int newScrollOffset = this.dragStartScrollOffset + (int) (maxScroll * scrollRatio);
+        newScrollOffset = Math.max(0, Math.min(newScrollOffset, maxScroll));
+
+        this.scrollOffset = newScrollOffset;
+    }
+
+    /**
+     * 分页滚动
+     */
+    private void pageScroll(int direction) {
+        int maxScroll = getMaxScroll();
+        if (maxScroll <= 0) return;
+
+        // 每次滚动可见区域的 80%
+        int pageAmount = (int) ((this.height - HEADER_HEIGHT - PADDING * 2) * 0.8);
+        this.scrollOffset += direction * pageAmount;
+        this.scrollOffset = Math.max(0, Math.min(this.scrollOffset, maxScroll));
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (!this.visible) return false;
+
+        // 只有真正在拖拽滚动条时才消费事件
+        if (this.draggingScrollbar) {
+            handleScrollbarDrag(event.y());
+            return true;
+        }
+
+        // 不在拖拽滚动条时返回 false，让事件继续转发给其他 Widget
+        return false;
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (!this.visible) return false;
+
+        // 停止拖拽滚动条
+        if (this.draggingScrollbar) {
+            this.draggingScrollbar = false;
+            return true;
+        }
+
         return false;
     }
 
@@ -274,21 +382,21 @@ public class TypeListWidget extends AbstractWidget {
      * 渲染右侧滚动条
      */
     private void renderScrollBar(GuiGraphicsExtractor graphics, int x, int y, int visibleLines) {
-        int sbX = x + this.width - 4;
+        int sbX = x + this.width - SCROLLBAR_WIDTH;
         int sbTop = y + HEADER_HEIGHT + PADDING;
         int sbHeight = this.height - HEADER_HEIGHT - PADDING * 2;
 
         // 滚动条背景
-        graphics.fill(sbX, sbTop, sbX + 4, sbTop + sbHeight, SCROLLBAR_BG);
+        graphics.fill(sbX, sbTop, sbX + SCROLLBAR_WIDTH, sbTop + sbHeight, SCROLLBAR_BG);
 
         // 滚动条滑块
         float ratio = (float) visibleLines / dataTypes.size();
-        int thumbHeight = Math.max(10, (int) (sbHeight * ratio));
+        int thumbHeight = Math.max(20, (int) (sbHeight * ratio));
         float scrollRatio = getMaxScroll() > 0 ? (float) scrollOffset / getMaxScroll() : 0;
         int thumbY = sbTop + (int) ((sbHeight - thumbHeight) * scrollRatio);
 
         int thumbColor = scrollbarHovered ? SCROLLBAR_HOVER : SCROLLBAR_COLOR;
-        graphics.fill(sbX, thumbY, sbX + 4, thumbY + thumbHeight, thumbColor);
+        graphics.fill(sbX, thumbY, sbX + SCROLLBAR_WIDTH, thumbY + thumbHeight, thumbColor);
     }
 
     @Override

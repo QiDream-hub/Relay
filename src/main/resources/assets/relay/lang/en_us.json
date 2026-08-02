@@ -209,6 +209,9 @@
   "operation.relay:build_vector.name": "Build Vector",
   "operation.relay:build_vector.description": "Build a vector from three numbers (X, Y, Z)",
 
+  "operation.relay:vector_split.name": "Vector Split",
+  "operation.relay:vector_split.description": "Split a vector into three numbers (X, Y, Z)",
+
   "operation.relay:raycast.name": "Raycast",
   "operation.relay:raycast.description": "Cast a ray from origin along direction, return hit block position",
 

@@ -378,7 +378,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         graphics.verticalLine(left + PANEL_WIDTH, top, panelBottom, SEPARATOR_COLOR);
         graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, INVENTORY_SEPARATOR_COLOR);
 
-        graphics.text(this.font, "JSON 编辑器", left + PANEL_WIDTH + PANEL_PADDING, top + 5, 0xFFFFFF00);
+        graphics.text(this.font, "编辑器", left + PANEL_WIDTH + PANEL_PADDING, top + 5, 0xFFFFFF00);
 
         // 磁盘提示文字
         graphics.text(this.font, "磁盘:", left + DISK_SLOT_X - 25, top + DISK_SLOT_Y, TITLE_COLOR);

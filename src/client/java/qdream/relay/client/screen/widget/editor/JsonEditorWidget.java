@@ -18,14 +18,14 @@ import org.jspecify.annotations.Nullable;
  */
 public class JsonEditorWidget extends AbstractWidget {
 
-    private static final int LINE_HEIGHT = 9;  // MultiLineEditBox 的行高
+    private static final int LINE_HEIGHT = 9; // MultiLineEditBox 的行高
     private static final int PADDING = 4;
     private static final int SCROLLBAR_WIDTH = 4;
 
     private static final int BG_COLOR = 0xFF1A1A1A;
     private static final int BORDER_COLOR = 0xFF404040;
     private static final int TEXT_COLOR = 0xFFFFFFFF;
-    private static final int ERROR_COLOR = 0xFFFF6B68;    // 错误红色
+    private static final int ERROR_COLOR = 0xFFFF6B68; // 错误红色
     private static final int SCROLLBAR_COLOR = 0xFF808080;
     private static final int SCROLLBAR_BG = 0xFF303030;
 
@@ -42,25 +42,33 @@ public class JsonEditorWidget extends AbstractWidget {
     /** 错误所在的行号 */
     private int errorLine = -1;
 
+    /** 是否在拖拽滚动条 */
+    private boolean draggingScrollbar = false;
+
+    /** 拖动滚动条时的初始鼠标 Y 位置 */
+    private double dragStartY = 0;
+
+    /** 拖动滚动条时的初始滚动偏移 */
+    private int dragStartScrollOffset = 0;
+
     public JsonEditorWidget(int x, int y, int width, int height, Font font) {
         super(x, y, width, height, Component.literal("JSON Editor"));
         this.font = font;
 
         // 使用自定义的 CustomMultiLineEditBox 支持精确光标控制
         this.editBox = new CustomMultiLineEditBox(
-            font,
-            x + PADDING,
-            y + PADDING,
-            width - PADDING * 2 - SCROLLBAR_WIDTH,
-            height - PADDING * 2,
-            Component.empty(),
-            TEXT_COLOR,
-            false,
-            TEXT_COLOR,
-            false,
-            false
-        );
-        
+                font,
+                x + PADDING,
+                y + PADDING,
+                width - PADDING * 2 - SCROLLBAR_WIDTH,
+                height - PADDING * 2,
+                Component.empty(),
+                TEXT_COLOR,
+                false,
+                TEXT_COLOR,
+                false,
+                false);
+
         // 监听文本变化，重新解析 JSON
         this.editBox.setValueListener(() -> this.parseJsonLines());
     }
@@ -145,14 +153,41 @@ public class JsonEditorWidget extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        this.draggingScrollbar = false;
         if (!this.visible) {
             return false;
         }
 
         // 检查是否点击在滚动条区域
         int scrollbarX = this.getX() + this.width - SCROLLBAR_WIDTH;
-        if (event.x() >= scrollbarX && event.x() <= scrollbarX + SCROLLBAR_WIDTH) {
-            this.handleScrollbarClick(event.y());
+        int scrollAreaTop = this.getY() + PADDING;
+        int scrollAreaHeight = this.height - PADDING * 2;
+
+        if (event.x() >= scrollbarX
+                && event.x() <= scrollbarX + SCROLLBAR_WIDTH
+                && event.y() >= scrollAreaTop
+                && event.y() <= scrollAreaTop + scrollAreaHeight) {
+
+            // 计算滑块位置，检查是否点击在滑块上
+            int maxScroll = this.getMaxScroll();
+            if (maxScroll > 0) {
+                int contentHeight = this.editBox.getInnerHeight();
+                float ratio = (float) (this.height - PADDING * 2) / contentHeight;
+                int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
+                float scrollRatio = (float) this.scrollOffset / maxScroll;
+                int thumbY = scrollAreaTop + (int) ((scrollAreaHeight - thumbHeight) * scrollRatio);
+
+                // 只有点击在滑块上才开始拖拽
+                if (event.y() >= thumbY && event.y() <= thumbY + thumbHeight) {
+                    this.draggingScrollbar = true;
+                    this.dragStartY = event.y();
+                    this.dragStartScrollOffset = this.scrollOffset;
+                    return true;
+                }
+            }
+
+            // 点击轨道：分页滚动
+            this.pageScroll(event.y() < (scrollAreaTop + scrollAreaHeight) / 2 ? -1 : 1);
             return true;
         }
 
@@ -208,25 +243,86 @@ public class JsonEditorWidget extends AbstractWidget {
         if (!this.visible) {
             return false;
         }
-        // 确保聚焦
-        if (!this.editBox.isFocused()) {
-            this.editBox.setFocused(true);
+
+        // 如果正在拖拽滚动条，根据鼠标的移动距离更新滚动位置
+        if (this.draggingScrollbar) {
+            this.handleScrollbarDrag(event.y());
+            return true;
         }
-        return this.editBox.mouseDragged(event, deltaX, deltaY);
+
+        // 只有在 Widget 范围内才转发拖动事件给编辑框（用于文本选择）
+        if (event.x() >= this.getX() && event.x() <= this.getX() + this.width
+                && event.y() >= this.getY() && event.y() <= this.getY() + this.height) {
+            // 确保聚焦
+            if (!this.editBox.isFocused()) {
+                this.editBox.setFocused(true);
+            }
+            return this.editBox.mouseDragged(event, deltaX, deltaY);
+        }
+
+        return false;
     }
 
     /**
-     * 处理滚动条点击
+     * 处理滚动条拖拽
      */
-    private void handleScrollbarClick(double mouseY) {
+    private void handleScrollbarDrag(double mouseY) {
         int maxScroll = this.getMaxScroll();
         if (maxScroll <= 0) {
             return;
         }
 
-        float ratio = (float) (mouseY - this.getY() - PADDING) / (this.height - PADDING * 2);
-        this.scrollOffset = (int) (maxScroll * Math.max(0, Math.min(1, ratio)));
+        // 滚动条的有效区域：从 getY() + PADDING 到 getY() + height - PADDING
+        int scrollAreaTop = this.getY() + PADDING;
+        int scrollAreaHeight = this.height - PADDING * 2;
+
+        // 计算滑块可移动的有效高度（减去滑块自身高度）
+        int contentHeight = this.editBox.getInnerHeight();
+        float ratio = (float) (this.height - PADDING * 2) / contentHeight;
+        int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
+        int effectiveHeight = scrollAreaHeight - thumbHeight;
+
+        // 计算鼠标移动距离
+        double deltaY = mouseY - this.dragStartY;
+
+        // 将鼠标移动距离转换为滚动偏移
+        float scrollRatio = effectiveHeight > 0 ? (float) deltaY / effectiveHeight : 0;
+        int newScrollOffset = this.dragStartScrollOffset + (int) (maxScroll * scrollRatio);
+        newScrollOffset = Math.max(0, Math.min(newScrollOffset, maxScroll));
+
+        this.scrollOffset = newScrollOffset;
         this.editBox.setScrollAmount(this.scrollOffset);
+    }
+
+    /**
+     * 分页滚动
+     */
+    private void pageScroll(int direction) {
+        int maxScroll = this.getMaxScroll();
+        if (maxScroll <= 0) {
+            return;
+        }
+
+        // 每次滚动可见区域的 80%
+        int pageAmount = (int) ((this.height - PADDING * 2) * 0.8);
+        this.scrollOffset += direction * pageAmount;
+        this.scrollOffset = Math.max(0, Math.min(this.scrollOffset, maxScroll));
+        this.editBox.setScrollAmount(this.scrollOffset);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (!this.visible) {
+            return false;
+        }
+
+        // 停止拖拽滚动条
+        if (this.draggingScrollbar) {
+            this.draggingScrollbar = false;
+            return true;
+        }
+
+        return this.editBox.mouseReleased(event);
     }
 
     @Override
@@ -250,6 +346,7 @@ public class JsonEditorWidget extends AbstractWidget {
     /**
      * 在光标位置插入文本并自动追加逗号
      * 插入后光标位于逗号之后，不选中任何内容
+     * 
      * @param textToInsert 要插入的文本（不含逗号）
      */
     public void insertWithComma(String textToInsert) {
