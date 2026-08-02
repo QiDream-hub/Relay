@@ -25,7 +25,6 @@ import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ExecutionStats;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.Relay;
-import qdream.relay.mc.component.ComputingCoreComponent;
 
 /**
  * 外壳实体
@@ -277,23 +276,13 @@ public class EntityShell extends Entity implements ShellContainer {
     }
 
     @Override
-    public boolean isInitialized() {
-        return tickHandler.isInitialized();
-    }
-
-    @Override
-    public void setInitialized(boolean initialized) {
-        tickHandler.setInitialized(initialized);
-    }
-
-    @Override
     public boolean isRunning() {
         return getStateMachine().isRunning();
     }
 
     @Override
     public boolean canExecute() {
-        return isInitialized() && isRunning();
+        return isRunning();
     }
 
     @Override

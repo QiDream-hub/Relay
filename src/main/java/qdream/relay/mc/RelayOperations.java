@@ -13,6 +13,7 @@ import qdream.relay.operations.vector.*;
 import qdream.relay.operations.logic.*;
 import qdream.relay.operations.list.*;
 import qdream.relay.operations.spawn.*;
+import qdream.relay.operations.entity.*;
 import qdream.relay.types.*;
 
 import java.util.ArrayList;
@@ -208,5 +209,17 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new SpawnShellOp()));
                 OperationRegistry.register("relay:remove_shell",
                                 new OperationRegistry.OpEntry(new RemoveShellOp()));
+
+                // EntityShell 控制操作
+                OperationRegistry.register("relay:entity_shell_add_energy",
+                                new OperationRegistry.OpEntry(new EntityShellAddEnergyOp()));
+                OperationRegistry.register("relay:entity_shell_get_energy",
+                                new OperationRegistry.OpEntry(new EntityShellGetEnergyOp()));
+                OperationRegistry.register("relay:entity_shell_reset",
+                                new OperationRegistry.OpEntry(new EntityShellResetOp()));
+                OperationRegistry.register("relay:entity_shell_stop",
+                                new OperationRegistry.OpEntry(new EntityShellStopOp()));
+                OperationRegistry.register("relay:entity_shell_start",
+                                new OperationRegistry.OpEntry(new EntityShellStartOp()));
         }
 }

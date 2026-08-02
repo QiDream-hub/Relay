@@ -9,7 +9,6 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import qdream.relay.Relay;
 import qdream.relay.core.PlayerShellDataAccessor;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
@@ -97,7 +96,6 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
 
         // 初始化同步槽的值
         if (container != null) {
-            initializedSlot.set(container.isInitialized() ? 1 : 0);
             if (container instanceof ToolShellContainer tc) {
                 useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
                 debugOutputSlot.set(tc.isDebugOutputEnabled() ? 1 : 0);
@@ -236,7 +234,6 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         super.broadcastChanges();
         // 从服务端同步状态到客户端
         if (container != null) {
-            initializedSlot.set(container.isInitialized() ? 1 : 0);
             if (container instanceof ToolShellContainer tc) {
                 useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
                 debugOutputSlot.set(tc.isDebugOutputEnabled() ? 1 : 0);
@@ -336,7 +333,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
 
             // 如果容器没有运行程序，从 activeShells 移除
             // 避免 GUI 打开后没有程序导致 Container 永久存在
-            if (!tc.isInitialized() && !tc.isRunning()) {
+            if (!tc.canExecute()) {
                 if (player instanceof PlayerShellDataAccessor accessor) {
                     var shellData = accessor.relay$getShellData();
                     shellData.removeContainer(tc.getSessionId());

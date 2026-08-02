@@ -272,6 +272,17 @@
   "operation.relay:spawn_shell.name": "Spawn Shell",
   "operation.relay:spawn_shell.description": "Spawn a programmable shell entity at specified position",
 
+  "operation.relay:entity_shell_add_energy.name": "Add Energy",
+  "operation.relay:entity_shell_add_energy.description": "Add energy to a shell entity",
+  "operation.relay:entity_shell_get_energy.name": "Get Energy",
+  "operation.relay:entity_shell_get_energy.description": "Get current energy of a shell entity",
+  "operation.relay:entity_shell_reset.name": "Reset Shell",
+  "operation.relay:entity_shell_reset.description": "Clear current program and load new program to shell entity",
+  "operation.relay:entity_shell_stop.name": "Stop Shell",
+  "operation.relay:entity_shell_stop.description": "Stop shell entity execution",
+  "operation.relay:entity_shell_start.name": "Start Shell",
+  "operation.relay:entity_shell_start.description": "Load program and start shell entity execution",
+
   "operation.relay:remove_shell.name": "Remove Shell",
   "operation.relay:remove_shell.description": "Remove specified shell entity and return 90% of remaining energy",
 
@@ -403,6 +414,7 @@
   "param.range.description": "Interaction range (8-128 blocks)",
   "param.energy.description": "Prepaid energy (at least 100)",
   "param.returnedEnergy.description": "Returned energy amount",
+  "param.shell.description": "Shell entity reference",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",

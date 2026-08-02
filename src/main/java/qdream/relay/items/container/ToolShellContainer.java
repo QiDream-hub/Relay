@@ -327,16 +327,6 @@ public class ToolShellContainer implements ShellContainer {
         return 0;
     }
 
-    @Override
-    public boolean isInitialized() {
-        return tickHandler.isInitialized();
-    }
-
-    public void setInitialized(boolean initialized) {
-        tickHandler.setInitialized(initialized);
-        saveTickState();
-    }
-
     /**
      * 是否可以执行 tick
      * <p>
@@ -345,7 +335,7 @@ public class ToolShellContainer implements ShellContainer {
      */
     @Override
     public boolean canExecute() {
-        return isInitialized() && isRunning();
+        return isRunning();
     }
 
     @Override

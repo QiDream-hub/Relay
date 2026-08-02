@@ -36,7 +36,7 @@ public class RemoveShellOp extends Instruction {
     private static final double ENERGY_RETURN_RATIO = 0.9;
 
     public RemoveShellOp() {
-        super("relay:remove_shell", 1, 1, OperationSignature.builder()
+        super("relay:remove_shell", 1, 10, OperationSignature.builder()
                 .consumesFromData("entity", "relay:entity")
                 .producesToData("energy", "relay:number")
                 .build());

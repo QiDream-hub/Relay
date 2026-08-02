@@ -362,16 +362,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         return totalEnergyCost;
     }
 
-    @Override
-    public boolean isInitialized() {
-        return tickHandler.isInitialized();
-    }
-
-    @Override
-    public void setInitialized(boolean initialized) {
-        tickHandler.setInitialized(initialized);
-    }
-
     /**
      * 获取 GUI 开关状态
      * <p>
@@ -401,7 +391,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     @Override
     public boolean canExecute() {
         // BlockShell 需要检查 GUI 开关状态
-        return isEnabled() && isInitialized() && isRunning();
+        return isEnabled() && isRunning();
     }
 
     @Override
@@ -520,7 +510,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         List<Executable> program = diskComponent.getProgram(diskStack);
         if (!program.isEmpty()) {
             getStateMachine().loadProgram(program);
-            setInitialized(true);
             setChanged();
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }

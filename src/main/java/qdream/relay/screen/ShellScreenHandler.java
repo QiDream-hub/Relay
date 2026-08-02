@@ -9,10 +9,8 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import qdream.relay.Relay;
 import qdream.relay.blocks.entity.custom.BlockShellEntity;
 import qdream.relay.core.ShellContainer;
-import qdream.relay.core.ShellCoreGroupManager;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.component.EnergyModuleComponent;
@@ -99,7 +97,6 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             enabledSlot.set(blockEntity.isEnabled() ? 1 : 0);
             coreCostSlot.set(blockEntity.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
-            initializedSlot.set(blockEntity.isInitialized() ? 1 : 0);
             double energyCost = blockEntity.getEnergyCostPerTick();
             energyCostSlot.set((int) energyCost);
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
@@ -203,7 +200,6 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             enabledSlot.set(blockEntity.isEnabled() ? 1 : 0);
             coreCostSlot.set(blockEntity.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
-            initializedSlot.set(blockEntity.isInitialized() ? 1 : 0);
             double energyCost = blockEntity.getEnergyCostPerTick();
             energyCostSlot.set((int) energyCost);
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));

@@ -116,8 +116,6 @@ public class ShellTickHandler {
         // 检查能量（核心基础消耗）- 每 tick 只检查一次
         if (!container.hasEnoughEnergy(energyCostPerTick)) {
             stateMachine.triggerMishap("能量不足：需要 " + energyCostPerTick + "，当前只有 " + container.getEnergy());
-            // 能量不足时重置状态，避免空转
-            container.setInitialized(false);
             accumulatedCost = 0;
             return;
         }
@@ -147,7 +145,6 @@ public class ShellTickHandler {
                 double opEnergy = spell.getEnergy();
                 if (!container.hasEnoughEnergy(opEnergy)) {
                     stateMachine.triggerMishap("操作能量不足：需要 " + opEnergy + "，当前只有 " + container.getEnergy());
-                    container.setInitialized(false);
                     accumulatedCost = 0;
                     return;
                 }
@@ -196,7 +193,6 @@ public class ShellTickHandler {
 
         // 程序执行完毕后，重置初始化状态和累计 cost
         if (!stateMachine.isRunning()) {
-            container.setInitialized(false);
             accumulatedCost = 0;
         }
 

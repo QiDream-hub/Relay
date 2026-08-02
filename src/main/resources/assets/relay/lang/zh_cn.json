@@ -269,6 +269,17 @@
   "operation.relay:spawn_shell.name": "召唤外壳",
   "operation.relay:spawn_shell.description": "在指定位置召唤一个可编程的外壳实体",
 
+  "operation.relay:entity_shell_add_energy.name": "添加能量",
+  "operation.relay:entity_shell_add_energy.description": "为外壳实体添加能量",
+  "operation.relay:entity_shell_get_energy.name": "获取能量",
+  "operation.relay:entity_shell_get_energy.description": "获取外壳实体的当前能量",
+  "operation.relay:entity_shell_reset.name": "复位外壳",
+  "operation.relay:entity_shell_reset.description": "清除当前程序并加载新程序到外壳实体",
+  "operation.relay:entity_shell_stop.name": "停止外壳",
+  "operation.relay:entity_shell_stop.description": "停止外壳实体的运行",
+  "operation.relay:entity_shell_start.name": "启动外壳",
+  "operation.relay:entity_shell_start.description": "加载程序并启动外壳实体运行",
+
   "operation.relay:remove_shell.name": "移除外壳",
   "operation.relay:remove_shell.description": "移除指定的外壳实体并返还 90% 剩余能量",
   "operation.relay:get_block.name": "获取方块",
@@ -402,6 +413,7 @@
   "param.range.description": "交互范围（8-128 方块）",
   "param.energy.description": "预付能量（至少 100）",
   "param.returnedEnergy.description": "返还的能量值",
+  "param.shell.description": "外壳实体引用",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",

@@ -66,7 +66,7 @@ public class SpawnShellOp extends Instruction {
     private static final double BASE_COST = 100.0;
 
     public SpawnShellOp() {
-        super("relay:spawn_shell", 1, 1, OperationSignature.builder()
+        super("relay:spawn_shell", 1, 10, OperationSignature.builder()
                 .consumesFromData("position", "relay:vector")
                 .consumesFromData("coreCost", "relay:number")
                 .consumesFromData("interval", "relay:number")
@@ -162,7 +162,6 @@ public class SpawnShellOp extends Instruction {
         // 设置程序（从列表转换为 Executable 列表）
         List<Executable> program = convertProgram(programList);
         shellEntity.getStateMachine().loadProgram(program);
-        shellEntity.setInitialized(true);
 
         // 生成实体到世界
         if (!level.addFreshEntity(shellEntity)) {

@@ -21,7 +21,8 @@ import qdream.relay.engine.StateMachine;
  * <li>程序控制：{@link #loadProgram()}</li>
  * <li>运行状态：{@link #canExecute()}, {@link #isInitialized()},
  * {@link #isRunning()}</li>
- * <li>GUI 开关（仅 BlockShell）：{@link #isEnabled()}, {@link #setEnabled(boolean)}</li>
+ * <li>GUI 开关（仅 BlockShell）：{@link #isEnabled()},
+ * {@link #setEnabled(boolean)}</li>
  * </ul>
  *
  * <p>
@@ -107,16 +108,6 @@ public interface ShellContainer extends Container {
     // ========== 运行状态 ==========
 
     /**
-     * 是否已初始化（程序已加载且准备执行）
-     */
-    boolean isInitialized();
-
-    /**
-     * 设置初始化状态
-     */
-    void setInitialized(boolean initialized);
-
-    /**
      * 是否正在运行（状态机程序栈非空）
      */
     default boolean isRunning() {
@@ -128,14 +119,10 @@ public interface ShellContainer extends Container {
      * <p>
      * 综合判断：已初始化 + 正在运行
      * </p>
-     * <p>
-     * </p>
      *
      * @return 如果满足所有条件返回 true
      */
-    default boolean canExecute() {
-        return isInitialized() && isRunning();
-    }
+    boolean canExecute();
 
     // ========== 能量管理 ==========
 
