@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
@@ -91,14 +93,14 @@ public class SlotData extends Data {
      * @param world 世界
      * @return 物品堆，如果容器不存在或格子为空返回 EMPTY
      */
-    public ItemStack getItemStack(Level world) {
+    public ItemStack getItemStack() {
 
         // 缓存失效，通过 BlockPos 查询容器
-        if (containerPos == null || world == null || slot < 0) {
+        if (containerPos == null || worldId == null || slot < 0) {
             return ItemStack.EMPTY;
         }
 
-        var blockEntity = world.getBlockEntity(containerPos);
+        var blockEntity = Relay.getWorld(worldId).getBlockEntity(containerPos);
         if (blockEntity instanceof Container container) {
             if (slot < container.getContainerSize()) {
                 return container.getItem(slot);
@@ -114,6 +116,15 @@ public class SlotData extends Data {
      */
     public BlockPos getContainerPos() {
         return containerPos;
+    }
+
+    /**
+     * 获取容器
+     *
+     * @return 容器
+     */
+    public BlockEntity getContainer() {
+        return Relay.getWorld(worldId).getBlockEntity(containerPos);
     }
 
     /**

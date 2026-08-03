@@ -8,8 +8,6 @@ import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.TypeData;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.level.ServerLevel;
-import qdream.relay.Relay;
 
 /**
  * 获取物品类型操作（支持跨维度）
@@ -36,15 +34,8 @@ public class GetItemType extends Instruction {
             return;
         }
 
-        // 通过 worldId 获取对应的世界（支持跨维度）
-        ServerLevel level = Relay.getWorld(itemData.getWorldId());
-        if (level == null) {
-            executor.triggerMishap(id + " 世界不存在：" + itemData.getWorldId());
-            return;
-        }
-
         // 获取物品堆并提取类型 ID
-        var itemStack = itemData.getItemStack(level);
+        var itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
             executor.triggerMishap(id + " 物品不存在");
             return;

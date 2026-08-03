@@ -2,8 +2,10 @@ package qdream.relay.operations;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.component.WorldInteractorComponent;
+import qdream.relay.types.SlotData;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.Entity;
@@ -247,5 +249,59 @@ public final class OperationHelpers {
             return 0;
         }
         return container.addEnergy(amount);
+    }
+
+    // ==================== 工具方法相关 ====================
+
+    /**
+     * 从向量转换为方向
+     * 找出绝对值最大的分量作为主方向
+     *
+     * @param vec 方向向量
+     * @return 最接近的 Direction
+     */
+    public static Direction getDirectionFromVector(Vec3 vec) {
+        double x = vec.x;
+        double y = vec.y;
+        double z = vec.z;
+
+        // 找出绝对值最大的分量
+        double absX = Math.abs(x);
+        double absY = Math.abs(y);
+        double absZ = Math.abs(z);
+
+        if (absY > absX && absY > absZ) {
+            return y > 0 ? Direction.UP : Direction.DOWN;
+        } else if (absZ > absX && absZ > absY) {
+            return z > 0 ? Direction.SOUTH : Direction.NORTH;
+        } else {
+            return x > 0 ? Direction.EAST : Direction.WEST;
+        }
+    }
+
+    /**
+     * 更新容器中的物品（同步物品变化）
+     *
+     * @param slotData  物品槽引用
+     * @param itemStack 新的物品堆
+     */
+    public static void updateContainerItem(SlotData slotData, ItemStack itemStack) {
+        int slot = slotData.getSlot();
+        BlockEntity blockEntity = slotData.getContainer();
+
+        if (blockEntity == null) {
+            return; // 容器不存在，跳过更新
+        }
+        
+        if (slot < 0) {
+            return; // 无效槽位，跳过更新
+        }
+
+        if (blockEntity instanceof net.minecraft.world.Container container) {
+            if (slot < container.getContainerSize()) {
+                container.setItem(slot, itemStack);
+                blockEntity.setChanged();
+            }
+        }
     }
 }

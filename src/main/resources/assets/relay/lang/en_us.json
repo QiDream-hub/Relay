@@ -248,7 +248,7 @@
   "operation.relay:get_item_type.name": "Get Item Type",
   "operation.relay:get_item_type.description": "Get the registry ID of an item",
 
-  "operation.relay:drop_item.name": "Drop Item Entity",
+  "operation.relay:drop_item.name": "Drop Item",
   "operation.relay:drop_item.description": "Spawn item entity at specified position",
 
   "operation.relay:break_block.name": "Break Block",
@@ -259,6 +259,9 @@
 
   "operation.relay:break_block_silk_touch.name": "Break Block with Silk Touch",
   "operation.relay:break_block_silk_touch.description": "Break block at specified position with silk touch",
+
+  "operation.relay:right_click.name": "Right Click",
+  "operation.relay:right_click.description": "Simulate player right-clicking a block, requires clicker entity and face direction",
 
   "operation.relay:set_entity_look.name": "Set Entity Look",
   "operation.relay:set_entity_look.description": "Set entity to look at specified direction",
@@ -311,6 +314,7 @@
   "operation.relay:to_bool.name": "To Bool",
   "operation.relay:to_bool.description": "Convert any type to boolean value",
 
+  "param.face.description": "Face direction (represented as vector)",
   "param.string.description": "String",
   "param.augend.description": "Augend",
   "param.addend.description": "Addend",

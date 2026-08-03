@@ -248,7 +248,7 @@
   "operation.relay:get_item_type.name": "获取物品类型",
   "operation.relay:get_item_type.description": "获取物品的注册表 ID",
 
-  "operation.relay:drop_item.name": "生成物品实体",
+  "operation.relay:drop_item.name": "投掷物品",
   "operation.relay:drop_item.description": "在指定坐标生成物品实体",
 
   "operation.relay:break_block.name": "破坏方块",
@@ -308,6 +308,10 @@
   "operation.relay:place_block.name": "放置方块",
   "operation.relay:place_block.description": "在指定坐标放置方块",
 
+  "operation.relay:right_click.name": "右键点击",
+  "operation.relay:right_click.description": "模拟玩家右键点击方块，需要指定点击者和点击面",
+
+  "param.face.description": "点击的面方向（使\n用向量表示）",
   "param.string.description": "字符串",
   "param.augend.description": "被加数",
   "param.addend.description": "加数",

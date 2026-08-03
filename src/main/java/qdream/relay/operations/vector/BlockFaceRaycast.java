@@ -90,6 +90,7 @@ public class BlockFaceRaycast extends Instruction {
             Direction hitFace = hitResult.getDirection();
             if (hitFace != null) {
                 // 返回面的名称（小写）
+                // getDirection() 返回的是击中面朝向射线来源的方向，直接使用
                 executor.pushData(new VectorData(hitFace.getUnitVec3()));
             }
         } else {

@@ -215,12 +215,12 @@ public class ContainerTools {
      * @param world    世界
      * @return 物品数量，如果物品不存在返回 0
      */
-    public static int getItemCount(SlotData itemData, Level world) {
-        if (itemData == null || world == null) {
+    public static int getItemCount(SlotData itemData) {
+        if (itemData == null) {
             return 0;
         }
 
-        ItemStack stack = itemData.getItemStack(world);
+        ItemStack stack = itemData.getItemStack();
         if (stack.isEmpty()) {
             return 0;
         }

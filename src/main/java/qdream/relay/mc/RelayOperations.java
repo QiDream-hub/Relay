@@ -13,7 +13,7 @@ import qdream.relay.operations.vector.*;
 import qdream.relay.operations.logic.*;
 import qdream.relay.operations.list.*;
 import qdream.relay.operations.spawn.*;
-import qdream.relay.operations.entity.*;
+import qdream.relay.operations.stack.*;
 import qdream.relay.types.*;
 
 import java.util.ArrayList;
@@ -186,6 +186,9 @@ public class RelayOperations {
 
                 // 放置方块
                 OperationRegistry.register(new OperationRegistry.OpEntry(new PlaceBlock()));
+
+                // 右键交互操作
+                OperationRegistry.register(new OperationRegistry.OpEntry(new RightClick()));
 
                 // 视线追踪操作
                 OperationRegistry.register(

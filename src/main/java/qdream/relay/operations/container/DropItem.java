@@ -46,13 +46,6 @@ public class DropItem extends Instruction {
             return;
         }
 
-        // 通过 worldId 获取对应的世界（支持跨维度）
-        ServerLevel itemLevel = Relay.getWorld(itemData.getWorldId());
-        if (itemLevel == null) {
-            executor.triggerMishap(id + " 物品世界不存在：" + itemData.getWorldId());
-            return;
-        }
-
         ServerLevel positionLevel = Relay.getWorld(itemData.getWorldId());
         if (positionLevel == null) {
             executor.triggerMishap(id + " 目标世界不存在：" + itemData.getWorldId());
@@ -64,7 +57,7 @@ public class DropItem extends Instruction {
         BlockPos targetPos = BlockPos.containing(targetVec);
 
         // 获取物品堆（使用物品所在世界）
-        ItemStack itemStack = itemData.getItemStack(itemLevel);
+        ItemStack itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
             executor.triggerMishap(id + " 物品不存在");
             return;
