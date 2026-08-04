@@ -198,6 +198,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         // 从服务端同步状态到客户端
         if (blockEntity != null) {
             enabledSlot.set(blockEntity.isEnabled() ? 1 : 0);
+            initializedSlot.set(blockEntity.isInitialized() ? 1 : 0); // 同步 initialized 状态
             coreCostSlot.set(blockEntity.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
             double energyCost = blockEntity.getEnergyCostPerTick();

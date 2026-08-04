@@ -103,32 +103,41 @@ public class ShellCoreGroupManager {
             return;
         }
 
+        // 优先从 shell 获取组 ID，如果为 null 则从 SavedData 查询
+        // 这样即使 NBT 加载失败也能正确从组中移除
         UUID oldGroupId = shell.getCoreGroupId();
-        if (oldGroupId != null) {
-            // 获取移除前的组成员
-            List<BlockPos> oldMembers = new ArrayList<>(data.getGroupMembers(oldGroupId));
-            
-            // 从组中移除（可能导致拆分）
-            data.removeFromGroup(pos);
-            
-            // 检查是否发生了拆分：如果移除后还有成员，且它们不再属于旧组，说明发生了拆分
-            if (!oldMembers.isEmpty()) {
-                // 收集所有需要更新的 BlockShell
-                Set<BlockPos> toUpdate = new HashSet<>();
-                for (BlockPos memberPos : oldMembers) {
-                    if (!memberPos.equals(pos)) {
-                        toUpdate.add(memberPos);
-                    }
+        if (oldGroupId == null) {
+            oldGroupId = data.getGroupIdAt(pos);
+        }
+        
+        // 如果仍然为 null，说明 posToGroup 中也没有记录，直接返回
+        if (oldGroupId == null) {
+            return;
+        }
+
+        // 获取移除前的组成员
+        List<BlockPos> oldMembers = new ArrayList<>(data.getGroupMembers(oldGroupId));
+
+        // 从组中移除（可能导致拆分）
+        data.removeFromGroup(pos);
+
+        // 检查是否发生了拆分：如果移除后还有成员，且它们不再属于旧组，说明发生了拆分
+        if (!oldMembers.isEmpty()) {
+            // 收集所有需要更新的 BlockShell
+            Set<BlockPos> toUpdate = new HashSet<>();
+            for (BlockPos memberPos : oldMembers) {
+                if (!memberPos.equals(pos)) {
+                    toUpdate.add(memberPos);
                 }
-                
-                // 更新所有剩余成员的 coreGroupId
-                for (BlockPos memberPos : toUpdate) {
-                    BlockEntity be = level.getBlockEntity(memberPos);
-                    if (be instanceof BlockShellEntity memberShell) {
-                        UUID newGroupId = data.getGroupIdAt(memberPos);
-                        if (newGroupId != null && !newGroupId.equals(oldGroupId)) {
-                            memberShell.setCoreGroupId(newGroupId);
-                        }
+            }
+
+            // 更新所有剩余成员的 coreGroupId
+            for (BlockPos memberPos : toUpdate) {
+                BlockEntity be = level.getBlockEntity(memberPos);
+                if (be instanceof BlockShellEntity memberShell) {
+                    UUID newGroupId = data.getGroupIdAt(memberPos);
+                    if (newGroupId != null && !newGroupId.equals(oldGroupId)) {
+                        memberShell.setCoreGroupId(newGroupId);
                     }
                 }
             }

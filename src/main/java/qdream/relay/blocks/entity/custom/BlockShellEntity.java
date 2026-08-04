@@ -59,6 +59,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     private UUID ownerUuid;
     private double energy;
     private boolean enabled;
+    private boolean initialized; // 程序是否已加载
     private UUID coreGroupId; // 所属核心共享组 ID
 
     /**
@@ -135,7 +136,8 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         super.setRemoved();
 
         // 方块被破坏时，从组中移除
-        if (level != null && !level.isClientSide() && coreGroupId != null) {
+        // 即使 coreGroupId 为 null 也要调用，因为 SavedData 中可能仍有记录
+        if (level != null && !level.isClientSide()) {
             ShellCoreGroupManager.onBlockRemoved(level, worldPosition, this);
         }
     }
@@ -388,6 +390,24 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
     }
 
+    /**
+     * 获取程序是否已加载
+     */
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    /**
+     * 设置程序是否已加载
+     */
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+        setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
     @Override
     public boolean canExecute() {
         // BlockShell 需要检查 GUI 开关状态
@@ -493,26 +513,40 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     public void loadProgramFromDisk() {
         if (level == null || level.isClientSide()) {
+            addLogEntry("§c[重载] 客户端或 level 为 null");
             return;
         }
 
         ItemStack diskStack = getDiskStack();
         if (diskStack.isEmpty()) {
+            addLogEntry("§c[重载] 磁盘为空");
             return;
         }
 
         DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
+            addLogEntry("§c[重载] 磁盘组件为 null");
             return;
         }
 
         getStateMachine().clear();
         List<Executable> program = diskComponent.getProgram(diskStack);
-        if (!program.isEmpty()) {
-            getStateMachine().loadProgram(program);
-            setChanged();
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        
+        addLogEntry(String.format("§7[重载] 从磁盘读取程序：size=%d, diskStack=%s", 
+            program.size(), diskStack));
+        
+        if (program.isEmpty()) {
+            addLogEntry("§c[重载] 程序列表为空，无法加载");
+            return;
         }
+        
+        getStateMachine().loadProgram(program);
+        setInitialized(true); // 标记程序已加载
+        setChanged();
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        addLogEntry(String.format("§a[重载] 成功加载 %d 个可执行单元到程序栈", program.size()));
+        addLogEntry(String.format("§7[重载] 程序栈大小=%d, 数据栈大小=%d", 
+            getStateMachine().getProgramStackSize(), getStateMachine().getDataStackSize()));
     }
 
     // ========== ShellContainer 接口：执行统计 ==========
@@ -535,6 +569,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         CompoundTag configTag = new CompoundTag();
         configTag.putDouble("Energy", energy);
         configTag.putBoolean("Enabled", enabled);
+        configTag.putBoolean("Initialized", initialized); // 保存 initialized 状态
         output.store("Config", CompoundTag.CODEC, configTag);
 
         // 保存状态机状态
@@ -567,6 +602,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         input.read("Config", CompoundTag.CODEC).ifPresent(configTag -> {
             energy = configTag.getDouble("Energy").orElse(0.0);
             enabled = configTag.getBoolean("Enabled").orElse(false);
+            initialized = configTag.getBoolean("Initialized").orElse(false); // 加载 initialized 状态
         });
 
         // 加载状态机状态
