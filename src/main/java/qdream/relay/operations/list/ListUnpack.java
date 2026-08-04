@@ -26,7 +26,6 @@ public class ListUnpack extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         ListData list = StackHelpers.popList(executor, id);
-        if (list == null) return;
 
         List<Executable> listData = list.getValue();
         // 将列表中的每个元素依次压入数据栈

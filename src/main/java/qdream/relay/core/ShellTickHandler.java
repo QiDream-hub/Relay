@@ -1,8 +1,10 @@
 package qdream.relay.core;
 
 import net.minecraft.nbt.CompoundTag;
+import qdream.relay.Relay;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Warning;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Instruction;
 
@@ -17,18 +19,33 @@ import qdream.relay.mc.base.Instruction;
 public class ShellTickHandler {
 
     /**
-     * 调试回调接口 - 用于监视 StateMachine 的栈变化
+     * 调试回调接口 - 用于监视 StateMachine 的执行
      */
-    @FunctionalInterface
     public interface DebugCallback {
         /**
-         * 当 StateMachine 发生栈修改时调用
+         * 在执行操作前调用
          *
          * @param stateMachine 被监视的状态机
-         * @param phase        执行阶段 ("beforeStep" / "afterStep" / "mishap")
          * @param executable   当前执行的可执行单元
          */
-        void onStackChange(StateMachine stateMachine, String phase, Executable executable);
+        default void beforeStep(StateMachine stateMachine, Executable executable) {}
+        
+        /**
+         * 在操作成功执行后调用
+         *
+         * @param stateMachine 被监视的状态机
+         * @param executable   当前执行的可执行单元
+         */
+        default void afterStep(StateMachine stateMachine, Executable executable) {}
+        
+        /**
+         * 在操作触发事故时调用
+         *
+         * @param stateMachine 被监视的状态机
+         * @param executable   当前执行的可执行单元
+         * @param reason       事故原因
+         */
+        default void onMishap(StateMachine stateMachine, Executable executable, String reason) {}
     }
 
     private int tickCounter;
@@ -104,7 +121,7 @@ public class ShellTickHandler {
      * mc 层负责：控制每 tick 执行的操作数、扣除能量
      *
      * @param container 外壳容器
-     * @param coreCost 核心数量（每 tick 最大可执行操作数）
+     * @param coreCost  核心数量（每 tick 最大可执行操作数）
      */
     private void runTick(ShellContainer container, int coreCost) {
         var stateMachine = container.getStateMachine();
@@ -155,20 +172,29 @@ public class ShellTickHandler {
 
             // 调试回调 - 执行前
             if (debugCallback != null) {
-                debugCallback.onStackChange(stateMachine, "beforeStep", currentOp);
+                debugCallback.beforeStep(stateMachine, currentOp);
             }
 
-            if (!stateMachine.step()) {
-                // 调试回调 - 执行失败
+            try {
+                stateMachine.step();
+            } catch (Warning e) {
+                // 调试回调 - 事故
                 if (debugCallback != null) {
-                    debugCallback.onStackChange(stateMachine, "mishap", currentOp);
+                    debugCallback.onMishap(stateMachine, currentOp, e.getMessage());
+                }
+                break; // 执行失败
+            } catch (Exception e) {
+                Relay.LOGGER.error(e.getMessage(), e);
+                // 调试回调 - 事故
+                if (debugCallback != null) {
+                    debugCallback.onMishap(stateMachine, currentOp, e.getMessage());
                 }
                 break; // 执行失败
             }
 
             // 调试回调 - 执行后
             if (debugCallback != null) {
-                debugCallback.onStackChange(stateMachine, "afterStep", currentOp);
+                debugCallback.afterStep(stateMachine, currentOp);
             }
 
             // 扣除操作能量并统计

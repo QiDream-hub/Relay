@@ -27,12 +27,7 @@ public class VectorCross extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         VectorData bVec = StackHelpers.popVector(executor, id);
-        if (bVec == null)
-            return;
-
         VectorData aVec = StackHelpers.popVector(executor, id);
-        if (aVec == null)
-            return;
 
         Vec3 av = aVec.asVector();
         Vec3 bv = bVec.asVector();

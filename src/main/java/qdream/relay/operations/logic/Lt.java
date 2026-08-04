@@ -23,10 +23,7 @@ public class Lt extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData b = StackHelpers.popNumber(executor, id);
-        if (b == null) return;
-        
         NumberData a = StackHelpers.popNumber(executor, id);
-        if (a == null) return;
 
         boolean result = a.asDouble() < b.asDouble();
         executor.pushData(new BooleanData(result));

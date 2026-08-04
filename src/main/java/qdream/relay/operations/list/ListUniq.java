@@ -27,7 +27,6 @@ public class ListUniq extends qdream.relay.mc.base.Instruction {
     @Override
     public void execute(StateMachine executor) {
         ListData list = StackHelpers.popList(executor, id);
-        if (list == null) return;
 
         List<Executable> originalList = list.getValue();
         List<Executable> uniqueList = new ArrayList<>();

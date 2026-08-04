@@ -22,10 +22,7 @@ public class Sub extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData b = StackHelpers.popNumber(executor, id);
-        if (b == null) return;
-        
         NumberData a = StackHelpers.popNumber(executor, id);
-        if (a == null) return;
 
         double result = a.asDouble() - b.asDouble();
         executor.pushData(new NumberData(result));

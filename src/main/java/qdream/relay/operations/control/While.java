@@ -51,10 +51,8 @@ public class While extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         BooleanData condition = StackHelpers.popBoolean(executor, id);
-        if (condition == null) return;
-        
+
         Executable body = executor.peekProgram();
-        if (body == null) return;
 
         // 如果条件为 true，执行 body 并继续循环
         if (condition.asBoolean()) {

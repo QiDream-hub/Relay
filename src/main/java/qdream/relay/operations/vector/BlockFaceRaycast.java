@@ -12,6 +12,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ExecutionException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -42,22 +43,12 @@ public class BlockFaceRaycast extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         NumberData maxDist = StackHelpers.popNumber(executor, id);
-        if (maxDist == null)
-            return;
-
         VectorData dir = StackHelpers.popVector(executor, id);
-        if (dir == null)
-            return;
-
         VectorData start = StackHelpers.popVector(executor, id);
-        if (start == null)
-            return;
 
         double maxDistVal = maxDist.asDouble();
         Vec3 direction = dir.asVector().normalize();
@@ -81,10 +72,9 @@ public class BlockFaceRaycast extends Instruction {
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             // 检查击中方块在范围内
             Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
-            if (!OperationHelpers.checkInRange(executor, id, startPos, blockCenter)) {
+            try { OperationHelpers.checkInRange(executor, id, startPos, blockCenter); } catch (Exception e) { 
                 executor.pushData(NullData.INSTANCE);
-                return;
-            }
+                return; }
 
             // 获取击中的面
             Direction hitFace = hitResult.getDirection();
@@ -94,7 +84,7 @@ public class BlockFaceRaycast extends Instruction {
                 executor.pushData(new VectorData(hitFace.getUnitVec3()));
             }
         } else {
-            executor.triggerMishap("无法获取面");
+            throw new ExecutionException("无法获取面");
         }
     }
 }

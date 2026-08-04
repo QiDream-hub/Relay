@@ -26,8 +26,6 @@ public class VectorLength extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         VectorData vec = StackHelpers.popVector(executor, id);
-        if (vec == null)
-            return;
 
         double length = vec.asVector().length();
         executor.pushData(new NumberData(length));

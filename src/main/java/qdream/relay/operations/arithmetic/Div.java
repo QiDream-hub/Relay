@@ -3,6 +3,7 @@ package qdream.relay.operations.arithmetic;
 import qdream.relay.types.NumberData;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 
@@ -22,15 +23,11 @@ public class Div extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData b = StackHelpers.popNumber(executor, id);
-        if (b == null) return;
-        
         NumberData a = StackHelpers.popNumber(executor, id);
-        if (a == null) return;
 
         double divisor = b.asDouble();
         if (divisor == 0) {
-            executor.triggerMishap("操作 relay:div 除零错误");
-            return;
+            throw new ParameterException("操作 relay:div 除零错误");
         }
 
         double result = a.asDouble() / divisor;

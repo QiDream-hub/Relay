@@ -3,6 +3,7 @@ package qdream.relay.operations.list;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.StackException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -28,12 +29,10 @@ public class ListCreate extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData sizeData = StackHelpers.popNumber(executor, id);
-        if (sizeData == null) return;
         
         int size = sizeData.asInt();
         if (executor.getDataStackSize() < size) {
-            executor.triggerMishap("操作 relay:list_creat 期望数据栈大小为：" + size + "，实际为：" + executor.getDataStackSize());
-            return;
+            throw new StackException("操作 relay:list_creat 期望数据栈大小为：" + size + "，实际为：" + executor.getDataStackSize());
         }
         
         List<Executable> list = new ArrayList<>();

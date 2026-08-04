@@ -27,12 +27,7 @@ public class VectorDistance extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         VectorData bVec = StackHelpers.popVector(executor, id);
-        if (bVec == null)
-            return;
-
         VectorData aVec = StackHelpers.popVector(executor, id);
-        if (aVec == null)
-            return;
 
         double distance = aVec.asVector().distanceTo(bVec.asVector());
         executor.pushData(new NumberData(distance));

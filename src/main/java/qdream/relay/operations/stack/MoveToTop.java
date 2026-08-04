@@ -22,17 +22,10 @@ public class MoveToTop extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData indexData = StackHelpers.popNumber(executor, id);
-        if (indexData == null) {
-            return;
-        }
-
         int index = indexData.asInt();
 
         // 移除目标位置的元素并压入栈顶
         var target = StackHelpers.removeDataAt(executor, index, id);
-        if (target == null) {
-            return;
-        }
 
         executor.pushData(target);
     }

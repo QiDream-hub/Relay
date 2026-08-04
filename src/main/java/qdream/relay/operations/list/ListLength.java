@@ -27,7 +27,6 @@ public class ListLength extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         ListData list = StackHelpers.popList(executor, id);
-        if (list == null) return;
 
         List<Executable> listData = list.getValue();
         executor.pushData(new NumberData(listData.size()));

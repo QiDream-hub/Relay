@@ -5,6 +5,7 @@ import qdream.relay.types.BooleanData;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ExecutionException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.core.CommunicationSystem;
@@ -34,8 +35,7 @@ public class Send extends Instruction {
         boolean success = CommunicationSystem.send(ch, data);
 
         if (!success) {
-            executor.triggerMishap("操作 relay:send 频道 " + ch + " 队列已满");
-            return;
+            throw new ExecutionException("操作 relay:send 频道 " + ch + " 队列已满");
         }
 
         executor.pushData(new BooleanData(true));

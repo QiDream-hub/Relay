@@ -4,6 +4,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.TypeException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
@@ -27,8 +28,7 @@ public class Eq extends Instruction {
         Executable b = StackHelpers.popAny(executor);
 
         if (!(a instanceof Operation operationA && b instanceof Operation operationB)) {
-            executor.triggerMishap("未知操作无法比较");
-            return;
+            throw new TypeException("未知操作无法比较");
         }
 
         executor.pushData(new BooleanData(operationA.equalsTo(operationB)));

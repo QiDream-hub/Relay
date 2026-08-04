@@ -22,10 +22,7 @@ public class Or extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         BooleanData b = StackHelpers.popBoolean(executor, id);
-        if (b == null) return;
-        
         BooleanData a = StackHelpers.popBoolean(executor, id);
-        if (a == null) return;
 
         boolean result = a.asBoolean() || b.asBoolean();
         executor.pushData(new BooleanData(result));

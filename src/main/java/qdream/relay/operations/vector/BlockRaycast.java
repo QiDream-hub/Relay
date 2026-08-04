@@ -41,22 +41,12 @@ public class BlockRaycast extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         NumberData maxDist = StackHelpers.popNumber(executor, id);
-        if (maxDist == null)
-            return;
-
         VectorData dir = StackHelpers.popVector(executor, id);
-        if (dir == null)
-            return;
-
         VectorData start = StackHelpers.popVector(executor, id);
-        if (start == null)
-            return;
 
         double maxDistVal = maxDist.asDouble();
         Vec3 direction = dir.asVector().normalize();
@@ -80,10 +70,9 @@ public class BlockRaycast extends Instruction {
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             // 检查击中方块在范围内
             Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
-            if (!OperationHelpers.checkInRange(executor, id, startPos, blockCenter)) {
+            try { OperationHelpers.checkInRange(executor, id, startPos, blockCenter); } catch (Exception e) { 
                 executor.pushData(NullData.INSTANCE);
-                return;
-            }
+                return; }
             // 返回击中的方块坐标（方块中心）
             executor.pushData(new VectorData(blockCenter));
         } else {

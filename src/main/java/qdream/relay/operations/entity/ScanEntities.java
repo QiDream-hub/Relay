@@ -40,23 +40,12 @@ public class ScanEntities extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
+        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) {
             executor.pushData(new ListData(new ArrayList<>()));
-            return;
-        }
+            return; }
 
         VectorData centerData = StackHelpers.popVector(executor, id);
-        if (centerData == null) {
-            executor.pushData(new ListData(new ArrayList<>()));
-            return;
-        }
-
-        // 弹出参数
         NumberData radiusData = StackHelpers.popNumber(executor, id);
-        if (radiusData == null) {
-            executor.pushData(new ListData(new ArrayList<>()));
-            return;
-        }
 
         double radius = radiusData.asDouble();
         Vec3 center = centerData.asVector();
@@ -64,10 +53,9 @@ public class ScanEntities extends Instruction {
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
         Vec3 searchEdge = center.add(new Vec3(radius, radius, radius));
-        if (!OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge)) {
+        try { OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge); } catch (Exception e) { 
             executor.pushData(new ListData(new ArrayList<>()));
-            return;
-        }
+            return; }
 
         // 获取 Level 上下文
         var levelOpt = OperationHelpers.getLevel(executor, id);

@@ -7,6 +7,8 @@ import net.minecraft.world.level.Level;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.TypeException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BlockEntityData;
@@ -45,16 +47,13 @@ public class GetType extends Instruction {
     public void execute(StateMachine executor) {
         // 弹出参数
         Executable inputExe = StackHelpers.popAny(executor);
-        if (inputExe == null)
-            return;
 
         // 根据输入类型提取 Identifier
         if (inputExe instanceof EntityData entityType) {
             // 获取实体的 EntityType ID
             var entity = entityType.getEntity();
             if (entity == null) {
-                executor.triggerMishap("实体引用为空");
-                return;
+                throw new EntityException("实体引用为空");
             }
             // 使用 BuiltInRegistries 获取 EntityType 的注册表 ID
             var registryKey = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
@@ -65,8 +64,7 @@ public class GetType extends Instruction {
             // 获取方块实体的 BlockEntityType ID
             var blockEntity = blockEntityType.getBlockEntity();
             if (blockEntity == null) {
-                executor.triggerMishap("方块实体引用为空");
-                return;
+                throw new TypeException("方块实体引用为空");
             }
             // 使用 BuiltInRegistries 获取 BlockEntityType 的注册表 ID
             var registryKey = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType());
@@ -77,8 +75,7 @@ public class GetType extends Instruction {
             // 获取方块的 Block ID
             var blockState = blockType.getBlockState();
             if (blockState == null) {
-                executor.triggerMishap("方块状态引用为空");
-                return;
+                throw new TypeException("方块状态引用为空");
             }
             // 使用 BuiltInRegistries 获取 Block 的注册表 ID
             var registryKey = BuiltInRegistries.BLOCK.getKey(blockState.getBlock());
@@ -86,8 +83,7 @@ public class GetType extends Instruction {
             executor.pushData(new TypeData(id));
 
         } else {
-            executor.triggerMishap("期望 entity/block_entity/block 类型");
-            return;
+            throw new TypeException("期望 entity/block_entity/block 类型");
         }
     }
 }

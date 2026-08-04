@@ -36,25 +36,24 @@ public class BreakBlock extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
         // 弹出参数
         VectorData posData = StackHelpers.popVector(executor, id);
-        if (posData == null) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
-
         Vec3 posVec = posData.asVector();
         // 使用 containing 正确处理负数坐标（向下取整而非向零取整）
         BlockPos pos = BlockPos.containing(posVec);
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
+        try {
+            OperationHelpers.checkInRange(executor, id, sourcePos, posVec);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
             return;
         }

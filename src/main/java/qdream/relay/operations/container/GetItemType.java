@@ -2,6 +2,7 @@ package qdream.relay.operations.container;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -25,20 +26,14 @@ public class GetItemType extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         SlotData itemData = StackHelpers.popSlot(executor, id);
-        if (itemData == null) {
-            return;
-        }
 
         // 获取物品堆并提取类型 ID
         var itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
-            executor.triggerMishap(id + " 物品不存在");
-            return;
+            throw new ContainerException(id + " 物品不存在");
         }
 
         // 从物品注册表 ID 获取类型 ID

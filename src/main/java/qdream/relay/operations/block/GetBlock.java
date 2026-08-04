@@ -41,22 +41,17 @@ public class GetBlock extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         VectorData pos = StackHelpers.popVector(executor, id);
-        if (pos == null) return;
 
         Vec3 posVec = pos.asVector();
         BlockPos blockPos = BlockPos.containing(posVec);
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        if (!OperationHelpers.checkInRange(executor, id, sourcePos, posVec)) {
-            return;
-        }
+        OperationHelpers.checkInRange(executor, id, sourcePos, posVec);
 
         // 获取 Level 上下文
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);

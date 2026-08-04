@@ -2,6 +2,10 @@ package qdream.relay.operations.spawn;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.EnergyException;
+import qdream.relay.mc.errors.WorldInteractionException;
+import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
@@ -38,43 +42,32 @@ public class EntityShellAddEnergy extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        if (OperationHelpers.checkWorldInteractor(executor, id)) {
-            executor.triggerMishap("WorldInteractor 不可用，无法为 EntityShell 添加能量");
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         EntityData entityData = StackHelpers.popEntity(executor, id);
-        if (entityData == null)
-            return;
-
         NumberData energyNum = StackHelpers.popNumber(executor, id);
-        if (energyNum == null)
-            return;
 
         double energy = energyNum.getValue();
 
         // 验证能量值
         if (energy <= 0) {
-            executor.triggerMishap("能量值必须大于 0: " + energy);
-            return;
+            throw new ParameterException("能量值必须大于 0: " + energy);
         }
 
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            executor.triggerMishap("实体引用无效");
-            return;
+            throw new EntityException("实体引用无效");
         }
 
         // 检查是否为 EntityShell
         if (!(entity instanceof EntityShell shell)) {
-            executor.triggerMishap("目标实体不是 EntityShell");
-            return;
+            throw new EntityException("目标实体不是 EntityShell");
         }
 
-        if (OperationHelpers.consumeEnergy(executor, energy)) {
-            executor.triggerMishap("能量不足，无法为 EntityShell 添加能量");
-            return;
+        if (!OperationHelpers.consumeEnergy(executor, energy)) {
+            throw new EnergyException("能量不足，无法为 EntityShell 添加能量");
         }
 
         // 添加能量

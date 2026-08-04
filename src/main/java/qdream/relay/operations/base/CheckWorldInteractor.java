@@ -29,7 +29,12 @@ public class CheckWorldInteractor extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        executor.pushData(new BooleanData(OperationHelpers.checkWorldInteractor(executor,id)));
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+            executor.pushData(new BooleanData(true));
+        } catch (Exception e) {
+            executor.pushData(new BooleanData(false));
+        }
     }
 
 }

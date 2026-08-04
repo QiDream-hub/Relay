@@ -26,13 +26,10 @@ public class BuildVector extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData z = StackHelpers.popNumber(executor, id);
-        if (z == null) return;
 
         NumberData y = StackHelpers.popNumber(executor, id);
-        if (y == null) return;
 
         NumberData x = StackHelpers.popNumber(executor, id);
-        if (x == null) return;
 
         Vec3 vector = new Vec3(x.asDouble(), y.asDouble(), z.asDouble());
         executor.pushData(new VectorData(vector));

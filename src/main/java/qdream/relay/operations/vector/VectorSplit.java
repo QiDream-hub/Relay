@@ -24,7 +24,6 @@ public class VectorSplit extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         VectorData vectorData = StackHelpers.popVector(executor, id);
-        if (vectorData == null) return;
 
         double x = vectorData.asVector().x;
         double y = vectorData.asVector().y;

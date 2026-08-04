@@ -2,6 +2,9 @@ package qdream.relay.operations;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.EnergyException;
+import qdream.relay.mc.errors.WorldInteractionException;
 import qdream.relay.types.SlotData;
 
 import net.minecraft.core.BlockPos;
@@ -53,22 +56,20 @@ public final class OperationHelpers {
      *
      * @param executor      状态机
      * @param operationName 操作名称（用于错误消息）
-     * @return 如果存在返回 true，否则触发事故并返回 false
+     * @throws WorldInteractionException 如果世界交互器不存在
+     * @throws EnergyException           如果能量不足
      */
-    public static boolean checkWorldInteractor(StateMachine executor, String operationName) {
+    public static void checkWorldInteractor(StateMachine executor, String operationName) {
         ShellContainer container = getShellContainer(executor);
         if (container == null || !container.hasWorldInteractor()) {
-            executor.triggerMishap(operationName + " 需要世界交互器");
-            return false;
+            throw new WorldInteractionException(operationName + " 需要世界交互器");
         }
         // 扣除世界交互器的能量消耗
         double energyCost = container.getWorldInteractorEnergyCost();
         if (!container.consumeEnergy(energyCost)) {
-            executor.triggerMishap(operationName + " 能量不足：需要 " + energyCost);
-            return false;
+            throw new EnergyException(operationName + " 能量不足：需要 " + energyCost);
         }
         container.getExecutionStats().addWorldInteractorEnergy(energyCost);
-        return true;
     }
 
     /**
@@ -80,24 +81,21 @@ public final class OperationHelpers {
      * @param executor      状态机
      * @param operationName 操作名称（用于错误消息）
      * @param dynamicEnergy 动态能量值（不包含基础消耗）
-     * @return 如果能量充足并成功扣除返回 true，否则触发事故并返回 false
+     * @throws ContainerException 如果无法获取容器上下文
+     * @throws EnergyException    如果能量不足
      */
-    public static boolean checkEnergy(StateMachine executor, String operationName, double dynamicEnergy) {
+    public static void checkEnergy(StateMachine executor, String operationName, double dynamicEnergy) {
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            executor.triggerMishap(operationName + " 无法获取容器上下文");
-            return false;
+            throw new ContainerException(operationName + " 无法获取容器上下文");
         }
 
         if (!container.consumeEnergy(dynamicEnergy)) {
-            executor.triggerMishap(operationName + " 能量不足：需要 " + dynamicEnergy);
-            return false;
+            throw new EnergyException(operationName + " 能量不足：需要 " + dynamicEnergy);
         }
 
         // 记录能量消耗
         container.getExecutionStats().addOperationEnergy(dynamicEnergy);
-
-        return true;
     }
 
     /**
@@ -111,23 +109,20 @@ public final class OperationHelpers {
      * @param operationName 操作名称
      * @param sourcePos     源位置
      * @param targetPos     目标位置
-     * @return 如果在范围内返回 true，否则返回 false
+     * @throws WorldInteractionException 如果世界交互器不存在或超出范围
      */
-    public static boolean checkInRange(StateMachine executor, String operationName,
+    public static void checkInRange(StateMachine executor, String operationName,
             Vec3 sourcePos,
             Vec3 targetPos) {
 
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            executor.triggerMishap(operationName + " 无法获取容器上下文");
-            return false;
+            throw new ContainerException(operationName + " 无法获取容器上下文");
         }
         if (!container.isWorldInRange(sourcePos, targetPos)) {
-            executor.triggerMishap(operationName + " 超出世界交互器范围：" +
+            throw new WorldInteractionException(operationName + " 超出世界交互器范围：" +
                     String.format("%.1f > %.1f", sourcePos.distanceTo(targetPos), container.getWorldInteractorRange()));
-            return false;
         }
-        return true;
     }
 
     // ==================== 上下文获取 ====================
@@ -137,12 +132,13 @@ public final class OperationHelpers {
      *
      * @param executor      状态机
      * @param operationName 操作名称（用于错误消息）
-     * @return Level，如果不存在触发事故并返回 Optional.empty()
+     * @return Optional<Level>
+     * @throws WorldInteractionException 如果无法获取世界
      */
     public static Optional<Level> getLevel(StateMachine executor, String operationName) {
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty()) {
-            executor.triggerMishap(operationName + " 无法获取世界");
+            throw new WorldInteractionException(operationName + " 无法获取世界");
         }
         return levelOpt;
     }
@@ -161,14 +157,13 @@ public final class OperationHelpers {
      * 获取所属者引用
      *
      * @param executor 状态机
-     * @return owner 所属者引用 只返回玩家,其余返回null
+     * @return owner 所属者引用 只返回玩家，其余返回 null
      */
     public static Player getOwner(StateMachine executor) {
         ShellContainer shellContainer = getShellContainer(executor);
         Player owner = shellContainer.getOwner();
         if (owner == null) {
-            executor.triggerMishap("无法获取所属者");
-            return null;
+            throw new WorldInteractionException("无法获取所属者");
         }
         return owner;
     }
@@ -292,7 +287,7 @@ public final class OperationHelpers {
         if (blockEntity == null) {
             return; // 容器不存在，跳过更新
         }
-        
+
         if (slot < 0) {
             return; // 无效槽位，跳过更新
         }

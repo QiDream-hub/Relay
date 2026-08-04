@@ -21,7 +21,6 @@ public class Ceil extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData a = StackHelpers.popNumber(executor, id);
-        if (a == null) return;
 
         double result = Math.ceil(a.asDouble());
         executor.pushData(new NumberData(result));

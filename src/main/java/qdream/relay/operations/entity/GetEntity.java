@@ -40,22 +40,17 @@ public class GetEntity extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         VectorData pos = StackHelpers.popVector(executor, id);
-        if (pos == null) return;
 
         Vec3 posVec = pos.asVector();
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
         Vec3 searchEdge = posVec.add(new Vec3(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS));
-        if (!OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge)) {
-            return;
-        }
+        OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge);
 
         // 获取 Level 上下文
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);

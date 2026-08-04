@@ -44,9 +44,6 @@ public class ToBoolean extends Instruction {
     public void execute(StateMachine executor) {
         // 弹出任意类型
         Executable input = StackHelpers.popAny(executor);
-        if (input == null) {
-            return;
-        }
 
         // 调用 asBoolean() 方法
         boolean result;

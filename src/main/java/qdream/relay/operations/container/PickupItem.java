@@ -7,6 +7,8 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.EntityException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -63,62 +65,53 @@ public class PickupItem extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
+        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) { 
             executor.pushData(new BooleanData(false));
-            return;
-        }
+            return; }
 
         // 弹出 BlockEntityData
         BlockEntityData blockEntityData = StackHelpers.popBlockEntity(executor, id);
         if (blockEntityData == null || blockEntityData.isNull()) {
-            executor.triggerMishap(id + " 错误的容器");
-            return;
+            throw new ContainerException(id + " 错误的容器");
         }
 
         // 弹出 EntityData
         EntityData entityData = StackHelpers.popEntity(executor, id);
         if (entityData == null || entityData.isNull()) {
-            executor.triggerMishap(id + " 错误的实体");
-            return;
+            throw new EntityException(id + " 错误的实体");
         }
 
         ServerLevel entityLevel = Relay.getWorld(entityData.getWorldId());
         if (entityLevel == null) {
-            executor.triggerMishap(id + " 错误的实体");
-            return;
+            throw new EntityException(id + " 错误的实体");
         }
 
         // 获取 BlockEntity（使用容器所在的世界）
         var blockEntity = blockEntityData.getBlockEntity();
         if (blockEntity == null || blockEntity.isRemoved()) {
-            executor.triggerMishap(id + "错误的容器");
-            return;
+            throw new ContainerException(id + "错误的容器");
         }
 
         // 检查是否为 Container
         if (!(blockEntity instanceof Container container)) {
-            executor.triggerMishap("方块实体不是容器");
-            return;
+            throw new ContainerException("方块实体不是容器");
         }
 
         // 获取实体（使用实体所在的世界）
         Entity entity = entityData.getEntity();
         if (entity == null || entity.isRemoved()) {
-            executor.triggerMishap(id + " 错误的实体");
-            return;
+            throw new EntityException(id + " 错误的实体");
         }
 
         // 检查是否为物品实体
         if (!(entity instanceof ItemEntity itemEntity)) {
-            executor.triggerMishap(id + " 错误的实体");
-            return;
+            throw new EntityException(id + " 错误的实体");
         }
 
         // 获取物品堆
         ItemStack itemStack = itemEntity.getItem();
         if (itemStack.isEmpty()) {
-            executor.triggerMishap(id + " 错误的实体");
-            return;
+            throw new EntityException(id + " 错误的实体");
         }
 
         // 尝试放入容器

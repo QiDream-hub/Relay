@@ -25,14 +25,9 @@ public class GetItemCount extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         SlotData itemData = StackHelpers.popSlot(executor, id);
-        if (itemData == null) {
-            return;
-        }
 
         int count = ContainerTools.getItemCount(itemData);
         executor.pushData(new NumberData(count));

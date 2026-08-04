@@ -28,12 +28,7 @@ public class VectorMul extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         VectorData vec = StackHelpers.popVector(executor, id);
-        if (vec == null)
-            return;
-
         NumberData num = StackHelpers.popNumber(executor, id);
-        if (num == null)
-            return;
 
         double scalar = num.asDouble();
         Vec3 result = vec.asVector().scale(scalar);

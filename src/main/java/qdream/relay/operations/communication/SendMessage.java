@@ -40,19 +40,13 @@ public class SendMessage extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 再弹出实体
         EntityData recipient = StackHelpers.popEntity(executor, id);
-        if (recipient == null)
-            return;
 
         // 先弹出消息（后压入的先弹出）
         StringData message = StackHelpers.popString(executor, id);
-        if (message == null)
-            return;
 
         // 获取实体引用
         Entity entity = recipient.getEntity();

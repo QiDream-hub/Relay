@@ -13,6 +13,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -32,18 +33,12 @@ public class PlaceBlock extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
         SlotData popSlot = StackHelpers.popSlot(executor, id);
         VectorData popVector = StackHelpers.popVector(executor, id);
-        if (popSlot == null || popVector == null) {
-            return;
-        }
         ItemStack itemStack = ContainerTools.getItemStack(popSlot);
         if (itemStack.isEmpty() || !(itemStack.getItem() instanceof BlockItem blockItem)) {
-            executor.triggerMishap("错误的物品");
-            return;
+            throw new ContainerException("错误的物品");
         }
 
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
@@ -58,9 +53,7 @@ public class PlaceBlock extends Instruction {
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
 
         // 检查放置地点是否在范围内
-        if (!OperationHelpers.checkInRange(executor, id, sourcePos, vec3)) {
-            return;
-        }
+        OperationHelpers.checkInRange(executor, id, sourcePos, vec3);
         // // 检查容器是否在范围内
         // if (!OperationHelpers.checkInRange(executor, id, sourcePos, popSlot.getContainerPos().getCenter())) {
         //     return;

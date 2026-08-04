@@ -52,20 +52,14 @@ public class RightClick extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
+        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) { 
             executor.pushData(new BooleanData(false));
-            return;
-        }
+            return; }
 
         EntityData entityData = StackHelpers.popEntity(executor, id);
         SlotData slotData = StackHelpers.popSlot(executor, id);
         VectorData targetData = StackHelpers.popVector(executor, id);
         VectorData faceData = StackHelpers.popVector(executor, id);
-
-        if (faceData == null || targetData == null || slotData == null || entityData == null) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
 
         // 获取实体并检查是否为玩家
         Entity entity = entityData.getEntity();
@@ -87,10 +81,9 @@ public class RightClick extends Instruction {
         Vec3 sourcePos = entity.position();
 
         // 检查范围
-        if (!OperationHelpers.checkInRange(executor, id, sourcePos, hitPos)) {
+        try { OperationHelpers.checkInRange(executor, id, sourcePos, hitPos); } catch (Exception e) { 
             executor.pushData(new BooleanData(false));
-            return;
-        }
+            return; }
 
         // 使用击中点计算方块位置
         // 从向量转换为方向

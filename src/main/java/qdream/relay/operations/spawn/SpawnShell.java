@@ -5,6 +5,10 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.EnergyException;
+import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.ParameterException;
+import qdream.relay.mc.errors.WorldInteractionException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -79,35 +83,15 @@ public class SpawnShell extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         VectorData posData = StackHelpers.popVector(executor, id);
-        if (posData == null)
-            return;
-
         NumberData coreCostNum = StackHelpers.popNumber(executor, id);
-        if (coreCostNum == null)
-            return;
-
         NumberData intervalNum = StackHelpers.popNumber(executor, id);
-        if (intervalNum == null)
-            return;
-
         NumberData rangeNum = StackHelpers.popNumber(executor, id);
-        if (rangeNum == null)
-            return;
-
         NumberData energyNum = StackHelpers.popNumber(executor, id);
-        if (energyNum == null)
-            return;
-
         ListData programList = StackHelpers.popList(executor, id);
-        if (programList == null)
-            return;
 
         // 转换为具体值
         int coreCost = coreCostNum.asInt();
@@ -126,9 +110,8 @@ public class SpawnShell extends Instruction {
 
         // 检查召唤者是否有足够能量
         if (!OperationHelpers.hasEnoughEnergy(executor, requiredEnergy)) {
-            executor.triggerMishap("能量不足：需要 " + requiredEnergy + "，当前可用 " +
+            throw new EnergyException("能量不足：需要 " + requiredEnergy + "，当前可用 " +
                     OperationHelpers.getAvailableEnergy(executor));
-            return;
         }
 
         // 扣除能量
@@ -137,8 +120,7 @@ public class SpawnShell extends Instruction {
         // 获取世界
         Level level = OperationHelpers.getLevel(executor, id).orElse(null);
         if (level == null) {
-            executor.triggerMishap("无法获取世界");
-            return;
+            throw new WorldInteractionException("无法获取世界");
         }
 
         // 生成 Shell 实体
@@ -165,10 +147,9 @@ public class SpawnShell extends Instruction {
 
         // 生成实体到世界
         if (!level.addFreshEntity(shellEntity)) {
-            executor.triggerMishap("实体生成失败");
+            throw new EntityException("实体生成失败");
             // 返还能量
-            OperationHelpers.addEnergy(executor, requiredEnergy * 0.9); // 返还 90%
-            return;
+            //OperationHelpers.addEnergy(executor, requiredEnergy * 0.9); // 返还 90%
         }
 
         // 压入实体引用
@@ -180,23 +161,19 @@ public class SpawnShell extends Instruction {
      */
     private boolean validateParameters(int coreCost, int interval, int range, double energy, StateMachine executor) {
         if (coreCost < MIN_CORE_COST || coreCost > MAX_CORE_COST) {
-            executor.triggerMishap("核心数量超出范围：" + coreCost + " (需要 " + MIN_CORE_COST + "-" + MAX_CORE_COST + ")");
-            return false;
+            throw new ParameterException("核心数量超出范围：" + coreCost + " (需要 " + MIN_CORE_COST + "-" + MAX_CORE_COST + ")");
         }
 
         if (interval < MIN_INTERVAL || interval > MAX_INTERVAL) {
-            executor.triggerMishap("执行间隔超出范围：" + interval + " (需要 " + MIN_INTERVAL + "-" + MAX_INTERVAL + ")");
-            return false;
+            throw new ParameterException("执行间隔超出范围：" + interval + " (需要 " + MIN_INTERVAL + "-" + MAX_INTERVAL + ")");
         }
 
         if (range < MIN_RANGE || range > MAX_RANGE) {
-            executor.triggerMishap("交互范围超出范围：" + range + " (需要 " + MIN_RANGE + "-" + MAX_RANGE + ")");
-            return false;
+            throw new ParameterException("交互范围超出范围：" + range + " (需要 " + MIN_RANGE + "-" + MAX_RANGE + ")");
         }
 
         if (energy < MIN_ENERGY) {
-            executor.triggerMishap("预付能量不足：" + energy + " (至少需要 " + MIN_ENERGY + ")");
-            return false;
+            throw new ParameterException("预付能量不足：" + energy + " (至少需要 " + MIN_ENERGY + ")");
         }
 
         return true;

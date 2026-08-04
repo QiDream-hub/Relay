@@ -41,22 +41,12 @@ public class Raycast extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         NumberData maxDistData = StackHelpers.popNumber(executor, id);
-        if (maxDistData == null)
-            return;
-
         VectorData dir = StackHelpers.popVector(executor, id);
-        if (dir == null)
-            return;
-
         VectorData startData = StackHelpers.popVector(executor, id);
-        if (startData == null)
-            return;
 
         double maxDist = maxDistData.asDouble();
         Vec3 direction = dir.asVector().normalize();
@@ -64,9 +54,7 @@ public class Raycast extends Instruction {
         Vec3 end = start.add(direction.scale(maxDist));
 
         // 检查范围
-        if (!OperationHelpers.checkInRange(executor, id, start, end)) {
-            return;
-        }
+        OperationHelpers.checkInRange(executor, id, start, end);
 
         // 获取 Level 上下文
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);

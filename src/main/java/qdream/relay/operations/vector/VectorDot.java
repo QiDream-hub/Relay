@@ -26,12 +26,7 @@ public class VectorDot extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         VectorData bVec = StackHelpers.popVector(executor, id);
-        if (bVec == null)
-            return;
-
         VectorData aVec = StackHelpers.popVector(executor, id);
-        if (aVec == null)
-            return;
 
         double result = aVec.asVector().dot(bVec.asVector());
         executor.pushData(new NumberData(result));

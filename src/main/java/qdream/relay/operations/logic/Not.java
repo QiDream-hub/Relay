@@ -21,7 +21,6 @@ public class Not extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         BooleanData a = StackHelpers.popBoolean(executor, id);
-        if (a == null) return;
 
         boolean result = !a.asBoolean();
         executor.pushData(new BooleanData(result));

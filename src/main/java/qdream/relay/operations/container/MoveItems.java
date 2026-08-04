@@ -4,6 +4,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -32,55 +33,40 @@ public class MoveItems extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         SlotData sourceItem = StackHelpers.popSlot(executor, id);
-        if (sourceItem == null) {
-            return;
-        }
-
         SlotData targetItem = StackHelpers.popSlot(executor, id);
-        if (targetItem == null) {
-            return;
-        }
 
         // 通过 worldId 获取对应的世界（支持跨维度合并）
         ServerLevel targetLevel = Relay.getWorld(targetItem.getWorldId());
         if (targetLevel == null) {
-            executor.triggerMishap(id + " 目标世界不存在：" + targetItem.getWorldId());
-            return;
+            throw new ContainerException("目标世界不存在：" + targetItem.getWorldId());
         }
 
         ServerLevel sourceLevel = Relay.getWorld(sourceItem.getWorldId());
         if (sourceLevel == null) {
-            executor.triggerMishap(id + " 源世界不存在：" + sourceItem.getWorldId());
-            return;
+            throw new ContainerException("源世界不存在：" + sourceItem.getWorldId());
         }
 
         // 通过位置获取目标容器
         var targetBlockEntity = targetLevel.getBlockEntity(targetItem.getContainerPos());
         if (targetBlockEntity == null) {
-            executor.triggerMishap(id + " 目标容器不存在");
-            return;
+            throw new ContainerException("目标容器不存在");
         }
 
         if (!(targetBlockEntity instanceof Container targetContainer)) {
-            executor.triggerMishap(id + " 目标不是容器");
-            return;
+            throw new ContainerException("目标不是容器");
         }
 
         // 通过位置获取源容器
         var sourceBlockEntity = sourceLevel.getBlockEntity(sourceItem.getContainerPos());
         if (sourceBlockEntity == null) {
-            executor.triggerMishap(id + " 源容器不存在");
-            return;
+            throw new ContainerException("源容器不存在");
         }
 
         if (!(sourceBlockEntity instanceof Container sourceContainer)) {
-            executor.triggerMishap(id + " 源不是容器");
-            return;
+            throw new ContainerException("源不是容器");
         }
 
         // 获取源物品堆

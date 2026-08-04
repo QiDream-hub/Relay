@@ -25,7 +25,6 @@ public class Eval extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         ListData list = StackHelpers.popList(executor, id);
-        if (list == null) return;
 
         List<Executable> reversed = list.getValue();
         executor.loadProgram(reversed);

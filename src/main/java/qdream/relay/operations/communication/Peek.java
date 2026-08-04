@@ -25,7 +25,6 @@ public class Peek extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData channel = StackHelpers.popNumber(executor, id);
-        if (channel == null) return;
 
         int ch = channel.asInt();
         Executable data = CommunicationSystem.peek(ch);

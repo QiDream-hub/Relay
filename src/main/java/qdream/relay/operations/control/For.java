@@ -50,10 +50,8 @@ public class For extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         ListData list = StackHelpers.popList(executor, id);
-        if (list == null) return;
-        
+
         Executable body = executor.peekProgram();
-        if (body == null) return;
 
         var elements = list.getValue();
         if (elements.isEmpty()) {

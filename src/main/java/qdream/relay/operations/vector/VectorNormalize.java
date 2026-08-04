@@ -2,6 +2,7 @@ package qdream.relay.operations.vector;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.VectorData;
@@ -27,15 +28,12 @@ public class VectorNormalize extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         VectorData vec = StackHelpers.popVector(executor, id);
-        if (vec == null)
-            return;
 
         Vec3 v = vec.asVector();
         double length = v.length();
 
         if (length < 1e-10) {
-            executor.triggerMishap("无法归一化零向量");
-            return;
+            throw new ParameterException("无法归一化零向量");
         }
 
         Vec3 result = v.normalize();

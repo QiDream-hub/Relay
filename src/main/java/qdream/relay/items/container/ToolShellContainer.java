@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.NonNullList;
 
 import qdream.relay.Component.RelayDataComponents;
+import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.items.ToolShellItem;
 import qdream.relay.core.ShellContainer;
@@ -85,30 +86,37 @@ public class ToolShellContainer implements ShellContainer {
             }
         });
         // 设置调试回调
-        tickHandler.setDebugCallback((stateMachine, phase, executable) -> {
-            if (isDebugOutputEnabled()) {
+        tickHandler.setDebugCallback(new ShellTickHandler.DebugCallback() {
+            @Override
+            public void afterStep(StateMachine stateMachine, Executable executable) {
+                if (isDebugOutputEnabled()) {
+                    Entity owner = ToolShellContainer.this.owner;
+                    if (owner != null && owner instanceof Player player) {
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
+                        player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
+                    }
+                }
+            }
+            
+            @Override
+            public void onMishap(StateMachine stateMachine, Executable executable, String reason) {
                 Entity owner = ToolShellContainer.this.owner;
                 if (owner != null && owner instanceof Player player) {
-                    // mishap: 显示操作和双栈
-                    if ("mishap".equals(phase)) {
-                        String opName = "unknown";
-                        if (executable instanceof Operation op) {
-                            opName = op.getId();
-                        }
-                        player.sendSystemMessage(Component.literal(
-                                "§c[§c 事故 §c] §f操作：" + opName));
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
+                    String opName = "unknown";
+                    if (executable instanceof Operation op) {
+                        opName = op.getId();
                     }
-                    // afterStep: 只显示双栈
-                    else if ("afterStep".equals(phase)) {
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
-                    }
+                    player.sendSystemMessage(Component.literal(
+                            "§c[§c 事故 §c] §f操作：" + opName));
+                    player.sendSystemMessage(Component.literal(
+                            "§c[§c 事故 §c] §f原因：" + reason));
+                    player.sendSystemMessage(Component.literal(
+                            "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
+                    player.sendSystemMessage(Component.literal(
+                            "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
                     player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
                 }
             }

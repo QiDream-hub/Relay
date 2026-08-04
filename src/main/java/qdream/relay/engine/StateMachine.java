@@ -1,5 +1,7 @@
 package qdream.relay.engine;
 
+import qdream.relay.mc.errors.ExecutionException;
+
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -30,10 +32,6 @@ public class StateMachine {
 
     private MishapHandler mishapHandler;
 
-    public StateMachine() {
-        this(1024);
-    }
-
     public StateMachine(int maxStackSize) {
         this.maxStackSize = maxStackSize;
     }
@@ -58,21 +56,18 @@ public class StateMachine {
      * 执行栈顶单个操作
      * <p>
      * engine 层保持最小化，只负责原子执行。
-     *
-     * @return true 成功执行，false 需要中断（栈空或执行失败）
+     * 捕获 ExecutionException 并触发 mishap
      */
-    public boolean step() {
+    public void step() {
         if (programStack.isEmpty()) {
-            return false;
+            throw new Warning(this, "已运行完成");
         }
 
         Executable executable = programStack.pop();
         try {
             executable.execute(this);
-            return true;
-        } catch (Exception e) {
-            triggerMishap("未知错误:" + e.getMessage());
-            return false;
+        } catch (ExecutionException e) {
+            triggerMishap(e.getMessage());
         }
     }
 
@@ -107,7 +102,8 @@ public class StateMachine {
 
     /**
      * 设置上下文数据
-     * @param key 键
+     * 
+     * @param key   键
      * @param value 值（可以是任意对象，如 ItemStack、ServerLevel 等）
      */
     public void setContext(String key, Object value) {
@@ -116,6 +112,7 @@ public class StateMachine {
 
     /**
      * 获取上下文数据
+     * 
      * @param key 键
      * @return 值，如果不存在返回 null
      */
@@ -125,17 +122,19 @@ public class StateMachine {
 
     /**
      * 获取上下文数据（类型安全版本）
-     * @param key 键
+     * 
+     * @param key  键
      * @param type 期望的类型
      * @return Optional<值>
      */
     public <T> Optional<T> getContext(String key, Class<T> type) {
-    return Optional.ofNullable(context.get(key))
-                   .map(type::cast);
-}
+        return Optional.ofNullable(context.get(key))
+                .map(type::cast);
+    }
 
     /**
      * 检查是否存在上下文数据
+     * 
      * @param key 键
      * @return 是否存在
      */
@@ -227,6 +226,7 @@ public class StateMachine {
 
     /**
      * 获取程序栈指定索引位置的元素
+     * 
      * @param index 索引（0 为栈顶）
      * @return 元素，索引越界返回 null
      */
@@ -240,7 +240,8 @@ public class StateMachine {
 
     /**
      * 设置程序栈指定索引位置的元素
-     * @param index 索引（0 为栈顶）
+     * 
+     * @param index      索引（0 为栈顶）
      * @param executable 新元素
      * @return 是否成功（索引越界返回 false）
      */
@@ -257,6 +258,7 @@ public class StateMachine {
 
     /**
      * 移除程序栈指定索引位置的元素
+     * 
      * @param index 索引（0 为栈顶）
      * @return 被移除的元素，索引越界返回 null
      */
@@ -273,6 +275,7 @@ public class StateMachine {
 
     /**
      * 获取数据栈指定索引位置的元素
+     * 
      * @param index 索引（0 为栈顶）
      * @return 元素，索引越界返回 null
      */
@@ -286,7 +289,8 @@ public class StateMachine {
 
     /**
      * 设置数据栈指定索引位置的元素
-     * @param index 索引（0 为栈顶）
+     * 
+     * @param index      索引（0 为栈顶）
      * @param executable 新元素
      * @return 是否成功（索引越界返回 false）
      */
@@ -303,6 +307,7 @@ public class StateMachine {
 
     /**
      * 移除数据栈指定索引位置的元素
+     * 
      * @param index 索引（0 为栈顶）
      * @return 被移除的元素，索引越界返回 null
      */

@@ -22,17 +22,10 @@ public class CopyToTop extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         NumberData indexData = StackHelpers.popNumber(executor, id);
-        if (indexData == null) {
-            return;
-        }
-
         int index = indexData.asInt();
 
         // 获取目标位置的元素并复制一份到栈顶
         var target = StackHelpers.getDataAt(executor, index, id);
-        if (target == null) {
-            return;
-        }
 
         executor.pushData(target);
     }

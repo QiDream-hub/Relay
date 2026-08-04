@@ -27,13 +27,9 @@ public class If extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         BooleanData condition = StackHelpers.popBoolean(executor, id);
-        if (condition == null) return;
-        
+
         Executable trueBranch = executor.popProgram();
-        if (trueBranch == null) return;
-        
         Executable falseBranch = executor.popProgram();
-        if (falseBranch == null) return;
 
         // 根据条件选择分支
         Executable selected = condition.asBoolean()

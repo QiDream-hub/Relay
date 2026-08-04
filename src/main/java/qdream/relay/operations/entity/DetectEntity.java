@@ -38,23 +38,13 @@ public class DetectEntity extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
+        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return;
-        }
+            return; }
 
         // 弹出参数
         NumberData radius = StackHelpers.popNumber(executor, id);
-        if (radius == null) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
-
         VectorData center = StackHelpers.popVector(executor, id);
-        if (center == null) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
 
         double radiusVal = radius.asDouble();
         Vec3 centerPos = center.asVector();
@@ -62,9 +52,7 @@ public class DetectEntity extends Instruction {
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
         Vec3 searchEdge = centerPos.add(new Vec3(radiusVal, radiusVal, radiusVal));
-        if (!OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge)) {
-            return;
-        }
+        OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge);
 
         // 获取 Level 上下文
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);

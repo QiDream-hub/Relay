@@ -44,22 +44,12 @@ public class EntityRaycast extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出参数
         NumberData maxDistData = StackHelpers.popNumber(executor, id);
-        if (maxDistData == null)
-            return;
-
         VectorData dir = StackHelpers.popVector(executor, id);
-        if (dir == null)
-            return;
-
         VectorData startData = StackHelpers.popVector(executor, id);
-        if (startData == null)
-            return;
 
         double maxDist = maxDistData.asDouble();
         Vec3 direction = dir.asVector().normalize();
@@ -132,10 +122,9 @@ public class EntityRaycast extends Instruction {
 
         // 检查击中的实体是否在范围内（参考 Hexcasting）
         if (hitEntity != null && hitPos != null) {
-            if (!OperationHelpers.checkInRange(executor, id, start, hitPos)) {
+            try { OperationHelpers.checkInRange(executor, id, start, hitPos); } catch (Exception e) { 
                 executor.pushData(NullData.INSTANCE);
-                return;
-            }
+                return; }
             EntityData result = EntityData.from(hitEntity, level);
             executor.pushData(result);
         } else {

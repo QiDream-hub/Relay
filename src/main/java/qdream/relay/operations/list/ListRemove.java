@@ -3,6 +3,7 @@ package qdream.relay.operations.list;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -31,19 +32,14 @@ public class ListRemove extends Instruction {
     public void execute(StateMachine executor) {
         // 弹出并消耗索引
         NumberData index = StackHelpers.popNumber(executor, id);
-        if (index == null)
-            return;
 
         // 栈顶是索引，栈顶 +1 是列表
         ListData list = StackHelpers.popList(executor, id);
-        if (list == null)
-            return;
 
         List<Executable> listData = list.getValue();
         int idx = (int) index.asDouble();
         if (idx < 0 || idx >= listData.size()) {
-            executor.triggerMishap("relay:list_remove 索引超出范围：" + idx);
-            return;
+            throw new ParameterException("relay:list_remove 索引超出范围：" + idx);
         }
 
         // 创建新列表（不可变修改）

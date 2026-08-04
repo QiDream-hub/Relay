@@ -2,6 +2,7 @@ package qdream.relay.operations.spawn;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.EntityException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.EntityData;
@@ -34,20 +35,16 @@ public class EntityShellGetEnergy extends Instruction {
     public void execute(StateMachine executor) {
         // 弹出参数
         EntityData entityData = StackHelpers.popEntity(executor, id);
-        if (entityData == null)
-            return;
 
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            executor.triggerMishap("实体引用无效");
-            return;
+            throw new EntityException("实体引用无效");
         }
 
         // 检查是否为 EntityShell
         if (!(entity instanceof EntityShell shell)) {
-            executor.triggerMishap("目标实体不是 EntityShell");
-            return;
+            throw new EntityException("目标实体不是 EntityShell");
         }
 
         // 获取能量

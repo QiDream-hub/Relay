@@ -4,6 +4,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -33,31 +34,23 @@ public class GetContainerItems extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         BlockEntityData containerData = StackHelpers.popBlockEntity(executor, id);
-        if (containerData == null) {
-            return;
-        }
 
         BlockEntity blockEntity = containerData.getBlockEntity();
         if (blockEntity == null) {
-            executor.triggerMishap(id + " 容器不存在");
-            return;
+            throw new ContainerException(id + " 容器不存在");
         }
 
         if (!(blockEntity instanceof Container container)) {
-            executor.triggerMishap(id + " 目标不是容器");
-            return;
+            throw new ContainerException(id + " 目标不是容器");
         }
 
         // 通过 worldId 获取对应的世界（支持跨维度）
         ServerLevel level = Relay.getWorld(containerData.getWorldId());
         if (level == null) {
-            executor.triggerMishap(id + " 世界不存在：" + containerData.getWorldId());
-            return;
+            throw new ContainerException(id + " 世界不存在：" + containerData.getWorldId());
         }
         List<SlotData> items = ContainerTools.getContainerItems(
                 container,

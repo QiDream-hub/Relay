@@ -5,6 +5,7 @@ import net.minecraft.world.level.Level;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.EntityException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -45,39 +46,31 @@ public class RemoveShell extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 弹出实体参数
         EntityData entityData = StackHelpers.popEntity(executor, id);
-        if (entityData == null)
-            return;
 
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            executor.triggerMishap("实体引用无效");
-            return;
+            throw new EntityException("实体引用无效");
         }
 
         // 验证是否为 Shell 实体
         if (!(entity instanceof EntityShell shellEntity)) {
-            executor.triggerMishap("目标实体不是 Shell 实体");
-            return;
+            throw new EntityException("目标实体不是 Shell 实体");
         }
 
         // 验证调用者是否为 Owner
         var owner = OperationHelpers.getOwner(executor);
         if (owner == null) {
-            executor.triggerMishap("无法获取调用者");
-            return;
+            throw new EntityException("无法获取调用者");
         }
 
         var shellOwner = shellEntity.getOwner();
         if (shellOwner == null || !shellOwner.getUUID().equals(owner.getUUID())) {
-            executor.triggerMishap("无权移除此 Shell（不属于你）");
-            return;
+            throw new EntityException("无权移除此 Shell（不属于你）");
         }
 
         // 获取 Shell 剩余能量

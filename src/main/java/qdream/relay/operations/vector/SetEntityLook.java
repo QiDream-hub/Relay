@@ -6,6 +6,8 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -39,34 +41,26 @@ public class SetEntityLook extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         VectorData popVector = StackHelpers.popVector(executor, id);
         EntityData popEntity = StackHelpers.popEntity(executor, id);
-        if (popEntity == null || popVector == null) {
-            return;
-        }
 
         Entity entity = popEntity.getEntity();
         if (entity == null) {
-            executor.triggerMishap(id + " 错误的实体");
-            return;
+            throw new EntityException(id + " 错误的实体");
         }
 
         Vec3 direction = popVector.asVector();
 
         // 验证向量合法性
         if (isInvalidVector(direction)) {
-            executor.triggerMishap("无效的朝向向量（NaN 或 Infinity）");
-            return;
+            throw new ParameterException("无效的朝向向量（NaN 或 Infinity）");
         }
 
         // 检查是否为零向量
         if (direction.lengthSqr() < 1e-10) {
-            executor.triggerMishap("朝向向量不能为零向量");
-            return;
+            throw new ParameterException("朝向向量不能为零向量");
         }
 
         direction = direction.normalize();

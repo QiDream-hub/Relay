@@ -3,7 +3,10 @@ package qdream.relay.operations.stack;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ParameterException;
+import qdream.relay.mc.errors.StackException;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.NumberData;
 
 import java.util.ArrayList;
@@ -23,30 +26,23 @@ public class BatchDup extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable countExe = executor.popData();
-        if (countExe == null) {
-            return;
-        }
+        Executable countExe = StackHelpers.popAny(executor);
 
         if (!(countExe instanceof NumberData numberData)) {
-            executor.triggerMishap("批量复制：参数必须是数字");
-            return;
+            throw new ParameterException("批量复制：参数必须是数字");
         }
 
         if (!numberData.isInteger()) {
-            executor.triggerMishap("批量复制：计数必须是整数");
-            return;
+            throw new ParameterException("批量复制：计数必须是整数");
         }
 
         int count = numberData.asInt();
         if (count <= 0) {
-            executor.triggerMishap("批量复制：计数必须大于 0");
-            return;
+            throw new ParameterException("批量复制：计数必须大于 0");
         }
 
         if (count > executor.getDataStackSize()) {
-            executor.triggerMishap("批量复制：计数超出栈大小");
-            return;
+            throw new StackException("批量复制：计数超出栈大小");
         }
 
         // 获取栈顶 N 个元素（从栈顶到栈底）

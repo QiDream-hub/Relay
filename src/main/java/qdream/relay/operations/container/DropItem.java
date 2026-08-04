@@ -6,6 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
@@ -32,24 +33,14 @@ public class DropItem extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        if (!OperationHelpers.checkWorldInteractor(executor, id)) {
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         VectorData positionData = StackHelpers.popVector(executor, id);
-        if (positionData == null) {
-            return;
-        }
-
         SlotData itemData = StackHelpers.popSlot(executor, id);
-        if (itemData == null) {
-            return;
-        }
 
         ServerLevel positionLevel = Relay.getWorld(itemData.getWorldId());
         if (positionLevel == null) {
-            executor.triggerMishap(id + " 目标世界不存在：" + itemData.getWorldId());
-            return;
+            throw new ContainerException(id + " 目标世界不存在：" + itemData.getWorldId());
         }
 
         // 从向量获取目标位置
@@ -59,15 +50,13 @@ public class DropItem extends Instruction {
         // 获取物品堆（使用物品所在世界）
         ItemStack itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
-            executor.triggerMishap(id + " 物品不存在");
-            return;
+            throw new ContainerException(id + " 物品不存在");
         }
 
         // 在目标位置生成物品实体（使用目标世界）
         ItemEntity entity = ContainerTools.spawnItemEntity(positionLevel, targetPos, itemStack);
         if (entity == null) {
-            executor.triggerMishap(id + " 无法生成物品实体");
-            return;
+            throw new ContainerException(id + " 无法生成物品实体");
         }
     }
 }

@@ -3,6 +3,7 @@ package qdream.relay.operations.list;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
@@ -30,19 +31,15 @@ public class ListSet extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         Executable valueData = executor.popData();
-        if (valueData == null) return;
         
         NumberData index = StackHelpers.popNumber(executor, id);
-        if (index == null) return;
         
         ListData list = StackHelpers.popList(executor, id);
-        if (list == null) return;
 
         List<Executable> listData = list.getValue();
         int indexVal = index.asInt();
         if (indexVal < 0 || indexVal >= listData.size()) {
-            executor.triggerMishap("操作 relay:list_set 索引超出范围：" + indexVal);
-            return;
+            throw new ParameterException("操作 relay:list_set 索引超出范围：" + indexVal);
         }
         // 创建新列表（不可变修改）
         List<Executable> newList = new ArrayList<>(listData);
