@@ -26,23 +26,23 @@ public class BatchDup extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable countExe = StackHelpers.popAny(executor);
+        Executable countExe = StackHelpers.popAny(executor, id);
 
         if (!(countExe instanceof NumberData numberData)) {
-            throw new ParameterException(executor,"批量复制：参数必须是数字");
+            throw new ParameterException(executor, "批量复制：参数必须是数字");
         }
 
         if (!numberData.isInteger()) {
-            throw new ParameterException(executor,"批量复制：计数必须是整数");
+            throw new ParameterException(executor, "批量复制：计数必须是整数");
         }
 
         int count = numberData.asInt();
         if (count <= 0) {
-            throw new ParameterException(executor,"批量复制：计数必须大于 0");
+            throw new ParameterException(executor, "批量复制：计数必须大于 0");
         }
 
         if (count > executor.getDataStackSize()) {
-            throw new StackException(executor,"批量复制：计数超出栈大小");
+            throw new StackException(executor, "批量复制：计数超出栈大小");
         }
 
         // 获取栈顶 N 个元素（从栈顶到栈底）

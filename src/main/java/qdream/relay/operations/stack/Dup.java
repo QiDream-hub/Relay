@@ -21,7 +21,7 @@ public class Dup extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable topData = StackHelpers.popAny(executor);
+        Executable topData = StackHelpers.popAny(executor, id);
         executor.pushData(topData);
         executor.pushData(topData);
     }

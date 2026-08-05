@@ -22,8 +22,8 @@ public class Swap extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable topData = StackHelpers.popAny(executor);
-        Executable secondData = StackHelpers.popAny(executor);
+        Executable topData = StackHelpers.popAny(executor, id);
+        Executable secondData = StackHelpers.popAny(executor, id);
 
         executor.pushData(topData);
         executor.pushData(secondData);

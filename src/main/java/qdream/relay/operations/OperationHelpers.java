@@ -7,7 +7,6 @@ import qdream.relay.mc.errors.EnergyException;
 import qdream.relay.mc.errors.WorldInteractionException;
 import qdream.relay.types.SlotData;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;

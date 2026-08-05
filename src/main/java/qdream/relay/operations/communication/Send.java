@@ -29,7 +29,7 @@ public class Send extends Instruction {
 
         NumberData channel = StackHelpers.popNumber(executor, id);
 
-        Executable data = StackHelpers.popAny(executor);
+        Executable data = StackHelpers.popAny(executor, id);
 
         int ch = channel.asInt();
         boolean success = CommunicationSystem.send(ch, data);

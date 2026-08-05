@@ -38,16 +38,19 @@ public class PushVector extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) { 
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         // 获取施法者位置（从 self 上下文）
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
 
         // 弹出参数
-        Executable entityExe = StackHelpers.popAny(executor);
-        Executable pushExe = StackHelpers.popAny(executor);
+        Executable entityExe = StackHelpers.popAny(executor, id);
+        Executable pushExe = StackHelpers.popAny(executor, id);
 
         if (!(entityExe instanceof EntityData entityEx)) {
             executor.pushData(new BooleanData(false));
@@ -70,9 +73,12 @@ public class PushVector extends Instruction {
         Vec3 targetPos = targetEntity.position();
 
         // 检查范围：施法者到目标实体的距离
-        try { OperationHelpers.checkInRange(executor, id, sourcePos, targetPos); } catch (Exception e) { 
+        try {
+            OperationHelpers.checkInRange(executor, id, sourcePos, targetPos);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         // 动态计算并扣除能量：基础 + 向量模长 × 系数
         // checkEnergy 会自动加上操作的基础能量消耗

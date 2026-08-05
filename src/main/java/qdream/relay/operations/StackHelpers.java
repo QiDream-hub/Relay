@@ -1,7 +1,6 @@
 package qdream.relay.operations;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
@@ -45,14 +44,15 @@ public final class StackHelpers {
      * 从数据栈弹出任意元素
      *
      * @param executor 状态机
+     * @param id       操作id
      * @return Executable 非空
      * @throws StackException 如果栈空
      */
     @NotNull
-    public static Executable popAny(StateMachine executor) {
+    public static Executable popAny(StateMachine executor, String id) {
         Executable popData = executor.popData();
         if (popData == null) {
-            throw new StackException(executor, "数据栈不足");
+            throw new StackException(executor, id + ": 数据栈不足");
         }
         return popData;
     }

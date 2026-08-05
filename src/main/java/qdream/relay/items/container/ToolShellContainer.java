@@ -92,32 +92,34 @@ public class ToolShellContainer implements ShellContainer {
                 if (isDebugOutputEnabled()) {
                     Entity owner = ToolShellContainer.this.owner;
                     if (owner != null && owner instanceof Player player) {
+                        player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
                         player.sendSystemMessage(Component.literal(
                                 "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
                         player.sendSystemMessage(Component.literal(
                                 "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
-                        player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
                     }
                 }
             }
-            
+
             @Override
             public void onMishap(StateMachine stateMachine, Executable executable, String reason) {
-                Entity owner = ToolShellContainer.this.owner;
-                if (owner != null && owner instanceof Player player) {
-                    String opName = "unknown";
-                    if (executable instanceof Operation op) {
-                        opName = op.getId();
+                if (isDebugOutputEnabled()) {
+                    Entity owner = ToolShellContainer.this.owner;
+                    if (owner != null && owner instanceof Player player) {
+                        String opName = "unknown";
+                        if (executable instanceof Operation op) {
+                            opName = op.getId();
+                        }
+                        player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
+                        player.sendSystemMessage(Component.literal(
+                                "§c[§c 事故 §c] §f操作：" + opName));
+                        player.sendSystemMessage(Component.literal(
+                                "§c[§c 事故 §c] §f原因：" + reason));
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
+                        player.sendSystemMessage(Component.literal(
+                                "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
                     }
-                    player.sendSystemMessage(Component.literal(
-                            "§c[§c 事故 §c] §f操作：" + opName));
-                    player.sendSystemMessage(Component.literal(
-                            "§c[§c 事故 §c] §f原因：" + reason));
-                    player.sendSystemMessage(Component.literal(
-                            "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
-                    player.sendSystemMessage(Component.literal(
-                            "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
-                    player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
                 }
             }
         });
@@ -521,19 +523,6 @@ public class ToolShellContainer implements ShellContainer {
             }
         }
         return 0;
-    }
-
-    /**
-     * 从物品堆获取 SpellDiskComponent
-     *
-     * @param stack 物品堆
-     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
-     */
-    private DiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof DiskComponent) {
-            return (DiskComponent) stack.getItem();
-        }
-        return null;
     }
 
     // ========== ShellContainer 接口：执行统计 ==========

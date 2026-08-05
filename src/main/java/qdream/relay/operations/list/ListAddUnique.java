@@ -28,7 +28,7 @@ public class ListAddUnique extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable valueData = StackHelpers.popAny(executor);
+        Executable valueData = StackHelpers.popAny(executor, id);
         ListData list = StackHelpers.popList(executor, id);
 
         // 创建新列表（保持不可变性）

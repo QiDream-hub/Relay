@@ -34,7 +34,7 @@ public class ToString extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 弹出任意类型
-        Executable input = StackHelpers.popAny(executor);
+        Executable input = StackHelpers.popAny(executor, id);
 
         if (input instanceof Operation op) {
             executor.pushData(new StringData(op.asString()));

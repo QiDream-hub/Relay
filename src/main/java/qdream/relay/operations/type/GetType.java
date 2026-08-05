@@ -46,7 +46,7 @@ public class GetType extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 弹出参数
-        Executable inputExe = StackHelpers.popAny(executor);
+        Executable inputExe = StackHelpers.popAny(executor,id);
 
         // 根据输入类型提取 Identifier
         if (inputExe instanceof EntityData entityType) {

@@ -51,13 +51,13 @@ public class StackRearrange extends Instruction {
 
         int amount = amountData.asInt();
         if (amount <= 0) {
-            throw new ParameterException(executor,id + ": amount 必须大于 0");
+            throw new ParameterException(executor, id + ": amount 必须大于 0");
         }
 
         // 3. 弹出 amount 个元素到临时数组（按弹出顺序）
         List<Executable> tempArray = new ArrayList<>(amount);
         for (int i = 0; i < amount; i++) {
-            Executable element = StackHelpers.popAny(executor);
+            Executable element = StackHelpers.popAny(executor, id);
             tempArray.add(element);
         }
         // 此时 tempArray[0] 是最后弹出的元素（原栈顶），tempArray[amount-1] 是最先弹出的元素
@@ -68,12 +68,12 @@ public class StackRearrange extends Instruction {
 
         for (Executable indexExe : indices) {
             if (!(indexExe instanceof NumberData indexNum)) {
-                throw new ParameterException(executor,id + ": 索引必须是数字");
+                throw new ParameterException(executor, id + ": 索引必须是数字");
             }
 
             int index = indexNum.asInt();
             if (index < 1 || index > amount) {
-                throw new ParameterException(executor,id + ": 索引 " + index +
+                throw new ParameterException(executor, id + ": 索引 " + index +
                         " 超出范围 [1, " + amount + "]");
             }
 

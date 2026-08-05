@@ -24,8 +24,8 @@ public class Eq extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable a = StackHelpers.popAny(executor);
-        Executable b = StackHelpers.popAny(executor);
+        Executable a = StackHelpers.popAny(executor, id);
+        Executable b = StackHelpers.popAny(executor, id);
 
         if (!(a instanceof Operation operationA && b instanceof Operation operationB)) {
             throw new TypeException(executor, "未知操作无法比较");

@@ -43,7 +43,7 @@ public class ToBoolean extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 弹出任意类型
-        Executable input = StackHelpers.popAny(executor);
+        Executable input = StackHelpers.popAny(executor, id);
 
         // 调用 asBoolean() 方法
         boolean result;

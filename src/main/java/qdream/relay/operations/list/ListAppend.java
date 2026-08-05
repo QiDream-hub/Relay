@@ -27,7 +27,7 @@ public class ListAppend extends Instruction {
 
     @Override
     public void execute(StateMachine executor) {
-        Executable valueData = StackHelpers.popAny(executor);
+        Executable valueData = StackHelpers.popAny(executor, id);
         ListData list = StackHelpers.popList(executor, id);
 
         // 创建新列表，复制原列表元素，然后添加新元素（保持不可变性）
