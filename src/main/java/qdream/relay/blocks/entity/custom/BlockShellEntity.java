@@ -280,7 +280,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public int getCoreCost() {
-        if (coreGroupId == null || level == null || level.isClientSide()) {
+        if (level == null || level.isClientSide()) {
             ItemStack coreStack = getCoreStack();
             if (!coreStack.isEmpty()) {
                 if (coreStack.getItem() instanceof ComputingCoreComponent component) {
@@ -290,9 +290,20 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             return 0;
         }
 
+        // 从 SavedData 动态查询当前坐标的组 ID
+        UUID groupId = ShellCoreGroupManager.getGroupIdForPosition(level, worldPosition);
+        if (groupId == null) {
+            // 不属于任何组，返回单个核心的 cost
+            ItemStack coreStack = getCoreStack();
+            if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent component) {
+                return component.getCost(coreStack);
+            }
+            return 0;
+        }
+
         // 使用 SavedData 获取组的所有成员，然后计算总 cost
         int totalCost = 0;
-        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
+        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, groupId);
 
         for (BlockPos memberPos : members) {
             BlockEntity be = level.getBlockEntity(memberPos);
@@ -309,7 +320,18 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public int getInterval() {
-        if (coreGroupId == null || level == null || level.isClientSide()) {
+        if (level == null || level.isClientSide()) {
+            ItemStack coreStack = getCoreStack();
+            if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+                return core.getInterval(coreStack);
+            }
+            return 0;
+        }
+
+        // 从 SavedData 动态查询当前坐标的组 ID
+        UUID groupId = ShellCoreGroupManager.getGroupIdForPosition(level, worldPosition);
+        if (groupId == null) {
+            // 不属于任何组，返回单个核心的 interval
             ItemStack coreStack = getCoreStack();
             if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
                 return core.getInterval(coreStack);
@@ -319,7 +341,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
         // 使用 SavedData 获取组的所有成员，然后计算最大 interval
         int maxInterval = 0;
-        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
+        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, groupId);
 
         for (BlockPos memberPos : members) {
             BlockEntity be = level.getBlockEntity(memberPos);
@@ -339,7 +361,18 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public double getEnergyCostPerTick() {
-        if (coreGroupId == null || level == null || level.isClientSide()) {
+        if (level == null || level.isClientSide()) {
+            ItemStack coreStack = getCoreStack();
+            if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
+                return core.getEnergyCost(coreStack);
+            }
+            return 0.0;
+        }
+
+        // 从 SavedData 动态查询当前坐标的组 ID
+        UUID groupId = ShellCoreGroupManager.getGroupIdForPosition(level, worldPosition);
+        if (groupId == null) {
+            // 不属于任何组，返回单个核心的能量消耗
             ItemStack coreStack = getCoreStack();
             if (!coreStack.isEmpty() && coreStack.getItem() instanceof ComputingCoreComponent core) {
                 return core.getEnergyCost(coreStack);
@@ -349,7 +382,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
         // 使用 SavedData 获取组的所有成员，然后计算总能量消耗
         double totalEnergyCost = 0.0;
-        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, coreGroupId);
+        List<BlockPos> members = ShellCoreGroupManager.getGroupMembers(level, groupId);
 
         for (BlockPos memberPos : members) {
             BlockEntity be = level.getBlockEntity(memberPos);
