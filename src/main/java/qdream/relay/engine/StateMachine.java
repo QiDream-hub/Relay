@@ -1,7 +1,5 @@
 package qdream.relay.engine;
 
-import qdream.relay.mc.errors.ExecutionException;
-
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -56,19 +54,15 @@ public class StateMachine {
      * 执行栈顶单个操作
      * <p>
      * engine 层保持最小化，只负责原子执行。
-     * 捕获 ExecutionException 并触发 mishap
+     * 捕获 Warning 并触发 mishap
      */
     public void step() {
         if (programStack.isEmpty()) {
-            throw new Warning(this, "已运行完成");
+            throw new Warning(this, "程序已运行完成");
         }
 
         Executable executable = programStack.pop();
-        try {
-            executable.execute(this);
-        } catch (ExecutionException e) {
-            triggerMishap(e.getMessage());
-        }
+        executable.execute(this);
     }
 
     // ========== 事故处理 ==========
@@ -170,8 +164,7 @@ public class StateMachine {
      */
     public void pushProgram(Executable iota) {
         if (programStack.size() >= maxStackSize) {
-            triggerMishap("程序栈超出大小限制 (" + maxStackSize + ")");
-            return;
+            throw new Warning(this, "程序栈超出大小限制 (" + maxStackSize + ")");
         }
         programStack.push(iota);
     }
@@ -181,8 +174,7 @@ public class StateMachine {
      */
     public Executable popData() {
         if (dataStack.isEmpty()) {
-            triggerMishap("数据栈为空，无法弹出");
-            return null;
+            throw new Warning(this, "数据栈为空，无法弹出");
         }
         return dataStack.pop();
     }
@@ -202,8 +194,7 @@ public class StateMachine {
      */
     public void pushData(Executable iota) {
         if (dataStack.size() >= maxStackSize) {
-            triggerMishap("数据栈超出大小限制 (" + maxStackSize + ")");
-            return;
+            throw new Warning(this, "数据栈超出大小限制 (" + maxStackSize + ")");
         }
         dataStack.push(iota);
     }

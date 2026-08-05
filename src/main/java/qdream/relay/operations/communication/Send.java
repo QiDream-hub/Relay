@@ -35,7 +35,7 @@ public class Send extends Instruction {
         boolean success = CommunicationSystem.send(ch, data);
 
         if (!success) {
-            throw new ExecutionException("操作 relay:send 频道 " + ch + " 队列已满");
+            throw new ExecutionException(executor, "操作 relay:send 频道 " + ch + " 队列已满");
         }
 
         executor.pushData(new BooleanData(true));

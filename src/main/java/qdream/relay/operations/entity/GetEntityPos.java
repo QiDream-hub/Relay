@@ -35,7 +35,7 @@ public class GetEntityPos extends Instruction {
 
         var entity = popEntity.getEntity();
         if (entity == null) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor, id + " 错误的实体");
         }
 
         // 获取实体位置

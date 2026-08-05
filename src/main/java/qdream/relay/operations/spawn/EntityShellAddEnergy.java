@@ -51,22 +51,22 @@ public class EntityShellAddEnergy extends Instruction {
 
         // 验证能量值
         if (energy <= 0) {
-            throw new ParameterException("能量值必须大于 0: " + energy);
+            throw new ParameterException(executor, "能量值必须大于 0: " + energy);
         }
 
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException("实体引用无效");
+            throw new EntityException(executor, "实体引用无效");
         }
 
         // 检查是否为 EntityShell
         if (!(entity instanceof EntityShell shell)) {
-            throw new EntityException("目标实体不是 EntityShell");
+            throw new EntityException(executor, "目标实体不是 EntityShell");
         }
 
         if (!OperationHelpers.consumeEnergy(executor, energy)) {
-            throw new EnergyException("能量不足，无法为 EntityShell 添加能量");
+            throw new EnergyException(executor, "能量不足，无法为 EntityShell 添加能量");
         }
 
         // 添加能量

@@ -84,7 +84,7 @@ public class BlockFaceRaycast extends Instruction {
                 executor.pushData(new VectorData(hitFace.getUnitVec3()));
             }
         } else {
-            throw new ExecutionException("无法获取面");
+            throw new ExecutionException(executor,"无法获取面");
         }
     }
 }

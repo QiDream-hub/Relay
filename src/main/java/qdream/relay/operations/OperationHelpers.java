@@ -62,12 +62,12 @@ public final class OperationHelpers {
     public static void checkWorldInteractor(StateMachine executor, String operationName) {
         ShellContainer container = getShellContainer(executor);
         if (container == null || !container.hasWorldInteractor()) {
-            throw new WorldInteractionException(operationName + " 需要世界交互器");
+            throw new WorldInteractionException(executor, operationName + " 需要世界交互器");
         }
         // 扣除世界交互器的能量消耗
         double energyCost = container.getWorldInteractorEnergyCost();
         if (!container.consumeEnergy(energyCost)) {
-            throw new EnergyException(operationName + " 能量不足：需要 " + energyCost);
+            throw new EnergyException(executor, operationName + " 能量不足：需要 " + energyCost);
         }
         container.getExecutionStats().addWorldInteractorEnergy(energyCost);
     }
@@ -87,11 +87,11 @@ public final class OperationHelpers {
     public static void checkEnergy(StateMachine executor, String operationName, double dynamicEnergy) {
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            throw new ContainerException(operationName + " 无法获取容器上下文");
+            throw new ContainerException(executor, operationName + " 无法获取容器上下文");
         }
 
         if (!container.consumeEnergy(dynamicEnergy)) {
-            throw new EnergyException(operationName + " 能量不足：需要 " + dynamicEnergy);
+            throw new EnergyException(executor, operationName + " 能量不足：需要 " + dynamicEnergy);
         }
 
         // 记录能量消耗
@@ -117,10 +117,10 @@ public final class OperationHelpers {
 
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            throw new ContainerException(operationName + " 无法获取容器上下文");
+            throw new ContainerException(executor, operationName + " 无法获取容器上下文");
         }
         if (!container.isWorldInRange(sourcePos, targetPos)) {
-            throw new WorldInteractionException(operationName + " 超出世界交互器范围：" +
+            throw new WorldInteractionException(executor, operationName + " 超出世界交互器范围：" +
                     String.format("%.1f > %.1f", sourcePos.distanceTo(targetPos), container.getWorldInteractorRange()));
         }
     }
@@ -138,7 +138,7 @@ public final class OperationHelpers {
     public static Optional<Level> getLevel(StateMachine executor, String operationName) {
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty()) {
-            throw new WorldInteractionException(operationName + " 无法获取世界");
+            throw new WorldInteractionException(executor, operationName + " 无法获取世界");
         }
         return levelOpt;
     }
@@ -163,7 +163,7 @@ public final class OperationHelpers {
         ShellContainer shellContainer = getShellContainer(executor);
         Player owner = shellContainer.getOwner();
         if (owner == null) {
-            throw new WorldInteractionException("无法获取所属者");
+            throw new WorldInteractionException(executor, "无法获取所属者");
         }
         return owner;
     }

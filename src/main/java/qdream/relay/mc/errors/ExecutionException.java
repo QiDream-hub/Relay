@@ -1,11 +1,15 @@
 package qdream.relay.mc.errors;
 
+import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Warning;
+
 /**
  * 法术执行异常基类
  * <p>
  * 所有操作中的错误都应抛出此异常或其子类，而不是直接调用 triggerMishap()
  * <p>
  * 使用示例:
+ * 
  * <pre>{@code
  * public void execute(StateMachine executor) {
  *     if (errorCondition) {
@@ -15,14 +19,14 @@ package qdream.relay.mc.errors;
  * }
  * }</pre>
  */
-public class ExecutionException extends RuntimeException {
+public class ExecutionException extends Warning {
     /**
      * 构造执行异常
      *
      * @param message 错误消息
      */
-    public ExecutionException(String message) {
-        super(message);
+    public ExecutionException(StateMachine executor, String message) {
+        super(executor,message);
     }
 
     /**
@@ -31,7 +35,7 @@ public class ExecutionException extends RuntimeException {
      * @param message 错误消息
      * @param cause   根本原因
      */
-    public ExecutionException(String message, Throwable cause) {
-        super(message, cause);
+    public ExecutionException(StateMachine executor, String message, Throwable cause) {
+        super(executor,message, cause);
     }
 }

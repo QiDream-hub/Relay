@@ -28,7 +28,7 @@ public class Eq extends Instruction {
         Executable b = StackHelpers.popAny(executor);
 
         if (!(a instanceof Operation operationA && b instanceof Operation operationB)) {
-            throw new TypeException("未知操作无法比较");
+            throw new TypeException(executor, "未知操作无法比较");
         }
 
         executor.pushData(new BooleanData(operationA.equalsTo(operationB)));

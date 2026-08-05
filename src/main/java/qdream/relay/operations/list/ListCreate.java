@@ -25,16 +25,17 @@ public class ListCreate extends Instruction {
                 .producesToData("result", "relay:list")
                 .build());
     }
-    
+
     @Override
     public void execute(StateMachine executor) {
         NumberData sizeData = StackHelpers.popNumber(executor, id);
-        
+
         int size = sizeData.asInt();
         if (executor.getDataStackSize() < size) {
-            throw new StackException("操作 relay:list_creat 期望数据栈大小为：" + size + "，实际为：" + executor.getDataStackSize());
+            throw new StackException(executor,
+                    "操作 " + id + " 期望数据栈大小为：" + size + "，实际为：" + executor.getDataStackSize());
         }
-        
+
         List<Executable> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             list.add(executor.popData());

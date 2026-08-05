@@ -40,12 +40,12 @@ public class EntityShellReset extends Instruction {
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException("实体引用无效");
+            throw new EntityException(executor, "实体引用无效");
         }
 
         // 检查是否为 EntityShell
         if (!(entity instanceof EntityShell shell)) {
-            throw new EntityException("目标实体不是 EntityShell");
+            throw new EntityException(executor, "目标实体不是 EntityShell");
         }
 
         // 清除当前程序并加载新程序

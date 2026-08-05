@@ -31,15 +31,15 @@ public class ListSet extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         Executable valueData = executor.popData();
-        
+
         NumberData index = StackHelpers.popNumber(executor, id);
-        
+
         ListData list = StackHelpers.popList(executor, id);
 
         List<Executable> listData = list.getValue();
         int indexVal = index.asInt();
         if (indexVal < 0 || indexVal >= listData.size()) {
-            throw new ParameterException("操作 relay:list_set 索引超出范围：" + indexVal);
+            throw new ParameterException(executor, "操作 " + id + " 索引超出范围：" + indexVal);
         }
         // 创建新列表（不可变修改）
         List<Executable> newList = new ArrayList<>(listData);

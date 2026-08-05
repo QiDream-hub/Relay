@@ -25,7 +25,9 @@ import qdream.relay.entities.EntityShell;
  * </ul>
  *
  * <h3>能量返还</h3>
- * <p>移除 Shell 时，将 Shell 当前能量的 90% 返还给调用者（10% 作为手续费）</p>
+ * <p>
+ * 移除 Shell 时，将 Shell 当前能量的 90% 返还给调用者（10% 作为手续费）
+ * </p>
  *
  * 弹出：entity (要移除的 Shell 实体)
  * 压入：number (返还的能量值，失败则为 0)
@@ -54,23 +56,23 @@ public class RemoveShell extends Instruction {
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException("实体引用无效");
+            throw new EntityException(executor, "实体引用无效");
         }
 
         // 验证是否为 Shell 实体
         if (!(entity instanceof EntityShell shellEntity)) {
-            throw new EntityException("目标实体不是 Shell 实体");
+            throw new EntityException(executor, "目标实体不是 Shell 实体");
         }
 
         // 验证调用者是否为 Owner
         var owner = OperationHelpers.getOwner(executor);
         if (owner == null) {
-            throw new EntityException("无法获取调用者");
+            throw new EntityException(executor, "无法获取调用者");
         }
 
         var shellOwner = shellEntity.getOwner();
         if (shellOwner == null || !shellOwner.getUUID().equals(owner.getUUID())) {
-            throw new EntityException("无权移除此 Shell（不属于你）");
+            throw new EntityException(executor, "无权移除此 Shell（不属于你）");
         }
 
         // 获取 Shell 剩余能量

@@ -48,19 +48,19 @@ public class SetEntityLook extends Instruction {
 
         Entity entity = popEntity.getEntity();
         if (entity == null) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor, id + " 错误的实体");
         }
 
         Vec3 direction = popVector.asVector();
 
         // 验证向量合法性
         if (isInvalidVector(direction)) {
-            throw new ParameterException("无效的朝向向量（NaN 或 Infinity）");
+            throw new ParameterException(executor, "无效的朝向向量（NaN 或 Infinity）");
         }
 
         // 检查是否为零向量
         if (direction.lengthSqr() < 1e-10) {
-            throw new ParameterException("朝向向量不能为零向量");
+            throw new ParameterException(executor, "朝向向量不能为零向量");
         }
 
         direction = direction.normalize();

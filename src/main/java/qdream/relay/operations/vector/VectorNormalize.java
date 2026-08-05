@@ -33,7 +33,7 @@ public class VectorNormalize extends Instruction {
         double length = v.length();
 
         if (length < 1e-10) {
-            throw new ParameterException("无法归一化零向量");
+            throw new ParameterException(executor,"无法归一化零向量");
         }
 
         Vec3 result = v.normalize();

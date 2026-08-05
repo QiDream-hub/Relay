@@ -40,7 +40,7 @@ public class DropItem extends Instruction {
 
         ServerLevel positionLevel = Relay.getWorld(itemData.getWorldId());
         if (positionLevel == null) {
-            throw new ContainerException(id + " 目标世界不存在：" + itemData.getWorldId());
+            throw new ContainerException(executor, id + " 目标世界不存在：" + itemData.getWorldId());
         }
 
         // 从向量获取目标位置
@@ -50,13 +50,13 @@ public class DropItem extends Instruction {
         // 获取物品堆（使用物品所在世界）
         ItemStack itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
-            throw new ContainerException(id + " 物品不存在");
+            throw new ContainerException(executor, id + " 物品不存在");
         }
 
         // 在目标位置生成物品实体（使用目标世界）
         ItemEntity entity = ContainerTools.spawnItemEntity(positionLevel, targetPos, itemStack);
         if (entity == null) {
-            throw new ContainerException(id + " 无法生成物品实体");
+            throw new ContainerException(executor, id + " 无法生成物品实体");
         }
     }
 }

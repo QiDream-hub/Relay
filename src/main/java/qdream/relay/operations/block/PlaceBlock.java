@@ -38,7 +38,7 @@ public class PlaceBlock extends Instruction {
         VectorData popVector = StackHelpers.popVector(executor, id);
         ItemStack itemStack = ContainerTools.getItemStack(popSlot);
         if (itemStack.isEmpty() || !(itemStack.getItem() instanceof BlockItem blockItem)) {
-            throw new ContainerException("错误的物品");
+            throw new ContainerException(executor, "错误的物品");
         }
 
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
@@ -55,8 +55,9 @@ public class PlaceBlock extends Instruction {
         // 检查放置地点是否在范围内
         OperationHelpers.checkInRange(executor, id, sourcePos, vec3);
         // // 检查容器是否在范围内
-        // if (!OperationHelpers.checkInRange(executor, id, sourcePos, popSlot.getContainerPos().getCenter())) {
-        //     return;
+        // if (!OperationHelpers.checkInRange(executor, id, sourcePos,
+        // popSlot.getContainerPos().getCenter())) {
+        // return;
         // }
 
         // 使用 containing 正确处理负数坐标（向下取整而非向零取整）

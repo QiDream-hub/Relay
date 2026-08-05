@@ -41,32 +41,32 @@ public class MoveItems extends Instruction {
         // 通过 worldId 获取对应的世界（支持跨维度合并）
         ServerLevel targetLevel = Relay.getWorld(targetItem.getWorldId());
         if (targetLevel == null) {
-            throw new ContainerException("目标世界不存在：" + targetItem.getWorldId());
+            throw new ContainerException(executor, "目标世界不存在：" + targetItem.getWorldId());
         }
 
         ServerLevel sourceLevel = Relay.getWorld(sourceItem.getWorldId());
         if (sourceLevel == null) {
-            throw new ContainerException("源世界不存在：" + sourceItem.getWorldId());
+            throw new ContainerException(executor, "源世界不存在：" + sourceItem.getWorldId());
         }
 
         // 通过位置获取目标容器
         var targetBlockEntity = targetLevel.getBlockEntity(targetItem.getContainerPos());
         if (targetBlockEntity == null) {
-            throw new ContainerException("目标容器不存在");
+            throw new ContainerException(executor, "目标容器不存在");
         }
 
         if (!(targetBlockEntity instanceof Container targetContainer)) {
-            throw new ContainerException("目标不是容器");
+            throw new ContainerException(executor, "目标不是容器");
         }
 
         // 通过位置获取源容器
         var sourceBlockEntity = sourceLevel.getBlockEntity(sourceItem.getContainerPos());
         if (sourceBlockEntity == null) {
-            throw new ContainerException("源容器不存在");
+            throw new ContainerException(executor, "源容器不存在");
         }
 
         if (!(sourceBlockEntity instanceof Container sourceContainer)) {
-            throw new ContainerException("源不是容器");
+            throw new ContainerException(executor, "源不是容器");
         }
 
         // 获取源物品堆

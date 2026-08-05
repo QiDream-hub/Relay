@@ -33,7 +33,7 @@ public class GetItemType extends Instruction {
         // 获取物品堆并提取类型 ID
         var itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
-            throw new ContainerException(id + " 物品不存在");
+            throw new ContainerException(executor, id + " 物品不存在");
         }
 
         // 从物品注册表 ID 获取类型 ID

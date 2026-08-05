@@ -110,7 +110,7 @@ public class SpawnShell extends Instruction {
 
         // 检查召唤者是否有足够能量
         if (!OperationHelpers.hasEnoughEnergy(executor, requiredEnergy)) {
-            throw new EnergyException("能量不足：需要 " + requiredEnergy + "，当前可用 " +
+            throw new EnergyException(executor, "能量不足：需要 " + requiredEnergy + "，当前可用 " +
                     OperationHelpers.getAvailableEnergy(executor));
         }
 
@@ -120,7 +120,7 @@ public class SpawnShell extends Instruction {
         // 获取世界
         Level level = OperationHelpers.getLevel(executor, id).orElse(null);
         if (level == null) {
-            throw new WorldInteractionException("无法获取世界");
+            throw new WorldInteractionException(executor, "无法获取世界");
         }
 
         // 生成 Shell 实体
@@ -147,9 +147,9 @@ public class SpawnShell extends Instruction {
 
         // 生成实体到世界
         if (!level.addFreshEntity(shellEntity)) {
-            throw new EntityException("实体生成失败");
+            throw new EntityException(executor, "实体生成失败");
             // 返还能量
-            //OperationHelpers.addEnergy(executor, requiredEnergy * 0.9); // 返还 90%
+            // OperationHelpers.addEnergy(executor, requiredEnergy * 0.9); // 返还 90%
         }
 
         // 压入实体引用
@@ -161,19 +161,21 @@ public class SpawnShell extends Instruction {
      */
     private boolean validateParameters(int coreCost, int interval, int range, double energy, StateMachine executor) {
         if (coreCost < MIN_CORE_COST || coreCost > MAX_CORE_COST) {
-            throw new ParameterException("核心数量超出范围：" + coreCost + " (需要 " + MIN_CORE_COST + "-" + MAX_CORE_COST + ")");
+            throw new ParameterException(executor,
+                    "核心数量超出范围：" + coreCost + " (需要 " + MIN_CORE_COST + "-" + MAX_CORE_COST + ")");
         }
 
         if (interval < MIN_INTERVAL || interval > MAX_INTERVAL) {
-            throw new ParameterException("执行间隔超出范围：" + interval + " (需要 " + MIN_INTERVAL + "-" + MAX_INTERVAL + ")");
+            throw new ParameterException(executor,
+                    "执行间隔超出范围：" + interval + " (需要 " + MIN_INTERVAL + "-" + MAX_INTERVAL + ")");
         }
 
         if (range < MIN_RANGE || range > MAX_RANGE) {
-            throw new ParameterException("交互范围超出范围：" + range + " (需要 " + MIN_RANGE + "-" + MAX_RANGE + ")");
+            throw new ParameterException(executor, "交互范围超出范围：" + range + " (需要 " + MIN_RANGE + "-" + MAX_RANGE + ")");
         }
 
         if (energy < MIN_ENERGY) {
-            throw new ParameterException("预付能量不足：" + energy + " (至少需要 " + MIN_ENERGY + ")");
+            throw new ParameterException(executor, "预付能量不足：" + energy + " (至少需要 " + MIN_ENERGY + ")");
         }
 
         return true;

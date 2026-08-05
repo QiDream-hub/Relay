@@ -35,7 +35,7 @@ public class GetEntityEyePos extends Instruction {
 
         var entity = popEntity.getEntity();
         if (entity == null) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor,id + " 错误的实体");
         }
 
         // 获取实体眼睛位置（用于射线追踪的起点）

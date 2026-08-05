@@ -39,7 +39,7 @@ public class ListRemove extends Instruction {
         List<Executable> listData = list.getValue();
         int idx = (int) index.asDouble();
         if (idx < 0 || idx >= listData.size()) {
-            throw new ParameterException("relay:list_remove 索引超出范围：" + idx);
+            throw new ParameterException(executor, id + " 索引超出范围：" + idx);
         }
 
         // 创建新列表（不可变修改）

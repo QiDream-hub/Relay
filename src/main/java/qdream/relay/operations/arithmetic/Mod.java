@@ -27,7 +27,7 @@ public class Mod extends Instruction {
 
         double divisor = b.asDouble();
         if (divisor == 0) {
-            throw new ParameterException("操作 relay:mod 除零错误");
+            throw new ParameterException(executor, "操作 relay:mod 除零错误");
         }
 
         double result = a.asDouble() % divisor;

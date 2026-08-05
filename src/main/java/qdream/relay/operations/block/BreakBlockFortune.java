@@ -40,9 +40,12 @@ public class BreakBlockFortune extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) {
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         // 弹出参数
         NumberData fortune = StackHelpers.popNumber(executor, id);
@@ -55,9 +58,12 @@ public class BreakBlockFortune extends Instruction {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        try { OperationHelpers.checkInRange(executor, id, sourcePos, posVec); } catch (Exception e) { 
+        try {
+            OperationHelpers.checkInRange(executor, id, sourcePos, posVec);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         // 获取 Level 上下文
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
@@ -78,7 +84,7 @@ public class BreakBlockFortune extends Instruction {
         // 根据时运等级额外消耗能量 (2 的 fortuneLevel 次方额外消耗)
         // 检查 fortuneLevel 范围，避免移位溢出（long 最大 63 位，double 精确表示最大 53 位）
         if (fortuneLevel < 0 || fortuneLevel > 53) {
-            throw new ParameterException("时运等级超出有效范围 (0-53): " + fortuneLevel);
+            throw new ParameterException(executor, "时运等级超出有效范围 (0-53): " + fortuneLevel);
         }
 
         // 破坏方块并应用时运附魔

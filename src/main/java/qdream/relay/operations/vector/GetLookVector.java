@@ -33,7 +33,7 @@ public class GetLookVector extends Instruction {
 
         Entity entity = popEntity.getEntity();
         if (entity == null) {
-            throw new EntityException("实体引用无效");
+            throw new EntityException(executor,"实体引用无效");
         }
 
         // 获取视线方向（使用 yRot 和 xRot 计算）

@@ -65,53 +65,56 @@ public class PickupItem extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) { 
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         // 弹出 BlockEntityData
         BlockEntityData blockEntityData = StackHelpers.popBlockEntity(executor, id);
         if (blockEntityData == null || blockEntityData.isNull()) {
-            throw new ContainerException(id + " 错误的容器");
+            throw new ContainerException(executor, id + " 错误的容器");
         }
 
         // 弹出 EntityData
         EntityData entityData = StackHelpers.popEntity(executor, id);
         if (entityData == null || entityData.isNull()) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor, id + " 错误的实体");
         }
 
         ServerLevel entityLevel = Relay.getWorld(entityData.getWorldId());
         if (entityLevel == null) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor, id + " 错误的实体");
         }
 
         // 获取 BlockEntity（使用容器所在的世界）
         var blockEntity = blockEntityData.getBlockEntity();
         if (blockEntity == null || blockEntity.isRemoved()) {
-            throw new ContainerException(id + "错误的容器");
+            throw new ContainerException(executor, id + "错误的容器");
         }
 
         // 检查是否为 Container
         if (!(blockEntity instanceof Container container)) {
-            throw new ContainerException("方块实体不是容器");
+            throw new ContainerException(executor, "方块实体不是容器");
         }
 
         // 获取实体（使用实体所在的世界）
         Entity entity = entityData.getEntity();
         if (entity == null || entity.isRemoved()) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor,id + " 错误的实体");
         }
 
         // 检查是否为物品实体
         if (!(entity instanceof ItemEntity itemEntity)) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor,id + " 错误的实体");
         }
 
         // 获取物品堆
         ItemStack itemStack = itemEntity.getItem();
         if (itemStack.isEmpty()) {
-            throw new EntityException(id + " 错误的实体");
+            throw new EntityException(executor,id + " 错误的实体");
         }
 
         // 尝试放入容器
