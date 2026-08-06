@@ -12,8 +12,9 @@ import qdream.relay.operations.type.*;
 import qdream.relay.operations.vector.*;
 import qdream.relay.operations.logic.*;
 import qdream.relay.operations.list.*;
-import qdream.relay.operations.spawn.*;
 import qdream.relay.operations.stack.*;
+import qdream.relay.operations.summon.display.*;
+import qdream.relay.operations.summon.shell.*;
 import qdream.relay.types.*;
 
 import java.util.ArrayList;
@@ -208,6 +209,10 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new GetItemType()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new DropItem()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SlotToList()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new ListToSlot()));
 
                 // EntityShell 控制操作
                 OperationRegistry.register(
@@ -220,5 +225,11 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new EntityShellGetEnergy()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new EntityShellReset()));
+
+                // StringDisplay 控制操作
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SpawnStringDisplay()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new RemoveStringDisplay()));
         }
 }

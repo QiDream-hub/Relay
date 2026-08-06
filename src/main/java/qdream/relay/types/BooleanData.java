@@ -28,7 +28,7 @@ public class BooleanData extends Data {
         executor.pushData(this);
     }
 
-    public boolean asBoolean() {
+    public boolean getValue() {
         return value;
     }
 
@@ -79,5 +79,10 @@ public class BooleanData extends Data {
     @Override
     public String asString() {
         return String.valueOf(value);
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return value;
     }
 }

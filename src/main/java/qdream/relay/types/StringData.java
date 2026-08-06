@@ -23,6 +23,10 @@ public class StringData extends Data {
         this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     @Override
     public void execute(StateMachine executor) {
         executor.pushData(this);

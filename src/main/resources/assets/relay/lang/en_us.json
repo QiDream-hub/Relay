@@ -251,6 +251,12 @@
   "operation.relay:drop_item.name": "Drop Item",
   "operation.relay:drop_item.description": "Spawn item entity at specified position",
 
+  "operation.relay:slot_to_list.name": "Read List from Slot",
+  "operation.relay:slot_to_list.description": "Read spell disk program list from item slot",
+
+  "operation.relay:list_to_slot.name": "Write List to Slot",
+  "operation.relay:list_to_slot.description": "Write program list to spell disk in item slot",
+
   "operation.relay:break_block.name": "Break Block",
   "operation.relay:break_block.description": "Break block at specified position",
 
@@ -289,6 +295,11 @@
 
   "operation.relay:remove_shell.name": "Remove Shell",
   "operation.relay:remove_shell.description": "Remove specified shell entity and return 90% of remaining energy",
+
+  "operation.relay:spawn_string_display.name": "Spawn String Display",
+  "operation.relay:spawn_string_display.description": "Spawn a string display entity at specified position",
+  "operation.relay:remove_string_display.name": "Remove String Display",
+  "operation.relay:remove_string_display.description": "Remove specified string display entity",
 
   "operation.relay:get_block.name": "Get Block",
   "operation.relay:get_block.description": "Get block state from coordinates",
@@ -419,6 +430,10 @@
   "param.energy.description": "Prepaid energy (at least 100)",
   "param.returnedEnergy.description": "Returned energy amount",
   "param.shell.description": "Shell entity reference",
+  "param.slot.description": "Item slot",
+  "param.see_through.description": "See-through (transparent)",
+  "param.track_player.description": "Track player (always face player)",
+  "param.text.description": "Text content to display",
 
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",

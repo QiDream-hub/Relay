@@ -251,6 +251,12 @@
   "operation.relay:drop_item.name": "投掷物品",
   "operation.relay:drop_item.description": "在指定坐标生成物品实体",
 
+  "operation.relay:slot_to_list.name": "从插槽读取列表",
+  "operation.relay:slot_to_list.description": "从物品插槽读取法术磁盘的程序列表",
+
+  "operation.relay:list_to_slot.name": "向插槽写入列表",
+  "operation.relay:list_to_slot.description": "将程序列表写入物品插槽的法术磁盘",
+
   "operation.relay:break_block.name": "破坏方块",
   "operation.relay:break_block.description": "破坏指定位置的方块",
 
@@ -281,6 +287,12 @@
 
   "operation.relay:remove_shell.name": "移除外壳",
   "operation.relay:remove_shell.description": "移除指定的外壳实体并返还 90% 剩余能量",
+
+  "operation.relay:spawn_string_display.name": "召唤文本显示",
+  "operation.relay:spawn_string_display.description": "在指定位置召唤一个文本显示实体",
+  "operation.relay:remove_string_display.name": "移除文本显示",
+  "operation.relay:remove_string_display.description": "移除指定的文本显示实体",
+
   "operation.relay:get_block.name": "获取方块",
   "operation.relay:get_block.description": "从坐标获取方块状态",
 
@@ -416,6 +428,10 @@
   "param.energy.description": "预付能量（至少 100）",
   "param.returnedEnergy.description": "返还的能量值",
   "param.shell.description": "外壳实体引用",
+  "param.slot.description": "物品插槽",
+  "param.see_through.description": "是否穿墙（透视）",
+  "param.track_player.description": "是否追踪玩家（始终面向玩家）",
+  "param.text.description": "显示的文本内容",
 
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
