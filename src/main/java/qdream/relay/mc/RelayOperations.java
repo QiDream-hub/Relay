@@ -231,5 +231,21 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new SpawnStringDisplay()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new RemoveStringDisplay()));
+
+                // StringDisplay 配置操作
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SetStringDisplayText()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SetStringDisplayTextColor()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SetStringDisplayBackgroundColor()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SetStringDisplaySeeThrough()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SetStringDisplayTrackPlayer()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new SetStringDisplayRotation()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new AddStringDisplayEnergy()));
         }
 }

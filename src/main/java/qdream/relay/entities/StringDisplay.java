@@ -64,7 +64,7 @@ public class StringDisplay extends Display.TextDisplay {
     /**
      * 为实体添加能量
      */
-    public void addEnergy(float amount) {
+    public void addEnergy(double amount) {
         this.setEnergy(this.energy + amount);
     }
 
