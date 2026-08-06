@@ -116,8 +116,8 @@ public class SpawnStringDisplay extends Instruction {
         // 设置文本
         display.setTextString(text);
 
-        // 设置文本颜色（默认黑色）
-        display.setTextColor(0x000000);
+        // 设置文本颜色
+        display.setTextColor(0xFFFFFFFF);  // 不透明纯白
 
         // 设置背景（默认不渲染，透明度 0）
         display.setBackgroundAlpha(0);

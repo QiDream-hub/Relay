@@ -38,7 +38,8 @@ public class StringDisplay extends Display.TextDisplay {
         super.tick();
 
         if (!this.level().isClientSide()) {
-            this.energy = Math.max(0.0f, this.energy - ENERGY_DRAIN_PER_TICK);
+            this.energy = Math.max(0.0f, this.energy - ENERGY_DRAIN_PER_TICK
+                    - (super.getBillboardConstraints() == Display.BillboardConstraints.CENTER ? 0.5 : 0));
 
             // 能量耗尽时移除实体
             if (this.energy <= 0.0f) {
@@ -207,14 +208,14 @@ public class StringDisplay extends Display.TextDisplay {
      * 计算从实体位置指向目标方向的旋转角度
      * </p>
      *
-     * @param direction 目标方向向量（会被归一化）
+     * @param direction         目标方向向量（会被归一化）
      * @param overrideBillboard 是否覆盖 Billboard 约束为 FIXED 模式
      */
     public void setRotation(Vec3 direction, boolean overrideBillboard) {
         Vec3 normalizedDir = direction.normalize();
         float yaw = (float) Math.atan2(normalizedDir.x, normalizedDir.z);
         float pitch = (float) Math.asin(-normalizedDir.y);
-        
+
         Transformation transformation = vec3ToRotationTransformation(pitch, yaw);
         super.setTransformation(transformation);
 
@@ -244,7 +245,7 @@ public class StringDisplay extends Display.TextDisplay {
      * 计算从实体位置指向目标点的旋转角度
      * </p>
      *
-     * @param target 目标点坐标
+     * @param target            目标点坐标
      * @param overrideBillboard 是否覆盖 Billboard 约束为 FIXED 模式
      */
     public void lookAt(Vec3 target, boolean overrideBillboard) {
@@ -256,7 +257,7 @@ public class StringDisplay extends Display.TextDisplay {
      * 使用 pitch 和 yaw 创建旋转变换
      *
      * @param pitch 俯仰角（弧度，绕 X 轴旋转）
-     * @param yaw 偏航角（弧度，绕 Y 轴旋转）
+     * @param yaw   偏航角（弧度，绕 Y 轴旋转）
      * @return Transformation 对象
      */
     public static Transformation vec3ToRotationTransformation(float pitch, float yaw) {
@@ -265,8 +266,7 @@ public class StringDisplay extends Display.TextDisplay {
                 new Vector3f(0, 0, 0),
                 quaternion,
                 new Vector3f(1, 1, 1),
-                new Quaternionf()
-        );
+                new Quaternionf());
     }
 
     /**
@@ -288,28 +288,25 @@ public class StringDisplay extends Display.TextDisplay {
      * 支持自定义旋转、平移、缩放
      * </p>
      *
-     * @param rotation 旋转向量（弧度制，XYZ 分别对应绕 XYZ 轴旋转）
+     * @param rotation    旋转向量（弧度制，XYZ 分别对应绕 XYZ 轴旋转）
      * @param translation 平移向量
-     * @param scale 缩放向量
+     * @param scale       缩放向量
      * @return Transformation 对象
      */
     public static Transformation vec3ToTransformation(
             Vec3 rotation,
             Vec3 translation,
-            Vec3 scale
-    ) {
+            Vec3 scale) {
         Quaternionf quaternion = new Quaternionf().rotationXYZ(
                 (float) rotation.x,
                 (float) rotation.y,
-                (float) rotation.z
-        );
+                (float) rotation.z);
 
         return new Transformation(
                 new Vector3f((float) translation.x, (float) translation.y, (float) translation.z),
                 quaternion,
                 new Vector3f((float) scale.x, (float) scale.y, (float) scale.z),
-                new Quaternionf()
-        );
+                new Quaternionf());
     }
 
     /**
