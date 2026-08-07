@@ -238,9 +238,9 @@ public class EntityData extends Data {
 
     @Override
     public String asString() {
-        return String.format("world:%s,uuid:%s",
-            worldId != null ? worldId : "null",
-            uuid != null ? uuid.toString() : "null");
+        return String.format("(%s,%s)",
+                worldId != null ? worldId : "null",
+                uuid != null ? uuid.toString() : "null");
     }
 
     @Override

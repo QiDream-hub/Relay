@@ -228,10 +228,10 @@ public class BlockEntityData extends Data {
 
     @Override
     public String asString() {
-        if (blockPos == null) {
-            return String.format("{world:%s}", worldId != null ? worldId : "null");
+        if (blockPos == null || worldId != null) {
+            return "(null,-1,-1,-1)E";
         }
-        return String.format("{world:%s,x:%d,y:%d,z:%d}",
+        return String.format("(%s,%d,%d,%d)E",
                 worldId != null ? worldId : "null",
                 blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }

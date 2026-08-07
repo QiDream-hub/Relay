@@ -282,10 +282,10 @@ public class SlotData extends Data {
 
     @Override
     public String asString() {
-        if (containerPos == null) {
-            return String.format("{world:%s,slot:%d}", worldId != null ? worldId : "null", slot);
+        if (containerPos == null || worldId != null) {
+            return "(null,-1,-1,-1,-1)";
         }
-        return String.format("{world:%s,x:%d,y:%d,z:%d,slot:%d}",
+        return String.format("(%s,%d,%d,%d,%d)",
                 worldId != null ? worldId : "null",
                 containerPos.getX(), containerPos.getY(), containerPos.getZ(), slot);
     }

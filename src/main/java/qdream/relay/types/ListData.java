@@ -15,6 +15,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.base.Data;
+import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
 
@@ -145,8 +146,9 @@ public class ListData extends Data {
         StringJoiner joiner = new StringJoiner(",", "[", "]");
         for (Executable executable : value) {
             if (executable instanceof Data data) {
-                // Data 也是 Operation 的子类，必须先检查
                 joiner.add(data.asString());
+            } else if (executable instanceof Instruction ins) {
+                joiner.add(ins.asString());
             } else if (executable instanceof Operation op) {
                 joiner.add(op.asString());
             } else {

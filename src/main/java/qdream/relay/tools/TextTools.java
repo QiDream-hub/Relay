@@ -177,7 +177,6 @@ public final class TextTools {
         return "unknown.name";
     }
 
-
     // ==================== 翻译方法 ====================
 
     /**
@@ -260,7 +259,9 @@ public final class TextTools {
             }
             Executable exe = stack.get(i);
             if (exe instanceof Instruction instr) {
-                sb.append("§e").append(getId(instr));
+                sb.append("§e").append(getText(instr.getId()));
+            } else if (exe instanceof Data data) {
+                sb.append("§e").append(data.asString());
             } else {
                 sb.append("§f").append(exe.getClass().getSimpleName());
             }

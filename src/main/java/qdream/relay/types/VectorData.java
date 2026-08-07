@@ -97,7 +97,7 @@ public class VectorData extends Data {
 
     @Override
     public String asString() {
-        return String.format("{x:%.1f,y:%.1f,z:%.1f}", vec3.x, vec3.y, vec3.z);
+        return String.format("(%.1f,%.1f,%.1f)", vec3.x, vec3.y, vec3.z);
     }
 
     @Override
