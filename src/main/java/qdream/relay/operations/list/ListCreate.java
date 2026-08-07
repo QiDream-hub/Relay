@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ListCreate extends Instruction {
     public ListCreate() {
-        super("relay:list_creat", 1, 0.25, OperationSignature.builder()
+        super("relay:list_create", 1, 0.25, OperationSignature.builder()
                 .consumesFromData("size", "relay:number")
                 .consumesFromData("elements", "...any")
                 .producesToData("result", "relay:list")

@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.ValueInput;
@@ -18,6 +19,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.core.NonNullList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
@@ -27,6 +29,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ExecutionStats;
 import qdream.relay.screen.ShellScreenHandler;
 import qdream.relay.mc.StateMachineNbtSerializer;
+import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.mc.component.ComputingCoreComponent;
@@ -563,22 +566,29 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
 
         getStateMachine().clear();
-        List<Executable> program = diskComponent.getProgram(diskStack);
-        
-        addLogEntry(String.format("§7[重载] 从磁盘读取程序：size=%d, diskStack=%s", 
+        ListTag programTag = diskComponent.getProgram(diskStack);
+        List<Executable> program;
+        try {
+            program = ProgramCompiler.fromNbt(programTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            e.printStackTrace();
+            program = new ArrayList<>();
+        }
+
+        addLogEntry(String.format("§7[重载] 从磁盘读取程序：size=%d, diskStack=%s",
             program.size(), diskStack));
-        
+
         if (program.isEmpty()) {
             addLogEntry("§c[重载] 程序列表为空，无法加载");
             return;
         }
-        
+
         getStateMachine().loadProgram(program);
         setInitialized(true); // 标记程序已加载
         setChanged();
         level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         addLogEntry(String.format("§a[重载] 成功加载 %d 个可执行单元到程序栈", program.size()));
-        addLogEntry(String.format("§7[重载] 程序栈大小=%d, 数据栈大小=%d", 
+        addLogEntry(String.format("§7[重载] 程序栈大小=%d, 数据栈大小=%d",
             getStateMachine().getProgramStackSize(), getStateMachine().getDataStackSize()));
     }
 

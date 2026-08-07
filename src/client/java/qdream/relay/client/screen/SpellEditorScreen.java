@@ -337,8 +337,10 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             return;
         }
 
-        List<Executable> program = disk.getProgram(diskStack);
+        ListTag programTag = disk.getProgram(diskStack);
+        List<Executable> program;
         try {
+            program = ProgramCompiler.fromNbt(programTag);
             String formatted = ProgramCompiler.toPrettyJson(program);
             jsonEditorWidget.setJsonContent(formatted);
         } catch (Exception e) {

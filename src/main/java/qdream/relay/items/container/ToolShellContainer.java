@@ -23,7 +23,7 @@ import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
-import qdream.relay.tools.StackTools;
+import qdream.relay.tools.TextTools;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.Relay;
 
@@ -82,7 +82,7 @@ public class ToolShellContainer implements ShellContainer {
         stateMachine.setMishapHandler(reason -> {
             Entity owner = ToolShellContainer.this.owner;
             if (owner != null && owner instanceof Player player) {
-                player.sendSystemMessage(Component.literal("§c[工具外壳] 事故：" + reason));
+                player.sendSystemMessage(Component.literal("[工具外壳]" + reason));
             }
         });
         // 设置调试回调
@@ -94,9 +94,9 @@ public class ToolShellContainer implements ShellContainer {
                     if (owner != null && owner instanceof Player player) {
                         player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
                         player.sendSystemMessage(Component.literal(
-                                "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
+                                "§7[§f 程序栈 §7]: " + TextTools.formatProgramStack(stateMachine)));
                         player.sendSystemMessage(Component.literal(
-                                "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
+                                "§7[§f 数据栈 §7]: " + TextTools.formatDataStack(stateMachine)));
                     }
                 }
             }
@@ -116,9 +116,9 @@ public class ToolShellContainer implements ShellContainer {
                         player.sendSystemMessage(Component.literal(
                                 "§c[§c 事故 §c] §f原因：" + reason));
                         player.sendSystemMessage(Component.literal(
-                                "§7[§f 程序栈 §7]: " + StackTools.formatProgramStack(stateMachine)));
+                                "§7[§f 程序栈 §7]: " + TextTools.formatProgramStack(stateMachine)));
                         player.sendSystemMessage(Component.literal(
-                                "§7[§f 数据栈 §7]: " + StackTools.formatDataStack(stateMachine)));
+                                "§7[§f 数据栈 §7]: " + TextTools.formatDataStack(stateMachine)));
                     }
                 }
             }

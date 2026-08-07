@@ -9,6 +9,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -87,7 +88,14 @@ public class ReadCommands {
             throw NO_DISK.create();
         }
 
-        List<Executable> program = diskComponent.getProgram(stack);
+        ListTag programTag = diskComponent.getProgram(stack);
+        List<Executable> program;
+        try {
+            program = ProgramCompiler.fromNbt(programTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            return 0;
+        }
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -120,7 +128,14 @@ public class ReadCommands {
             throw NO_DISK.create();
         }
 
-        List<Executable> program = diskComponent.getProgram(disk);
+        ListTag programTag = diskComponent.getProgram(disk);
+        List<Executable> program;
+        try {
+            program = ProgramCompiler.fromNbt(programTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            return 0;
+        }
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -144,7 +159,14 @@ public class ReadCommands {
         }
 
         String format = StringArgumentType.getString(context, "format");
-        List<Executable> program = diskComponent.getProgram(stack);
+        ListTag programTag = diskComponent.getProgram(stack);
+        List<Executable> program;
+        try {
+            program = ProgramCompiler.fromNbt(programTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            return 0;
+        }
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;
@@ -178,7 +200,14 @@ public class ReadCommands {
             throw NO_DISK.create();
         }
 
-        List<Executable> program = diskComponent.getProgram(disk);
+        ListTag programTag = diskComponent.getProgram(disk);
+        List<Executable> program;
+        try {
+            program = ProgramCompiler.fromNbt(programTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            return 0;
+        }
         if (program.isEmpty()) {
             source.sendSuccess(() -> Component.literal("法术磁盘为空"), true);
             return 0;

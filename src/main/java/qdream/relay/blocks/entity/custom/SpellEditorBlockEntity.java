@@ -72,7 +72,14 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
         if (diskComponent == null) {
             return;
         }
-        List<Executable> loadedProgram = diskComponent.getProgram(diskStack);
+        ListTag programTag = diskComponent.getProgram(diskStack);
+        List<Executable> loadedProgram;
+        try {
+            loadedProgram = ProgramCompiler.fromNbt(programTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            e.printStackTrace();
+            loadedProgram = new ArrayList<>();
+        }
         setProgram(loadedProgram);
     }
 
@@ -88,7 +95,14 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
         if (diskComponent == null) {
             return;
         }
-        diskComponent.setProgram(diskStack, this.program);
+        ListTag programTag;
+        try {
+            programTag = ProgramCompiler.toNbt(this.program);
+        } catch (ProgramCompiler.CompilationException e) {
+            e.printStackTrace();
+            programTag = new ListTag();
+        }
+        diskComponent.setProgram(diskStack, programTag);
         setChanged();
     }
 

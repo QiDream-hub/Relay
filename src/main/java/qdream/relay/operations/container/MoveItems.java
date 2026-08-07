@@ -7,8 +7,10 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ContainerTools;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.SlotData;
 
@@ -41,32 +43,32 @@ public class MoveItems extends Instruction {
         // 通过 worldId 获取对应的世界（支持跨维度合并）
         ServerLevel targetLevel = Relay.getWorld(targetItem.getWorldId());
         if (targetLevel == null) {
-            throw new ContainerException(executor, "目标世界不存在：" + targetItem.getWorldId());
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_FOUND, targetItem.getWorldId()));
         }
 
         ServerLevel sourceLevel = Relay.getWorld(sourceItem.getWorldId());
         if (sourceLevel == null) {
-            throw new ContainerException(executor, "源世界不存在：" + sourceItem.getWorldId());
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_FOUND, sourceItem.getWorldId()));
         }
 
         // 通过位置获取目标容器
         var targetBlockEntity = targetLevel.getBlockEntity(targetItem.getContainerPos());
         if (targetBlockEntity == null) {
-            throw new ContainerException(executor, "目标容器不存在");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_NOT_FOUND));
         }
 
         if (!(targetBlockEntity instanceof Container targetContainer)) {
-            throw new ContainerException(executor, "目标不是容器");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
         }
 
         // 通过位置获取源容器
         var sourceBlockEntity = sourceLevel.getBlockEntity(sourceItem.getContainerPos());
         if (sourceBlockEntity == null) {
-            throw new ContainerException(executor, "源容器不存在");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_NOT_FOUND));
         }
 
         if (!(sourceBlockEntity instanceof Container sourceContainer)) {
-            throw new ContainerException(executor, "源不是容器");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
         }
 
         // 获取源物品堆
@@ -77,7 +79,7 @@ public class MoveItems extends Instruction {
         }
 
         // 执行物品移动（支持跨容器、跨维度）
-        int remaining = ContainerTools.moveItems(
+        int remaining = ContainerHelpers.moveItems(
                 targetContainer,
                 targetItem.getSlot(),
                 sourceContainer,

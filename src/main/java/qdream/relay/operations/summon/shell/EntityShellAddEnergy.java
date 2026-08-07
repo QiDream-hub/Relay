@@ -8,6 +8,8 @@ import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
 import qdream.relay.entities.EntityShell;
@@ -51,22 +53,25 @@ public class EntityShellAddEnergy extends Instruction {
 
         // 验证能量值
         if (energy <= 0) {
-            throw new ParameterException(executor, "能量值必须大于 0: " + energy);
+            throw new ParameterException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_MUST_BE_POSITIVE));
         }
 
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, "实体引用无效");
+            throw new EntityException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
         }
 
         // 检查是否为 EntityShell
         if (!(entity instanceof EntityShell shell)) {
-            throw new EntityException(executor, "目标实体不是 EntityShell");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
         }
 
         if (!OperationHelpers.consumeEnergy(executor, energy)) {
-            throw new EnergyException(executor, "能量不足，无法为 EntityShell 添加能量");
+            throw new EnergyException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, energy));
         }
 
         // 添加能量

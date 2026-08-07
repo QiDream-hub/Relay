@@ -7,8 +7,10 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ContainerTools;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.ListData;
@@ -40,19 +42,19 @@ public class GetContainerItems extends Instruction {
 
         BlockEntity blockEntity = containerData.getBlockEntity();
         if (blockEntity == null) {
-            throw new ContainerException(executor, id + " 容器不存在");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_NOT_FOUND));
         }
 
         if (!(blockEntity instanceof Container container)) {
-            throw new ContainerException(executor, id + " 目标不是容器");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
         }
 
         // 通过 worldId 获取对应的世界（支持跨维度）
         ServerLevel level = Relay.getWorld(containerData.getWorldId());
         if (level == null) {
-            throw new ContainerException(executor, id + " 世界不存在：" + containerData.getWorldId());
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_FOUND, containerData.getWorldId()));
         }
-        List<SlotData> items = ContainerTools.getContainerItems(
+        List<SlotData> items = ContainerHelpers.getContainerItems(
                 container,
                 blockEntity.getBlockPos(),
                 level);

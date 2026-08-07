@@ -1,7 +1,5 @@
 package qdream.relay.commands;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
@@ -15,7 +13,6 @@ import net.minecraft.network.chat.MutableComponent;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.tools.StackTools;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;

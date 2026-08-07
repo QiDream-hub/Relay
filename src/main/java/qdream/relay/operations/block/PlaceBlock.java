@@ -16,8 +16,10 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ContainerTools;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.VectorData;
 
@@ -36,9 +38,9 @@ public class PlaceBlock extends Instruction {
         OperationHelpers.checkWorldInteractor(executor, id);
         SlotData popSlot = StackHelpers.popSlot(executor, id);
         VectorData popVector = StackHelpers.popVector(executor, id);
-        ItemStack itemStack = ContainerTools.getItemStack(popSlot);
+        ItemStack itemStack = ContainerHelpers.getItemStack(popSlot);
         if (itemStack.isEmpty() || !(itemStack.getItem() instanceof BlockItem blockItem)) {
-            throw new ContainerException(executor, "错误的物品");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ITEM_FOR_ACTION));
         }
 
         Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);

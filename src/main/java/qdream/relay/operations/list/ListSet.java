@@ -6,6 +6,8 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
 
@@ -39,7 +41,7 @@ public class ListSet extends Instruction {
         List<Executable> listData = list.getValue();
         int indexVal = index.asInt();
         if (indexVal < 0 || indexVal >= listData.size()) {
-            throw new ParameterException(executor, "操作 " + id + " 索引超出范围：" + indexVal);
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.LIST_INDEX_OUT_OF_BOUNDS, indexVal));
         }
         // 创建新列表（不可变修改）
         List<Executable> newList = new ArrayList<>(listData);

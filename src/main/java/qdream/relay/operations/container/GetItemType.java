@@ -6,6 +6,8 @@ import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.TypeData;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,7 +35,7 @@ public class GetItemType extends Instruction {
         // 获取物品堆并提取类型 ID
         var itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
-            throw new ContainerException(executor, id + " 物品不存在");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ITEM_NOT_FOUND));
         }
 
         // 从物品注册表 ID 获取类型 ID

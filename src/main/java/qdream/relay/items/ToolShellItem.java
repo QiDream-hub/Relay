@@ -1,8 +1,10 @@
 package qdream.relay.items;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionHand;
@@ -21,6 +23,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.core.PlayerShellDataAccessor;
+import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.component.DiskComponent;
 
 /**
@@ -102,7 +105,14 @@ public class ToolShellItem extends Item {
             ItemStack diskStack = container.getDiskStack();
             DiskComponent diskComponent = getDiskComponent(diskStack);
             if (diskComponent != null) {
-                List<Executable> program = diskComponent.getProgram(diskStack);
+                ListTag programTag = diskComponent.getProgram(diskStack);
+                List<Executable> program;
+                try {
+                    program = ProgramCompiler.fromNbt(programTag);
+                } catch (ProgramCompiler.CompilationException e) {
+                    e.printStackTrace();
+                    program = new ArrayList<>();
+                }
                 if (!program.isEmpty()) {
                     // 清空双栈后加载新程序
                     machine.clear();

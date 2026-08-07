@@ -12,6 +12,8 @@ import qdream.relay.mc.errors.WorldInteractionException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.VectorData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.ListData;
@@ -110,8 +112,8 @@ public class SpawnShell extends Instruction {
 
         // 检查召唤者是否有足够能量
         if (!OperationHelpers.hasEnoughEnergy(executor, requiredEnergy)) {
-            throw new EnergyException(executor, "能量不足：需要 " + requiredEnergy + "，当前可用 " +
-                    OperationHelpers.getAvailableEnergy(executor));
+            throw new EnergyException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, requiredEnergy));
         }
 
         // 扣除能量
@@ -120,7 +122,8 @@ public class SpawnShell extends Instruction {
         // 获取世界
         Level level = OperationHelpers.getLevel(executor, id).orElse(null);
         if (level == null) {
-            throw new WorldInteractionException(executor, "无法获取世界");
+            throw new WorldInteractionException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE));
         }
 
         // 生成 Shell 实体
@@ -147,7 +150,7 @@ public class SpawnShell extends Instruction {
 
         // 生成实体到世界
         if (!level.addFreshEntity(shellEntity)) {
-            throw new EntityException(executor, "实体生成失败");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_SPAWN_FAILED));
             // 返还能量
             // OperationHelpers.addEnergy(executor, requiredEnergy * 0.9); // 返还 90%
         }
@@ -162,20 +165,26 @@ public class SpawnShell extends Instruction {
     private boolean validateParameters(int coreCost, int interval, int range, double energy, StateMachine executor) {
         if (coreCost < MIN_CORE_COST || coreCost > MAX_CORE_COST) {
             throw new ParameterException(executor,
-                    "核心数量超出范围：" + coreCost + " (需要 " + MIN_CORE_COST + "-" + MAX_CORE_COST + ")");
+                    ErrorMessageTools.buildErrorMessage(ErrorType.CORE_COST_OUT_OF_RANGE,
+                            coreCost, MIN_CORE_COST, MAX_CORE_COST));
         }
 
         if (interval < MIN_INTERVAL || interval > MAX_INTERVAL) {
             throw new ParameterException(executor,
-                    "执行间隔超出范围：" + interval + " (需要 " + MIN_INTERVAL + "-" + MAX_INTERVAL + ")");
+                    ErrorMessageTools.buildErrorMessage(ErrorType.INTERVAL_OUT_OF_RANGE,
+                            interval, MIN_INTERVAL, MAX_INTERVAL));
         }
 
         if (range < MIN_RANGE || range > MAX_RANGE) {
-            throw new ParameterException(executor, "交互范围超出范围：" + range + " (需要 " + MIN_RANGE + "-" + MAX_RANGE + ")");
+            throw new ParameterException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.RANGE_OUT_OF_RANGE,
+                            range, MIN_RANGE, MAX_RANGE));
         }
 
         if (energy < MIN_ENERGY) {
-            throw new ParameterException(executor, "预付能量不足：" + energy + " (至少需要 " + MIN_ENERGY + ")");
+            throw new ParameterException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.PREPAID_ENERGY_INSUFFICIENT,
+                            energy, MIN_ENERGY));
         }
 
         return true;

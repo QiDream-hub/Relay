@@ -5,6 +5,9 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.errors.EnergyException;
 import qdream.relay.mc.errors.WorldInteractionException;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.TextTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.SlotData;
 
 import net.minecraft.core.Direction;
@@ -61,12 +64,14 @@ public final class OperationHelpers {
     public static void checkWorldInteractor(StateMachine executor, String operationName) {
         ShellContainer container = getShellContainer(executor);
         if (container == null || !container.hasWorldInteractor()) {
-            throw new WorldInteractionException(executor, operationName + " 需要世界交互器");
+            throw new WorldInteractionException(executor, ErrorMessageTools
+                    .buildErrorMessage(ErrorType.WORLD_INTERACTOR_MISSING, TextTools.getText(operationName)));
         }
         // 扣除世界交互器的能量消耗
         double energyCost = container.getWorldInteractorEnergyCost();
         if (!container.consumeEnergy(energyCost)) {
-            throw new EnergyException(executor, operationName + " 能量不足：需要 " + energyCost);
+            throw new EnergyException(executor, ErrorMessageTools
+                    .buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, energyCost));
         }
         container.getExecutionStats().addWorldInteractorEnergy(energyCost);
     }
@@ -86,11 +91,13 @@ public final class OperationHelpers {
     public static void checkEnergy(StateMachine executor, String operationName, double dynamicEnergy) {
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            throw new ContainerException(executor, operationName + " 无法获取容器上下文");
+            throw new ContainerException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_CONTEXT_MISSING));
         }
 
         if (!container.consumeEnergy(dynamicEnergy)) {
-            throw new EnergyException(executor, operationName + " 能量不足：需要 " + dynamicEnergy);
+            throw new EnergyException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, dynamicEnergy));
         }
 
         // 记录能量消耗
@@ -116,11 +123,15 @@ public final class OperationHelpers {
 
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            throw new ContainerException(executor, operationName + " 无法获取容器上下文");
+            throw new ContainerException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_CONTEXT_MISSING));
         }
         if (!container.isWorldInRange(sourcePos, targetPos)) {
-            throw new WorldInteractionException(executor, operationName + " 超出世界交互器范围：" +
-                    String.format("%.1f > %.1f", sourcePos.distanceTo(targetPos), container.getWorldInteractorRange()));
+            double distance = sourcePos.distanceTo(targetPos);
+            double range = container.getWorldInteractorRange();
+            throw new WorldInteractionException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_INTERACTOR_OUT_OF_RANGE,
+                            operationName, distance, range));
         }
     }
 
@@ -137,7 +148,8 @@ public final class OperationHelpers {
     public static Optional<Level> getLevel(StateMachine executor, String operationName) {
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty()) {
-            throw new WorldInteractionException(executor, operationName + " 无法获取世界");
+            throw new WorldInteractionException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE));
         }
         return levelOpt;
     }
@@ -162,7 +174,8 @@ public final class OperationHelpers {
         ShellContainer shellContainer = getShellContainer(executor);
         Player owner = shellContainer.getOwner();
         if (owner == null) {
-            throw new WorldInteractionException(executor, "无法获取所属者");
+            throw new WorldInteractionException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.OWNER_NOT_FOUND));
         }
         return owner;
     }

@@ -8,6 +8,8 @@ import qdream.relay.mc.errors.TypeException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 
 /**
  * Eq 操作 - 等于比较
@@ -28,7 +30,10 @@ public class Eq extends Instruction {
         Executable b = StackHelpers.popAny(executor, id);
 
         if (!(a instanceof Operation operationA && b instanceof Operation operationB)) {
-            throw new TypeException(executor, "未知操作无法比较");
+            throw new TypeException(
+                executor,
+                ErrorMessageTools.buildErrorMessage(ErrorType.OPERATION_NOT_COMPARABLE)
+            );
         }
 
         executor.pushData(new BooleanData(operationA.equalsTo(operationB)));

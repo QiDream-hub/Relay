@@ -12,6 +12,8 @@ import qdream.relay.mc.errors.WorldInteractionException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.VectorData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
@@ -92,19 +94,20 @@ public class SpawnStringDisplay extends Instruction {
 
         // 验证参数
         if (text.isEmpty()) {
-            throw new ParameterException(executor, "文本不能为空");
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TEXT_EMPTY));
         }
 
         // 检查召唤者是否有足够能量
         if (!OperationHelpers.consumeEnergy(executor, energyNum.getValue())) {
-            throw new EnergyException(executor, "能量不足：需要 " + energyNum.getValue() + "，当前可用 " +
-                    OperationHelpers.getAvailableEnergy(executor));
+            throw new EnergyException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, energyNum.getValue()));
         }
 
         // 获取世界
         Level level = OperationHelpers.getLevel(executor, id).orElse(null);
         if (level == null) {
-            throw new WorldInteractionException(executor, "无法获取世界");
+            throw new WorldInteractionException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE));
         }
 
         // 生成 StringDisplay 实体
@@ -117,7 +120,7 @@ public class SpawnStringDisplay extends Instruction {
         display.setTextString(text);
 
         // 设置文本颜色
-        display.setTextColor(0xFFFFFFFF);  // 不透明纯白
+        display.setTextColor(0xFFFFFFFF); // 不透明纯白
 
         // 设置背景（默认不渲染，透明度 0）
         display.setBackgroundAlpha(0);
@@ -142,7 +145,7 @@ public class SpawnStringDisplay extends Instruction {
 
         // 生成实体到世界
         if (!level.addFreshEntity(display)) {
-            throw new EntityException(executor, "实体生成失败");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_SPAWN_FAILED));
         }
 
         // 压入实体引用

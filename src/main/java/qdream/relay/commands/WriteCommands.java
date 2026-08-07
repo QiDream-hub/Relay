@@ -9,6 +9,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -108,7 +109,12 @@ public class WriteCommands {
         }
 
         if (stack.getItem() instanceof DiskComponent diskComponent) {
-            diskComponent.setProgram(stack, program);
+            try {
+                diskComponent.setProgram(stack, ProgramCompiler.toNbt(program));
+            } catch (CompilationException e) {
+                source.sendFailure(Component.literal("§c NBT 转换失败：" + e.getMessage()));
+                return 0;
+            }
         }
 
         source.sendSuccess(() -> Component.literal("已写入法术程序：§e" + program.size() + "§r 个指令"), true);
@@ -143,7 +149,12 @@ public class WriteCommands {
             return 0;
         }
         if (disk.getItem() instanceof DiskComponent diskComponent) {
-            diskComponent.setProgram(disk, program);
+            try {
+                diskComponent.setProgram(disk, ProgramCompiler.toNbt(program));
+            } catch (CompilationException e) {
+                source.sendFailure(Component.literal("§c NBT 转换失败：" + e.getMessage()));
+                return 0;
+            }
         }
         shell.setChanged();
 
@@ -165,15 +176,16 @@ public class WriteCommands {
 
         String jsonStr = StringArgumentType.getString(context, "json");
         try {
-            diskComponent.importFromJson(stack, jsonStr);
+            List<Executable> program = ProgramCompiler.compileFromJson(jsonStr);
+            diskComponent.setProgram(stack, ProgramCompiler.toNbt(program));
         } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
 
-        List<Executable> program = diskComponent.getProgram(stack);
-        source.sendSuccess(() -> Component.literal("已写入 JSON 程序：§e" + program.size() + "§r 个指令"), true);
-        return program.size();
+        ListTag programTag = diskComponent.getProgram(stack);
+        source.sendSuccess(() -> Component.literal("已写入 JSON 程序：§e" + programTag.size() + "§r 个指令"), true);
+        return programTag.size();
     }
 
     /**
@@ -201,16 +213,17 @@ public class WriteCommands {
         }
 
         try {
-            diskComponent.importFromJson(disk, jsonStr);
+            List<Executable> program = ProgramCompiler.compileFromJson(jsonStr);
+            diskComponent.setProgram(disk, ProgramCompiler.toNbt(program));
         } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
         shell.setChanged();
 
-        List<Executable> program = diskComponent.getProgram(disk);
-        source.sendSuccess(() -> Component.literal("已向外壳写入 JSON 程序：§e" + program.size() + "§r 个指令"), true);
-        return program.size();
+        ListTag programTag = diskComponent.getProgram(disk);
+        source.sendSuccess(() -> Component.literal("已向外壳写入 JSON 程序：§e" + programTag.size() + "§r 个指令"), true);
+        return programTag.size();
     }
 
     /**

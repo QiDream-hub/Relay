@@ -146,7 +146,14 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
         }
 
         if (blockEntity != null) {
-            List<Executable> loadedProgram = diskComponent.getProgram(diskStack);
+            ListTag programTag = diskComponent.getProgram(diskStack);
+            List<Executable> loadedProgram;
+            try {
+                loadedProgram = ProgramCompiler.fromNbt(programTag);
+            } catch (ProgramCompiler.CompilationException e) {
+                e.printStackTrace();
+                loadedProgram = new ArrayList<>();
+            }
             blockEntity.setProgram(loadedProgram);
         }
 
@@ -226,7 +233,14 @@ public class SpellEditorScreenHandler extends AbstractContainerMenu {
             return;
         }
 
-        diskComponent.setProgram(diskStack, blockEntity.getProgram());
+        ListTag programTag;
+        try {
+            programTag = ProgramCompiler.toNbt(blockEntity.getProgram());
+        } catch (ProgramCompiler.CompilationException e) {
+            e.printStackTrace();
+            programTag = new ListTag();
+        }
+        diskComponent.setProgram(diskStack, programTag);
     }
 
     /**

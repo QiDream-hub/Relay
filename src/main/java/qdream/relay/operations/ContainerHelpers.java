@@ -1,4 +1,4 @@
-package qdream.relay.tools;
+package qdream.relay.operations;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
@@ -15,8 +15,8 @@ import java.util.List;
  * 容器操作工具类
  * 提供容器和物品堆的获取、合并、查询等操作
  */
-public class ContainerTools {
-    private ContainerTools() {
+public class ContainerHelpers {
+    private ContainerHelpers() {
     }
 
     /**

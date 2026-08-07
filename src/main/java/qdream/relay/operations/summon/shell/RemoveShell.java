@@ -9,6 +9,8 @@ import qdream.relay.mc.errors.EntityException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
 import qdream.relay.entities.EntityShell;
@@ -56,23 +58,23 @@ public class RemoveShell extends Instruction {
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, "实体引用无效");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
         }
 
         // 验证是否为 Shell 实体
         if (!(entity instanceof EntityShell shellEntity)) {
-            throw new EntityException(executor, "目标实体不是 Shell 实体");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
         }
 
         // 验证调用者是否为 Owner
         var owner = OperationHelpers.getOwner(executor);
         if (owner == null) {
-            throw new EntityException(executor, "无法获取调用者");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.OWNER_NOT_FOUND));
         }
 
         var shellOwner = shellEntity.getOwner();
         if (shellOwner == null || !shellOwner.getUUID().equals(owner.getUUID())) {
-            throw new EntityException(executor, "无权移除此 Shell（不属于你）");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.PERMISSION_DENIED));
         }
 
         // 获取 Shell 剩余能量

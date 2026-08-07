@@ -11,8 +11,10 @@ import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.errors.EntityException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ContainerTools;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.EntityData;
@@ -75,50 +77,50 @@ public class PickupItem extends Instruction {
         // 弹出 BlockEntityData
         BlockEntityData blockEntityData = StackHelpers.popBlockEntity(executor, id);
         if (blockEntityData == null || blockEntityData.isNull()) {
-            throw new ContainerException(executor, id + " 错误的容器");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_CONTAINER));
         }
 
         // 弹出 EntityData
         EntityData entityData = StackHelpers.popEntity(executor, id);
         if (entityData == null || entityData.isNull()) {
-            throw new EntityException(executor, id + " 错误的实体");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ENTITY));
         }
 
         ServerLevel entityLevel = Relay.getWorld(entityData.getWorldId());
         if (entityLevel == null) {
-            throw new EntityException(executor, id + " 错误的实体");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ENTITY));
         }
 
         // 获取 BlockEntity（使用容器所在的世界）
         var blockEntity = blockEntityData.getBlockEntity();
         if (blockEntity == null || blockEntity.isRemoved()) {
-            throw new ContainerException(executor, id + "错误的容器");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_CONTAINER));
         }
 
         // 检查是否为 Container
         if (!(blockEntity instanceof Container container)) {
-            throw new ContainerException(executor, "方块实体不是容器");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
         }
 
         // 获取实体（使用实体所在的世界）
         Entity entity = entityData.getEntity();
         if (entity == null || entity.isRemoved()) {
-            throw new EntityException(executor,id + " 错误的实体");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ENTITY));
         }
 
         // 检查是否为物品实体
         if (!(entity instanceof ItemEntity itemEntity)) {
-            throw new EntityException(executor,id + " 错误的实体");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ENTITY));
         }
 
         // 获取物品堆
         ItemStack itemStack = itemEntity.getItem();
         if (itemStack.isEmpty()) {
-            throw new EntityException(executor,id + " 错误的实体");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ENTITY));
         }
 
         // 尝试放入容器
-        var result = ContainerTools.tryInsertIntoContainer(container, itemStack);
+        var result = ContainerHelpers.tryInsertIntoContainer(container, itemStack);
 
         List<Executable> list = new ArrayList<>();
         for (Integer integer : result) {

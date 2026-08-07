@@ -5,6 +5,8 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.EntityException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
 import qdream.relay.entities.EntityShell;
@@ -39,12 +41,12 @@ public class EntityShellGetEnergy extends Instruction {
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, "实体引用无效");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
         }
 
         // 检查是否为 EntityShell
         if (!(entity instanceof EntityShell shell)) {
-            throw new EntityException(executor, "目标实体不是 EntityShell");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
         }
 
         // 获取能量

@@ -6,7 +6,9 @@ import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.errors.StackException;
 import qdream.relay.mc.errors.TypeException;
-import qdream.relay.tools.StackTools;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
+import qdream.relay.tools.TextTools;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.VectorData;
@@ -52,7 +54,7 @@ public final class StackHelpers {
     public static Executable popAny(StateMachine executor, String id) {
         Executable popData = executor.popData();
         if (popData == null) {
-            throw new StackException(executor, id + ": 数据栈不足");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.STACK_EMPTY));
         }
         return popData;
     }
@@ -72,12 +74,9 @@ public final class StackHelpers {
     @NotNull
     public static <T> T popAsType(StateMachine executor, Class<T> expectedType, String operationName, String targetId) {
         Executable exe = executor.popData();
-        if (exe == null) {
-            throw new StackException(executor, operationName + " 数据栈不足");
-        }
         if (!expectedType.isInstance(exe)) {
-            throw new TypeException(executor, operationName + " 期望:" + targetId +
-                    " 类型，实际为：" + StackTools.getId(exe));
+            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
+                    TextTools.getText(targetId), TextTools.getText(exe)));
         }
         return expectedType.cast(exe);
     }
@@ -100,8 +99,8 @@ public final class StackHelpers {
             String targetId) {
         Executable exe = getDataAt(executor, index, operationName);
         if (!expectedType.isInstance(exe)) {
-            throw new TypeException(executor, operationName + " 期望:" + targetId +
-                    " 类型，实际为：" + StackTools.getId(exe));
+            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
+                    TextTools.getText(targetId), TextTools.getText(exe)));
         }
         return expectedType.cast(exe);
     }
@@ -418,7 +417,8 @@ public final class StackHelpers {
         for (int i = count - 1; i >= 0; i--) {
             result[i] = executor.popData();
             if (result[i] == null) {
-                throw new StackException(executor, "数据栈不足，需要 " + count + " 个参数");
+                throw new StackException(executor,
+                        ErrorMessageTools.buildErrorMessage(ErrorType.STACK_INSUFFICIENT, i));
             }
         }
         return result;
@@ -434,7 +434,8 @@ public final class StackHelpers {
      */
     public static void checkStackSize(StateMachine executor, int required, String operationName) {
         if (executor.getDataStackSize() < required) {
-            throw new StackException(executor, operationName + " 需要 " + required + " 个参数");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.STACK_INSUFFICIENT, required));
         }
     }
 
@@ -452,14 +453,16 @@ public final class StackHelpers {
     @NotNull
     public static Executable getDataAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, operationName + " 索引不能为负数");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
         }
         if (index >= executor.getDataStackSize()) {
-            throw new StackException(executor, operationName + " 索引超出栈范围");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
+                    executor.getDataStackSize()));
         }
         Executable target = executor.getDataAt(index);
         if (target == null) {
-            throw new StackException(executor, operationName + " 无法获取目标元素");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_GETTABLE));
         }
         return target;
     }
@@ -476,14 +479,16 @@ public final class StackHelpers {
     @NotNull
     public static Executable removeDataAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, operationName + " 索引不能为负数");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
         }
         if (index >= executor.getDataStackSize()) {
-            throw new StackException(executor, operationName + " 索引超出栈范围");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
+                    executor.getDataStackSize()));
         }
         Executable target = executor.removeDataAt(index);
         if (target == null) {
-            throw new StackException(executor, operationName + " 无法移除目标元素");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_REMOVABLE));
         }
         return target;
     }
@@ -499,13 +504,15 @@ public final class StackHelpers {
      */
     public static void setDataAt(StateMachine executor, int index, Executable value, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, operationName + " 索引不能为负数");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
         }
         if (index >= executor.getDataStackSize()) {
-            throw new StackException(executor, operationName + " 索引超出栈范围");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
+                    executor.getDataStackSize()));
         }
         if (!executor.setDataAt(index, value)) {
-            throw new StackException(executor, operationName + " 无法设置目标元素");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_SETTABLE));
         }
     }
 
@@ -521,14 +528,16 @@ public final class StackHelpers {
     @NotNull
     public static Executable getProgramAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, operationName + " 索引不能为负数");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
         }
         if (index >= executor.getProgramStackSize()) {
-            throw new StackException(executor, operationName + " 索引超出栈范围");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
+                    executor.getProgramStackSize()));
         }
         Executable target = executor.getProgramAt(index);
         if (target == null) {
-            throw new StackException(executor, operationName + " 无法获取目标元素");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_GETTABLE));
         }
         return target;
     }
@@ -545,14 +554,16 @@ public final class StackHelpers {
     @NotNull
     public static Executable removeProgramAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, operationName + " 索引不能为负数");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
         }
         if (index >= executor.getProgramStackSize()) {
-            throw new StackException(executor, operationName + " 索引超出栈范围");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
+                    executor.getProgramStackSize()));
         }
         Executable target = executor.removeProgramAt(index);
         if (target == null) {
-            throw new StackException(executor, operationName + " 无法移除目标元素");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_REMOVABLE));
         }
         return target;
     }
@@ -568,13 +579,15 @@ public final class StackHelpers {
      */
     public static void setProgramAt(StateMachine executor, int index, Executable value, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, operationName + " 索引不能为负数");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
         }
         if (index >= executor.getProgramStackSize()) {
-            throw new StackException(executor, operationName + " 索引超出栈范围");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
+                    executor.getProgramStackSize()));
         }
         if (!executor.setProgramAt(index, value)) {
-            throw new StackException(executor, operationName + " 无法设置目标元素");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_SETTABLE));
         }
     }
 
@@ -589,10 +602,11 @@ public final class StackHelpers {
      */
     public static void checkIndex(StateMachine executor, int index, int stackSize, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, operationName + " 索引不能为负数");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
         }
         if (index >= stackSize) {
-            throw new StackException(executor, operationName + " 索引超出栈范围");
+            throw new StackException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index, stackSize));
         }
     }
 }

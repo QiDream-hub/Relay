@@ -6,12 +6,13 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import qdream.relay.tools.StackTools;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import qdream.relay.tools.TextTools;
 
 /**
  * 数据类型列表 Widget
@@ -139,7 +140,7 @@ public class TypeListWidget extends AbstractWidget {
      * 获取类型的显示名称（从语言文件）
      */
     private String getDisplayName(String typeId) {
-        return displayNameCache.computeIfAbsent(typeId, StackTools::getTypeDisplayName);
+        return displayNameCache.computeIfAbsent(typeId, id -> TextTools.getText("type." + id + ".name", id));
     }
 
     /** 获取可视区域内可显示的最大行数 */

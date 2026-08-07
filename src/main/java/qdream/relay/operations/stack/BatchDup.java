@@ -7,6 +7,8 @@ import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.errors.StackException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.NumberData;
 
 import java.util.ArrayList;
@@ -29,20 +31,20 @@ public class BatchDup extends Instruction {
         Executable countExe = StackHelpers.popAny(executor, id);
 
         if (!(countExe instanceof NumberData numberData)) {
-            throw new ParameterException(executor, "批量复制：参数必须是数字");
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_MUST_BE_NUMBER));
         }
 
         if (!numberData.isInteger()) {
-            throw new ParameterException(executor, "批量复制：计数必须是整数");
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_MUST_BE_INTEGER));
         }
 
         int count = numberData.asInt();
         if (count <= 0) {
-            throw new ParameterException(executor, "批量复制：计数必须大于 0");
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_MUST_BE_POSITIVE));
         }
 
         if (count > executor.getDataStackSize()) {
-            throw new StackException(executor, "批量复制：计数超出栈大小");
+            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_EXCEEDS_STACK));
         }
 
         // 获取栈顶 N 个元素（从栈顶到栈底）

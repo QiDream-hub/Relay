@@ -4,8 +4,8 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ContainerTools;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.NumberData;
 
@@ -29,7 +29,7 @@ public class GetItemCount extends Instruction {
 
         SlotData itemData = StackHelpers.popSlot(executor, id);
 
-        int count = ContainerTools.getItemCount(itemData);
+        int count = ContainerHelpers.getItemCount(itemData);
         executor.pushData(new NumberData(count));
     }
 }

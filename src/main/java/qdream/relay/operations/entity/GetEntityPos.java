@@ -5,6 +5,8 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.EntityException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -35,7 +37,7 @@ public class GetEntityPos extends Instruction {
 
         var entity = popEntity.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, id + " 错误的实体");
+            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
         }
 
         // 获取实体位置

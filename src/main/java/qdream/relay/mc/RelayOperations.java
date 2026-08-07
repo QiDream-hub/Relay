@@ -167,7 +167,6 @@ public class RelayOperations {
                 OperationRegistry.register(new OperationRegistry.OpEntry(new VectorSplit()));
 
                 // 世界交互操作（需要世界交互器）
-                OperationRegistry.register(new OperationRegistry.OpEntry(new Raycast()));
                 OperationRegistry.register(new OperationRegistry.OpEntry(new DetectBlock()));
                 OperationRegistry.register(new OperationRegistry.OpEntry(new DetectEntity()));
                 OperationRegistry.register(new OperationRegistry.OpEntry(new PushVector()));

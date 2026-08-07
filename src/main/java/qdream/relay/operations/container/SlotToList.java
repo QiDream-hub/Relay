@@ -1,17 +1,23 @@
 package qdream.relay.operations.container;
 
+import java.util.ArrayList;
+
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ContainerException;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.SlotData;
 import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.Component.RelayDataComponents;
-
-import net.minecraft.world.item.ItemStack;
 
 /**
  * 从物品读取列表操作
@@ -35,18 +41,24 @@ public class SlotToList extends Instruction {
 
         ItemStack itemStack = slotData.getItemStack();
         if (itemStack == null || itemStack.isEmpty()) {
-            throw new ContainerException(executor, id + " 物品为空");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ITEM_NOT_FOUND));
         }
 
         // 检查物品是否是法术磁盘（检查是否是 DiskComponent 类型）
         if (!(itemStack.getItem() instanceof DiskComponent diskComponent)) {
-            throw new ContainerException(executor, id + " 目标物品不是法术磁盘");
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_SPELL_DISK));
         }
 
         // 从磁盘读取程序列表
-        var program = diskComponent.getProgram(itemStack);
+        ListTag programTag = diskComponent.getProgram(itemStack);
+        java.util.List<Executable> program;
+        try {
+            program = ProgramCompiler.fromNbt(programTag);
+        } catch (ProgramCompiler.CompilationException e) {
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.COMPILATION_FAILED, e.getMessage()));
+        }
 
         // 将程序列表包装为 ListData 并压入数据栈
-        executor.pushData(new ListData(new java.util.ArrayList<>(program)));
+        executor.pushData(new ListData(new ArrayList<>(program)));
     }
 }
