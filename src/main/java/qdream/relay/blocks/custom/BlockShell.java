@@ -20,12 +20,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-import java.util.UUID;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Iterator;
-
 import com.mojang.serialization.MapCodec;
 
 import qdream.relay.blocks.entity.RelayBlockEntities;

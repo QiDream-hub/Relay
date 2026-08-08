@@ -467,7 +467,8 @@
   "type.relay:null.description": "Null type, represents no data",
   "type.relay:slot.name": "Slot",
   "type.relay:slot.description": "Slot reference of the container",
-
+  "type.relay:block.name": "Block",
+  "type.relay:block.description": "Block state reference, allows retrieving block properties",
   "type.any.name": "any",
   "type....any.name": "...any",
 
@@ -537,6 +538,10 @@
   "gui.relay:shell.status.energy_cost.none": "§7Energy Cost: §8None",
   "gui.relay:shell.status.program.loaded": "§7Program: §aLoaded",
   "gui.relay:shell.status.program.missing": "§7Program: §8Not Loaded",
+  "gui.relay:shell.program_reload.disk_empty": "§c[Reload] Disk is empty",
+  "gui.relay:shell.program_reload.disk_component_null": "§c[Reload] Disk component is null",
+  "gui.relay:shell.program_reload.program_empty": "§c[Reload] Program list is empty, cannot load",
+  "gui.relay:shell.program_reload.success": "§a[Reload] Successfully loaded %d executables to program stack",
 
   "gui.relay:tool_shell.title": "Tool Shell",
   "gui.relay:tool_shell.slot.core": "Core",
@@ -558,5 +563,17 @@
   "gui.relay:spell_editor.label.editor": "Editor",
   "gui.relay:spell_editor.label.disk_slot": "Disk:",
   "gui.relay:spell_editor.save.success": "Saved",
-  "gui.relay:spell_editor.save.failure": "Save Failed"
+  "gui.relay:spell_editor.save.failure": "Save Failed",
+
+  "gui.relay:spell_editor.operations.title": "Available Operations",
+  "gui.relay:spell_editor.operations.count": "%d operations",
+  "gui.relay:spell_editor.types.title": "Data Types",
+  "gui.relay:spell_editor.types.count": "%d types",
+
+  "gui.relay:tool_shell.message.prefix": "[Tool Shell]",
+  "gui.relay:tool_shell.debug.separator": "§8§m----------------------------------------",
+  "gui.relay:tool_shell.debug.program_stack": "§7[§f Program Stack §7]: %s",
+  "gui.relay:tool_shell.debug.data_stack": "§7[§f Data Stack §7]: %s",
+  "gui.relay:tool_shell.mishap.title": "§c[§c Mishap §c] §fOperation: %s",
+  "gui.relay:tool_shell.mishap.reason": "§c[§c Mishap §c] §fReason: %s"
 }

@@ -368,11 +368,11 @@ public class OperationListWidget extends AbstractWidget {
         }
 
         // 标题文字
-        graphics.text(this.font, "可用操作", x + PADDING + 2, y + 4, 0xFF00FF00);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.title"), x + PADDING + 2, y + 4, 0xFF00FF00);
 
         // 底部计数提示（在裁剪区域外渲染，确保可见）
         int countY = y + this.height - LINE_HEIGHT - 2;
-        graphics.text(this.font, operations.size() + " 个操作", x + PADDING, countY, 0xFF666666);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.count", operations.size()), x + PADDING, countY, 0xFF666666);
     }
 
     /**

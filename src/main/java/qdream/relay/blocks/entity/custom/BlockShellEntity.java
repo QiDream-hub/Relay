@@ -93,6 +93,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 syncLogsToClient(getLevel(), worldPosition);
             }
             setEnabled(false);
+            setInitialized(false);
         });
     }
 
@@ -168,7 +169,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("外壳");
+        return Component.literal("");
     }
 
     @Override
@@ -421,9 +422,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         setChanged();
-        if (level != null && !level.isClientSide()) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        }
     }
 
     /**
@@ -439,15 +437,12 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
         setChanged();
-        if (level != null && !level.isClientSide()) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        }
     }
 
     @Override
     public boolean canExecute() {
         // BlockShell 需要检查 GUI 开关状态
-        return isEnabled() && isRunning();
+        return isEnabled() && isRunning() && isInitialized();
     }
 
     @Override
@@ -549,19 +544,18 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     public void loadProgramFromDisk() {
         if (level == null || level.isClientSide()) {
-            addLogEntry("§c[重载] 客户端或 level 为 null");
             return;
         }
 
         ItemStack diskStack = getDiskStack();
         if (diskStack.isEmpty()) {
-            addLogEntry("§c[重载] 磁盘为空");
+            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_empty").getString());
             return;
         }
 
         DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
-            addLogEntry("§c[重载] 磁盘组件为 null");
+            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_component_null").getString());
             return;
         }
 
@@ -575,21 +569,15 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             program = new ArrayList<>();
         }
 
-        addLogEntry(String.format("§7[重载] 从磁盘读取程序：size=%d, diskStack=%s",
-            program.size(), diskStack));
-
         if (program.isEmpty()) {
-            addLogEntry("§c[重载] 程序列表为空，无法加载");
+            addLogEntry(Component.translatable("gui.relay:shell.program_reload.program_empty").getString());
             return;
         }
 
         getStateMachine().loadProgram(program);
         setInitialized(true); // 标记程序已加载
         setChanged();
-        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        addLogEntry(String.format("§a[重载] 成功加载 %d 个可执行单元到程序栈", program.size()));
-        addLogEntry(String.format("§7[重载] 程序栈大小=%d, 数据栈大小=%d",
-            getStateMachine().getProgramStackSize(), getStateMachine().getDataStackSize()));
+        addLogEntry(Component.translatable("gui.relay:shell.program_reload.success", program.size()).getString());
     }
 
     // ========== ShellContainer 接口：执行统计 ==========

@@ -372,11 +372,11 @@ public class TypeListWidget extends AbstractWidget {
         }
 
         // 标题文字
-        graphics.text(this.font, "数据类型", x + PADDING + 2, y + 4, 0xFFAAAAFF);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.types.title"), x + PADDING + 2, y + 4, 0xFFAAAAFF);
 
         // 底部计数提示（在裁剪区域外渲染，确保可见）
         int countY = y + this.height - LINE_HEIGHT - 2;
-        graphics.text(this.font, dataTypes.size() + " 个类型", x + PADDING, countY, 0xFF666666);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.types.count", dataTypes.size()), x + PADDING, countY, 0xFF666666);
     }
 
     /**

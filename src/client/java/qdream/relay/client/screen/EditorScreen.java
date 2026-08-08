@@ -28,18 +28,19 @@ import qdream.relay.items.DiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
-import qdream.relay.screen.SpellEditorScreenHandler;
+import qdream.relay.networking.payloads.C2S_DiskInsertedPayload;
+import qdream.relay.screen.EditorScreenHandler;
 
 /**
  * 法术编辑器 Screen
  * 使用官方容器纹理渲染玩家背包
  */
-public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreenHandler> {
+public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
     // ===== 布局常量 =====
     private static final int GUI_WIDTH = 410;
@@ -86,7 +87,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
     private HoverInfoWidget hoverInfoWidget;
     private SlotWidget diskSlotWidget;
 
-    public SpellEditorScreen(SpellEditorScreenHandler handler, Inventory inventory, Component title) {
+    public EditorScreen(EditorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
         // 设置背包标签位置
         this.inventoryLabelY = EDITOR_PANEL_HEIGHT + 10;
@@ -142,21 +143,21 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // ===== 功能按钮 =====
         // 格式化按钮
-        formatButton = Button.builder(Component.literal("格式化"), btn -> onFormat())
+        formatButton = Button.builder(Component.translatable("gui.relay:spell_editor.button.format"), btn -> onFormat())
                 .pos(buttonX, buttonY)
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
         this.addRenderableWidget(formatButton);
 
         // 加载按钮
-        loadButton = Button.builder(Component.literal("加载"), btn -> onLoad())
+        loadButton = Button.builder(Component.translatable("gui.relay:spell_editor.button.load"), btn -> onLoad())
                 .pos(buttonX + BUTTON_WIDTH + BUTTON_SPACING, buttonY)
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
         this.addRenderableWidget(loadButton);
 
         // 保存按钮
-        saveButton = Button.builder(Component.literal("保存"), btn -> onSave())
+        saveButton = Button.builder(Component.translatable("gui.relay:spell_editor.button.save"), btn -> onSave())
                 .pos(buttonX + (BUTTON_WIDTH + BUTTON_SPACING) * 2, buttonY)
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
@@ -170,7 +171,7 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
 
         // 磁盘插槽 Widget (与 ScreenHandler 中的 DISK_SLOT 位置一致)
         diskSlotWidget = new SlotWidget(
-                left + DISK_SLOT_X, top + DISK_SLOT_Y, "法术磁盘");
+                left + DISK_SLOT_X, top + DISK_SLOT_Y, Component.translatable("gui.relay:spell_editor.slot.spell_disk"), this.font);
         this.addRenderableWidget(diskSlotWidget);
 
         // 初始加载程序
@@ -320,11 +321,11 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
             // 然后保存到磁盘
             ClientPlayNetworking.send(new C2S_SaveSpellDiskPayload());
 
-            saveButton.setMessage(Component.literal("已保存"));
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.success"));
         } catch (CompilationException e) {
             // 保存失败，显示错误
             Relay.LOGGER.error("保存失败 出现错误:" + e.getMessage());
-            saveButton.setMessage(Component.literal("保存失败"));
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure"));
         }
     }
 
@@ -333,19 +334,12 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
      */
     private void onLoad() {
         ItemStack diskStack = this.menu.getDiskItem();
-        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof DiskItem disk)) {
+        if (diskStack.isEmpty() || !(diskStack.getItem() instanceof DiskItem)) {
             return;
         }
 
-        ListTag programTag = disk.getProgram(diskStack);
-        List<Executable> program;
-        try {
-            program = ProgramCompiler.fromNbt(programTag);
-            String formatted = ProgramCompiler.toPrettyJson(program);
-            jsonEditorWidget.setJsonContent(formatted);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // 发送请求到服务端，由服务端加载并同步
+        ClientPlayNetworking.send(new C2S_DiskInsertedPayload());
     }
 
     /**
@@ -380,10 +374,10 @@ public class SpellEditorScreen extends AbstractContainerScreen<SpellEditorScreen
         graphics.verticalLine(left + PANEL_WIDTH, top, panelBottom, SEPARATOR_COLOR);
         graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, INVENTORY_SEPARATOR_COLOR);
 
-        graphics.text(this.font, "编辑器", left + PANEL_WIDTH + PANEL_PADDING, top + 5, 0xFFFFFF00);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.label.editor"), left + PANEL_WIDTH + PANEL_PADDING, top + 5, TITLE_COLOR);
 
         // 磁盘提示文字
-        graphics.text(this.font, "磁盘:", left + DISK_SLOT_X - 25, top + DISK_SLOT_Y, TITLE_COLOR);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.label.disk_slot"), left + DISK_SLOT_X - 25, top + DISK_SLOT_Y, TITLE_COLOR);
     }
 
     // ==================== 事件转发 ====================

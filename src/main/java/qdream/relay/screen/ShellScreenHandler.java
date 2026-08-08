@@ -260,14 +260,6 @@ public class ShellScreenHandler extends AbstractContainerMenu {
         return localCoreCostSlot.get();
     }
 
-    /**
-     * 客户端调用：切换开关状态（本地预览）
-     * 实际服务端切换通过网络包完成
-     */
-    public void toggleEnabled() {
-        enabledSlot.set(enabledSlot.get() == 0 ? 1 : 0);
-    }
-
     /** 获取当前启用状态（读取同步槽） */
     public boolean isEnabled() {
         return enabledSlot.get() != 0;

@@ -44,7 +44,12 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     private static final int STATUS_BG_COLOR = 0xFF0F0F1F;
 
     // 复位按钮 - 开关按钮左侧 插槽标签
-    private static final String[] SLOT_LABELS = { "核心", "磁盘", "能量", "交互" };
+    private static final Component[] SLOT_LABELS = {
+        Component.translatable("gui.relay:shell.slot.core"),
+        Component.translatable("gui.relay:shell.slot.disk"),
+        Component.translatable("gui.relay:shell.slot.energy"),
+        Component.translatable("gui.relay:shell.slot.interactor")
+    };
     private static final int[] SLOT_LABEL_COLORS = { 0xFF00FF88, 0xFF00CCFF, 0xFFFFCC00, 0xFFFF8800 };
 
     // 复位按钮 - 开关按钮左侧 开关按钮
@@ -96,17 +101,17 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         int slotX = this.leftPos + 50;
         int slotY = this.topPos + 12;
         for (int i = 0; i < 4; i++) {
-            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i]);
+            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i], this.font);
             this.addRenderableWidget(slotWidgets[i]);
         }
     }
 
     private Component getToggleLabel() {
-        return Component.literal(this.menu.isEnabled() ? "§a已开启" : "§c已关闭");
+        return Component.translatable(this.menu.isEnabled() ? "gui.relay:shell.button.toggle" : "gui.relay:shell.button.toggle.disabled");
     }
 
     private Component getResetLabel() {
-        return Component.literal("§e 重载程序");
+        return Component.translatable("gui.relay:shell.button.init");
     }
 
     private void onReset() {
@@ -114,9 +119,9 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     }
 
     private void onToggle() {
-        this.menu.toggleEnabled();
         toggleButton.setMessage(getToggleLabel());
 
+        // 发送网络包让服务端切换实际状态
         ClientPlayNetworking.send(new C2S_ToggleShellPayload());
     }
 
@@ -173,31 +178,30 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         int currentY = y;
 
         boolean enabled = this.menu.isEnabled();
-        String statusText = enabled ? "§a● 运行中" : "§c● 已停止";
+        Component statusText = Component.translatable(enabled ? "gui.relay:shell.status.running" : "gui.relay:shell.status.stopped");
         graphics.text(this.font, statusText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
         int coreCount = this.menu.getSyncedCoreCount();
-
-        String coreText;
-        if (coreCount > 0) {
-            coreText = "§7核心：§f" + coreCount;
-        } else {
-            coreText = "§7核心：§8未安装";
-        }
+        Component coreText = coreCount > 0 
+            ? Component.translatable("gui.relay:shell.status.core", coreCount)
+            : Component.translatable("gui.relay:shell.status.core.missing");
         graphics.text(this.font, coreText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
         double energyCost = this.menu.getSyncedEnergyCost();
-        String energyCostText = energyCost > 0 ? "§7能耗：§e" + energyCost + " /tick" : "§7能耗：§8无";
+        Component energyCostText = energyCost > 0 
+            ? Component.translatable("gui.relay:shell.status.energy_cost", String.format("%.1f", energyCost))
+            : Component.translatable("gui.relay:shell.status.energy_cost.none");
         graphics.text(this.font, energyCostText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
         boolean initialized = this.menu.isSyncedInitialized();
-        String initText = initialized ? "§7程序: §a已加载" : "§7程序: §8未加载";
+        Component initText = initialized 
+            ? Component.translatable("gui.relay:shell.status.program.loaded")
+            : Component.translatable("gui.relay:shell.status.program.missing");
         graphics.text(this.font, initText, x, currentY, 0xFFFFFFFF);
     }
-
     @Override
     public boolean isPauseScreen() {
         return false;

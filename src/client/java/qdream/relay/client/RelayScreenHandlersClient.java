@@ -3,7 +3,7 @@ package qdream.relay.client;
 import net.minecraft.client.gui.screens.MenuScreens;
 
 import qdream.relay.client.screen.ShellScreen;
-import qdream.relay.client.screen.SpellEditorScreen;
+import qdream.relay.client.screen.EditorScreen;
 import qdream.relay.client.screen.ToolShellScreen;
 import qdream.relay.screen.RelayScreenHandlers;
 
@@ -18,7 +18,7 @@ public class RelayScreenHandlersClient {
         MenuScreens.register(RelayScreenHandlers.SHELL_SCREEN_HANDLER, ShellScreen::new);
 
         // 注册法术编辑器屏幕
-        MenuScreens.register(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, SpellEditorScreen::new);
+        MenuScreens.register(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, EditorScreen::new);
 
         // 注册工具外壳屏幕
         MenuScreens.register(RelayScreenHandlers.TOOL_SHELL_SCREEN_HANDLER, ToolShellScreen::new);

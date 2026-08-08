@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import qdream.relay.client.screen.SpellEditorScreen;
+import qdream.relay.client.screen.EditorScreen;
 import qdream.relay.client.screen.ShellScreen;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
@@ -30,7 +30,7 @@ public class RelayClientNetworking {
         ClientPlayNetworking.registerGlobalReceiver(S2C_SyncSpellDiskPayload.TYPE, (payload, context) -> {
             context.client().execute(() -> {
                 Minecraft mc = Minecraft.getInstance();
-                if (mc.screen instanceof SpellEditorScreen editorScreen) {
+                if (mc.screen instanceof EditorScreen editorScreen) {
                     try {
                         CompoundTag tag = payload.programNbt();
                         ListTag listTag = tag.getList("program").orElse(null);

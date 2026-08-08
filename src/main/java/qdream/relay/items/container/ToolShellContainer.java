@@ -82,7 +82,7 @@ public class ToolShellContainer implements ShellContainer {
         stateMachine.setMishapHandler(reason -> {
             Entity owner = ToolShellContainer.this.owner;
             if (owner != null && owner instanceof Player player) {
-                player.sendSystemMessage(Component.literal("[工具外壳]" + reason));
+                player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix").append(reason));
             }
         });
         // 设置调试回调
@@ -92,11 +92,9 @@ public class ToolShellContainer implements ShellContainer {
                 if (isDebugOutputEnabled()) {
                     Entity owner = ToolShellContainer.this.owner;
                     if (owner != null && owner instanceof Player player) {
-                        player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 程序栈 §7]: " + TextTools.formatProgramStack(stateMachine)));
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 数据栈 §7]: " + TextTools.formatDataStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.program_stack", TextTools.formatProgramStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.data_stack", TextTools.formatDataStack(stateMachine)));
                     }
                 }
             }
@@ -110,15 +108,11 @@ public class ToolShellContainer implements ShellContainer {
                         if (executable instanceof Operation op) {
                             opName = op.getId();
                         }
-                        player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
-                        player.sendSystemMessage(Component.literal(
-                                "§c[§c 事故 §c] §f操作：" + opName));
-                        player.sendSystemMessage(Component.literal(
-                                "§c[§c 事故 §c] §f原因：" + reason));
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 程序栈 §7]: " + TextTools.formatProgramStack(stateMachine)));
-                        player.sendSystemMessage(Component.literal(
-                                "§7[§f 数据栈 §7]: " + TextTools.formatDataStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.mishap.title", opName));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.mishap.reason", reason));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.program_stack", TextTools.formatProgramStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.data_stack", TextTools.formatDataStack(stateMachine)));
                     }
                 }
             }
@@ -299,11 +293,11 @@ public class ToolShellContainer implements ShellContainer {
         // 程序执行完毕后打印统计信息（仅当启用统计信息时）
         if (isStatusInfo()) {
             String[] formatStatsPanel = executionStats.formatStatsPanel();
-            player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
+            player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
             for (String string : formatStatsPanel) {
                 player.sendSystemMessage(Component.literal(string));
             }
-            player.sendSystemMessage(Component.literal("§8§m----------------------------------------"));
+            player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
         }
     }
 

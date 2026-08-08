@@ -30,7 +30,12 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
     private static final int BORDER_COLOR = 0xFF404060;
 
     // 插槽标签
-    private static final String[] SLOT_LABELS = { "核心", "磁盘", "能量", "交互" };
+    private static final Component[] SLOT_LABELS = {
+        Component.translatable("gui.relay:tool_shell.slot.core"),
+        Component.translatable("gui.relay:tool_shell.slot.disk"),
+        Component.translatable("gui.relay:tool_shell.slot.energy"),
+        Component.translatable("gui.relay:tool_shell.slot.interactor")
+    };
     private static final int[] SLOT_LABEL_COLORS = { 0xFF00FF88, 0xFF00CCFF, 0xFFFFCC00, 0xFFFF8800 };
 
     // 配置按钮
@@ -88,7 +93,7 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
         int slotX = this.leftPos + 50;
         int slotY = this.topPos + 12;
         for (int i = 0; i < 4; i++) {
-            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i]);
+            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i], this.font);
             this.addRenderableWidget(slotWidgets[i]);
         }
     }

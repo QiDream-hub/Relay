@@ -1,5 +1,6 @@
 package qdream.relay.client.screen.widget;
 
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -19,15 +20,31 @@ public class SlotWidget extends AbstractWidget {
     private static final int BG_COLOR = 0xFF3A3A3A;
     private static final int BORDER_COLOR = 0xFF8B8B8B;
 
+    private final Component name;
+    private final Font font;
+
     /**
      * 创建插槽 Widget
      *
      * @param x    X 坐标（相对于 GUI 左上角）
      * @param y    Y 坐标（相对于 GUI 左上角）
      * @param name 插槽名称
+     * @param font 字体
      */
-    public SlotWidget(int x, int y, String name) {
+    public SlotWidget(int x, int y, Component name, Font font) {
         super(x - 1, y - 1, SLOT_SIZE, SLOT_SIZE, Component.empty());
+        this.name = name;
+        this.font = font;
+    }
+
+    /**
+     * 创建插槽 Widget（不显示名称）
+     *
+     * @param x X 坐标（相对于 GUI 左上角）
+     * @param y Y 坐标（相对于 GUI 左上角）
+     */
+    public SlotWidget(int x, int y) {
+        this(x, y, Component.empty(), null);
     }
 
     @Override
@@ -37,6 +54,11 @@ public class SlotWidget extends AbstractWidget {
 
         // 边框（始终使用普通边框颜色，不响应悬停）
         graphics.outline(this.getX(), this.getY(), SLOT_SIZE, SLOT_SIZE, BORDER_COLOR);
+
+        // 渲染插槽名称（在插槽上方）
+        if (this.name != null && this.font != null) {
+            graphics.text(this.font, this.name, this.getX(), this.getY() - 9, 0xFFFFFF);
+        }
     }
 
     @Override

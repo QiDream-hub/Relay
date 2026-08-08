@@ -72,30 +72,20 @@ public class LogWidget extends AbstractWidget {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        int x = getX();
-        int y = getY();
-
-        // 背景
-        graphics.fill(x, y, x + this.width, y + this.height, BG_COLOR);
-
-        // 外边框
-        graphics.outline(x, y, this.width, this.height, BORDER_COLOR);
-
-        // 标题
-        graphics.text(this.font, "§7 调试日志", x + PADDING, y + PADDING, TITLE_COLOR);
-
-        // 日志内容区域
-        int textY = y + PADDING + TITLE_HEIGHT + 2;
-        int textWidth = this.width - PADDING * 2;
-
-        // 检查日志是否变化，需要重新缓存
+        // 检查日志是否为空，空则不渲染
         List<String> logs = logSupplier.get();
         if (logs == null || logs.isEmpty()) {
             cachedLogLines.clear();
             lastLogs = null;
-            graphics.text(this.font, "§8 暂无日志", x + PADDING, textY, EMPTY_COLOR);
             return;
         }
+
+        int x = getX();
+        int y = getY();
+
+        // 日志内容区域
+        int textY = y + PADDING + TITLE_HEIGHT + 2;
+        int textWidth = this.width - PADDING * 2;
 
         if (lastLogs == null || !lastLogs.equals(logs)) {
             lastLogs = logs;

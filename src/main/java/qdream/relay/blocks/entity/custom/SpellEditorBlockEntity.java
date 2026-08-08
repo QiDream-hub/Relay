@@ -22,7 +22,7 @@ import net.minecraft.world.Container;
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.screen.SpellEditorScreenHandler;
+import qdream.relay.screen.EditorScreenHandler;
 import qdream.relay.mc.component.DiskComponent;
 
 /**
@@ -223,7 +223,7 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
 
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-        return new SpellEditorScreenHandler(syncId, inv, this);
+        return new EditorScreenHandler(syncId, inv, this);
     }
 
     // ========== NBT 序列化与反序列化 (26.1.2 ValueInput/ValueOutput) ==========

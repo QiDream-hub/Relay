@@ -39,25 +39,22 @@ public class RelayServerNetworking {
         // 注册 C2S_DiskInsertedPayload (客户端到服务端)
         PayloadTypeRegistry.serverboundPlay().register(C2S_DiskInsertedPayload.TYPE, C2S_DiskInsertedPayload.CODEC);
 
-        // 注册服务端接收处理器 - 磁盘插入时加载程序
+        // 注册服务端接收处理器 - 客户端请求加载磁盘
         ServerPlayNetworking.registerGlobalReceiver(C2S_DiskInsertedPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             if (player == null)
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.SpellEditorScreenHandler handler) {
-                    ItemStack diskStack = handler.getDiskItem();
-                    if (!diskStack.isEmpty() && diskStack.getItem() instanceof DiskItem) {
-                        handler.onDiskInserted(diskStack);
-                        try {
-                            ListTag programList = ProgramCompiler.toNbt(handler.getProgramEntries());
-                            CompoundTag programTag = new CompoundTag();
-                            programTag.put("program", programList);
-                            ServerPlayNetworking.send(player, new S2C_SyncSpellDiskPayload(programTag));
-                        } catch (ProgramCompiler.CompilationException e) {
-                            e.printStackTrace();
-                        }
+                if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
+                    handler.onDiskInserted();
+                    try {
+                        ListTag programList = ProgramCompiler.toNbt(handler.getProgramEntries());
+                        CompoundTag programTag = new CompoundTag();
+                        programTag.put("program", programList);
+                        ServerPlayNetworking.send(player, new S2C_SyncSpellDiskPayload(programTag));
+                    } catch (ProgramCompiler.CompilationException e) {
+                        e.printStackTrace();
                     }
                 }
             });
@@ -76,7 +73,7 @@ public class RelayServerNetworking {
                 if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
                     qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
                     if (blockEntity != null) {
-                        blockEntity.setEnabled(!blockEntity.isEnabled());
+                        blockEntity.setEnabled(!blockEntity.isEnabled()&&blockEntity.isInitialized());
                     }
                 }
             });
@@ -112,7 +109,7 @@ public class RelayServerNetworking {
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.SpellEditorScreenHandler handler) {
+                if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
                     // 如果程序列表为空但磁盘存在，先加载磁盘
                     ItemStack diskStack = handler.getDiskItem();
                     if (handler.getProgramEntries().isEmpty() && !diskStack.isEmpty()
@@ -139,7 +136,7 @@ public class RelayServerNetworking {
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.SpellEditorScreenHandler handler) {
+                if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
                     // 调用 handler.saveProgramToDisk() 将 blockEntity.program 保存到磁盘
                     handler.saveProgramToDisk();
                 }
@@ -157,7 +154,7 @@ public class RelayServerNetworking {
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.SpellEditorScreenHandler handler) {
+                if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
                     handler.onProgramModified(payload.programNbt());
                 }
             });
