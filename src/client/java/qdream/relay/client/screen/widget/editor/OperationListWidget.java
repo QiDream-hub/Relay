@@ -153,9 +153,15 @@ public class OperationListWidget extends AbstractWidget {
 
     /** 根据鼠标坐标计算条目索引，超出范围返回 -1 */
     private int getEntryAt(double mouseX, double mouseY) {
+        // 先检查鼠标是否在 Widget 范围内
+        if (!isMouseOver(mouseX, mouseY)) return -1;
+        
         double relX = mouseX - (getX() + PADDING);
         double relY = mouseY - (getY() + HEADER_HEIGHT + PADDING);
+        
+        // 检查是否超出可视区域
         if (relX < 0 || relX > this.width - PADDING * 2 - 4 || relY < 0) return -1;
+        
         int index = scrollOffset + (int) (relY / LINE_HEIGHT);
         if (index < 0 || index >= operations.size()) return -1;
         return index;
