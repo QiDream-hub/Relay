@@ -48,14 +48,6 @@ public class RelayServerNetworking {
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
                     handler.onDiskInserted();
-                    try {
-                        ListTag programList = ProgramCompiler.toNbt(handler.getProgramEntries());
-                        CompoundTag programTag = new CompoundTag();
-                        programTag.put("program", programList);
-                        ServerPlayNetworking.send(player, new S2C_SyncSpellDiskPayload(programTag));
-                    } catch (ProgramCompiler.CompilationException e) {
-                        e.printStackTrace();
-                    }
                 }
             });
         });
@@ -99,7 +91,7 @@ public class RelayServerNetworking {
             });
         });
 
-        // 注册 C2S_SaveSpellDiskPayload
+        // 注册 C2S_SaveSpellDiskPayload - 保存程序到磁盘（包含程序 NBT 数据）
         PayloadTypeRegistry.serverboundPlay().register(C2S_SaveSpellDiskPayload.TYPE, C2S_SaveSpellDiskPayload.CODEC);
 
         // 注册服务端接收处理器 - 请求程序列表
@@ -110,26 +102,16 @@ public class RelayServerNetworking {
 
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
-                    // 如果程序列表为空但磁盘存在，先加载磁盘
+                    // 从磁盘加载并同步到客户端
                     ItemStack diskStack = handler.getDiskItem();
-                    if (handler.getProgramEntries().isEmpty() && !diskStack.isEmpty()
-                            && diskStack.getItem() instanceof qdream.relay.items.DiskItem) {
+                    if (!diskStack.isEmpty() && diskStack.getItem() instanceof qdream.relay.items.DiskItem) {
                         handler.loadProgramFromDisk(diskStack);
-                    }
-
-                    try {
-                        ListTag programList = ProgramCompiler.toNbt(handler.getProgramEntries());
-                        CompoundTag programTag = new CompoundTag();
-                        programTag.put("program", programList);
-                        ServerPlayNetworking.send(player, new S2C_SyncSpellDiskPayload(programTag));
-                    } catch (ProgramCompiler.CompilationException e) {
-                        e.printStackTrace();
                     }
                 }
             });
         });
 
-        // 注册服务端接收处理器 - 保存法术磁盘（将实体程序保存到磁盘）
+        // 注册服务端接收处理器 - 保存法术磁盘（直接将程序 NBT 保存到磁盘）
         ServerPlayNetworking.registerGlobalReceiver(C2S_SaveSpellDiskPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             if (player == null)
@@ -137,25 +119,8 @@ public class RelayServerNetworking {
 
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
-                    // 调用 handler.saveProgramToDisk() 将 blockEntity.program 保存到磁盘
-                    handler.saveProgramToDisk();
-                }
-            });
-        });
-
-        // 注册 C2S_ProgramModifiedPayload
-        PayloadTypeRegistry.serverboundPlay().register(C2S_ProgramModifiedPayload.TYPE,
-                C2S_ProgramModifiedPayload.CODEC);
-
-        // 注册服务端接收处理器 - 客户端程序修改
-        ServerPlayNetworking.registerGlobalReceiver(C2S_ProgramModifiedPayload.TYPE, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player == null)
-                return;
-
-            context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
-                    handler.onProgramModified(payload.programNbt());
+                    // 直接将程序 NBT 保存到磁盘，不经过 blockEntity.program 缓存
+                    handler.saveProgramToDisk(payload.programNbt());
                 }
             });
         });

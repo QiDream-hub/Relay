@@ -1,5 +1,6 @@
 package qdream.relay.client.screen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonObject;
@@ -29,14 +30,13 @@ import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
 import qdream.relay.networking.payloads.C2S_DiskInsertedPayload;
+import qdream.relay.networking.payloads.C2S_RequestProgramPayload;
 import qdream.relay.screen.EditorScreenHandler;
 
 /**
  * 法术编辑器 Screen
- * 使用官方容器纹理渲染玩家背包
  */
 public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
@@ -117,7 +117,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
         operationListWidget = new OperationListWidget(
                 left + PANEL_PADDING, listTop,
                 listWidth, OPS_LIST_HEIGHT,
-                this.font, this.menu.getAvailableOperations());
+                this.font, new ArrayList<>(OperationRegistry.getAllOperationIds()));
         operationListWidget.setOnOperationClicked(this::onOperationClicked);
         operationListWidget.setOnHover(this::onHovered);
         this.addRenderableWidget(operationListWidget);
@@ -127,7 +127,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
         typeListWidget = new TypeListWidget(
                 left + PANEL_PADDING, typeListTop,
                 listWidth, TYPE_LIST_HEIGHT,
-                this.font, this.menu.getAvailableDataTypes());
+                this.font, new ArrayList<>(OperationRegistry.getAllDataIds()));
         typeListWidget.setOnTypeClicked(this::onTypeClicked);
         typeListWidget.setOnHover(this::onHovered);
         this.addRenderableWidget(typeListWidget);
@@ -173,8 +173,8 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
                 this.font);
         this.addRenderableWidget(diskSlotWidget);
 
-        // 初始加载程序
-        loadProgramFromServer();
+        // 初始加载程序：发送请求到服务端，服务端同步到客户端
+        ClientPlayNetworking.send(new C2S_RequestProgramPayload());
     }
 
     // ==================== 事件处理 ====================
@@ -271,14 +271,11 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
             String jsonStr = jsonEditorWidget.getJsonContent();
             List<Executable> program = ProgramCompiler.compileFromJson(jsonStr);
 
-            // 先同步到服务端 BlockEntity
+            // 直接发送保存请求，包含程序 NBT 数据
             ListTag programList = ProgramCompiler.toNbt(program);
             CompoundTag programTag = new CompoundTag();
             programTag.put("program", programList);
-            ClientPlayNetworking.send(new C2S_ProgramModifiedPayload(programTag));
-
-            // 然后保存到磁盘
-            ClientPlayNetworking.send(new C2S_SaveSpellDiskPayload());
+            ClientPlayNetworking.send(new C2S_SaveSpellDiskPayload(programTag));
 
             saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.success"));
         } catch (CompilationException e) {
@@ -297,21 +294,8 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
             return;
         }
 
-        // 发送请求到服务端，由服务端加载并同步
+        // 发送请求到服务端，服务端会从磁盘加载并同步到客户端
         ClientPlayNetworking.send(new C2S_DiskInsertedPayload());
-    }
-
-    /**
-     * 从服务端加载程序
-     */
-    private void loadProgramFromServer() {
-        List<Executable> program = this.menu.getProgramEntries();
-        try {
-            String formatted = ProgramCompiler.toPrettyJson(program);
-            jsonEditorWidget.setJsonContent(formatted);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     // ==================== 渲染 ====================

@@ -1,8 +1,5 @@
 package qdream.relay.blocks.entity.custom;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.entity.player.Player;
@@ -13,109 +10,26 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Container;
 import qdream.relay.blocks.entity.RelayBlockEntities;
-import qdream.relay.engine.Executable;
-import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.screen.EditorScreenHandler;
-import qdream.relay.mc.component.DiskComponent;
 
 /**
  * 法术编辑器方块实体
  * 实现 MenuProvider 接口以支持 GUI 打开
  * 使用 ValueInput/ValueOutput 处理 26.1.2 的序列化系统
  */
-public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider, Container {
+public class EditorBlockEntity extends BlockEntity implements MenuProvider, Container {
 
     /** 物品栏：1 个插槽用于法术磁盘 */
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(1, ItemStack.EMPTY);
 
-    /** 程序列表：持久化存储，不随 GUI 关闭而丢失 */
-    private final List<Executable> program = new ArrayList<>();
-
-    public SpellEditorBlockEntity(BlockPos pos, BlockState state) {
+    public EditorBlockEntity(BlockPos pos, BlockState state) {
         super(RelayBlockEntities.SPELL_EDITOR_BLOCK_ENTITY, pos, state);
-    }
-
-    // ========== 程序列表访问 ==========
-
-    /**
-     * 获取程序列表
-     */
-    public List<Executable> getProgram() {
-        return program;
-    }
-
-    /**
-     * 设置程序列表
-     */
-    public void setProgram(List<Executable> program) {
-        this.program.clear();
-        this.program.addAll(program);
-        setChanged();
-    }
-
-    /**
-     * 从磁盘加载程序
-     */
-    public void loadProgramFromDisk() {
-        ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty()) {
-            return;
-        }
-        DiskComponent diskComponent = getDiskComponent(diskStack);
-        if (diskComponent == null) {
-            return;
-        }
-        ListTag programTag = diskComponent.getProgram(diskStack);
-        List<Executable> loadedProgram;
-        try {
-            loadedProgram = ProgramCompiler.fromNbt(programTag);
-        } catch (ProgramCompiler.CompilationException e) {
-            e.printStackTrace();
-            loadedProgram = new ArrayList<>();
-        }
-        setProgram(loadedProgram);
-    }
-
-    /**
-     * 保存程序到磁盘
-     */
-    public void saveProgramToDisk() {
-        ItemStack diskStack = getDiskStack();
-        if (diskStack.isEmpty()) {
-            return;
-        }
-        DiskComponent diskComponent = getDiskComponent(diskStack);
-        if (diskComponent == null) {
-            return;
-        }
-        ListTag programTag;
-        try {
-            programTag = ProgramCompiler.toNbt(this.program);
-        } catch (ProgramCompiler.CompilationException e) {
-            e.printStackTrace();
-            programTag = new ListTag();
-        }
-        diskComponent.setProgram(diskStack, programTag);
-        setChanged();
-    }
-
-    /**
-     * 从物品堆获取 SpellDiskComponent
-     * @param stack 物品堆
-     * @return SpellDiskComponent 实例，如果物品不是法术磁盘则返回 null
-     */
-    private DiskComponent getDiskComponent(ItemStack stack) {
-        if (stack.getItem() instanceof DiskComponent) {
-            return (DiskComponent) stack.getItem();
-        }
-        return null;
     }
 
     // ========== Container 接口 ==========
@@ -234,16 +148,6 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
 
         // 保存物品栏
         ContainerHelper.saveAllItems(output, this.inventory);
-
-        // 保存程序列表 - 使用 CompoundTag.CODEC 序列化
-        try {
-            ListTag programTag = ProgramCompiler.toNbt(this.program);
-            CompoundTag nbt = new CompoundTag();
-            nbt.put("program", programTag);
-            output.store("editorProgram", CompoundTag.CODEC, nbt);
-        } catch (ProgramCompiler.CompilationException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -252,20 +156,6 @@ public class SpellEditorBlockEntity extends BlockEntity implements MenuProvider,
 
         // 加载物品栏
         ContainerHelper.loadAllItems(input, this.inventory);
-
-        // 加载程序列表
-        input.read("editorProgram", CompoundTag.CODEC).ifPresent(nbt -> {
-            try {
-                ListTag listTag = ((CompoundTag) nbt).getList("program").orElse(null);
-                if (listTag != null) {
-                    List<Executable> loaded = ProgramCompiler.fromNbt(listTag);
-                    this.program.clear();
-                    this.program.addAll(loaded);
-                }
-            } catch (ProgramCompiler.CompilationException e) {
-                e.printStackTrace();
-            }
-        });
     }
 
     // ========== 网络同步 ==========

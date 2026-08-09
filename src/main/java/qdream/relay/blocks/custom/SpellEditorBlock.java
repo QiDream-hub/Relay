@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 
 import qdream.relay.blocks.entity.RelayBlockEntities;
-import qdream.relay.blocks.entity.custom.SpellEditorBlockEntity;
+import qdream.relay.blocks.entity.custom.EditorBlockEntity;
 
 /**
  * 法术编辑器方块
@@ -33,7 +33,7 @@ public class SpellEditorBlock extends BaseEntityBlock {
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new SpellEditorBlockEntity(pos, state);
+        return new EditorBlockEntity(pos, state);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class SpellEditorBlock extends BaseEntityBlock {
 
         // 服务端打开编辑器菜单
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof SpellEditorBlockEntity editor) {
+        if (blockEntity instanceof EditorBlockEntity editor) {
             player.openMenu(editor);
         }
 
