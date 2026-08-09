@@ -573,11 +573,9 @@
   "gui.relay:spell_editor.label.disk_slot": "磁盘:",
   "gui.relay:spell_editor.save.success": "已保存",
   "gui.relay:spell_editor.save.failure": "保存失败",
-
   "gui.relay:spell_editor.operations.title": "可用操作",
-  "gui.relay:spell_editor.operations.count": "%d 个操作",
+  "gui.relay:spell_editor.operations.search": "搜索操作...",
   "gui.relay:spell_editor.types.title": "数据类型",
-  "gui.relay:spell_editor.types.count": "%d 个类型",
 
   "gui.relay:tool_shell.message.prefix": "[工具外壳]",
   "gui.relay:tool_shell.debug.separator": "§8§m----------------------------------------",

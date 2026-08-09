@@ -4,26 +4,27 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import qdream.relay.tools.TextTools;
+import qdream.relay.client.screen.widget.ScrollableListWidget;
+import qdream.relay.client.screen.widget.editor.tools.InfoContent;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
  * 可用操作列表 Widget
- * 支持滚动浏览、点击选中、悬停高亮
+ * 支持滚动浏览、点击选中、悬停高亮、搜索过滤
  * 点击某项操作时通过回调通知父级 Screen
  */
 public class OperationListWidget extends AbstractWidget {
 
-    private static final int LINE_HEIGHT = 11;
-    private static final int PADDING = 3;
     private static final int HEADER_HEIGHT = 16;
-    private static final int SCROLLBAR_WIDTH = 4;
+    private static final int PADDING = 3;
+    private static final int SEARCH_BOX_HEIGHT = 14;
 
     private static final int BG_COLOR = 0xFF1E1E1E;
     private static final int HEADER_BG = 0xFF252525;
@@ -32,337 +33,272 @@ public class OperationListWidget extends AbstractWidget {
     private static final int HOVER_COLOR = 0xFF55FF55;
     private static final int HOVER_BG = 0x3000FF00;
     private static final int SELECTED_BG = 0x4000AA00;
-    private static final int SCROLLBAR_COLOR = 0xFF808080;
-    private static final int SCROLLBAR_HOVER = 0xFF909090;
-    private static final int SCROLLBAR_BG = 0xFF303030;
+    private static final int SEARCH_BOX_BG = 0xFF2A2A2A;
+    private static final int SEARCH_BOX_BORDER = 0xFF404040;
 
+    private final ScrollableListWidget listWidget;
     private final Font font;
-    private final List<String> operations;
-    private Consumer<String> onOperationClicked;
+    private final List<InfoContent> operations;
 
-    /** 悬停回调：当悬停在某个操作上时调用，参数为操作 ID */
-    private Consumer<String> onHover;
+    /** 搜索关键词 */
+    private String searchText = "";
 
-    /** 缓存操作 ID 到显示名称的映射 */
-    private final Map<String, String> displayNameCache = new HashMap<>();
+    /** 搜索框区域 */
+    private int searchBoxX, searchBoxY, searchBoxWidth, searchBoxHeight;
 
-    /** 滚动偏移量（以行为单位） */
-    private int scrollOffset = 0;
+    /** 光标位置（字符索引） */
+    private int cursorPosition = 0;
 
-    /** 当前鼠标悬停的条目索引，-1 表示无悬停 */
-    private int hoveredIndex = -1;
+    /** 光标闪烁计时（毫秒） */
+    private long cursorTime = 0;
 
-    /** 当前选中的条目索引，-1 表示无选中 */
-    private int selectedIndex = -1;
-
-    /** 滚动条悬停状态 */
-    private boolean scrollbarHovered = false;
-
-    /** 是否在拖拽滚动条 */
-    private boolean draggingScrollbar = false;
-
-    /** 拖动滚动条时的初始鼠标 Y 位置 */
-    private double dragStartY = 0;
-
-    /** 拖动滚动条时的初始滚动偏移 */
-    private int dragStartScrollOffset = 0;
-
-    public OperationListWidget(int x, int y, int width, int height, Font font, List<String> operations) {
+    public OperationListWidget(int x, int y, int width, int height, Font font, List<InfoContent> operations) {
         super(x, y, width, height, Component.empty());
         this.font = font;
         this.operations = operations;
+
+        // 搜索框区域
+        this.searchBoxX = x + PADDING;
+        this.searchBoxY = y + HEADER_HEIGHT + PADDING;
+        this.searchBoxWidth = width - PADDING * 2;
+        this.searchBoxHeight = SEARCH_BOX_HEIGHT;
+
+        // 列表区域扣除标题栏和搜索框高度
+        int listY = searchBoxY + searchBoxHeight + PADDING;
+        int listHeight = height - HEADER_HEIGHT - searchBoxHeight - PADDING * 3;
+        this.listWidget = new ScrollableListWidget(x, listY, width, listHeight, font, operations);
+        this.listWidget.setColors(TEXT_COLOR, HOVER_COLOR, HOVER_BG, SELECTED_BG);
+    }
+
+    /**
+     * 过滤操作列表
+     */
+    private void filterOperations() {
+        if (searchText.isEmpty()) {
+            listWidget.setDisplayItems(operations);
+        } else {
+            List<InfoContent> filtered = new ArrayList<>();
+            for (InfoContent op : operations) {
+                String name = op.name().text();
+                String desc = op.description().text();
+                String id = op.id();
+                if (name.contains(searchText) || desc.contains(searchText) || id.contains(searchText)) {
+                    filtered.add(op);
+                }
+            }
+            listWidget.setDisplayItems(filtered);
+        }
+    }
+
+    /**
+     * 检查鼠标是否在搜索框内
+     */
+    public boolean isMouseOverSearchBox(double mouseX, double mouseY) {
+        return mouseX >= searchBoxX && mouseX < searchBoxX + searchBoxWidth &&
+                mouseY >= searchBoxY && mouseY < searchBoxY + searchBoxHeight;
     }
 
     public void setOnOperationClicked(Consumer<String> callback) {
-        this.onOperationClicked = callback;
+        this.listWidget.setOnItemSelected(callback);
     }
 
-    /**
-     * 设置悬停回调
-     */
-    public void setOnHover(Consumer<String> callback) {
-        this.onHover = callback;
+    public void setOnHover(Consumer<InfoContent> callback) {
+        this.listWidget.setOnHover(callback);
     }
-
-    /**
-     * 获取操作的显示名称（从语言文件）
-     */
-    private String getDisplayName(String opId) {
-        return displayNameCache.computeIfAbsent(opId, id -> TextTools.getName(id));
-    }
-
-    /** 获取可视区域内可显示的最大行数 */
-    private int getVisibleLineCount() {
-        return Math.max(1, (this.height - HEADER_HEIGHT - PADDING * 2) / LINE_HEIGHT);
-    }
-
-    /** 获取最大滚动偏移 */
-    private int getMaxScroll() {
-        return Math.max(0, operations.size() - getVisibleLineCount());
-    }
-
-    /** 根据鼠标坐标计算条目索引，超出范围返回 -1 */
-    private int getEntryAt(double mouseX, double mouseY) {
-        // 先检查鼠标是否在 Widget 范围内
-        if (!isMouseOver(mouseX, mouseY))
-            return -1;
-
-        double relX = mouseX - (getX() + PADDING);
-        double relY = mouseY - (getY() + HEADER_HEIGHT + PADDING);
-
-        // 检查是否超出可视区域
-        if (relX < 0 || relX > this.width - PADDING * 2 - 4 || relY < 0)
-            return -1;
-
-        int index = scrollOffset + (int) (relY / LINE_HEIGHT);
-        if (index < 0 || index >= operations.size())
-            return -1;
-        return index;
-    }
-
-    /** 检查鼠标是否在滚动条上 */
-    private boolean isMouseOnScrollbar(double mouseX, double mouseY) {
-        int sbX = getX() + this.width - 4;
-        return mouseX >= sbX && mouseX <= getX() + this.width;
-    }
-
-    // ==================== 事件处理 ====================
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (!this.visible)
-            return false;
+        // 检查是否点击搜索框
+        if (event.button() == 0 && isMouseOverSearchBox(event.x(), event.y())) {
+            this.setFocused(true);
+            // 设置光标位置为点击位置对应的字符索引
+            this.cursorPosition = getCursorIndexAtX(event.x());
+            return true;
+        } else {
+            this.setFocused(false);
+        }
+        return this.listWidget.mouseClicked(event, doubleClick);
+    }
 
-        // 检查是否点击在滚动条区域
-        int scrollbarX = getX() + this.width - SCROLLBAR_WIDTH;
-        int scrollAreaTop = getY() + HEADER_HEIGHT + PADDING;
-        int scrollAreaHeight = this.height - HEADER_HEIGHT - PADDING * 2;
+    /**
+     * 根据鼠标 X 坐标计算光标位置
+     */
+    private int getCursorIndexAtX(double mouseX) {
+        if (searchText.isEmpty()) {
+            return 0;
+        }
+        int textX = searchBoxX + 4;
+        String displayText = searchText;
 
-        if (event.button() == 0
-                && event.x() >= scrollbarX && event.x() <= scrollbarX + SCROLLBAR_WIDTH
-                && event.y() >= scrollAreaTop && event.y() <= scrollAreaTop + scrollAreaHeight) {
-
-            // 计算滑块位置，只有点击在滑块上才开始拖拽
-            int maxScroll = getMaxScroll();
-            if (maxScroll > 0) {
-                float ratio = (float) getVisibleLineCount() / operations.size();
-                int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
-                float scrollRatio = (float) scrollOffset / maxScroll;
-                int thumbY = scrollAreaTop + (int) ((scrollAreaHeight - thumbHeight) * scrollRatio);
-
-                // 点击在滑块上：开始拖拽
-                if (event.y() >= thumbY && event.y() <= thumbY + thumbHeight) {
-                    this.draggingScrollbar = true;
-                    this.dragStartY = event.y();
-                    this.dragStartScrollOffset = this.scrollOffset;
-                    return true;
-                }
+        // 计算鼠标位置对应的字符索引
+        int charIndex = 0;
+        int currentWidth = 0;
+        for (int i = 0; i < displayText.length(); i++) {
+            int charWidth = font.width(String.valueOf(displayText.charAt(i)));
+            if (textX + currentWidth + charWidth / 2 > mouseX) {
+                break;
             }
+            currentWidth += charWidth;
+            charIndex++;
+        }
+        return Math.min(charIndex, displayText.length());
+    }
 
-            // 点击在轨道上：分页滚动，不设置 draggingScrollbar
-            pageScroll(event.y() < (scrollAreaTop + scrollAreaHeight) / 2 ? -1 : 1);
+    /**
+     * 处理键盘按键事件
+     */
+    public boolean keyPressed(KeyEvent event) {
+        if (!isFocused()) {
+            return false;
+        }
+
+        int key = event.key();
+
+        // Backspace: 删除光标前的字符
+        if (key == 259) { // GLFW_KEY_BACKSPACE
+            if (cursorPosition > 0) {
+                searchText = searchText.substring(0, cursorPosition - 1) + searchText.substring(cursorPosition);
+                cursorPosition--;
+                filterOperations();
+            }
             return true;
         }
 
-        // 点击列表条目
-        if (event.button() == 0) {
-            int index = getEntryAt(event.x(), event.y());
-            if (index >= 0 && index < operations.size()) {
-                selectedIndex = index;
-                if (onOperationClicked != null) {
-                    onOperationClicked.accept(operations.get(index));
-                }
-                return true;
+        // Delete: 删除光标后的字符
+        if (key == 261) { // GLFW_KEY_DELETE
+            if (cursorPosition < searchText.length()) {
+                searchText = searchText.substring(0, cursorPosition) + searchText.substring(cursorPosition + 1);
+                filterOperations();
             }
+            return true;
         }
+
+        // Left Arrow: 光标左移
+        if (key == 263) { // GLFW_KEY_LEFT
+            if (cursorPosition > 0) {
+                cursorPosition--;
+            }
+            return true;
+        }
+
+        // Right Arrow: 光标右移
+        if (key == 262) { // GLFW_KEY_RIGHT
+            if (cursorPosition < searchText.length()) {
+                cursorPosition++;
+            }
+            return true;
+        }
+
+        // Home: 光标移到开头
+        if (key == 268) { // GLFW_KEY_HOME
+            cursorPosition = 0;
+            return true;
+        }
+
+        // End: 光标移到末尾
+        if (key == 269) { // GLFW_KEY_END
+            cursorPosition = searchText.length();
+            return true;
+        }
+
+        // Escape: 取消聚焦并清空搜索
+        if (key == 256) { // GLFW_KEY_ESCAPE
+            this.setFocused(false);
+            this.searchText = "";
+            this.cursorPosition = 0;
+            filterOperations();
+            return true;
+        }
+
         return false;
     }
 
     /**
-     * 处理滚动条拖拽
+     * 处理字符输入事件
      */
-    private void handleScrollbarDrag(double mouseY) {
-        int maxScroll = getMaxScroll();
-        if (maxScroll <= 0)
-            return;
-
-        int scrollAreaTop = getY() + HEADER_HEIGHT + PADDING;
-        int scrollAreaHeight = this.height - HEADER_HEIGHT - PADDING * 2;
-
-        // 计算滑块高度
-        float ratio = (float) getVisibleLineCount() / operations.size();
-        int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
-        int effectiveHeight = scrollAreaHeight - thumbHeight;
-
-        // 计算鼠标移动距离
-        double deltaY = mouseY - this.dragStartY;
-
-        // 将鼠标移动距离转换为滚动偏移
-        float scrollRatio = effectiveHeight > 0 ? (float) deltaY / effectiveHeight : 0;
-        int newScrollOffset = this.dragStartScrollOffset + (int) (maxScroll * scrollRatio);
-        newScrollOffset = Math.max(0, Math.min(newScrollOffset, maxScroll));
-
-        this.scrollOffset = newScrollOffset;
-    }
-
-    /**
-     * 分页滚动
-     */
-    private void pageScroll(int direction) {
-        int maxScroll = getMaxScroll();
-        if (maxScroll <= 0)
-            return;
-
-        // 每次滚动可见区域的 80%
-        int pageAmount = (int) ((this.height - HEADER_HEIGHT - PADDING * 2) * 0.8);
-        this.scrollOffset += direction * pageAmount;
-        this.scrollOffset = Math.max(0, Math.min(this.scrollOffset, maxScroll));
-    }
-
-    @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (!this.visible)
+    public boolean charTyped(CharacterEvent event) {
+        if (!isFocused()) {
             return false;
-
-        // 如果正在拖拽滚动条，根据鼠标的移动距离更新滚动
-        if (this.draggingScrollbar) {
-            handleScrollbarDrag(event.y());
-            return true;
         }
 
-        return false;
-    }
-
-    @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (!this.visible)
+        char c = event.codepointAsString().charAt(0);
+        // 过滤控制字符（已经由 keyPressed 处理）
+        if (!event.isAllowedChatCharacter()) {
             return false;
-
-        // 停止拖拽滚动条
-        if (this.draggingScrollbar) {
-            this.draggingScrollbar = false;
-            return true;
         }
 
-        return false;
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (operations.size() <= getVisibleLineCount())
-            return false;
-        scrollOffset -= (int) scrollY;
-        scrollOffset = Math.max(0, Math.min(scrollOffset, getMaxScroll()));
+        // 插入字符到光标位置
+        searchText = searchText.substring(0, cursorPosition) + c + searchText.substring(cursorPosition);
+        cursorPosition++;
+        filterOperations();
         return true;
     }
 
     @Override
-    public boolean isMouseOver(double mouseX, double mouseY) {
-        return this.visible &&
-                mouseX >= this.getX() && mouseX < this.getX() + this.width &&
-                mouseY >= this.getY() && mouseY < this.getY() + this.height;
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        return this.listWidget.mouseDragged(event, deltaX, deltaY);
     }
 
-    // ==================== 渲染 ====================
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        return this.listWidget.mouseReleased(event);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return this.listWidget.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        int x = getX();
-        int y = getY();
-        int visibleLines = getVisibleLineCount();
-        int listHeight = HEADER_HEIGHT + visibleLines * LINE_HEIGHT + PADDING * 2;
-
         // 背景
-        graphics.fill(x, y, x + this.width, y + this.height, BG_COLOR);
+        graphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, BG_COLOR);
 
         // 外边框
-        graphics.outline(x, y, this.width, this.height, BORDER_COLOR);
+        graphics.outline(this.getX(), this.getY(), this.width, this.height, BORDER_COLOR);
 
-        // 标题栏背景
-        graphics.fill(x, y, x + this.width, y + HEADER_HEIGHT, HEADER_BG);
-        graphics.horizontalLine(x, x + this.width, y + HEADER_HEIGHT, BORDER_COLOR);
-
-        // 更新悬停索引
-        int oldHoveredIndex = hoveredIndex;
-        hoveredIndex = getEntryAt(mouseX, mouseY);
-        scrollbarHovered = isMouseOnScrollbar(mouseX, mouseY);
-
-        // 触发悬停回调
-        if (hoveredIndex != oldHoveredIndex && onHover != null) {
-            if (hoveredIndex >= 0 && hoveredIndex < operations.size()) {
-                onHover.accept(operations.get(hoveredIndex));
-            } else {
-                onHover.accept(null);
-            }
-        }
-
-        // 启用裁剪区域（底部留出计数提示的空间）
-        int contentBottom = y + this.height - LINE_HEIGHT - 4;
-        graphics.enableScissor(x + PADDING, y + HEADER_HEIGHT + PADDING,
-                x + this.width - PADDING - 4, contentBottom);
-
-        // 渲染列表条目
-        int textX = x + PADDING + 2;
-        int textY = y + HEADER_HEIGHT + PADDING;
-
-        for (int i = 0; i < visibleLines && (i + scrollOffset) < operations.size(); i++) {
-            int dataIndex = i + scrollOffset;
-            String opId = operations.get(dataIndex);
-            String displayName = getDisplayName(opId);
-            int entryY = textY + i * LINE_HEIGHT;
-
-            boolean isHovered = (dataIndex == hoveredIndex);
-            boolean isSelected = (dataIndex == selectedIndex);
-
-            // 选中背景优先于悬停背景
-            if (isSelected) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1,
-                        SELECTED_BG);
-            } else if (isHovered) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1,
-                        HOVER_BG);
-            }
-
-            int color = isHovered ? HOVER_COLOR : TEXT_COLOR;
-            graphics.text(this.font, displayName, textX, entryY, color);
-        }
-
-        graphics.disableScissor();
-
-        // 渲染滚动条（仅在内容超出时显示）
-        if (operations.size() > visibleLines) {
-            renderScrollBar(graphics, x, y, visibleLines);
-        }
+        // 标题栏背景和分隔线
+        graphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + HEADER_HEIGHT, HEADER_BG);
+        graphics.horizontalLine(this.getX(), this.getX() + this.width, this.getY() + HEADER_HEIGHT, BORDER_COLOR);
 
         // 标题文字
-        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.title"), x + PADDING + 2,
-                y + 4, 0xFF00FF00);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.title"),
+                this.getX() + PADDING + 2, this.getY() + 4, 0xFF00FF00);
 
-        // 底部计数提示（在裁剪区域外渲染，确保可见）
-        int countY = y + this.height - LINE_HEIGHT - 2;
-        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.count", operations.size()),
-                x + PADDING, countY, 0xFF666666);
-    }
+        // 搜索框背景
+        graphics.fill(searchBoxX, searchBoxY, searchBoxX + searchBoxWidth, searchBoxY + searchBoxHeight, SEARCH_BOX_BG);
 
-    /**
-     * 渲染右侧滚动条
-     */
-    private void renderScrollBar(GuiGraphicsExtractor graphics, int x, int y, int visibleLines) {
-        int sbX = x + this.width - SCROLLBAR_WIDTH;
-        int sbTop = y + HEADER_HEIGHT + PADDING;
-        int sbHeight = this.height - HEADER_HEIGHT - PADDING * 2;
+        // 聚焦时显示高亮边框
+        int borderColor = isFocused() ? 0xFF6060FF : SEARCH_BOX_BORDER;
+        graphics.outline(searchBoxX, searchBoxY, searchBoxWidth, searchBoxHeight, borderColor);
 
-        // 滚动条背景
-        graphics.fill(sbX, sbTop, sbX + SCROLLBAR_WIDTH, sbTop + sbHeight, SCROLLBAR_BG);
+        // 搜索提示文字或输入内容
+        if (searchText.isEmpty()) {
+            graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.search"),
+                    searchBoxX + 4, searchBoxY + 2, 0xFF808080);
+        } else {
+            graphics.text(this.font, searchText, searchBoxX + 4, searchBoxY + 2, TEXT_COLOR);
 
-        // 滚动条滑块
-        float ratio = (float) visibleLines / operations.size();
-        int thumbHeight = Math.max(20, (int) (sbHeight * ratio));
-        float scrollRatio = getMaxScroll() > 0 ? (float) scrollOffset / getMaxScroll() : 0;
-        int thumbY = sbTop + (int) ((sbHeight - thumbHeight) * scrollRatio);
+            if (isFocused()) {
+                // 渲染光标（闪烁效果）
+                cursorTime += 16; // 假设 60 FPS，每帧约 16ms
+                if (cursorTime < 500) { // 0.5 秒周期
+                    int cursorX = searchBoxX + 4;
+                    if (cursorPosition > 0) {
+                        // 计算光标 X 位置
+                        String subText = searchText.substring(0, cursorPosition);
+                        cursorX += font.width(subText);
+                    }
+                    graphics.verticalLine(cursorX, searchBoxY + 1, searchBoxY + searchBoxHeight - 2, 0xFFAAAA00);
+                }
+                if (cursorTime >= 1000) {
+                    cursorTime = 0;
+                }
+            }
+        }
 
-        int thumbColor = scrollbarHovered ? SCROLLBAR_HOVER : SCROLLBAR_COLOR;
-        graphics.fill(sbX, thumbY, sbX + SCROLLBAR_WIDTH, thumbY + thumbHeight, thumbColor);
+        // 渲染列表内容（由内部组件负责）
+        this.listWidget.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
     }
 
     @Override

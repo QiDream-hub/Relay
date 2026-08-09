@@ -14,15 +14,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import qdream.relay.blocks.entity.custom.EditorBlockEntity;
-import qdream.relay.engine.Executable;
 import qdream.relay.items.DiskItem;
-import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 import qdream.relay.mc.component.DiskComponent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * 法术编辑器 Screen Handler
@@ -97,77 +91,6 @@ public class EditorScreenHandler extends AbstractContainerMenu {
         }
     }
 
-    // ==================== 程序编辑 ====================
-
-    /**
-     * 从磁盘加载程序到编辑器
-     *
-     * @param diskStack 磁盘物品（直接传入，避免客户端/服务端不同步）
-     */
-    public void loadProgramFromDisk(ItemStack diskStack) {
-        if (diskStack.isEmpty()) {
-            return;
-        }
-        DiskComponent diskComponent = (DiskComponent) diskStack.getItem();
-        if (diskComponent == null) {
-            return;
-        }
-
-        // 同步到客户端
-        syncProgramToClient(diskComponent.getProgram(diskStack));
-    }
-
-    /**
-     * 将程序同步到客户端
-     */
-    public void syncProgramToClient(ListTag programTag) {
-        if (blockEntity != null && blockEntity.getLevel() != null) {
-            Level level = blockEntity.getLevel();
-            if (!level.isClientSide()) {
-                CompoundTag nbt = new CompoundTag();
-                nbt.put("program", programTag);
-                level.players().stream()
-                        .filter(p -> p.containerMenu == this)
-                        .filter(p -> p instanceof ServerPlayer)
-                        .findFirst()
-                        .ifPresent(p -> ServerPlayNetworking.send((ServerPlayer) p, new S2C_SyncSpellDiskPayload(nbt)));
-            }
-        }
-    }
-
-    /**
-     * 处理客户端程序修改（已移除，不再需要）
-     * 客户端直接编辑 JSON，保存时发送到服务端
-     */
-
-    /**
-     * 保存程序到磁盘
-     * @param programTag 程序 NBT 数据，直接从客户端传来
-     */
-    public void saveProgramToDisk(CompoundTag programTag) {
-        if (blockEntity == null)
-            return;
-
-        ItemStack diskStack = getDiskItem();
-        if (diskStack.isEmpty()) {
-            return;
-        }
-        DiskComponent diskComponent = (DiskComponent) diskStack.getItem();
-        if (diskComponent == null) {
-            return;
-        }
-
-        // 直接使用客户端传来的 NBT 数据，不需要重新序列化
-        diskComponent.setProgram(diskStack, programTag.getList("program").orElse(new ListTag()));
-    }
-
-    /**
-     * 保存程序到磁盘（旧方法，保留兼容性）
-     */
-    public void saveProgramToDisk() {
-        saveProgramToDisk(new CompoundTag());
-    }
-
     // ==================== 物品移动 ====================
 
     /**
@@ -224,6 +147,71 @@ public class EditorScreenHandler extends AbstractContainerMenu {
         return this.wrapper.stillValid(player);
     }
 
+    // ==================== 程序编辑 ====================
+
+    /**
+     * 从磁盘加载程序到编辑器
+     *
+     * @param diskStack 磁盘物品（直接传入，避免客户端/服务端不同步）
+     */
+    public void loadProgramFromDisk(ItemStack diskStack) {
+        if (diskStack.isEmpty()) {
+            return;
+        }
+
+        if (!(diskStack.getItem() instanceof DiskComponent diskComponent)) {
+            return;
+        }
+
+        // 同步到客户端
+        syncProgramToClient(diskComponent.getProgram(diskStack));
+    }
+
+    /**
+     * 将程序同步到客户端
+     */
+    public void syncProgramToClient(ListTag programTag) {
+        if (blockEntity != null && blockEntity.getLevel() != null) {
+            Level level = blockEntity.getLevel();
+            if (!level.isClientSide()) {
+                CompoundTag nbt = new CompoundTag();
+                nbt.put("program", programTag);
+                level.players().stream()
+                        .filter(p -> p.containerMenu == this)
+                        .filter(p -> p instanceof ServerPlayer)
+                        .findFirst()
+                        .ifPresent(p -> ServerPlayNetworking.send((ServerPlayer) p, new S2C_SyncSpellDiskPayload(nbt)));
+            }
+        }
+    }
+
+    /**
+     * 处理客户端程序修改（已移除，不再需要）
+     * 客户端直接编辑 JSON，保存时发送到服务端
+     */
+
+    /**
+     * 保存程序到磁盘
+     * 
+     * @param programTag 程序 NBT 数据，直接从客户端传来
+     */
+    public void saveProgramToDisk(CompoundTag programTag) {
+        if (blockEntity == null)
+            return;
+
+        ItemStack diskStack = getDiskItem();
+        if (diskStack.isEmpty()) {
+            return;
+        }
+        DiskComponent diskComponent = (DiskComponent) diskStack.getItem();
+        if (diskComponent == null) {
+            return;
+        }
+
+        // 直接使用客户端传来的 NBT 数据，不需要重新序列化
+        diskComponent.setProgram(diskStack, programTag.getList("program").orElse(new ListTag()));
+    }
+
     /** 获取磁盘物品 */
     public ItemStack getDiskItem() {
         return this.getSlot(DISK_SLOT).getItem();
@@ -238,4 +226,5 @@ public class EditorScreenHandler extends AbstractContainerMenu {
             loadProgramFromDisk(diskStack);
         }
     }
+
 }

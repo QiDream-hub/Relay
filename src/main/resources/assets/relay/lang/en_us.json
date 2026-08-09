@@ -572,11 +572,9 @@
   "gui.relay:spell_editor.label.disk_slot": "Disk:",
   "gui.relay:spell_editor.save.success": "Saved",
   "gui.relay:spell_editor.save.failure": "Save Failed",
-
   "gui.relay:spell_editor.operations.title": "Available Operations",
-  "gui.relay:spell_editor.operations.count": "%d operations",
+  "gui.relay:spell_editor.operations.search": "Search operations...",
   "gui.relay:spell_editor.types.title": "Data Types",
-  "gui.relay:spell_editor.types.count": "%d types",
 
   "gui.relay:tool_shell.message.prefix": "[Tool Shell]",
   "gui.relay:tool_shell.debug.separator": "§8§m----------------------------------------",

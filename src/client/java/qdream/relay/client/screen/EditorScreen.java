@@ -55,8 +55,8 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
     // 列表布局
     private static final int LIST_TOP_MARGIN = 8;
-    private static final int OPS_LIST_HEIGHT = 160; // 操作列表高度 (增加 30px)
-    private static final int TYPE_LIST_HEIGHT = 110; // 类型列表高度 (增加 20px)
+    private static final int OPS_LIST_HEIGHT = 160; // 操作列表高度
+    private static final int TYPE_LIST_HEIGHT = 110; // 类型列表高度
     private static final int LIST_GAP = 8; // 两个列表之间的间距
 
     // 按钮
@@ -117,7 +117,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
         operationListWidget = new OperationListWidget(
                 left + PANEL_PADDING, listTop,
                 listWidth, OPS_LIST_HEIGHT,
-                this.font, new ArrayList<>(OperationRegistry.getAllOperationIds()));
+                this.font, InfoUtils.buildInfoContent(OperationRegistry.getAllOperationIds()));
         operationListWidget.setOnOperationClicked(this::onOperationClicked);
         operationListWidget.setOnHover(this::onHovered);
         this.addRenderableWidget(operationListWidget);
@@ -127,7 +127,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
         typeListWidget = new TypeListWidget(
                 left + PANEL_PADDING, typeListTop,
                 listWidth, TYPE_LIST_HEIGHT,
-                this.font, new ArrayList<>(OperationRegistry.getAllDataIds()));
+                this.font, InfoUtils.buildInfoContent(OperationRegistry.getAllDataIds()));
         typeListWidget.setOnTypeClicked(this::onTypeClicked);
         typeListWidget.setOnHover(this::onHovered);
         this.addRenderableWidget(typeListWidget);
@@ -208,15 +208,10 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     /**
      * 类型悬停回调
      */
-    private void onHovered(String id) {
-        if (id != null) {
-            InfoContent content = InfoUtils.buildInfoContent(id);
-            if (content != null) {
-                hoverInfoWidget.setContent(content);
-                hoverInfoWidget.visible = true;
-            } else {
-                hoverInfoWidget.visible = false;
-            }
+    private void onHovered(InfoContent content) {
+        if (content != null) {
+            hoverInfoWidget.setContent(content);
+            hoverInfoWidget.visible = true;
         } else {
             hoverInfoWidget.visible = false;
         }
@@ -226,21 +221,31 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        // 如果编辑器聚焦，消费掉 E 键防止关闭 GUI
-        if (jsonEditorWidget != null && jsonEditorWidget.isFocused()) {
-            // E 键的 keyCode 是 69
-            if (event.key() == 69) {
-                return true; // 消费掉 E 键
-            }
+        // 优先转发给操作列表的搜索框
+        if (operationListWidget != null && operationListWidget.isFocused()) {
+            return operationListWidget.keyPressed(event);
+        } else if (jsonEditorWidget != null && jsonEditorWidget.isFocused()) {
+            return jsonEditorWidget.keyPressed(event);
+        }
+        return super.keyPressed(event);
+    }
+
+    // ==================== 事件转发 ====================
+
+    @Override
+    public boolean charTyped(CharacterEvent event) {
+        // 优先转发给操作列表的搜索框
+        if (operationListWidget != null && operationListWidget.charTyped(event)) {
+            return true;
         }
 
         // 优先转发给 JSON 编辑器
         if (jsonEditorWidget != null) {
-            if (jsonEditorWidget.keyPressed(event)) {
+            if (jsonEditorWidget.charTyped(event)) {
                 return true;
             }
         }
-        return super.keyPressed(event);
+        return super.charTyped(event);
     }
 
     /**
@@ -328,26 +333,11 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     // ==================== 事件转发 ====================
 
     @Override
-    public boolean charTyped(CharacterEvent event) {
-        // 优先转发给 JSON 编辑器
-        if (jsonEditorWidget != null) {
-            if (jsonEditorWidget.charTyped(event)) {
-                return true;
-            }
-        }
-        return super.charTyped(event);
-    }
-
-    @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        // 优先转发给 JSON 编辑器
-        if (jsonEditorWidget != null && jsonEditorWidget.visible) {
-            if (jsonEditorWidget.mouseClicked(event, doubleClick)) {
-                return true;
-            }
-        }
+        jsonEditorWidget.setFocused(false);
+        operationListWidget.setFocused(false);
 
-        // 转发给其他自定义 Widget（按渲染顺序逆序，后渲染的优先接收事件）
+        // 优先转发给可见的 Widget（按渲染顺序逆序，后渲染的优先接收事件）
         var children = this.children();
         for (int i = children.size() - 1; i >= 0; i--) {
             var widget = children.get(i);
@@ -359,11 +349,6 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
                     return true;
                 }
             }
-        }
-
-        // 点击空白区域取消编辑器聚焦
-        if (jsonEditorWidget != null && jsonEditorWidget.isFocused()) {
-            jsonEditorWidget.setFocused(false);
         }
 
         return super.mouseClicked(event, doubleClick);

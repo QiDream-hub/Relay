@@ -3,6 +3,7 @@ package qdream.relay.client.screen.widget.editor.tools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
@@ -74,13 +75,26 @@ public class InfoUtils {
         return buildInfoContent(optional.get());
     }
 
+    public static List<InfoContent> buildInfoContent(Set<String> ids) {
+        List<InfoContent> infos = new ArrayList<>();
+
+        ids.forEach(id -> {
+            InfoContent infoContent = buildInfoContent(id);
+            if (infoContent != null) {
+                infos.add(infoContent);
+            }
+        });
+
+        return infos;
+    }
+
     /**
      * 构建操作签名的展示信息
      *
      * @param signature 操作签名
      * @return 签名信息行列表
      */
-    public static List<InfoContent.InfoLine> buildSignatureInfo(OperationSignature signature) {
+    private static List<InfoContent.InfoLine> buildSignatureInfo(OperationSignature signature) {
         List<InfoContent.InfoLine> lines = new ArrayList<>();
 
         // 添加输入参数信息
@@ -99,7 +113,8 @@ public class InfoUtils {
             if (!inputs.isEmpty()) {
                 lines.add(new InfoContent.InfoLine("", null)); // 添加空行分隔
             }
-            lines.add(new InfoContent.InfoLine(Component.translatable(OUTPUT_LABEL_KEY).getString(), OUTPUT_LABEL_COLOR));
+            lines.add(
+                    new InfoContent.InfoLine(Component.translatable(OUTPUT_LABEL_KEY).getString(), OUTPUT_LABEL_COLOR));
             for (ParameterDescriptor param : outputs) {
                 String displayText = buildParameterDisplayText(param);
                 lines.add(new InfoContent.InfoLine("  " + displayText, PARAM_TEXT_COLOR));
@@ -144,7 +159,7 @@ public class InfoUtils {
      * @param signature 数据签名
      * @return 签名信息行列表
      */
-    public static List<InfoContent.InfoLine> buildDataSignatureInfo(DataSignature signature) {
+    private static List<InfoContent.InfoLine> buildDataSignatureInfo(DataSignature signature) {
         List<InfoContent.InfoLine> lines = new ArrayList<>();
 
         // 添加输出类型信息
