@@ -48,7 +48,7 @@ public class DiskItem extends Item implements DiskComponent {
 
             for (int i = 0; i < displayCount; i++) {
                 textConsumer.accept(
-                        Component.literal("  • " + TextTools.getText(programTag, i)).withStyle(ChatFormatting.GRAY));
+                        Component.literal("  • " + TextTools.getName(programTag, i)).withStyle(ChatFormatting.GRAY));
             }
 
             // 如果程序超过显示行数，显示省略提示

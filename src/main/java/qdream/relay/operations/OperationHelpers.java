@@ -65,7 +65,7 @@ public final class OperationHelpers {
         ShellContainer container = getShellContainer(executor);
         if (container == null || !container.hasWorldInteractor()) {
             throw new WorldInteractionException(executor, ErrorMessageTools
-                    .buildErrorMessage(ErrorType.WORLD_INTERACTOR_MISSING, TextTools.getText(operationName)));
+                    .buildErrorMessage(ErrorType.WORLD_INTERACTOR_MISSING, TextTools.getName(operationName)));
         }
         // 扣除世界交互器的能量消耗
         double energyCost = container.getWorldInteractorEnergyCost();

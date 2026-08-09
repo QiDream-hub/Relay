@@ -34,7 +34,7 @@ import qdream.relay.types.BooleanData;
 public class ToBoolean extends Instruction {
 
     public ToBoolean() {
-        super("relay:to_bool", 0, 0.05, OperationSignature.builder()
+        super("relay:to_bool", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("any", "any")
                 .producesToData("result", "relay:boolean")
                 .build());

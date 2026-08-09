@@ -114,6 +114,20 @@ public final class TextTools {
     }
 
     // ==================== 翻译键获取 ====================
+    @NonNull
+    public static String geParamNameKey(Executable exe) {
+        return "param.shell.description";
+    }
+
+    @NonNull
+    public static String geDescriptiontKey(Executable exe) {
+        if (exe instanceof Data data) {
+            return "type." + data.getId() + ".description";
+        } else if (exe instanceof Instruction instr) {
+            return "operation." + instr.getId() + ".description";
+        }
+        return "unknown.name";
+    }
 
     /**
      * 获取可执行单元的翻译键
@@ -186,9 +200,9 @@ public final class TextTools {
      * @param index 索引
      * @return 翻译后的文本
      */
-    public static String getText(ListTag tag, int index) {
+    public static String getName(ListTag tag, int index) {
         CompoundTag compound = tag.getCompoundOrEmpty(index);
-        return Component.translatable(getNameKey(compound)).getString();
+        return getText(getNameKey(compound));
     }
 
     /**
@@ -197,8 +211,8 @@ public final class TextTools {
      * @param exe 可执行单元
      * @return 显示名称
      */
-    public static String getText(Executable exe) {
-        return Component.translatable(getNameKey(exe)).getString();
+    public static String getName(Executable exe) {
+        return getText(getNameKey(exe));
     }
 
     /**
@@ -207,8 +221,8 @@ public final class TextTools {
      * @param tag NBT 标签
      * @return 显示名称
      */
-    public static String getText(CompoundTag tag) {
-        return Component.translatable(getNameKey(tag)).getString();
+    public static String getName(CompoundTag tag) {
+        return getText(getNameKey(tag));
     }
 
     /**
@@ -217,9 +231,55 @@ public final class TextTools {
      * @param id 操作id
      * @return 翻译后的文本
      */
-    public static String getText(String key) {
-        return Component.translatable(getNameKey(key)).getString();
+    public static String getName(String id) {
+        return getText(getNameKey(id));
     }
+
+    /**
+     * 翻译类型(包括any与...any)
+     *
+     * @param id 操作id
+     * @return 翻译后的文本
+     */
+    public static String getTypeName(String id) {
+        if (id.equals("any") || id.equals("...any")) {
+            return getText("type." + id + ".name");
+        }
+        return getText(getNameKey(id));
+    }
+
+    // ==================== 描述翻译 ====================
+    /**
+     * 获取可执行单元的描述文本
+     *
+     * @param exe 可执行单元
+     * @return 描述文本
+     */
+    public static String getDescriptionText(Executable exe) {
+        return getText(getDescriptionKey(exe));
+    }
+
+    /**
+     * 获取可执行单元的描述翻译键
+     *
+     * @param exe 可执行单元
+     * @return 翻译键
+     */
+    @NonNull
+    public static String getDescriptionKey(Executable exe) {
+        if (exe instanceof Data data) {
+            return "type." + data.getId() + ".description";
+        } else if (exe instanceof Instruction instr) {
+            return "operation." + instr.getId() + ".description";
+        }
+        return "unknown.description";
+    }
+
+    // ==================== 参数名翻译 ====================
+    public static String getParamNameText(String name) {
+        return getText("param." + name + ".description");
+    }
+
     // ==================== 栈格式化 ====================
 
     /**
@@ -259,7 +319,7 @@ public final class TextTools {
             }
             Executable exe = stack.get(i);
             if (exe instanceof Instruction instr) {
-                sb.append("§e").append(getText(instr.getId()));
+                sb.append("§e").append(getName(instr.getId()));
             } else if (exe instanceof Data data) {
                 sb.append("§e").append(data.asString());
             } else {

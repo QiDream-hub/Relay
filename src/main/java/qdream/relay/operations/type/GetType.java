@@ -85,7 +85,7 @@ public class GetType extends Instruction {
             executor.pushData(new TypeData(id));
 
         } else {
-            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.PARAMETER_INVALID,TextTools.getText(inputExe)));
+            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.PARAMETER_INVALID,TextTools.getName(inputExe)));
         }
     }
 }

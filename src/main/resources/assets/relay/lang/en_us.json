@@ -449,6 +449,14 @@
   "param.color.description": "Color value (RGB, 0-16777215)",
   "param.alpha.description": "Alpha transparency (0-255, 0=transparent, 255=opaque)",
 
+  "gui.relay:spell_editor.info.input_label": "▶ Input:",
+  "gui.relay:spell_editor.info.output_label": "▶ Output:",
+  "gui.relay:spell_editor.info.type_label": "▶ Type:",
+  "gui.relay:spell_editor.info.field_label": "▶ Field:",
+  "gui.relay:spell_editor.info.program_prefix": "[Program]",
+  "gui.relay:spell_editor.info.cost_label": "Cost:",
+  "gui.relay:spell_editor.info.energy_cost_label": "Energy Cost:",
+
   "type.relay:number.name": "Number",
   "type.relay:number.description": "Numeric type, supports integer and decimal operations",
   "type.relay:boolean.name": "Boolean",

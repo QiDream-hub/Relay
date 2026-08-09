@@ -39,10 +39,10 @@ public class OperationListWidget extends AbstractWidget {
     private final Font font;
     private final List<String> operations;
     private Consumer<String> onOperationClicked;
-    
+
     /** 悬停回调：当悬停在某个操作上时调用，参数为操作 ID */
     private Consumer<String> onHover;
-    
+
     /** 缓存操作 ID 到显示名称的映射 */
     private final Map<String, String> displayNameCache = new HashMap<>();
 
@@ -67,56 +67,6 @@ public class OperationListWidget extends AbstractWidget {
     /** 拖动滚动条时的初始滚动偏移 */
     private int dragStartScrollOffset = 0;
 
-    /**
-     * 获取滚动偏移量
-     */
-    public int getScrollOffset() {
-        return scrollOffset;
-    }
-
-    /**
-     * 获取操作列表
-     */
-    public List<String> getOperations() {
-        return operations;
-    }
-
-    /**
-     * 获取当前选中的操作 ID，-1 表示无选中
-     */
-    public int getSelectedIndex() {
-        return selectedIndex;
-    }
-
-    /**
-     * 获取当前选中的操作 ID
-     * @return 选中的操作 ID，无选中时返回 null
-     */
-    public String getSelectedOperation() {
-        if (selectedIndex >= 0 && selectedIndex < operations.size()) {
-            return operations.get(selectedIndex);
-        }
-        return null;
-    }
-
-    /**
-     * 获取当前悬停的操作 ID，-1 表示无悬停
-     */
-    public int getHoveredIndex() {
-        return hoveredIndex;
-    }
-
-    /**
-     * 获取当前悬停的操作 ID
-     * @return 悬停的操作 ID，无悬停时返回 null
-     */
-    public String getHoveredOperation() {
-        if (hoveredIndex >= 0 && hoveredIndex < operations.size()) {
-            return operations.get(hoveredIndex);
-        }
-        return null;
-    }
-
     public OperationListWidget(int x, int y, int width, int height, Font font, List<String> operations) {
         super(x, y, width, height, Component.empty());
         this.font = font;
@@ -126,19 +76,19 @@ public class OperationListWidget extends AbstractWidget {
     public void setOnOperationClicked(Consumer<String> callback) {
         this.onOperationClicked = callback;
     }
-    
+
     /**
      * 设置悬停回调
      */
     public void setOnHover(Consumer<String> callback) {
         this.onHover = callback;
     }
-    
+
     /**
      * 获取操作的显示名称（从语言文件）
      */
     private String getDisplayName(String opId) {
-        return displayNameCache.computeIfAbsent(opId, id -> TextTools.getText("operation." + id + ".name", id));
+        return displayNameCache.computeIfAbsent(opId, id -> TextTools.getName(id));
     }
 
     /** 获取可视区域内可显示的最大行数 */
@@ -154,16 +104,19 @@ public class OperationListWidget extends AbstractWidget {
     /** 根据鼠标坐标计算条目索引，超出范围返回 -1 */
     private int getEntryAt(double mouseX, double mouseY) {
         // 先检查鼠标是否在 Widget 范围内
-        if (!isMouseOver(mouseX, mouseY)) return -1;
-        
+        if (!isMouseOver(mouseX, mouseY))
+            return -1;
+
         double relX = mouseX - (getX() + PADDING);
         double relY = mouseY - (getY() + HEADER_HEIGHT + PADDING);
-        
+
         // 检查是否超出可视区域
-        if (relX < 0 || relX > this.width - PADDING * 2 - 4 || relY < 0) return -1;
-        
+        if (relX < 0 || relX > this.width - PADDING * 2 - 4 || relY < 0)
+            return -1;
+
         int index = scrollOffset + (int) (relY / LINE_HEIGHT);
-        if (index < 0 || index >= operations.size()) return -1;
+        if (index < 0 || index >= operations.size())
+            return -1;
         return index;
     }
 
@@ -177,7 +130,8 @@ public class OperationListWidget extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (!this.visible) return false;
+        if (!this.visible)
+            return false;
 
         // 检查是否点击在滚动条区域
         int scrollbarX = getX() + this.width - SCROLLBAR_WIDTH;
@@ -229,7 +183,8 @@ public class OperationListWidget extends AbstractWidget {
      */
     private void handleScrollbarDrag(double mouseY) {
         int maxScroll = getMaxScroll();
-        if (maxScroll <= 0) return;
+        if (maxScroll <= 0)
+            return;
 
         int scrollAreaTop = getY() + HEADER_HEIGHT + PADDING;
         int scrollAreaHeight = this.height - HEADER_HEIGHT - PADDING * 2;
@@ -255,7 +210,8 @@ public class OperationListWidget extends AbstractWidget {
      */
     private void pageScroll(int direction) {
         int maxScroll = getMaxScroll();
-        if (maxScroll <= 0) return;
+        if (maxScroll <= 0)
+            return;
 
         // 每次滚动可见区域的 80%
         int pageAmount = (int) ((this.height - HEADER_HEIGHT - PADDING * 2) * 0.8);
@@ -265,7 +221,8 @@ public class OperationListWidget extends AbstractWidget {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (!this.visible) return false;
+        if (!this.visible)
+            return false;
 
         // 如果正在拖拽滚动条，根据鼠标的移动距离更新滚动
         if (this.draggingScrollbar) {
@@ -278,7 +235,8 @@ public class OperationListWidget extends AbstractWidget {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (!this.visible) return false;
+        if (!this.visible)
+            return false;
 
         // 停止拖拽滚动条
         if (this.draggingScrollbar) {
@@ -291,7 +249,8 @@ public class OperationListWidget extends AbstractWidget {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (operations.size() <= getVisibleLineCount()) return false;
+        if (operations.size() <= getVisibleLineCount())
+            return false;
         scrollOffset -= (int) scrollY;
         scrollOffset = Math.max(0, Math.min(scrollOffset, getMaxScroll()));
         return true;
@@ -299,9 +258,9 @@ public class OperationListWidget extends AbstractWidget {
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        return this.visible && 
-               mouseX >= this.getX() && mouseX < this.getX() + this.width &&
-               mouseY >= this.getY() && mouseY < this.getY() + this.height;
+        return this.visible &&
+                mouseX >= this.getX() && mouseX < this.getX() + this.width &&
+                mouseY >= this.getY() && mouseY < this.getY() + this.height;
     }
 
     // ==================== 渲染 ====================
@@ -315,7 +274,7 @@ public class OperationListWidget extends AbstractWidget {
 
         // 背景
         graphics.fill(x, y, x + this.width, y + this.height, BG_COLOR);
-        
+
         // 外边框
         graphics.outline(x, y, this.width, this.height, BORDER_COLOR);
 
@@ -327,7 +286,7 @@ public class OperationListWidget extends AbstractWidget {
         int oldHoveredIndex = hoveredIndex;
         hoveredIndex = getEntryAt(mouseX, mouseY);
         scrollbarHovered = isMouseOnScrollbar(mouseX, mouseY);
-        
+
         // 触发悬停回调
         if (hoveredIndex != oldHoveredIndex && onHover != null) {
             if (hoveredIndex >= 0 && hoveredIndex < operations.size()) {
@@ -339,13 +298,13 @@ public class OperationListWidget extends AbstractWidget {
 
         // 启用裁剪区域（底部留出计数提示的空间）
         int contentBottom = y + this.height - LINE_HEIGHT - 4;
-        graphics.enableScissor(x + PADDING, y + HEADER_HEIGHT + PADDING, 
-                               x + this.width - PADDING - 4, contentBottom);
+        graphics.enableScissor(x + PADDING, y + HEADER_HEIGHT + PADDING,
+                x + this.width - PADDING - 4, contentBottom);
 
         // 渲染列表条目
         int textX = x + PADDING + 2;
         int textY = y + HEADER_HEIGHT + PADDING;
-        
+
         for (int i = 0; i < visibleLines && (i + scrollOffset) < operations.size(); i++) {
             int dataIndex = i + scrollOffset;
             String opId = operations.get(dataIndex);
@@ -357,9 +316,11 @@ public class OperationListWidget extends AbstractWidget {
 
             // 选中背景优先于悬停背景
             if (isSelected) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1, SELECTED_BG);
+                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1,
+                        SELECTED_BG);
             } else if (isHovered) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1, HOVER_BG);
+                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - 4, entryY + LINE_HEIGHT - 1,
+                        HOVER_BG);
             }
 
             int color = isHovered ? HOVER_COLOR : TEXT_COLOR;
@@ -374,11 +335,13 @@ public class OperationListWidget extends AbstractWidget {
         }
 
         // 标题文字
-        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.title"), x + PADDING + 2, y + 4, 0xFF00FF00);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.title"), x + PADDING + 2,
+                y + 4, 0xFF00FF00);
 
         // 底部计数提示（在裁剪区域外渲染，确保可见）
         int countY = y + this.height - LINE_HEIGHT - 2;
-        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.count", operations.size()), x + PADDING, countY, 0xFF666666);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.operations.count", operations.size()),
+                x + PADDING, countY, 0xFF666666);
     }
 
     /**

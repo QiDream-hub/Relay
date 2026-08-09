@@ -76,7 +76,7 @@ public final class StackHelpers {
         Executable exe = executor.popData();
         if (!expectedType.isInstance(exe)) {
             throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                    TextTools.getText(targetId), TextTools.getText(exe)));
+                    TextTools.getName(targetId), TextTools.getName(exe)));
         }
         return expectedType.cast(exe);
     }
@@ -100,7 +100,7 @@ public final class StackHelpers {
         Executable exe = getDataAt(executor, index, operationName);
         if (!expectedType.isInstance(exe)) {
             throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                    TextTools.getText(targetId), TextTools.getText(exe)));
+                    TextTools.getName(targetId), TextTools.getName(exe)));
         }
         return expectedType.cast(exe);
     }

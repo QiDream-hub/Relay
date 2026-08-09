@@ -447,6 +447,14 @@
   "param.color.description": "颜色值（RGB，0-16777215）",
   "param.alpha.description": "透明度（0-255，0=透明，255=不透明）",
 
+  "gui.relay:spell_editor.info.input_label": "▶ 输入:",
+  "gui.relay:spell_editor.info.output_label": "▶ 输出:",
+  "gui.relay:spell_editor.info.type_label": "▶ 类型:",
+  "gui.relay:spell_editor.info.field_label": "▶ 字段:",
+  "gui.relay:spell_editor.info.program_prefix": "[程序]",
+  "gui.relay:spell_editor.info.cost_label": "计算资源:",
+  "gui.relay:spell_editor.info.energy_cost_label": "消耗能量:",
+
   "type.relay:number.name": "数字",
   "type.relay:number.description": "数值类型，支持整数和小数运算",
   "type.relay:boolean.name": "布尔",

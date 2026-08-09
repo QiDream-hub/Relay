@@ -16,21 +16,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.Relay;
+import qdream.relay.client.screen.widget.editor.HoverInfoWidget;
 import qdream.relay.client.screen.widget.editor.JsonEditorWidget;
 import qdream.relay.client.screen.widget.editor.OperationListWidget;
 import qdream.relay.client.screen.widget.editor.TypeListWidget;
-import qdream.relay.client.screen.widget.info.HoverInfoWidget;
-import qdream.relay.client.screen.widget.info.HoverInfoWidget.InfoContent;
-import qdream.relay.client.screen.widget.info.InfoUtils;
+import qdream.relay.client.screen.widget.editor.tools.InfoContent;
+import qdream.relay.client.screen.widget.editor.tools.InfoUtils;
 import qdream.relay.client.screen.widget.SlotWidget;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.ProgramCompiler.CompilationException;
-import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.networking.payloads.C2S_ProgramModifiedPayload;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
 import qdream.relay.networking.payloads.C2S_DiskInsertedPayload;
@@ -121,7 +119,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
                 listWidth, OPS_LIST_HEIGHT,
                 this.font, this.menu.getAvailableOperations());
         operationListWidget.setOnOperationClicked(this::onOperationClicked);
-        operationListWidget.setOnHover(this::onOperationHovered);
+        operationListWidget.setOnHover(this::onHovered);
         this.addRenderableWidget(operationListWidget);
 
         // 类型列表
@@ -131,7 +129,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
                 listWidth, TYPE_LIST_HEIGHT,
                 this.font, this.menu.getAvailableDataTypes());
         typeListWidget.setOnTypeClicked(this::onTypeClicked);
-        typeListWidget.setOnHover(this::onTypeHovered);
+        typeListWidget.setOnHover(this::onHovered);
         this.addRenderableWidget(typeListWidget);
 
         // ===== 右侧面板：JSON 编辑器 =====
@@ -171,7 +169,8 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
         // 磁盘插槽 Widget (与 ScreenHandler 中的 DISK_SLOT 位置一致)
         diskSlotWidget = new SlotWidget(
-                left + DISK_SLOT_X, top + DISK_SLOT_Y, Component.translatable("gui.relay:spell_editor.slot.spell_disk"), this.font);
+                left + DISK_SLOT_X, top + DISK_SLOT_Y, Component.translatable("gui.relay:spell_editor.slot.spell_disk"),
+                this.font);
         this.addRenderableWidget(diskSlotWidget);
 
         // 初始加载程序
@@ -194,29 +193,6 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     }
 
     /**
-     * 获取操作悬停信息
-     */
-    private InfoContent getOperationInfo(String opId) {
-        return OperationRegistry.get(opId).map(op -> {
-            Operation operation = (Operation) op;
-            var signature = operation.getSignature();
-            InfoContent operationInfo = InfoUtils.buildOperationInfo(opId,
-                    signature instanceof OperationSignature opSig ? opSig : null);
-            if (operation instanceof Instruction spell) {
-                operationInfo.pushLine("计算开销:" + spell.getCost() + " 能量消耗:" + spell.getEnergy(), TITLE_COLOR);
-            }
-            return operationInfo;
-        }).orElse(null);
-    }
-
-    /**
-     * 获取类型悬停信息
-     */
-    private InfoContent getTypeInfo(String typeId) {
-        return InfoUtils.buildTypeInfo(typeId);
-    }
-
-    /**
      * 点击类型列表时，在光标位置插入数据类型 JSON
      * 插入后自动追加逗号，不选中内容
      */
@@ -230,28 +206,11 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     }
 
     /**
-     * 操作悬停回调
-     */
-    private void onOperationHovered(String opId) {
-        if (opId != null) {
-            InfoContent content = getOperationInfo(opId);
-            if (content != null) {
-                hoverInfoWidget.setContent(content);
-                hoverInfoWidget.visible = true;
-            } else {
-                hoverInfoWidget.visible = false;
-            }
-        } else {
-            hoverInfoWidget.visible = false;
-        }
-    }
-
-    /**
      * 类型悬停回调
      */
-    private void onTypeHovered(String typeId) {
-        if (typeId != null) {
-            InfoContent content = getTypeInfo(typeId);
+    private void onHovered(String id) {
+        if (id != null) {
+            InfoContent content = InfoUtils.buildInfoContent(id);
             if (content != null) {
                 hoverInfoWidget.setContent(content);
                 hoverInfoWidget.visible = true;
@@ -374,10 +333,12 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
         graphics.verticalLine(left + PANEL_WIDTH, top, panelBottom, SEPARATOR_COLOR);
         graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, INVENTORY_SEPARATOR_COLOR);
 
-        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.label.editor"), left + PANEL_WIDTH + PANEL_PADDING, top + 5, TITLE_COLOR);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.label.editor"),
+                left + PANEL_WIDTH + PANEL_PADDING, top + 5, TITLE_COLOR);
 
         // 磁盘提示文字
-        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.label.disk_slot"), left + DISK_SLOT_X - 25, top + DISK_SLOT_Y, TITLE_COLOR);
+        graphics.text(this.font, Component.translatable("gui.relay:spell_editor.label.disk_slot"),
+                left + DISK_SLOT_X - 25, top + DISK_SLOT_Y, TITLE_COLOR);
     }
 
     // ==================== 事件转发 ====================
