@@ -4,9 +4,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import qdream.relay.client.screen.widget.SlotWidget;
@@ -100,17 +97,21 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
 
     private Component getUseInventoryEnergyLabel() {
         boolean useInventory = this.menu.isUseInventoryEnergyModule();
-        return Component.literal(useInventory ? "§a 使用背包能量" : "§7 使用插槽能量");
+        String key = useInventory ? "gui.relay:tool_shell.button.use_inventory_energy.enabled"
+                                   : "gui.relay:tool_shell.button.use_inventory_energy.disabled";
+        return Component.translatable(key);
     }
 
     private Component getDebugOutputLabel() {
         boolean debugEnabled = this.menu.isDebugOutputEnabled();
-        return Component.literal(debugEnabled ? "§c 调试输出:开" : "§7 调试输出:关");
+        String key = debugEnabled ? "gui.relay:tool_shell.button.debug_output.enabled" : "gui.relay:tool_shell.button.debug_output.disabled";
+        return Component.translatable(key);
     }
 
     private Component getStatusLabel() {
         boolean debugEnabled = this.menu.isStatusInfo();
-        return Component.literal(debugEnabled ? "§c 统计信息:开" : "§7 统计信息:关");
+        String key = debugEnabled ? "gui.relay:tool_shell.button.status_info.enabled" : "gui.relay:tool_shell.button.status_info.disabled";
+        return Component.translatable(key);
     }
 
     /**

@@ -17,6 +17,8 @@ import qdream.relay.items.DiskItem;
 import qdream.relay.networking.payloads.*;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.mc.ProgramCompiler.CompilationException;
+import qdream.relay.Relay;
 
 /**
  * 服务端网络处理
@@ -111,7 +113,7 @@ public class RelayServerNetworking {
             });
         });
 
-        // 注册服务端接收处理器 - 保存法术磁盘（直接将程序 NBT 保存到磁盘）
+        // 注册服务端接收处理器 - 保存法术磁盘（将 JSON 字符串编译后保存到磁盘）
         ServerPlayNetworking.registerGlobalReceiver(C2S_SaveSpellDiskPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             if (player == null)
@@ -119,8 +121,17 @@ public class RelayServerNetworking {
 
             context.server().execute(() -> {
                 if (player.containerMenu instanceof qdream.relay.screen.EditorScreenHandler handler) {
-                    // 直接将程序 NBT 保存到磁盘，不经过 blockEntity.program 缓存
-                    handler.saveProgramToDisk(payload.programNbt());
+                    // 编译 JSON 并保存到磁盘
+                    try {
+                        ProgramCompiler.compileFromJson(payload.programJson());
+                        // 编译通过，直接保存 JSON 字符串
+                        ItemStack diskStack = handler.getDiskItem();
+                        if (!diskStack.isEmpty() && diskStack.getItem() instanceof qdream.relay.mc.component.DiskComponent diskComponent) {
+                            diskComponent.setProgram(diskStack, payload.programJson());
+                        }
+                    } catch (CompilationException e) {
+                        Relay.LOGGER.error("服务端编译失败：" + e.getMessage());
+                    }
                 }
             });
         });
@@ -189,5 +200,45 @@ public class RelayServerNetworking {
                 }
             });
         });
+
+        // 注册 C2S_StopToolShellPayload - 客户端请求停止工具外壳程序
+        PayloadTypeRegistry.serverboundPlay().register(C2S_StopToolShellPayload.TYPE, C2S_StopToolShellPayload.CODEC);
+
+        // 注册服务端接收处理器 - 停止工具外壳程序
+        ServerPlayNetworking.registerGlobalReceiver(C2S_StopToolShellPayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player == null)
+                return;
+
+            context.server().execute(() -> {
+                // 检查玩家手持物品
+                ItemStack mainHand = player.getMainHandItem();
+                ItemStack offHand = player.getOffhandItem();
+
+                if (mainHand.getItem() instanceof qdream.relay.items.ToolShellItem) {
+                    qdream.relay.items.container.ToolShellContainer container = getToolShellContainer(mainHand, player);
+                    if (container != null) {
+                        container.getStateMachine().clear();
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c[工具外壳] 程序已停止"));
+                    }
+                } else if (offHand.getItem() instanceof qdream.relay.items.ToolShellItem) {
+                    qdream.relay.items.container.ToolShellContainer container = getToolShellContainer(offHand, player);
+                    if (container != null) {
+                        container.getStateMachine().clear();
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c[工具外壳] 程序已停止"));
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * 获取工具外壳容器
+     */
+    private static qdream.relay.items.container.ToolShellContainer getToolShellContainer(ItemStack stack, ServerPlayer player) {
+        if (player instanceof qdream.relay.core.PlayerShellDataAccessor accessor) {
+            return accessor.relay$getShellData().getContainer(stack);
+        }
+        return null;
     }
 }

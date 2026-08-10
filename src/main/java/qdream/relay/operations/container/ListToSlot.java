@@ -1,6 +1,5 @@
 package qdream.relay.operations.container;
 
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
@@ -49,11 +48,7 @@ public class ListToSlot extends Instruction {
 
         // 将 ListData 中的程序列表写入磁盘
         java.util.List<Executable> program = listData.getValue();
-        try {
-            ListTag programTag = ProgramCompiler.toNbt(program);
-            diskComponent.setProgram(itemStack, programTag);
-        } catch (ProgramCompiler.CompilationException e) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.SERIALIZATION_FAILED, e.getMessage()));
-        }
+        String programJson = ProgramCompiler.toJsonString(program);
+        diskComponent.setProgram(itemStack, programJson);
     }
 }

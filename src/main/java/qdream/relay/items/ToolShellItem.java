@@ -57,7 +57,9 @@ public class ToolShellItem extends Item {
         textConsumer.accept(
                 Component.translatable("item.relay.tool_shell.usage_right").withStyle(ChatFormatting.GRAY));
         textConsumer.accept(
-                Component.translatable("item.relay.tool_shell.usage_shift").withStyle(ChatFormatting.GRAY));
+                Component.translatable("item.relay.tool_shell.usage_stop",
+                        Component.keybind("key.relay.stop_tool_shell_program"))
+                        .withStyle(ChatFormatting.GRAY));
         // GUI 按键提示 - 使用 Component.keybind 动态显示按键绑定
         textConsumer.accept(
                 Component.translatable("item.relay.tool_shell.usage_gui",
@@ -79,13 +81,6 @@ public class ToolShellItem extends Item {
         }
         var shellData = accessor.relay$getShellData();
 
-        // Shift+ 右键：停止程序
-        if (player.isShiftKeyDown()) {
-            shellData.stopContainer(stack);
-            player.sendSystemMessage(Component.literal("§c[工具外壳] 程序已停止"));
-            return InteractionResult.SUCCESS;
-        }
-
         // 普通右键：获取或创建 Container
         ToolShellContainer container = shellData.getOrCreateContainer(stack);
         StateMachine machine = container.getStateMachine();
@@ -94,21 +89,15 @@ public class ToolShellItem extends Item {
         container.setOwner(player);
 
         // 检查运行状态
-        if (machine.isRunning()) {
-            // 正在运行中
-            // 开启调试输出时，显示程序栈和数据栈
-            if (container.isDebugOutputEnabled()) {
-                player.sendSystemMessage(Component.literal("§e[工具外壳] 程序正在运行中"));
-            }
-        } else {
+        if (!machine.isRunning()) {
             // 已停止，加载磁盘程序并运行
             ItemStack diskStack = container.getDiskStack();
             DiskComponent diskComponent = getDiskComponent(diskStack);
             if (diskComponent != null) {
-                ListTag programTag = diskComponent.getProgram(diskStack);
+                String programJson = diskComponent.getProgram(diskStack);
                 List<Executable> program;
                 try {
-                    program = ProgramCompiler.fromNbt(programTag);
+                    program = ProgramCompiler.compileFromJson(programJson);
                 } catch (ProgramCompiler.CompilationException e) {
                     e.printStackTrace();
                     program = new ArrayList<>();
@@ -117,14 +106,11 @@ public class ToolShellItem extends Item {
                     // 清空双栈后加载新程序
                     machine.clear();
                     machine.loadProgram(program);
-                    if (container.isDebugOutputEnabled()) {
-                        player.sendSystemMessage(Component.literal("§a[工具外壳] 程序已启动，共 " + program.size() + " 个指令"));
-                    }
                 } else {
-                    player.sendSystemMessage(Component.literal("§e[工具外壳] 磁盘为空，无法启动"));
+                    player.sendSystemMessage(Component.translatable("item.relay.tool_shell.disk_empty"));
                 }
             } else {
-                player.sendSystemMessage(Component.literal("§e[工具外壳] 未插入法术磁盘"));
+                player.sendSystemMessage(Component.translatable("item.relay.tool_shell.no_disk"));
             }
             container.getExecutionStats().reset();
         }

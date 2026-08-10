@@ -194,18 +194,6 @@ public final class TextTools {
     // ==================== 翻译方法 ====================
 
     /**
-     * 获取 ListTag 中指定索引位置的元素翻译文本
-     *
-     * @param tag   ListTag
-     * @param index 索引
-     * @return 翻译后的文本
-     */
-    public static String getName(ListTag tag, int index) {
-        CompoundTag compound = tag.getCompoundOrEmpty(index);
-        return getText(getNameKey(compound));
-    }
-
-    /**
      * 获取可执行单元的显示名称（从翻译键）
      *
      * @param exe 可执行单元

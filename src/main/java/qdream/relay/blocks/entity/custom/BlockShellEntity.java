@@ -560,10 +560,10 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
 
         getStateMachine().clear();
-        ListTag programTag = diskComponent.getProgram(diskStack);
+        String programJson = diskComponent.getProgram(diskStack);
         List<Executable> program;
         try {
-            program = ProgramCompiler.fromNbt(programTag);
+            program = ProgramCompiler.compileFromJson(programJson);
         } catch (ProgramCompiler.CompilationException e) {
             e.printStackTrace();
             program = new ArrayList<>();

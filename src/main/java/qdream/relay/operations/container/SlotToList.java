@@ -2,7 +2,6 @@ package qdream.relay.operations.container;
 
 import java.util.ArrayList;
 
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
@@ -17,7 +16,6 @@ import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.SlotData;
 import qdream.relay.mc.component.DiskComponent;
-import qdream.relay.Component.RelayDataComponents;
 
 /**
  * 从物品读取列表操作
@@ -50,10 +48,10 @@ public class SlotToList extends Instruction {
         }
 
         // 从磁盘读取程序列表
-        ListTag programTag = diskComponent.getProgram(itemStack);
+        String programJson = diskComponent.getProgram(itemStack);
         java.util.List<Executable> program;
         try {
-            program = ProgramCompiler.fromNbt(programTag);
+            program = ProgramCompiler.compileFromJson(programJson);
         } catch (ProgramCompiler.CompilationException e) {
             throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.COMPILATION_FAILED, e.getMessage()));
         }

@@ -6,13 +6,9 @@ import java.util.Set;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import qdream.relay.client.screen.EditorScreen;
 import qdream.relay.client.screen.ShellScreen;
-import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
-import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.networking.payloads.S2C_ShellEnergyPayload;
 import qdream.relay.networking.payloads.S2C_ShellLogPayload;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
@@ -31,16 +27,7 @@ public class RelayClientNetworking {
             context.client().execute(() -> {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.screen instanceof EditorScreen editorScreen) {
-                    try {
-                        CompoundTag tag = payload.programNbt();
-                        ListTag listTag = tag.getList("program").orElse(null);
-                        if (listTag != null) {
-                            List<Executable> program = ProgramCompiler.fromNbt(listTag);
-                            editorScreen.updateProgramFromServer(program);
-                        }
-                    } catch (ProgramCompiler.CompilationException e) {
-                        e.printStackTrace();
-                    }
+                    editorScreen.updateProgramFromServer(payload.programJson());
                 }
             });
         });

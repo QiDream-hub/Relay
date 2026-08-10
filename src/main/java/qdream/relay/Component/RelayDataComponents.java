@@ -21,13 +21,25 @@ public class RelayDataComponents {
 
     /**
      * 法术程序组件 - 存储为 CompoundTag (内部包含 ListTag)
-     * 用于法术磁盘物品存储程序数据
+     * 用于法术磁盘物品存储程序数据（向后兼容，不再使用）
      */
     public static final DataComponentType<CompoundTag> SPELL_PROGRAM = register(
             "spell_program",
             builder -> builder
                     .persistent(CompoundTag.CODEC)
                     .networkSynchronized(createNbtStreamCodec())
+    );
+
+    /**
+     * 法术程序组件 - 存储为 JSON 字符串
+     * 用于法术磁盘物品存储程序数据（新格式）
+     * 使用 32767 字符限制以支持较长的法术程序
+     */
+    public static final DataComponentType<String> SPELL_PROGRAM_JSON = register(
+            "spell_program_json",
+            builder -> builder
+                    .persistent(Codec.STRING)
+                    .networkSynchronized(createStringStreamCodec(32767))
     );
 
     /**
@@ -206,19 +218,27 @@ public class RelayDataComponents {
 
     /**
      * 创建 String 的网络同步 StreamCodec
+     * @param maxLength 最大字符串长度
      */
-    private static StreamCodec<FriendlyByteBuf, String> createStringStreamCodec() {
+    private static StreamCodec<FriendlyByteBuf, String> createStringStreamCodec(int maxLength) {
         return new StreamCodec<FriendlyByteBuf, String>() {
             @Override
             public String decode(FriendlyByteBuf buf) {
-                return buf.readUtf(36); // UUID 字符串最大长度
+                return buf.readUtf(maxLength);
             }
 
             @Override
             public void encode(FriendlyByteBuf buf, String value) {
-                buf.writeUtf(value, 36);
+                buf.writeUtf(value, maxLength);
             }
         };
+    }
+
+    /**
+     * 创建 String 的网络同步 StreamCodec (默认用于 UUID，最大 36 字符)
+     */
+    private static StreamCodec<FriendlyByteBuf, String> createStringStreamCodec() {
+        return createStringStreamCodec(36);
     }
 
     /**

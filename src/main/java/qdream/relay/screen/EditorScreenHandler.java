@@ -2,7 +2,6 @@ package qdream.relay.screen;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -14,9 +13,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import qdream.relay.blocks.entity.custom.EditorBlockEntity;
-import qdream.relay.items.DiskItem;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 import qdream.relay.mc.component.DiskComponent;
+import qdream.relay.items.DiskItem;
 
 /**
  * 法术编辑器 Screen Handler
@@ -163,24 +162,25 @@ public class EditorScreenHandler extends AbstractContainerMenu {
             return;
         }
 
-        // 同步到客户端
-        syncProgramToClient(diskComponent.getProgram(diskStack));
+        // 同步到客户端（JSON 字符串）
+        String programJson = diskComponent.getProgram(diskStack);
+        if (programJson != null) {
+            syncProgramToClient(programJson);
+        }
     }
 
     /**
-     * 将程序同步到客户端
+     * 将程序同步到客户端（JSON 字符串）
      */
-    public void syncProgramToClient(ListTag programTag) {
+    public void syncProgramToClient(String programJson) {
         if (blockEntity != null && blockEntity.getLevel() != null) {
             Level level = blockEntity.getLevel();
             if (!level.isClientSide()) {
-                CompoundTag nbt = new CompoundTag();
-                nbt.put("program", programTag);
                 level.players().stream()
                         .filter(p -> p.containerMenu == this)
                         .filter(p -> p instanceof ServerPlayer)
                         .findFirst()
-                        .ifPresent(p -> ServerPlayNetworking.send((ServerPlayer) p, new S2C_SyncSpellDiskPayload(nbt)));
+                        .ifPresent(p -> ServerPlayNetworking.send((ServerPlayer) p, new S2C_SyncSpellDiskPayload(programJson)));
             }
         }
     }
@@ -192,24 +192,12 @@ public class EditorScreenHandler extends AbstractContainerMenu {
 
     /**
      * 保存程序到磁盘
-     * 
-     * @param programTag 程序 NBT 数据，直接从客户端传来
+     *
+     * @param programTag 程序 NBT 数据（向后兼容，不再使用）
      */
     public void saveProgramToDisk(CompoundTag programTag) {
-        if (blockEntity == null)
-            return;
-
-        ItemStack diskStack = getDiskItem();
-        if (diskStack.isEmpty()) {
-            return;
-        }
-        DiskComponent diskComponent = (DiskComponent) diskStack.getItem();
-        if (diskComponent == null) {
-            return;
-        }
-
-        // 直接使用客户端传来的 NBT 数据，不需要重新序列化
-        diskComponent.setProgram(diskStack, programTag.getList("program").orElse(new ListTag()));
+        // 向后兼容：此方法不再使用
+        // 新流程由服务端网络接收器直接编译 JSON 并调用 DiskComponent.setProgramJson()
     }
 
     /** 获取磁盘物品 */

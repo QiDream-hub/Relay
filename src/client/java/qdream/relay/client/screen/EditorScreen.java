@@ -11,8 +11,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -272,21 +270,16 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
      */
     private void onSave() {
         try {
-            // 从 JSON 编辑器获取内容并解析
+            // 从 JSON 编辑器获取内容并编译检查
             String jsonStr = jsonEditorWidget.getJsonContent();
-            List<Executable> program = ProgramCompiler.compileFromJson(jsonStr);
+            ProgramCompiler.compileFromJson(jsonStr);
 
-            // 直接发送保存请求，包含程序 NBT 数据
-            ListTag programList = ProgramCompiler.toNbt(program);
-            CompoundTag programTag = new CompoundTag();
-            programTag.put("program", programList);
-            ClientPlayNetworking.send(new C2S_SaveSpellDiskPayload(programTag));
-
+            // 编译通过，发送 JSON 字符串到服务端
+            ClientPlayNetworking.send(new C2S_SaveSpellDiskPayload(jsonStr));
             saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.success"));
         } catch (CompilationException e) {
-            // 保存失败，显示错误
-            Relay.LOGGER.error("保存失败 出现错误:" + e.getMessage());
-            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure"));
+            // 编译失败，显示错误信息
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure", e.getMessage()));
         }
     }
 
@@ -409,15 +402,16 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     // ==================== 服务端同步 ====================
 
     /**
-     * 从服务端同步程序列表
+     * 从服务端同步程序列表（JSON 字符串）
      * 由网络包接收器调用
      */
-    public void updateProgramFromServer(List<Executable> program) {
+    public void updateProgramFromServer(String programJson) {
         try {
-            String formatted = ProgramCompiler.toPrettyJson(program);
-            jsonEditorWidget.setJsonContent(formatted);
+            // 直接设置 JSON 内容，不进行编译检查
+            // 这样即使包含未知操作也能加载到编辑器中
+            jsonEditorWidget.setJsonContent(programJson);
         } catch (Exception e) {
-            e.printStackTrace();
+            Relay.LOGGER.error("加载程序失败：" + e.getMessage());
         }
     }
 

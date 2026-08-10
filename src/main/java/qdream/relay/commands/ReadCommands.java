@@ -9,7 +9,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -88,12 +87,12 @@ public class ReadCommands {
             throw NO_DISK.create();
         }
 
-        ListTag programTag = diskComponent.getProgram(stack);
+        String programJson = diskComponent.getProgram(stack);
         List<Executable> program;
         try {
-            program = ProgramCompiler.fromNbt(programTag);
+            program = ProgramCompiler.compileFromJson(programJson);
         } catch (ProgramCompiler.CompilationException e) {
-            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
         if (program.isEmpty()) {
@@ -128,12 +127,12 @@ public class ReadCommands {
             throw NO_DISK.create();
         }
 
-        ListTag programTag = diskComponent.getProgram(disk);
+        String programJson = diskComponent.getProgram(disk);
         List<Executable> program;
         try {
-            program = ProgramCompiler.fromNbt(programTag);
+            program = ProgramCompiler.compileFromJson(programJson);
         } catch (ProgramCompiler.CompilationException e) {
-            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
         if (program.isEmpty()) {
@@ -159,12 +158,12 @@ public class ReadCommands {
         }
 
         String format = StringArgumentType.getString(context, "format");
-        ListTag programTag = diskComponent.getProgram(stack);
+        String programJson = diskComponent.getProgram(stack);
         List<Executable> program;
         try {
-            program = ProgramCompiler.fromNbt(programTag);
+            program = ProgramCompiler.compileFromJson(programJson);
         } catch (ProgramCompiler.CompilationException e) {
-            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
         if (program.isEmpty()) {
@@ -200,12 +199,12 @@ public class ReadCommands {
             throw NO_DISK.create();
         }
 
-        ListTag programTag = diskComponent.getProgram(disk);
+        String programJson = diskComponent.getProgram(disk);
         List<Executable> program;
         try {
-            program = ProgramCompiler.fromNbt(programTag);
+            program = ProgramCompiler.compileFromJson(programJson);
         } catch (ProgramCompiler.CompilationException e) {
-            source.sendFailure(Component.literal("§c NBT 解析失败：" + e.getMessage()));
+            source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
         if (program.isEmpty()) {
