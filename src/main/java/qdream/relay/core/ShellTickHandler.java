@@ -28,24 +28,27 @@ public class ShellTickHandler {
          * @param stateMachine 被监视的状态机
          * @param executable   当前执行的可执行单元
          */
-        default void beforeStep(StateMachine stateMachine, Executable executable) {}
-        
+        default void beforeStep(StateMachine stateMachine, Executable executable) {
+        }
+
         /**
          * 在操作成功执行后调用
          *
          * @param stateMachine 被监视的状态机
          * @param executable   当前执行的可执行单元
          */
-        default void afterStep(StateMachine stateMachine, Executable executable) {}
-        
+        default void afterStep(StateMachine stateMachine, Executable executable) {
+        }
+
         /**
          * 在操作触发事故时调用
          *
          * @param stateMachine 被监视的状态机
          * @param executable   当前执行的可执行单元
-         * @param reason       事故原因
+         * @param warning      警告对象
          */
-        default void onMishap(StateMachine stateMachine, Executable executable, String reason) {}
+        default void onMishap(StateMachine stateMachine, Executable executable, Warning warning) {
+        }
     }
 
     private int tickCounter;
@@ -132,7 +135,10 @@ public class ShellTickHandler {
 
         // 检查能量（核心基础消耗）- 每 tick 只检查一次
         if (!container.hasEnoughEnergy(energyCostPerTick)) {
-            stateMachine.triggerMishap("能量不足：需要 " + energyCostPerTick + "，当前只有 " + container.getEnergy());
+            stateMachine.triggerMishap(new qdream.relay.mc.errors.EnergyException(
+                    stateMachine,
+                    net.minecraft.network.chat.Component.translatable("error.energy_insufficient", energyCostPerTick,
+                            container.getEnergy())));
             accumulatedCost = 0;
             return;
         }
@@ -161,7 +167,10 @@ public class ShellTickHandler {
             if (top instanceof Instruction spell) {
                 double opEnergy = spell.getEnergy();
                 if (!container.hasEnoughEnergy(opEnergy)) {
-                    stateMachine.triggerMishap("操作能量不足：需要 " + opEnergy + "，当前只有 " + container.getEnergy());
+                    stateMachine.triggerMishap(new qdream.relay.mc.errors.EnergyException(
+                            stateMachine,
+                            net.minecraft.network.chat.Component.translatable("error.energy_insufficient", opEnergy,
+                                    container.getEnergy())));
                     accumulatedCost = 0;
                     return;
                 }
@@ -176,20 +185,12 @@ public class ShellTickHandler {
             }
 
             try {
-                stateMachine.step();
-            } catch (Warning e) {
-                // 调试回调 - 事故
-                if (debugCallback != null) {
-                    debugCallback.onMishap(stateMachine, currentOp, e.getMessage());
+                if (!stateMachine.step()) {
+                    break;
                 }
-                break; // 执行失败
             } catch (Exception e) {
                 Relay.LOGGER.error(e.getMessage(), e);
-                // 调试回调 - 事故
-                if (debugCallback != null) {
-                    debugCallback.onMishap(stateMachine, currentOp, e.getMessage());
-                }
-                break; // 执行失败
+                break;
             }
 
             // 调试回调 - 执行后

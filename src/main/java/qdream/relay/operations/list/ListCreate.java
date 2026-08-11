@@ -6,6 +6,8 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.StackException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
 
@@ -33,7 +35,7 @@ public class ListCreate extends Instruction {
         int size = sizeData.asInt();
         if (executor.getDataStackSize() < size) {
             throw new StackException(executor,
-                    "操作 " + id + " 期望数据栈大小为：" + size + "，实际为：" + executor.getDataStackSize());
+                    ErrorMessageTools.buildErrorMessage(ErrorType.LIST_CREATE_SIZE_MISMATCH, size, executor.getDataStackSize()));
         }
 
         List<Executable> list = new ArrayList<>();

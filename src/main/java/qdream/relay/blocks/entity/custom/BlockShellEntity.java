@@ -85,10 +85,10 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         this.coreGroupId = null;
 
         // 设置事故回调
-        stateMachine.setMishapHandler(reason -> {
+        stateMachine.setMishapHandler(warning -> {
             // 延迟获取 level，因为在构造函数中 level 为 null
             if (getLevel() != null && !getLevel().isClientSide()) {
-                addLogEntry(String.format("§c§lMISHAP§r§c: %s", reason));
+                addLogEntry(String.format("§c§lMISHAP§r§c: %s", warning.getMessage()));
                 // 同步日志到客户端
                 syncLogsToClient(getLevel(), worldPosition);
             }

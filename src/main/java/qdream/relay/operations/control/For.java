@@ -7,8 +7,6 @@ import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.ListData;
 
-import java.util.ArrayList;
-
 /**
  * ForOp - 列表迭代器
  *

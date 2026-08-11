@@ -14,6 +14,7 @@ import net.minecraft.core.NonNullList;
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Warning;
 import qdream.relay.items.ToolShellItem;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
@@ -79,10 +80,10 @@ public class ToolShellContainer implements ShellContainer {
         loadAllState();
 
         // 设置事故回调
-        stateMachine.setMishapHandler(reason -> {
+        stateMachine.setMishapHandler(warning -> {
             Entity owner = ToolShellContainer.this.owner;
             if (owner != null && owner instanceof Player player) {
-                player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix").append(reason));
+                player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix").append(warning.getMessage()));
             }
         });
         // 设置调试回调
@@ -100,7 +101,7 @@ public class ToolShellContainer implements ShellContainer {
             }
 
             @Override
-            public void onMishap(StateMachine stateMachine, Executable executable, String reason) {
+            public void onMishap(StateMachine stateMachine, Executable executable, Warning warning) {
                 if (isDebugOutputEnabled()) {
                     Entity owner = ToolShellContainer.this.owner;
                     if (owner != null && owner instanceof Player player) {
@@ -110,7 +111,7 @@ public class ToolShellContainer implements ShellContainer {
                         }
                         player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
                         player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.mishap.title", opName));
-                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.mishap.reason", reason));
+                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.mishap.reason", warning.getMessage()));
                         player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.program_stack", TextTools.formatProgramStack(stateMachine)));
                         player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.data_stack", TextTools.formatDataStack(stateMachine)));
                     }

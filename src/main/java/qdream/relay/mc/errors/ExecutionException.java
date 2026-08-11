@@ -1,5 +1,6 @@
 package qdream.relay.mc.errors;
 
+import net.minecraft.network.chat.Component;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Warning;
 
@@ -7,35 +8,36 @@ import qdream.relay.engine.Warning;
  * 法术执行异常基类
  * <p>
  * 所有操作中的错误都应抛出此异常或其子类，而不是直接调用 triggerMishap()
- * <p>
- * 使用示例:
- * 
- * <pre>{@code
- * public void execute(StateMachine executor) {
- *     if (errorCondition) {
- *         throw new ExecutionException("错误描述");
- *     }
- *     // 正常逻辑
- * }
- * }</pre>
  */
 public class ExecutionException extends Warning {
     /**
-     * 构造执行异常
+     * 构造执行异常（使用 Component）
      *
-     * @param message 错误消息
+     * @param executor 状态机
+     * @param info     错误信息（Component）
      */
-    public ExecutionException(StateMachine executor, String message) {
-        super(executor,message);
+    public ExecutionException(StateMachine executor, Component info) {
+        super(executor, info, r -> {
+            if (r instanceof Component component) {
+                return component.getString();
+            }
+            return "未知错误";
+        });
     }
 
     /**
-     * 构造执行异常
+     * 构造执行异常（使用 Component 和根本原因）
      *
-     * @param message 错误消息
-     * @param cause   根本原因
+     * @param executor 状态机
+     * @param info     错误信息
+     * @param cause    根本原因
      */
-    public ExecutionException(StateMachine executor, String message, Throwable cause) {
-        super(executor,message, cause);
+    public ExecutionException(StateMachine executor, Component info, Throwable cause) {
+        super(executor, info, r -> {
+            if (r instanceof Component component) {
+                return component.getString();
+            }
+            return "未知错误";
+        }, cause);
     }
 }

@@ -5,6 +5,8 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.VectorData;
 
 import net.minecraft.world.phys.Vec3;
@@ -33,7 +35,7 @@ public class VectorNormalize extends Instruction {
         double length = v.length();
 
         if (length < 1e-10) {
-            throw new ParameterException(executor,"无法归一化零向量");
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ZERO_VECTOR));
         }
 
         Vec3 result = v.normalize();

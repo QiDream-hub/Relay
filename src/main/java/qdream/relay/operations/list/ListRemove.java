@@ -6,11 +6,15 @@ import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
 
 import java.util.List;
 import java.util.ArrayList;
+
+import net.minecraft.network.chat.Component;
 
 /**
  * List Remove 操作 - 移除列表指定索引的元素
@@ -39,7 +43,7 @@ public class ListRemove extends Instruction {
         List<Executable> listData = list.getValue();
         int idx = (int) index.asDouble();
         if (idx < 0 || idx >= listData.size()) {
-            throw new ParameterException(executor, id + " 索引超出范围：" + idx);
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.LIST_INDEX_OUT_OF_BOUNDS, idx));
         }
 
         // 创建新列表（不可变修改）

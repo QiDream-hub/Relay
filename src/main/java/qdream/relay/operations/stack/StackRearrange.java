@@ -7,6 +7,8 @@ import qdream.relay.mc.errors.ParameterException;
 import qdream.relay.mc.errors.StackException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
 
@@ -51,7 +53,7 @@ public class StackRearrange extends Instruction {
 
         int amount = amountData.asInt();
         if (amount <= 0) {
-            throw new ParameterException(executor, id + ": amount 必须大于 0");
+            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_MUST_BE_POSITIVE));
         }
 
         // 3. 弹出 amount 个元素到临时数组（按弹出顺序）
@@ -68,13 +70,12 @@ public class StackRearrange extends Instruction {
 
         for (Executable indexExe : indices) {
             if (!(indexExe instanceof NumberData indexNum)) {
-                throw new ParameterException(executor, id + ": 索引必须是数字");
+                throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.STACK_REARRANGE_INDEX_MUST_BE_NUMBER));
             }
 
             int index = indexNum.asInt();
             if (index < 1 || index > amount) {
-                throw new ParameterException(executor, id + ": 索引 " + index +
-                        " 超出范围 [1, " + amount + "]");
+                throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.STACK_REARRANGE_INDEX_OUT_OF_RANGE, index, amount));
             }
 
             // 索引从 1 开始，tempArray 索引从 0 开始，且 tempArray[0] 是最后弹出的元素

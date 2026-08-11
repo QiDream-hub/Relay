@@ -18,7 +18,8 @@ import java.util.List;
 public class StateMachineNbtSerializer {
     public static final StateMachineNbtSerializer INSTANCE = new StateMachineNbtSerializer();
 
-    private StateMachineNbtSerializer() {}
+    private StateMachineNbtSerializer() {
+    }
 
     public CompoundTag serialize(StateMachine machine) {
         CompoundTag tag = new CompoundTag();
@@ -65,11 +66,7 @@ public class StateMachineNbtSerializer {
                 });
             }
         }
-        // 反转后压入，保证执行顺序
-        java.util.Collections.reverse(programStack);
-        for (Executable exe : programStack) {
-            machine.pushProgram(exe);
-        }
+        machine.loadProgram(programStack);
 
         // 恢复数据栈
         ListTag dataList = tag.getList("dataStack").orElse(new ListTag());

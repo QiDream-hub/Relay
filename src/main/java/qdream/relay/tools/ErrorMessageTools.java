@@ -1,5 +1,7 @@
 package qdream.relay.tools;
 
+import net.minecraft.network.chat.Component;
+
 /**
  * 错误消息生成工具类
  * <p>
@@ -157,7 +159,23 @@ public final class ErrorMessageTools {
         /** 无法移除目标元素 */
         ELEMENT_NOT_REMOVABLE("element_not_removable"),
         /** 无法设置目标元素 */
-        ELEMENT_NOT_SETTABLE("element_not_settable");
+        ELEMENT_NOT_SETTABLE("element_not_settable"),
+
+        // === 栈重排操作错误 ===
+        /** 栈重排：索引必须是数字 */
+        STACK_REARRANGE_INDEX_MUST_BE_NUMBER("stack_rearrange_index_must_be_number"),
+        /** 栈重排：索引超出范围 */
+        STACK_REARRANGE_INDEX_OUT_OF_RANGE("stack_rearrange_index_out_of_range"),
+
+        // === 列表创建操作错误 ===
+        /** 创建列表：数据栈大小不足 */
+        STACK_SIZE_INSUFFICIENT_FOR_LIST_CREATE("stack_size_insufficient_for_list_create"),
+        /** 创建列表：大小不匹配 */
+        LIST_CREATE_SIZE_MISMATCH("list_create_size_mismatch"),
+
+        // === 方块射线追踪错误 ===
+        /** 无法获取方块面 */
+        BLOCK_FACE_NOT_FOUND("block_face_not_found");
 
         private final String code;
 
@@ -170,8 +188,8 @@ public final class ErrorMessageTools {
         }
     }
 
-    public static String buildErrorMessage(ErrorType e, Object... args) {
-        return TextTools.getComponent("error." + e.getCode(), args).getString();
+    public static Component buildErrorMessage(ErrorType e, Object... args) {
+        return TextTools.getComponent("error." + e.getCode(), args);
     }
 
 }

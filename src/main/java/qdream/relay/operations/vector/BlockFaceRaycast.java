@@ -14,6 +14,8 @@ import qdream.relay.mc.errors.ExecutionException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
+import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
@@ -66,19 +68,20 @@ public class BlockFaceRaycast extends Instruction {
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             // 检查击中方块在范围内
             Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
-            try { OperationHelpers.checkInRange(executor, id, startPos, blockCenter); } catch (Exception e) { 
+            try { OperationHelpers.checkInRange(executor, id, startPos, blockCenter); } catch (Exception e) {
                 executor.pushData(NullData.INSTANCE);
                 return; }
 
             // 获取击中的面
             Direction hitFace = hitResult.getDirection();
             if (hitFace != null) {
-                // 返回面的名称（小写）
-                // getDirection() 返回的是击中面朝向射线来源的方向，直接使用
+                // 返回面的方向向量
                 executor.pushData(new VectorData(hitFace.getUnitVec3()));
+            } else {
+                throw new ExecutionException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_FACE_NOT_FOUND));
             }
         } else {
-            throw new ExecutionException(executor,"无法获取面");
+            throw new ExecutionException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_FACE_NOT_FOUND));
         }
     }
 }

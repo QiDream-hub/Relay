@@ -64,9 +64,9 @@ public class EntityShell extends Entity implements ShellContainer {
         this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
 
         // 设置事故回调
-        stateMachine.setMishapHandler(reason -> {
+        stateMachine.setMishapHandler(warning -> {
             if (!level().isClientSide()) {
-                getOwner().sendSystemMessage(Component.literal(String.format("§c§lMISHAP§r§c[实体]: %s", reason)));
+                getOwner().sendSystemMessage(Component.literal(String.format("§c§lMISHAP§r§c[实体]: %s", warning.getMessage())));
             }
         });
     }

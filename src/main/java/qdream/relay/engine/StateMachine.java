@@ -25,7 +25,7 @@ public class StateMachine {
      * 事故回调
      */
     public interface MishapHandler {
-        void onMishap(String reason);
+        void onMishap(Warning warning);
     }
 
     private MishapHandler mishapHandler;
@@ -56,13 +56,14 @@ public class StateMachine {
      * engine 层保持最小化，只负责原子执行。
      * 捕获 Warning 并触发 mishap
      */
-    public void step() {
+    public boolean step() {
         if (programStack.isEmpty()) {
-            throw new Warning(this, "程序已运行完成");
+            return false;
         }
 
         Executable executable = programStack.pop();
         executable.execute(this);
+        return true;
     }
 
     // ========== 事故处理 ==========
@@ -70,13 +71,15 @@ public class StateMachine {
     /**
      * 触发事故
      * 清空双栈并终止执行
+     *
+     * @param warning 警告对象
      */
-    public void triggerMishap(String reason) {
+    public void triggerMishap(Warning warning) {
         programStack.clear();
         dataStack.clear();
 
         if (mishapHandler != null) {
-            mishapHandler.onMishap(reason);
+            mishapHandler.onMishap(warning);
         }
     }
 
@@ -162,11 +165,12 @@ public class StateMachine {
     /**
      * 压入程序栈
      */
-    public void pushProgram(Executable iota) {
+    public boolean pushProgram(Executable iota) {
         if (programStack.size() >= maxStackSize) {
-            throw new Warning(this, "程序栈超出大小限制 (" + maxStackSize + ")");
+            return false;
         }
         programStack.push(iota);
+        return true;
     }
 
     /**
@@ -174,7 +178,7 @@ public class StateMachine {
      */
     public Executable popData() {
         if (dataStack.isEmpty()) {
-            throw new Warning(this, "数据栈为空，无法弹出");
+            return null;
         }
         return dataStack.pop();
     }
@@ -192,11 +196,12 @@ public class StateMachine {
     /**
      * 压入数据栈
      */
-    public void pushData(Executable iota) {
+    public boolean pushData(Executable iota) {
         if (dataStack.size() >= maxStackSize) {
-            throw new Warning(this, "数据栈超出大小限制 (" + maxStackSize + ")");
+            return false;
         }
         dataStack.push(iota);
+        return true;
     }
 
     /**

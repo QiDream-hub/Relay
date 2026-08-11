@@ -12,7 +12,6 @@ import java.util.Optional;
 import org.jspecify.annotations.NonNull;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -24,7 +23,7 @@ import net.minecraft.network.chat.Component;
  * <ul>
  * <li>获取可执行单元的 ID 和翻译键</li>
  * <li>获取翻译后的文本（支持参数化消息）</li>
- * <li>格式化栈快照为字符串</li>
+ * <li>格式化栈快照为文本组件（支持服务端/客户端）</li>
  * </ul>
  *
  * <h2>翻译键规范</h2>

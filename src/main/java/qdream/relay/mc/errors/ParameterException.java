@@ -1,5 +1,6 @@
 package qdream.relay.mc.errors;
 
+import net.minecraft.network.chat.Component;
 import qdream.relay.engine.StateMachine;
 
 /**
@@ -8,11 +9,11 @@ import qdream.relay.engine.StateMachine;
  * 用于操作参数验证失败的错误，如参数超出范围、参数格式错误等
  */
 public class ParameterException extends ExecutionException {
-    public ParameterException(StateMachine executor, String message) {
+    public ParameterException(StateMachine executor, Component message) {
         super(executor, message);
     }
 
-    public ParameterException(StateMachine executor, String message, Throwable cause) {
+    public ParameterException(StateMachine executor, Component message, Throwable cause) {
         super(executor, message, cause);
     }
 }
