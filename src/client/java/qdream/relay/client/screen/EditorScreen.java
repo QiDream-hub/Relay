@@ -1,6 +1,5 @@
 package qdream.relay.client.screen;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonObject;
@@ -276,7 +275,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
             // 编译通过，发送 JSON 字符串到服务端
             ClientPlayNetworking.send(new C2S_SaveSpellDiskPayload(jsonStr));
-            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.success"));
+            // 不立即修改按钮文本，等待服务端确认
         } catch (CompilationException e) {
             // 编译失败，显示错误信息
             saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure", e.getMessage()));
@@ -300,6 +299,12 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        // 检查是否需要恢复保存按钮文本
+        if (needsRestore && saveButton != null && System.currentTimeMillis() > saveButtonRestoreTime) {
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.button.save"));
+            needsRestore = false;
+        }
+
         // 深色背景
         graphics.fill(this.leftPos, this.topPos,
                 this.leftPos + this.imageWidth, this.topPos + this.imageHeight, BG_COLOR);
@@ -412,6 +417,26 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
             jsonEditorWidget.setJsonContent(programJson);
         } catch (Exception e) {
             Relay.LOGGER.error("加载程序失败：" + e.getMessage());
+        }
+    }
+
+    // 保存按钮恢复计时器
+    private long saveButtonRestoreTime = 0;
+    private boolean needsRestore = false;
+
+    /**
+     * 从服务端接收保存确认（成功/失败）
+     * 由网络包接收器调用
+     */
+    public void onSaved(boolean success, String errorMessage) {
+        if (success) {
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.success"));
+            saveButtonRestoreTime = System.currentTimeMillis() + 1500;
+            needsRestore = true;
+        } else {
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure", errorMessage));
+            saveButtonRestoreTime = System.currentTimeMillis() + 3000;
+            needsRestore = true;
         }
     }
 

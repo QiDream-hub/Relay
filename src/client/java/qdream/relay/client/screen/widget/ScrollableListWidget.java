@@ -243,7 +243,7 @@ public class ScrollableListWidget extends AbstractWidget {
 
             int maxScroll = getMaxScroll();
             if (maxScroll > 0) {
-                float ratio = (float) getVisibleLineCount() / items.size();
+                float ratio = (float) getVisibleLineCount() / getDisplayItems().size();
                 int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
                 float scrollRatio = (float) scrollOffset / maxScroll;
                 int thumbY = scrollAreaTop + (int) ((scrollAreaHeight - thumbHeight) * scrollRatio);
@@ -284,7 +284,7 @@ public class ScrollableListWidget extends AbstractWidget {
         int scrollAreaTop = getY() + PADDING;
         int scrollAreaHeight = this.height - PADDING * 2;
 
-        float ratio = (float) getVisibleLineCount() / items.size();
+        float ratio = (float) getVisibleLineCount() / getDisplayItems().size();
         int thumbHeight = Math.max(20, (int) (scrollAreaHeight * ratio));
         int effectiveHeight = scrollAreaHeight - thumbHeight;
 
@@ -417,7 +417,7 @@ public class ScrollableListWidget extends AbstractWidget {
 
         graphics.fill(sbX, sbTop, sbX + SCROLLBAR_WIDTH, sbTop + sbHeight, SCROLLBAR_BG);
 
-        float ratio = (float) visibleLines / items.size();
+        float ratio = (float) visibleLines / getDisplayItems().size();
         int thumbHeight = Math.max(20, (int) (sbHeight * ratio));
         float scrollRatio = getMaxScroll() > 0 ? (float) scrollOffset / getMaxScroll() : 0;
         int thumbY = sbTop + (int) ((sbHeight - thumbHeight) * scrollRatio);
