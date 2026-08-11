@@ -40,14 +40,11 @@ public class PlaceBlock extends Instruction {
         VectorData popVector = StackHelpers.popVector(executor, id);
         ItemStack itemStack = ContainerHelpers.getItemStack(popSlot);
         if (itemStack.isEmpty() || !(itemStack.getItem() instanceof BlockItem blockItem)) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ITEM_FOR_ACTION));
+            throw new ContainerException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ITEM_FOR_ACTION));
         }
 
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty())
-            return;
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         Vec3 vec3 = popVector.getVec3();
 

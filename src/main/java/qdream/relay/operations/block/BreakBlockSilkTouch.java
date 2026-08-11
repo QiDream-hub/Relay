@@ -58,13 +58,7 @@ public class BreakBlockSilkTouch extends Instruction {
             return; }
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
-
-        Level level = levelOpt.get();
+        Level level  = OperationHelpers.getLevel(executor, id);
 
         // 挖掘方块
         BlockState state = level.getBlockState(pos);

@@ -111,13 +111,7 @@ public class RightClick extends Instruction {
         // 设置玩家手中的物品
         // player.setItemInHand(InteractionHand.MAIN_HAND, itemStack);
 
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
-
-        Level level = levelOpt.get();
+        Level level  = OperationHelpers.getLevel(executor, id);
 
         // 创建 UseOnContext 用于右键点击方块
         UseOnContext useOnContext = new UseOnContext(

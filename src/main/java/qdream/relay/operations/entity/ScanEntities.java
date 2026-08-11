@@ -40,9 +40,12 @@ public class ScanEntities extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) {
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+        } catch (Exception e) {
             executor.pushData(new ListData(new ArrayList<>()));
-            return; }
+            return;
+        }
 
         VectorData centerData = StackHelpers.popVector(executor, id);
         NumberData radiusData = StackHelpers.popNumber(executor, id);
@@ -53,18 +56,15 @@ public class ScanEntities extends Instruction {
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
         Vec3 searchEdge = center.add(new Vec3(radius, radius, radius));
-        try { OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge); } catch (Exception e) { 
-            executor.pushData(new ListData(new ArrayList<>()));
-            return; }
-
-        // 获取 Level 上下文
-        var levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) {
+        try {
+            OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge);
+        } catch (Exception e) {
             executor.pushData(new ListData(new ArrayList<>()));
             return;
         }
 
-        Level level = levelOpt.get();
+        // 获取 Level 上下文
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 创建搜索区域
         AABB searchBox = new AABB(

@@ -53,10 +53,7 @@ public class GetEntity extends Instruction {
         OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge);
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) return;
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 创建搜索区域
         AABB searchBox = new AABB(

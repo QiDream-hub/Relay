@@ -1,4 +1,4 @@
-package qdream.relay.operations.entity;
+package qdream.relay.operations.block;
 
 import java.util.Optional;
 
@@ -54,10 +54,7 @@ public class GetBlockEntity extends Instruction {
         OperationHelpers.checkInRange(executor, id, sourcePos, posVec);
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) return;
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 获取方块实体
         BlockEntity blockEntity = level.getBlockEntity(blockPos);

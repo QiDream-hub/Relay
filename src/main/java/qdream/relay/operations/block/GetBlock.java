@@ -54,10 +54,7 @@ public class GetBlock extends Instruction {
         OperationHelpers.checkInRange(executor, id, sourcePos, posVec);
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) return;
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 获取方块状态
         BlockState blockState = level.getBlockState(blockPos);

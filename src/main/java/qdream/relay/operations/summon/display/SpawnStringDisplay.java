@@ -104,11 +104,7 @@ public class SpawnStringDisplay extends Instruction {
         }
 
         // 获取世界
-        Level level = OperationHelpers.getLevel(executor, id).orElse(null);
-        if (level == null) {
-            throw new WorldInteractionException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE));
-        }
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 生成 StringDisplay 实体
         StringDisplay display = new StringDisplay(RelayEntities.STRING_DISPLAY, level);

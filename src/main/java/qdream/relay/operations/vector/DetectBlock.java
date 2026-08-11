@@ -36,9 +36,12 @@ public class DetectBlock extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) {
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         // 弹出参数
         VectorData pos = StackHelpers.popVector(executor, id);
@@ -48,18 +51,15 @@ public class DetectBlock extends Instruction {
 
         // 获取源位置并检查范围
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        try { OperationHelpers.checkInRange(executor, id, sourcePos, posVec); } catch (Exception e) { 
-            executor.pushData(new BooleanData(false));
-            return; }
-
-        // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) {
+        try {
+            OperationHelpers.checkInRange(executor, id, sourcePos, posVec);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
-        Level level = levelOpt.get();
+        // 获取 Level 上下文
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 检测方块
         BlockState state = level.getBlockState(blockPos);

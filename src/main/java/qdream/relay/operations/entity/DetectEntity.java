@@ -55,12 +55,7 @@ public class DetectEntity extends Instruction {
         OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge);
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) {
-            return;
-        }
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 检测实体
         AABB searchBox = new AABB(

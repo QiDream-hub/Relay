@@ -120,11 +120,7 @@ public class SpawnShell extends Instruction {
         OperationHelpers.consumeEnergy(executor, requiredEnergy);
 
         // 获取世界
-        Level level = OperationHelpers.getLevel(executor, id).orElse(null);
-        if (level == null) {
-            throw new WorldInteractionException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE));
-        }
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 生成 Shell 实体
         EntityShell shellEntity = new EntityShell(RelayEntities.ENTITY_SHELL, level);

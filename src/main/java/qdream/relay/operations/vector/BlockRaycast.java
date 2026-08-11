@@ -54,11 +54,7 @@ public class BlockRaycast extends Instruction {
         Vec3 endPos = startPos.add(direction.scale(maxDistVal));
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty())
-            return;
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 执行射线追踪
         BlockHitResult hitResult = level.clip(new ClipContext(
@@ -70,9 +66,12 @@ public class BlockRaycast extends Instruction {
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             // 检查击中方块在范围内
             Vec3 blockCenter = Vec3.atCenterOf(hitResult.getBlockPos());
-            try { OperationHelpers.checkInRange(executor, id, startPos, blockCenter); } catch (Exception e) { 
+            try {
+                OperationHelpers.checkInRange(executor, id, startPos, blockCenter);
+            } catch (Exception e) {
                 executor.pushData(NullData.INSTANCE);
-                return; }
+                return;
+            }
             // 返回击中的方块坐标（方块中心）
             executor.pushData(new VectorData(blockCenter));
         } else {

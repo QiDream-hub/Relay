@@ -1,7 +1,5 @@
 package qdream.relay.operations.vector;
 
-import java.util.Optional;
-
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext;
@@ -56,11 +54,7 @@ public class BlockFaceRaycast extends Instruction {
         Vec3 endPos = startPos.add(direction.scale(maxDistVal));
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty())
-            return;
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 执行射线追踪
         BlockHitResult hitResult = level.clip(new ClipContext(

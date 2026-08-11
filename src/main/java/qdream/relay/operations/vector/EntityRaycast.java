@@ -57,13 +57,7 @@ public class EntityRaycast extends Instruction {
         Vec3 end = start.add(direction.scale(maxDist));
 
         // 获取 Level 上下文
-        Optional<Level> levelOpt = OperationHelpers.getLevel(executor, id);
-        if (levelOpt.isEmpty()) {
-            executor.pushData(NullData.INSTANCE);
-            return;
-        }
-
-        Level level = levelOpt.get();
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 获取要排除的实体
         Entity excludeEntity = null;
@@ -122,9 +116,12 @@ public class EntityRaycast extends Instruction {
 
         // 检查击中的实体是否在范围内（参考 Hexcasting）
         if (hitEntity != null && hitPos != null) {
-            try { OperationHelpers.checkInRange(executor, id, start, hitPos); } catch (Exception e) { 
+            try {
+                OperationHelpers.checkInRange(executor, id, start, hitPos);
+            } catch (Exception e) {
                 executor.pushData(NullData.INSTANCE);
-                return; }
+                return;
+            }
             EntityData result = EntityData.from(hitEntity, level);
             executor.pushData(result);
         } else {

@@ -142,16 +142,16 @@ public final class OperationHelpers {
      *
      * @param executor      状态机
      * @param operationName 操作名称（用于错误消息）
-     * @return Optional<Level>
+     * @return Level
      * @throws WorldInteractionException 如果无法获取世界
      */
-    public static Optional<Level> getLevel(StateMachine executor, String operationName) {
+    public static Level getLevel(StateMachine executor, String operationName) {
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
-        if (levelOpt.isEmpty()) {
+        if (levelOpt.isEmpty() || levelOpt.get() == null) {
             throw new WorldInteractionException(executor,
                     ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE));
         }
-        return levelOpt;
+        return levelOpt.get();
     }
 
     /**
