@@ -2,7 +2,7 @@ package qdream.relay.mc.base;
 
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
-
+import net.minecraft.network.chat.Component;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.signature.Signature;
 
@@ -41,7 +41,7 @@ public abstract class Operation implements Executable {
      */
     public abstract boolean equalsTo(Operation other);
 
-    public abstract String asString();
+    public abstract Component asString();
 
     /**
      * 转换为布尔值

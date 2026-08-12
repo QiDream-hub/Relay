@@ -1,5 +1,6 @@
 package qdream.relay.operations.type;
 
+import net.minecraft.network.chat.Component;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -39,7 +40,7 @@ public class ToString extends Instruction {
         if (input instanceof Operation op) {
             executor.pushData(new StringData(op.asString()));
         } else {
-            executor.pushData(new StringData(input.toString()));
+            executor.pushData(new StringData(Component.literal(input.toString())));
         }
 
     }

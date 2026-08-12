@@ -1,5 +1,6 @@
 package qdream.relay.operations.summon.display;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -14,13 +15,13 @@ import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.tools.ErrorMessageTools;
 import qdream.relay.tools.ErrorMessageTools.ErrorType;
-import qdream.relay.types.VectorData;
+import qdream.relay.types.BooleanData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.StringData;
-import qdream.relay.types.BooleanData;
-import qdream.relay.entities.StringDisplay;
+import qdream.relay.types.VectorData;
 import qdream.relay.entities.RelayEntities;
+import qdream.relay.entities.StringDisplay;
 
 /**
  * 召唤 StringDisplay 实体操作
@@ -85,7 +86,7 @@ public class SpawnStringDisplay extends Instruction {
         BooleanData trackPlayerData = StackHelpers.popBoolean(executor, id);
 
         // 转换为具体值
-        String text = textData.getValue();
+        Component text = textData.getValue();
         double energy = energyNum.getValue();
         boolean seeThrough = seeThroughData.asBoolean();
         boolean trackPlayer = trackPlayerData.asBoolean();
@@ -93,7 +94,7 @@ public class SpawnStringDisplay extends Instruction {
         Vec3 lookAt = lookAtData.asVector();
 
         // 验证参数
-        if (text.isEmpty()) {
+        if (text.getString().isEmpty()) {
             throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TEXT_EMPTY));
         }
 
@@ -113,7 +114,7 @@ public class SpawnStringDisplay extends Instruction {
         display.setPos(position);
 
         // 设置文本
-        display.setTextString(text);
+        display.setText(text);
 
         // 设置文本颜色
         display.setTextColor(0xFFFFFFFF); // 不透明纯白

@@ -8,6 +8,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import qdream.relay.client.screen.widget.ScrollableListWidget;
 import qdream.relay.client.screen.widget.editor.tools.InfoContent;
 
@@ -49,8 +50,8 @@ public class OperationListWidget extends AbstractWidget {
     /** 光标位置（字符索引） */
     private int cursorPosition = 0;
 
-    /** 光标闪烁计时（毫秒） */
-    private long cursorTime = 0;
+    /** 光标聚焦开始时间（用于闪烁计算） */
+    private long cursorFocusedTime = 0;
 
     public OperationListWidget(int x, int y, int width, int height, Font font, List<InfoContent> operations) {
         super(x, y, width, height, Component.empty());
@@ -98,6 +99,15 @@ public class OperationListWidget extends AbstractWidget {
                 mouseY >= searchBoxY && mouseY < searchBoxY + searchBoxHeight;
     }
 
+    /**
+     * 检查光标是否可见（闪烁效果）
+     * 使用绝对时间计算，避免帧率波动影响闪烁速度
+     */
+    private boolean isCursorVisible() {
+        long elapsed = Util.getMillis() - this.cursorFocusedTime;
+        return (elapsed / 500) % 2 == 0;
+    }
+
     public void setOnOperationClicked(Consumer<String> callback) {
         this.listWidget.setOnItemSelected(callback);
     }
@@ -111,6 +121,7 @@ public class OperationListWidget extends AbstractWidget {
         // 检查是否点击搜索框
         if (event.button() == 0 && isMouseOverSearchBox(event.x(), event.y())) {
             this.setFocused(true);
+            this.cursorFocusedTime = Util.getMillis();
             // 设置光标位置为点击位置对应的字符索引
             this.cursorPosition = getCursorIndexAtX(event.x());
             return true;
@@ -280,9 +291,8 @@ public class OperationListWidget extends AbstractWidget {
             graphics.text(this.font, searchText, searchBoxX + 4, searchBoxY + 2, TEXT_COLOR);
 
             if (isFocused()) {
-                // 渲染光标（闪烁效果）
-                cursorTime += 16; // 假设 60 FPS，每帧约 16ms
-                if (cursorTime < 500) { // 0.5 秒周期
+                // 渲染光标（闪烁效果）-- 使用绝对时间计算，避免帧率波动影响
+                if (isCursorVisible()) {
                     int cursorX = searchBoxX + 4;
                     if (cursorPosition > 0) {
                         // 计算光标 X 位置
@@ -290,9 +300,6 @@ public class OperationListWidget extends AbstractWidget {
                         cursorX += font.width(subText);
                     }
                     graphics.verticalLine(cursorX, searchBoxY + 1, searchBoxY + searchBoxHeight - 2, 0xFFAAAA00);
-                }
-                if (cursorTime >= 1000) {
-                    cursorTime = 0;
                 }
             }
         }

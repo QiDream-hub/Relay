@@ -52,7 +52,7 @@ public class DiskItem extends Item implements DiskComponent {
 
                     for (int i = 0; i < displayCount; i++) {
                         textConsumer.accept(
-                                Component.literal("  • " + TextTools.getName(program.get(i)))
+                                Component.literal("  • ").append(TextTools.getName(program.get(i)))
                                         .withStyle(ChatFormatting.GRAY));
                     }
 

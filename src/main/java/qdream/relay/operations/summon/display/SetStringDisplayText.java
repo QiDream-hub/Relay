@@ -1,5 +1,6 @@
 package qdream.relay.operations.summon.display;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 
 import qdream.relay.engine.StateMachine;
@@ -51,14 +52,14 @@ public class SetStringDisplayText extends Instruction {
         }
 
         // 验证文本
-        String text = textData.getValue();
-        if (text == null || text.isEmpty()) {
+        Component text = textData.getValue();
+        if (text == null || text.getString().isEmpty()) {
             executor.pushData(new qdream.relay.types.BooleanData(false));
             return;
         }
 
         // 设置文本
-        display.setTextString(text);
+        display.setText(text);
 
         // 压入成功标志
         executor.pushData(new qdream.relay.types.BooleanData(true));

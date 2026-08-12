@@ -10,14 +10,15 @@ import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.base.Data;
-import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.tools.TextTools;
 
 /**
  * 列表类型
@@ -142,20 +143,8 @@ public class ListData extends Data {
     }
 
     @Override
-    public String asString() {
-        StringJoiner joiner = new StringJoiner(",", "[", "]");
-        for (Executable executable : value) {
-            if (executable instanceof Data data) {
-                joiner.add(data.asString());
-            } else if (executable instanceof Instruction ins) {
-                joiner.add(ins.asString());
-            } else if (executable instanceof Operation op) {
-                joiner.add(op.asString());
-            } else {
-                joiner.add(executable.toString());
-            }
-        }
-        return joiner.toString();
+    public Component asString() {
+        return TextTools.formatList(this.value);
     }
 
     @Override

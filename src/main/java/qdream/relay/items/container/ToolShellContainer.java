@@ -5,6 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -83,7 +84,12 @@ public class ToolShellContainer implements ShellContainer {
         stateMachine.setMishapHandler(warning -> {
             Entity owner = ToolShellContainer.this.owner;
             if (owner != null && owner instanceof Player player) {
-                player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix").append(warning.getMessage()));
+                if (!(warning.getInfo() instanceof Component component)) {
+                    player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix",
+                            Component.literal(warning.getMessage())));
+                    return;
+                }
+                player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix", component));
             }
         });
         // 设置调试回调
@@ -94,8 +100,12 @@ public class ToolShellContainer implements ShellContainer {
                     Entity owner = ToolShellContainer.this.owner;
                     if (owner != null && owner instanceof Player player) {
                         player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
-                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.program_stack", TextTools.formatProgramStack(stateMachine)));
-                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.data_stack", TextTools.formatDataStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable(
+                                "gui.relay:tool_shell.debug.program_stack",
+                                TextTools.formatProgramStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable(
+                                "gui.relay:tool_shell.debug.data_stack",
+                                TextTools.formatDataStack(stateMachine)));
                     }
                 }
             }
@@ -110,10 +120,18 @@ public class ToolShellContainer implements ShellContainer {
                             opName = op.getId();
                         }
                         player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
-                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.mishap.title", opName));
-                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.mishap.reason", warning.getMessage()));
-                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.program_stack", TextTools.formatProgramStack(stateMachine)));
-                        player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.data_stack", TextTools.formatDataStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable(
+                                "gui.relay:tool_shell.mishap.title",
+                                Component.literal(opName)));
+                        player.sendSystemMessage(Component.translatable(
+                                "gui.relay:tool_shell.mishap.reason",
+                                Component.literal(warning.getMessage())));
+                        player.sendSystemMessage(Component.translatable(
+                                "gui.relay:tool_shell.debug.program_stack",
+                                TextTools.formatProgramStack(stateMachine)));
+                        player.sendSystemMessage(Component.translatable(
+                                "gui.relay:tool_shell.debug.data_stack",
+                                TextTools.formatDataStack(stateMachine)));
                     }
                 }
             }

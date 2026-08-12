@@ -1,5 +1,6 @@
 package qdream.relay.mc;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.operations.arithmetic.*;
 import qdream.relay.operations.base.*;
@@ -42,7 +43,7 @@ public class RelayOperations {
                 OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new BooleanData(false)));
                 OperationRegistry.register(
-                                new OperationRegistry.DataEntry(() -> new StringData("")));
+                                new OperationRegistry.DataEntry(() -> new StringData(Component.literal(""))));
                 OperationRegistry.register(
                                 new OperationRegistry.DataEntry(() -> new VectorData(new Vec3(0, 0, 0))));
                 OperationRegistry.register(

@@ -2,6 +2,7 @@ package qdream.relay.types;
 
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
@@ -61,8 +62,8 @@ public class NullData extends Data {
     }
 
     @Override
-    public String asString() {
-        return "null";
+    public Component asString() {
+        return Component.literal("null");
     }
 
     @Override

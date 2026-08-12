@@ -145,6 +145,14 @@ public class ScrollableListWidget extends AbstractWidget {
     }
 
     /**
+     * 检查是否需要显示滚动条
+     * @return 当元素数量超过可视区域行数时返回 true
+     */
+    public boolean needsScrollbar() {
+        return getDisplayItems().size() > getVisibleLineCount();
+    }
+
+    /**
      * 根据鼠标坐标计算条目索引，超出范围返回 -1
      */
     public int getEntryAt(double mouseX, double mouseY) {
@@ -362,9 +370,12 @@ public class ScrollableListWidget extends AbstractWidget {
         int y = getY();
         int visibleLines = getVisibleLineCount();
 
+        // 检查是否需要显示滚动条
+        boolean needsScrollbar = needsScrollbar();
+
         int oldHoveredIndex = hoveredIndex;
         hoveredIndex = getEntryAt(mouseX, mouseY);
-        scrollbarHovered = isMouseOnScrollbar(mouseX, mouseY);
+        scrollbarHovered = needsScrollbar && isMouseOnScrollbar(mouseX, mouseY);
 
         if (hoveredIndex != oldHoveredIndex && onHover != null) {
             if (hoveredIndex >= 0 && hoveredIndex < getDisplayItems().size()) {
@@ -374,9 +385,10 @@ public class ScrollableListWidget extends AbstractWidget {
             }
         }
 
+        // 根据是否需要滚动条来决定裁剪区域
+        int scissorRight = needsScrollbar ? x + this.width - PADDING - SCROLLBAR_WIDTH : x + this.width - PADDING;
         int contentBottom = y + this.height - 4;
-        graphics.enableScissor(x + PADDING, y + PADDING,
-                x + this.width - PADDING - SCROLLBAR_WIDTH, contentBottom);
+        graphics.enableScissor(x + PADDING, y + PADDING, scissorRight, contentBottom);
 
         int textX = x + PADDING + 2;
         int textY = y + PADDING;
@@ -388,12 +400,11 @@ public class ScrollableListWidget extends AbstractWidget {
             boolean isHovered = (dataIndex == hoveredIndex);
             boolean isSelected = (dataIndex == selectedIndex);
 
+            int bgRight = needsScrollbar ? x + this.width - PADDING - SCROLLBAR_WIDTH : x + this.width - PADDING;
             if (isSelected) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - SCROLLBAR_WIDTH,
-                        entryY + LINE_HEIGHT - 1, selectedBg);
+                graphics.fill(x + PADDING, entryY - 1, bgRight, entryY + LINE_HEIGHT - 1, selectedBg);
             } else if (isHovered) {
-                graphics.fill(x + PADDING, entryY - 1, x + this.width - PADDING - SCROLLBAR_WIDTH,
-                        entryY + LINE_HEIGHT - 1, hoverBg);
+                graphics.fill(x + PADDING, entryY - 1, bgRight, entryY + LINE_HEIGHT - 1, hoverBg);
             }
 
             int color = isHovered ? hoverColor : textColor;
@@ -402,7 +413,8 @@ public class ScrollableListWidget extends AbstractWidget {
 
         graphics.disableScissor();
 
-        if (items.size() > visibleLines) {
+        // 只在需要时渲染滚动条
+        if (needsScrollbar) {
             renderScrollBar(graphics, x, y, visibleLines);
         }
     }

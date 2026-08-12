@@ -13,6 +13,7 @@ import org.jspecify.annotations.NonNull;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 /**
  * 文本工具类 - 提供 ID 获取和文本翻译功能
@@ -108,16 +109,11 @@ public final class TextTools {
      * @param args 参数列表
      * @return 翻译后的文本
      */
-    public static String getText(String key, Object... args) {
-        return Component.translatable(key, args).getString();
+    public static Component getText(String key, Object... args) {
+        return Component.translatable(key, args);
     }
 
     // ==================== 翻译键获取 ====================
-    @NonNull
-    public static String geParamNameKey(Executable exe) {
-        return "param.shell.description";
-    }
-
     @NonNull
     public static String geDescriptiontKey(Executable exe) {
         if (exe instanceof Data data) {
@@ -198,7 +194,7 @@ public final class TextTools {
      * @param exe 可执行单元
      * @return 显示名称
      */
-    public static String getName(Executable exe) {
+    public static Component getName(Executable exe) {
         return getText(getNameKey(exe));
     }
 
@@ -208,7 +204,7 @@ public final class TextTools {
      * @param tag NBT 标签
      * @return 显示名称
      */
-    public static String getName(CompoundTag tag) {
+    public static Component getName(CompoundTag tag) {
         return getText(getNameKey(tag));
     }
 
@@ -218,7 +214,7 @@ public final class TextTools {
      * @param id 操作id
      * @return 翻译后的文本
      */
-    public static String getName(String id) {
+    public static Component getName(String id) {
         return getText(getNameKey(id));
     }
 
@@ -228,7 +224,7 @@ public final class TextTools {
      * @param id 操作id
      * @return 翻译后的文本
      */
-    public static String getTypeName(String id) {
+    public static Component getTypeName(String id) {
         if (id.equals("any") || id.equals("...any")) {
             return getText("type." + id + ".name");
         }
@@ -242,7 +238,7 @@ public final class TextTools {
      * @param exe 可执行单元
      * @return 描述文本
      */
-    public static String getDescriptionText(Executable exe) {
+    public static Component getDescriptionText(Executable exe) {
         return getText(getDescriptionKey(exe));
     }
 
@@ -263,7 +259,7 @@ public final class TextTools {
     }
 
     // ==================== 参数名翻译 ====================
-    public static String getParamNameText(String name) {
+    public static Component getParamNameText(String name) {
         return getText("param." + name + ".description");
     }
 
@@ -273,47 +269,50 @@ public final class TextTools {
      * 格式化数据栈快照为字符串
      *
      * @param executor 状态机
-     * @return 格式化后的字符串
+     * @return 格式化后的Component
      */
-    public static String formatDataStack(StateMachine executor) {
-        return formatStack(executor.getDataStackSnapshot());
+    public static Component formatDataStack(StateMachine executor) {
+        return formatList(executor.getDataStackSnapshot());
     }
 
     /**
      * 格式化程序栈快照为字符串
      *
      * @param executor 状态机
-     * @return 格式化后的字符串
+     * @return 格式化后的Component
      */
-    public static String formatProgramStack(StateMachine executor) {
-        return formatStack(executor.getProgramStackSnapshot());
+    public static Component formatProgramStack(StateMachine executor) {
+        return formatList(executor.getProgramStackSnapshot());
     }
 
     /**
      * 格式化栈快照为字符串
      *
-     * @param stack 栈快照
-     * @return 格式化后的字符串
+     * @param list 栈快照
+     * @return 格式化后的Component
      */
-    public static String formatStack(List<Executable> stack) {
-        if (stack.isEmpty()) {
-            return "§8[]";
+    public static Component formatList(List<Executable> list) {
+        if (list.isEmpty()) {
+            return Component.literal("[]");
         }
-        StringBuilder sb = new StringBuilder("§8[");
-        for (int i = 0; i < stack.size(); i++) {
+        MutableComponent result = Component.literal("[");
+        for (int i = 0; i < list.size(); i++) {
             if (i > 0) {
-                sb.append("§8, ");
+                result.append(Component.literal(", "));
             }
-            Executable exe = stack.get(i);
+            Executable exe = list.get(i);
             if (exe instanceof Instruction instr) {
-                sb.append("§e").append(getName(instr.getId()));
+                // 浅蓝色显示操作名称
+                result.append(getName(instr.getId()).copy().withColor(0x55FFFF));
             } else if (exe instanceof Data data) {
-                sb.append("§e").append(data.asString());
+                // 绿色显示数据值
+                result.append(data.asString().copy().withColor(0x55FF55));
             } else {
-                sb.append("§f").append(exe.getClass().getSimpleName());
+                // 红色显示未知类型
+                result.append(Component.literal(exe.getClass().getSimpleName()).withColor(0xFF5555));
             }
         }
-        sb.append("§8]");
-        return sb.toString();
+        result.append(Component.literal("]"));
+        return result;
     }
 }

@@ -3,6 +3,7 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import qdream.relay.Relay;
@@ -227,13 +228,13 @@ public class BlockData extends Data {
     }
 
     @Override
-    public String asString() {
+    public Component asString() {
         if (blockPos == null || worldId != null) {
-            return "(null,-1,-1,-1)B";
+            return Component.literal("{null,(-1,-1,-1)}");
         }
-        return String.format("(%s,%d,%d,%d)B",
+        return Component.literal(String.format("{%s,(%d,%d,%d)}",
                 worldId != null ? worldId : "null",
-                blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                blockPos.getX(), blockPos.getY(), blockPos.getZ()));
     }
 
     @Override

@@ -597,7 +597,7 @@
   "gui.relay:spell_editor.operations.search": "搜索操作...",
   "gui.relay:spell_editor.types.title": "数据类型",
 
-  "gui.relay:tool_shell.message.prefix": "[工具外壳]",
+  "gui.relay:tool_shell.message.prefix": "[工具外壳] %s",
   "gui.relay:tool_shell.debug.separator": "§8§m----------------------------------------",
   "gui.relay:tool_shell.debug.program_stack": "§7[§f 程序栈 §7]: %s",
   "gui.relay:tool_shell.debug.data_stack": "§7[§f 数据栈 §7]: %s",

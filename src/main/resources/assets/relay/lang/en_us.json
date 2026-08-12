@@ -596,7 +596,7 @@
   "gui.relay:spell_editor.operations.search": "Search operations...",
   "gui.relay:spell_editor.types.title": "Data Types",
 
-  "gui.relay:tool_shell.message.prefix": "[Tool Shell]",
+  "gui.relay:tool_shell.message.prefix": "[Tool Shell] %s",
   "gui.relay:tool_shell.debug.separator": "§8§m----------------------------------------",
   "gui.relay:tool_shell.debug.program_stack": "§7[§f Program Stack §7]: %s",
   "gui.relay:tool_shell.debug.data_stack": "§7[§f Data Stack §7]: %s",

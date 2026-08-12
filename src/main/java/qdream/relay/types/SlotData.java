@@ -3,6 +3,7 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -281,13 +282,13 @@ public class SlotData extends Data {
     }
 
     @Override
-    public String asString() {
+    public Component asString() {
         if (containerPos == null || worldId != null) {
-            return "(null,-1,-1,-1,-1)";
+            return Component.literal("{null,(-1,-1,-1),-1}");
         }
-        return String.format("(%s,%d,%d,%d,%d)",
+        return Component.literal(String.format("(%s,%d,%d,%d,%d)",
                 worldId != null ? worldId : "null",
-                containerPos.getX(), containerPos.getY(), containerPos.getZ(), slot);
+                containerPos.getX(), containerPos.getY(), containerPos.getZ(), slot));
     }
 
     @Override

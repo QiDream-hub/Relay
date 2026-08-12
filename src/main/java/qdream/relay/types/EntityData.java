@@ -2,6 +2,7 @@ package qdream.relay.types;
 
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -237,10 +238,10 @@ public class EntityData extends Data {
     }
 
     @Override
-    public String asString() {
-        return String.format("(%s,%s)",
+    public Component asString() {
+        return Component.literal(String.format("(%s,%s)",
                 worldId != null ? worldId : "null",
-                uuid != null ? uuid.toString() : "null");
+                uuid != null ? uuid.toString() : "null"));
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.OperationRegistry;
@@ -60,8 +61,8 @@ public class InfoUtils {
 
         return new InfoContent(
                 TextTools.getId(e),
-                new InfoContent.InfoLine(TextTools.getName(e), INPUT_LABEL_COLOR),
-                new InfoContent.InfoLine(TextTools.getDescriptionText(e), TEXT_COLOR),
+                new InfoContent.InfoLine(TextTools.getName(e).getString(), INPUT_LABEL_COLOR),
+                new InfoContent.InfoLine(TextTools.getDescriptionText(e).getString(), TEXT_COLOR),
                 cost,
                 energyCost,
                 signatureLines.isEmpty() ? null : signatureLines);
@@ -145,11 +146,9 @@ public class InfoUtils {
 
         // 使用 Stream API 构建类型字符串
         String typesStr = types.stream()
-                .map(TextTools::getTypeName)
-                .reduce((a, b) -> a + "|" + b)
-                .orElse("");
-
-        return prefix + typesStr + ": " + TextTools.getParamNameText(param.getName());
+                .map(s -> TextTools.getTypeName(s).getString())
+                .collect(Collectors.joining("|"));
+        return prefix + typesStr + ": " + TextTools.getParamNameText(param.getName()).getString();
     }
 
     /**
@@ -167,7 +166,7 @@ public class InfoUtils {
         if (!outputs.isEmpty()) {
             lines.add(new InfoContent.InfoLine(Component.translatable(TYPE_LABEL_KEY).getString(), TYPE_COLOR));
             for (String output : outputs) {
-                lines.add(new InfoContent.InfoLine("  " + TextTools.getName(output), TYPE_COLOR));
+                lines.add(new InfoContent.InfoLine("  " + TextTools.getName(output).getString(), TYPE_COLOR));
             }
         }
 

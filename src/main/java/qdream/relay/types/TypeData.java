@@ -1,7 +1,7 @@
 package qdream.relay.types;
 
 import com.google.gson.JsonObject;
-
+import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -86,8 +86,8 @@ public class TypeData extends Data {
     }
 
     @Override
-    public String asString() {
-        return value;
+    public Component asString() {
+        return Component.literal(value != null ? value : "");
     }
 
     @Override

@@ -1,5 +1,6 @@
 package qdream.relay.mc.base;
 
+import net.minecraft.network.chat.Component;
 import qdream.relay.mc.signature.OperationSignature;
 
 /**
@@ -51,7 +52,7 @@ public abstract class Instruction extends Operation {
      * 转换为字符串(默认为id)
      */
     @Override
-    public String asString() {
-        return id;
+    public Component asString() {
+        return Component.literal(id);
     }
 }

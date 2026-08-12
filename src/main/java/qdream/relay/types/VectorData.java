@@ -2,6 +2,7 @@ package qdream.relay.types;
 
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
@@ -96,8 +97,8 @@ public class VectorData extends Data {
     }
 
     @Override
-    public String asString() {
-        return String.format("(%.1f,%.1f,%.1f)", vec3.x, vec3.y, vec3.z);
+    public Component asString() {
+        return Component.literal(String.format("(%.1f,%.1f,%.1f)", vec3.x, vec3.y, vec3.z));
     }
 
     @Override

@@ -50,11 +50,11 @@ public class SendMessage extends Instruction {
 
         // 获取实体引用
         Entity entity = recipient.getEntity();
-        String msg = message.asString();
+        Component msg = message.getValue();
 
         // 检查是否是玩家
         if (entity instanceof Player player) {
-            player.sendSystemMessage(Component.literal(msg));
+            player.sendSystemMessage(msg);
             executor.pushData(new BooleanData(true));
         } else {
             // 不是玩家或实体不存在，返回 false
