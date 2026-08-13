@@ -28,7 +28,7 @@ public class LogWidget extends AbstractWidget {
     private static final int EMPTY_COLOR = 0xFF555555;
 
     private final Font font;
-    private final Supplier<List<String>> logSupplier;
+    private final Supplier<List<Component>> logSupplier;
 
     // 滚动位置
     private int scrollOffset = 0;
@@ -41,9 +41,9 @@ public class LogWidget extends AbstractWidget {
 
     // 缓存换行后的日志
     private List<LogLine> cachedLogLines = new ArrayList<>();
-    private List<String> lastLogs;
+    private List<Component> lastLogs;
 
-    public LogWidget(int x, int y, int width, int height, Font font, Supplier<List<String>> logSupplier) {
+    public LogWidget(int x, int y, int width, int height, Font font, Supplier<List<Component>> logSupplier) {
         super(x, y, width, height, Component.literal("日志窗口"));
         this.font = font;
         this.logSupplier = logSupplier;
@@ -55,14 +55,14 @@ public class LogWidget extends AbstractWidget {
      * 日志行（支持换行）
      */
     private static class LogLine {
-        final String text;
+        final Component text;
         final int color;
         final int lineCount;
 
-        LogLine(String text, int color, Font font, int maxWidth) {
+        LogLine(Component text, int color, Font font, int maxWidth) {
             this.text = text;
             this.color = color;
-            this.lineCount = font.split(Component.literal(text), maxWidth).size();
+            this.lineCount = font.split(text, maxWidth).size();
         }
 
         int getLineCount() {
@@ -73,7 +73,7 @@ public class LogWidget extends AbstractWidget {
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         // 检查日志是否为空，空则不渲染
-        List<String> logs = logSupplier.get();
+        List<Component> logs = logSupplier.get();
         if (logs == null || logs.isEmpty()) {
             cachedLogLines.clear();
             lastLogs = null;
@@ -90,7 +90,7 @@ public class LogWidget extends AbstractWidget {
         if (lastLogs == null || !lastLogs.equals(logs)) {
             lastLogs = logs;
             cachedLogLines = new ArrayList<>();
-            for (String log : logs) {
+            for (Component log : logs) {
                 cachedLogLines.add(new LogLine(log, getLogColor(log), font, textWidth));
             }
         }
@@ -109,7 +109,7 @@ public class LogWidget extends AbstractWidget {
             }
 
             // 渲染时进行换行
-            var wrappedLines = font.split(Component.literal(logLine.text), textWidth);
+            var wrappedLines = font.split(logLine.text, textWidth);
             for (int lineIdx = 0; lineIdx < wrappedLines.size(); lineIdx++) {
                 if (displayedLines >= startIndex) {
                     if (currentY < y + this.height - PADDING) {
@@ -126,12 +126,13 @@ public class LogWidget extends AbstractWidget {
     /**
      * 根据日志内容获取颜色
      */
-    private int getLogColor(String log) {
-        if (log.contains("mishap")) {
+    private int getLogColor(Component log) {
+        String logString = log.getString();
+        if (logString.contains("mishap")) {
             return MISHAP_COLOR; // 红色 - 事故
-        } else if (log.contains("beforeStep")) {
+        } else if (logString.contains("beforeStep")) {
             return BEFORE_STEP_COLOR; // 绿色 - 执行前
-        } else if (log.contains("afterStep")) {
+        } else if (logString.contains("afterStep")) {
             return AFTER_STEP_COLOR; // 青色 - 执行后
         }
         return DEFAULT_COLOR; // 灰色 - 默认
@@ -150,7 +151,7 @@ public class LogWidget extends AbstractWidget {
      * @return 如果处理了滚动事件返回 true
      */
     public boolean handleScroll(double verticalAmount) {
-        List<String> logs = logSupplier.get();
+        List<Component> logs = logSupplier.get();
         if (logs != null && !logs.isEmpty()) {
             // 重新计算总行数
             int totalLines = cachedLogLines.stream().mapToInt(LogLine::getLineCount).sum();
@@ -170,7 +171,7 @@ public class LogWidget extends AbstractWidget {
      * 重置滚动位置到底部
      */
     public void scrollToBottom() {
-        List<String> logs = logSupplier.get();
+        List<Component> logs = logSupplier.get();
         if (logs != null && !logs.isEmpty()) {
             int totalLines = cachedLogLines.stream().mapToInt(LogLine::getLineCount).sum();
             scrollOffset = Math.max(0, totalLines - maxVisibleLines);

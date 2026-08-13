@@ -13,7 +13,7 @@ import qdream.relay.Relay;
  */
 public class RelayScreenHandlers {
 
-    public static MenuType<ShellScreenHandler> SHELL_SCREEN_HANDLER;
+    public static MenuType<BlockShellScreenHandler> SHELL_SCREEN_HANDLER;
     public static MenuType<EditorScreenHandler> SPELL_EDITOR_SCREEN_HANDLER;
     public static MenuType<ToolShellScreenHandler> TOOL_SHELL_SCREEN_HANDLER;
 
@@ -29,7 +29,7 @@ public class RelayScreenHandlers {
         }
         initialized = true;
 
-        SHELL_SCREEN_HANDLER = new MenuType<>((syncId, inventory) -> new ShellScreenHandler(syncId, inventory), FeatureFlags.VANILLA_SET);
+        SHELL_SCREEN_HANDLER = new MenuType<>((syncId, inventory) -> new BlockShellScreenHandler(syncId, inventory), FeatureFlags.VANILLA_SET);
         Identifier id = Identifier.fromNamespaceAndPath(Relay.MOD_ID, "shell");
         Registry.register(BuiltInRegistries.MENU, id, SHELL_SCREEN_HANDLER);
 

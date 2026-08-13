@@ -24,7 +24,7 @@ import qdream.relay.mc.component.WorldInteractorComponent;
  * 2 - 能量模块
  * 3 - 世界交互器
  */
-public class ShellScreenHandler extends AbstractContainerMenu {
+public class BlockShellScreenHandler extends AbstractContainerMenu {
 
     // 插槽布局常量
     private static final int CONTAINER_SLOT_COUNT = 4;
@@ -64,19 +64,19 @@ public class ShellScreenHandler extends AbstractContainerMenu {
 
     // 日志变更标记
     private boolean logsChanged = false;
-    private java.util.List<String> syncedLogs = new java.util.ArrayList<>();
+    private java.util.List<net.minecraft.network.chat.Component> syncedLogs = new java.util.ArrayList<>();
 
     /**
      * 客户端构造方法（没有实际容器）
      */
-    public ShellScreenHandler(int syncId, Inventory playerInventory) {
+    public BlockShellScreenHandler(int syncId, Inventory playerInventory) {
         this(syncId, playerInventory, null);
     }
 
     /**
      * 服务端构造方法（有实际容器）
      */
-    public ShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container) {
+    public BlockShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container) {
         super(RelayScreenHandlers.SHELL_SCREEN_HANDLER, syncId);
         this.blockEntity = container instanceof BlockShellEntity be ? be : null;
         // ShellBlockEntity 已实现 Container，直接使用；客户端使用空容器
@@ -206,7 +206,7 @@ public class ShellScreenHandler extends AbstractContainerMenu {
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
 
             // 同步日志（每 tick 检查变更）
-            java.util.List<String> currentLogs = blockEntity.getLogBuffer();
+            java.util.List<net.minecraft.network.chat.Component> currentLogs = blockEntity.getLogBuffer();
             if (!currentLogs.equals(syncedLogs)) {
                 syncedLogs = currentLogs;
                 logsChanged = true;
@@ -217,14 +217,14 @@ public class ShellScreenHandler extends AbstractContainerMenu {
     /**
      * 获取同步的日志内容
      */
-    public java.util.List<String> getSyncedLogs() {
+    public java.util.List<net.minecraft.network.chat.Component> getSyncedLogs() {
         return syncedLogs;
     }
 
     /**
      * 设置同步的日志内容（客户端调用）
      */
-    public void setSyncedLogs(java.util.List<String> logs) {
+    public void setSyncedLogs(java.util.List<net.minecraft.network.chat.Component> logs) {
         this.syncedLogs = logs;
     }
 

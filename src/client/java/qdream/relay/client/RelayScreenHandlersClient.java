@@ -2,7 +2,7 @@ package qdream.relay.client;
 
 import net.minecraft.client.gui.screens.MenuScreens;
 
-import qdream.relay.client.screen.ShellScreen;
+import qdream.relay.client.screen.BlockShellScreen;
 import qdream.relay.client.screen.EditorScreen;
 import qdream.relay.client.screen.ToolShellScreen;
 import qdream.relay.screen.RelayScreenHandlers;
@@ -15,7 +15,7 @@ public class RelayScreenHandlersClient {
 
     public static void init() {
         // 注册外壳方块屏幕
-        MenuScreens.register(RelayScreenHandlers.SHELL_SCREEN_HANDLER, ShellScreen::new);
+        MenuScreens.register(RelayScreenHandlers.SHELL_SCREEN_HANDLER, BlockShellScreen::new);
 
         // 注册法术编辑器屏幕
         MenuScreens.register(RelayScreenHandlers.SPELL_EDITOR_SCREEN_HANDLER, EditorScreen::new);

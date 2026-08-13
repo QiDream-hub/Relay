@@ -64,10 +64,20 @@ public class RelayServerNetworking {
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
                     if (blockEntity != null) {
-                        blockEntity.setEnabled(!blockEntity.isEnabled()&&blockEntity.isInitialized());
+                        // 检查是否已初始化
+                        if (!blockEntity.isInitialized()) {
+                            blockEntity.addLogEntry(net.minecraft.network.chat.Component.translatable("gui.relay:shell.toggle.not_initialized"));
+                            return;
+                        }
+                        // 切换开关状态
+                        boolean newState = !blockEntity.isEnabled();
+                        blockEntity.setEnabled(newState);
+                        blockEntity.addLogEntry(net.minecraft.network.chat.Component.translatable(
+                            newState ? "gui.relay:shell.toggle.enabled" : "gui.relay:shell.toggle.disabled"
+                        ));
                     }
                 }
             });
@@ -84,7 +94,7 @@ public class RelayServerNetworking {
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
                     if (blockEntity != null) {
                         blockEntity.loadProgramFromDisk();
@@ -199,7 +209,7 @@ public class RelayServerNetworking {
                 return;
 
             context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
                     if (blockEntity != null) {
                         // 每 10 tick 同步一次日志

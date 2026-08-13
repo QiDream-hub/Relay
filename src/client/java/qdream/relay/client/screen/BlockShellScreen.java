@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import qdream.relay.networking.payloads.C2S_ToggleShellPayload;
 import qdream.relay.networking.payloads.C2S_InitializeShellPayload;
 import qdream.relay.networking.payloads.C2S_RequestShellLogPayload;
-import qdream.relay.screen.ShellScreenHandler;
+import qdream.relay.screen.BlockShellScreenHandler;
 import qdream.relay.client.screen.widget.LogWidget;
 import qdream.relay.client.screen.widget.SlotWidget;
 
@@ -19,7 +19,7 @@ import qdream.relay.client.screen.widget.SlotWidget;
  * 显示 4 个插槽：核心、法术磁盘、能量模块、世界交互器
  * 包含开关按钮和状态信息显示
  */
-public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
+public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHandler> {
 
     // 复位按钮 - 开关按钮左侧 布局常量
     private static final int GUI_WIDTH = 176;
@@ -74,7 +74,7 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     private SlotWidget[] inventorySlotWidgets;
     private SlotWidget[] hotbarSlotWidgets;
 
-    public ShellScreen(ShellScreenHandler handler, Inventory inventory, Component title) {
+    public BlockShellScreen(BlockShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
         this.inventoryLabelY = this.imageHeight - 94;

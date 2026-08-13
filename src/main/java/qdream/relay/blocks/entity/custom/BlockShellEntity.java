@@ -8,10 +8,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.ValueInput;
@@ -27,7 +28,7 @@ import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ExecutionStats;
-import qdream.relay.screen.ShellScreenHandler;
+import qdream.relay.screen.BlockShellScreenHandler;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.component.WorldInteractorComponent;
@@ -69,7 +70,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
      * 日志缓冲区 - 存储最近的调试输出
      * 使用 ConcurrentLinkedQueue 保证线程安全
      */
-    private final ConcurrentLinkedQueue<String> logBuffer = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Component> logBuffer = new ConcurrentLinkedQueue<>();
 
     public static final int CORE_SLOT = 0;
     public static final int DISK_SLOT = 1;
@@ -88,7 +89,13 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         stateMachine.setMishapHandler(warning -> {
             // 延迟获取 level，因为在构造函数中 level 为 null
             if (getLevel() != null && !getLevel().isClientSide()) {
-                addLogEntry(String.format("§c§lMISHAP§r§c: %s", warning.getMessage()));
+                MutableComponent log = Component.literal("§lMISHAP:").withColor(0xFF5555);
+                if (warning.getInfo() instanceof Component component) {
+                    log.append(component);
+                } else {
+                    log.append(Component.literal(warning.getMessage()));
+                }
+                addLogEntry(log);
                 // 同步日志到客户端
                 syncLogsToClient(getLevel(), worldPosition);
             }
@@ -98,21 +105,11 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     }
 
     /**
-     * 格式化日志条目
-     */
-    private String formatLogEntry(String phase, Executable executable) {
-        long tick = (getLevel() != null) ? getLevel().getGameTime() : 0;
-        String id = "unknown";
-        if (executable instanceof qdream.relay.mc.base.Operation op) {
-            id = op.getClass().getSimpleName();
-        }
-        return String.format("[T%d] %s %s", tick, phase, id);
-    }
-
-    /**
      * 添加日志条目到缓冲区
+     *
+     * @param log 日志内容
      */
-    private void addLogEntry(String log) {
+    public void addLogEntry(Component log) {
         while (logBuffer.size() >= LOG_BUFFER_SIZE) {
             logBuffer.poll(); // 移除最旧的日志
         }
@@ -124,8 +121,8 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
      * 
      * @return 日志列表（按时间顺序）
      */
-    public java.util.List<String> getLogBuffer() {
-        return new java.util.ArrayList<>(logBuffer);
+    public List<Component> getLogBuffer() {
+        return new ArrayList<>(logBuffer);
     }
 
     /**
@@ -174,7 +171,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-        return new ShellScreenHandler(syncId, inv, this);
+        return new BlockShellScreenHandler(syncId, inv, this);
     }
 
     // ========== Container 接口 ==========
@@ -262,7 +259,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             return owner;
         }
         // 玩家可能离线后重新上线，尝试从 UUID 恢复
-        if (ownerUuid != null && getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+        if (ownerUuid != null && getLevel() instanceof ServerLevel serverLevel) {
             // 使用 Server 级别的 PlayerList 查询，跨所有维度
             Player playerByUUID = serverLevel.getServer().getPlayerList().getPlayer(ownerUuid);
             if (playerByUUID != null) {
@@ -549,13 +546,13 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
         ItemStack diskStack = getDiskStack();
         if (diskStack.isEmpty()) {
-            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_empty").getString());
+            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_empty"));
             return;
         }
 
         DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
-            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_component_null").getString());
+            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_component_null"));
             return;
         }
 
@@ -570,14 +567,14 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
 
         if (program.isEmpty()) {
-            addLogEntry(Component.translatable("gui.relay:shell.program_reload.program_empty").getString());
+            addLogEntry(Component.translatable("gui.relay:shell.program_reload.program_empty"));
             return;
         }
 
         getStateMachine().loadProgram(program);
         setInitialized(true); // 标记程序已加载
         setChanged();
-        addLogEntry(Component.translatable("gui.relay:shell.program_reload.success", program.size()).getString());
+        addLogEntry(Component.translatable("gui.relay:shell.program_reload.success", program.size()));
     }
 
     // ========== ShellContainer 接口：执行统计 ==========
@@ -683,7 +680,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
 
         double energy = getEnergy();
-        net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) world;
+        ServerLevel serverLevel = (ServerLevel) world;
         net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(pos);
         serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
                 .forEach(player -> {
@@ -701,8 +698,8 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             return;
         }
 
-        java.util.List<String> logs = getLogBuffer();
-        net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) world;
+        List<Component> logs = getLogBuffer();
+        ServerLevel serverLevel = (ServerLevel) world;
         net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(pos);
         serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
                 .forEach(player -> {

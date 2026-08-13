@@ -7,7 +7,7 @@ import java.util.Set;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import qdream.relay.client.screen.EditorScreen;
-import qdream.relay.client.screen.ShellScreen;
+import qdream.relay.client.screen.BlockShellScreen;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.networking.payloads.S2C_ShellEnergyPayload;
 import qdream.relay.networking.payloads.S2C_ShellLogPayload;
@@ -48,7 +48,7 @@ public class RelayClientNetworking {
             context.client().execute(() -> {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.player != null
-                        && mc.player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                        && mc.player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     handler.setSyncedEnergy(payload.energy());
                 }
             });
@@ -59,10 +59,10 @@ public class RelayClientNetworking {
             context.client().execute(() -> {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.player != null
-                        && mc.player.containerMenu instanceof qdream.relay.screen.ShellScreenHandler handler) {
+                        && mc.player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     handler.setSyncedLogs(payload.logs());
                     // 通知 GUI 重绘
-                    if (mc.screen instanceof ShellScreen shellScreen) {
+                    if (mc.screen instanceof BlockShellScreen shellScreen) {
                         if (shellScreen.getLogWidget() != null) {
                             shellScreen.getLogWidget().scrollToBottom();
                         }
