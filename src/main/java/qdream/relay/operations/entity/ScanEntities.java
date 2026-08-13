@@ -47,17 +47,17 @@ public class ScanEntities extends Instruction {
             return;
         }
 
-        VectorData centerData = StackHelpers.popVector(executor, id);
+        // 弹出参数 (注意：栈是后进先出，所以先弹出 radius，后弹出 center)
         NumberData radiusData = StackHelpers.popNumber(executor, id);
+        VectorData centerData = StackHelpers.popVector(executor, id);
 
         double radius = radiusData.asDouble();
         Vec3 center = centerData.asVector();
 
-        // 获取源位置并检查范围
+        // 获取源位置并检查范围 (检查中心点而非边缘)
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        Vec3 searchEdge = center.add(new Vec3(radius, radius, radius));
         try {
-            OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge);
+            OperationHelpers.checkInRange(executor, id, sourcePos, center);
         } catch (Exception e) {
             executor.pushData(new ListData(new ArrayList<>()));
             return;
