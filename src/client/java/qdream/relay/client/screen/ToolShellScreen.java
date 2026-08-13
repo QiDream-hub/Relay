@@ -26,6 +26,11 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
     private static final int BG_COLOR = 0xFF1A1A2E;
     private static final int BORDER_COLOR = 0xFF404060;
 
+    // 插槽布局（与 ScreenHandler 一致）
+    private static final int SLOT_X = 50;
+    private static final int SLOT_Y = 12;
+    private static final int SLOT_SIZE = 18;
+
     // 插槽标签
     private static final Component[] SLOT_LABELS = {
         Component.translatable("gui.relay:tool_shell.slot.core"),
@@ -35,12 +40,20 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
     };
     private static final int[] SLOT_LABEL_COLORS = { 0xFF00FF88, 0xFF00CCFF, 0xFFFFCC00, 0xFFFF8800 };
 
+    // 玩家背包插槽位置
+    private static final int INVENTORY_START_X = 8;
+    private static final int INVENTORY_START_Y = 140;
+    private static final int HOTBAR_START_Y = 198;
+
     // 配置按钮
     private Button useInventoryEnergyButton;
     private Button debugOutputButton;
     private Button statusInfoButton;
 
-    private SlotWidget[] slotWidgets;
+    // 插槽 Widget
+    private SlotWidget[] containerSlotWidgets;
+    private SlotWidget[] inventorySlotWidgets;
+    private SlotWidget[] hotbarSlotWidgets;
 
     public ToolShellScreen(ToolShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -85,13 +98,33 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
                 .build();
         this.addRenderableWidget(statusInfoButton);
 
-        // 插槽 Widget (4 个垂直排列)
-        slotWidgets = new SlotWidget[4];
-        int slotX = this.leftPos + 50;
-        int slotY = this.topPos + 12;
+        // 容器插槽 Widget (4 个垂直排列)
+        containerSlotWidgets = new SlotWidget[4];
         for (int i = 0; i < 4; i++) {
-            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i], this.font);
-            this.addRenderableWidget(slotWidgets[i]);
+            containerSlotWidgets[i] = new SlotWidget(
+                    this.leftPos + SLOT_X,
+                    this.topPos + SLOT_Y + i * LABEL_SPACING_Y);
+            this.addRenderableWidget(containerSlotWidgets[i]);
+        }
+
+        // 玩家背包插槽 Widget（主物品栏 3 行 x 9 列）
+        inventorySlotWidgets = new SlotWidget[27];
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 9; x++) {
+                inventorySlotWidgets[y * 9 + x] = new SlotWidget(
+                        this.leftPos + INVENTORY_START_X + x * SLOT_SIZE,
+                        this.topPos + INVENTORY_START_Y + y * SLOT_SIZE);
+                this.addRenderableWidget(inventorySlotWidgets[y * 9 + x]);
+            }
+        }
+
+        // 玩家热键栏插槽 Widget（1 行 x 9 列）
+        hotbarSlotWidgets = new SlotWidget[9];
+        for (int x = 0; x < 9; x++) {
+            hotbarSlotWidgets[x] = new SlotWidget(
+                    this.leftPos + INVENTORY_START_X + x * SLOT_SIZE,
+                    this.topPos + HOTBAR_START_Y);
+            this.addRenderableWidget(hotbarSlotWidgets[x]);
         }
     }
 

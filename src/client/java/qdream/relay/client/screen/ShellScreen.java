@@ -32,9 +32,14 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     private static final int BUTTON_WIDTH = 50;
     private static final int BUTTON_HEIGHT = 20;
 
+    // 插槽布局（与 ScreenHandler 一致）
+    private static final int SLOT_X = 50;
+    private static final int SLOT_Y = 12;
+    private static final int SLOT_SIZE = 18;
+
     // 日志窗口布局 - 放在屏幕左边，插槽标签下方
     private static final int LOG_WINDOW_X = 8;
-    private static final int LOG_WINDOW_Y = 130; 
+    private static final int LOG_WINDOW_Y = 130;
     private static final int LOG_WINDOW_WIDTH = 260;
     private static final int LOG_WINDOW_HEIGHT = 280;
 
@@ -52,6 +57,11 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     };
     private static final int[] SLOT_LABEL_COLORS = { 0xFF00FF88, 0xFF00CCFF, 0xFFFFCC00, 0xFFFF8800 };
 
+    // 玩家背包插槽位置
+    private static final int INVENTORY_START_X = 8;
+    private static final int INVENTORY_START_Y = 140;
+    private static final int HOTBAR_START_Y = 198;
+
     // 复位按钮 - 开关按钮左侧 开关按钮
     private Button toggleButton;
     private Button initButton;
@@ -59,8 +69,10 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
     // 日志窗口 Widget（包级可见，供 RelayClientNetworking 访问）
     private LogWidget logWidget;
 
-    // 插槽 Widget 数组
-    private SlotWidget[] slotWidgets;
+    // 插槽 Widget
+    private SlotWidget[] containerSlotWidgets;
+    private SlotWidget[] inventorySlotWidgets;
+    private SlotWidget[] hotbarSlotWidgets;
 
     public ShellScreen(ShellScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -96,13 +108,33 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
                 () -> this.menu.getSyncedLogs());
         this.addRenderableWidget(logWidget);
 
-        // 插槽 Widget (4 个垂直排列)
-        slotWidgets = new SlotWidget[4];
-        int slotX = this.leftPos + 50;
-        int slotY = this.topPos + 12;
+        // 容器插槽 Widget (4 个垂直排列)
+        containerSlotWidgets = new SlotWidget[4];
         for (int i = 0; i < 4; i++) {
-            slotWidgets[i] = new SlotWidget(slotX, slotY + i * LABEL_SPACING_Y, SLOT_LABELS[i], this.font);
-            this.addRenderableWidget(slotWidgets[i]);
+            containerSlotWidgets[i] = new SlotWidget(
+                    this.leftPos + SLOT_X,
+                    this.topPos + SLOT_Y + i * LABEL_SPACING_Y);
+            this.addRenderableWidget(containerSlotWidgets[i]);
+        }
+
+        // 玩家背包插槽 Widget（主物品栏 3 行 x 9 列）
+        inventorySlotWidgets = new SlotWidget[27];
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 9; x++) {
+                inventorySlotWidgets[y * 9 + x] = new SlotWidget(
+                        this.leftPos + INVENTORY_START_X + x * SLOT_SIZE,
+                        this.topPos + INVENTORY_START_Y + y * SLOT_SIZE);
+                this.addRenderableWidget(inventorySlotWidgets[y * 9 + x]);
+            }
+        }
+
+        // 玩家热键栏插槽 Widget（1 行 x 9 列）
+        hotbarSlotWidgets = new SlotWidget[9];
+        for (int x = 0; x < 9; x++) {
+            hotbarSlotWidgets[x] = new SlotWidget(
+                    this.leftPos + INVENTORY_START_X + x * SLOT_SIZE,
+                    this.topPos + HOTBAR_START_Y);
+            this.addRenderableWidget(hotbarSlotWidgets[x]);
         }
     }
 
@@ -144,8 +176,6 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        if (toggleButton != null) {
-        }
         if (initButton != null) {
             initButton.setMessage(getResetLabel());
             toggleButton.setMessage(getToggleLabel());
@@ -156,12 +186,13 @@ public class ShellScreen extends AbstractContainerScreen<ShellScreenHandler> {
         int left = this.leftPos;
         int top = this.topPos;
 
+        // 插槽标签
         for (int i = 0; i < SLOT_LABELS.length; i++) {
             int labelY = top + LABEL_START_Y + i * LABEL_SPACING_Y + 4;
             graphics.text(this.font, SLOT_LABELS[i], left + LABEL_X, labelY, SLOT_LABEL_COLORS[i]);
         }
 
-        renderStatusInfo(graphics, left + STATUS_X, top + STATUS_Y + BUTTON_HEIGHT);
+        renderStatusInfo(graphics, this.leftPos + STATUS_X, this.topPos + STATUS_Y + BUTTON_HEIGHT);
 
         // 定期请求日志同步（每 10 tick）
         if (this.minecraft != null && this.minecraft.level != null &&

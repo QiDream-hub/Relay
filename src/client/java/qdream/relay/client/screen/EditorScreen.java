@@ -72,6 +72,12 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     private static final int DISK_SLOT_X = 160;
     private static final int DISK_SLOT_Y = 18;
 
+    // 玩家背包插槽位置（与 ScreenHandler 一致）
+    private static final int INVENTORY_START_X = 124;
+    private static final int INVENTORY_START_Y = 310;
+    private static final int HOTBAR_START_Y = 364;
+    private static final int SLOT_SIZE = 18;
+
     // 自定义 Widget
     private OperationListWidget operationListWidget;
     private TypeListWidget typeListWidget;
@@ -81,6 +87,8 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     private Button formatButton;
     private HoverInfoWidget hoverInfoWidget;
     private SlotWidget diskSlotWidget;
+    private SlotWidget[] inventorySlotWidgets;
+    private SlotWidget[] hotbarSlotWidgets;
 
     public EditorScreen(EditorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, GUI_WIDTH, GUI_HEIGHT);
@@ -166,9 +174,28 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
         // 磁盘插槽 Widget (与 ScreenHandler 中的 DISK_SLOT 位置一致)
         diskSlotWidget = new SlotWidget(
-                left + DISK_SLOT_X, top + DISK_SLOT_Y, Component.translatable("gui.relay:spell_editor.slot.spell_disk"),
-                this.font);
+                left + DISK_SLOT_X, top + DISK_SLOT_Y);
         this.addRenderableWidget(diskSlotWidget);
+
+        // 玩家背包插槽 Widget（主物品栏 3 行 x 9 列）
+        inventorySlotWidgets = new SlotWidget[27];
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 9; x++) {
+                inventorySlotWidgets[y * 9 + x] = new SlotWidget(
+                        left + INVENTORY_START_X + x * SLOT_SIZE,
+                        top + INVENTORY_START_Y + y * SLOT_SIZE);
+                this.addRenderableWidget(inventorySlotWidgets[y * 9 + x]);
+            }
+        }
+
+        // 玩家热键栏插槽 Widget（1 行 x 9 列）
+        hotbarSlotWidgets = new SlotWidget[9];
+        for (int x = 0; x < 9; x++) {
+            hotbarSlotWidgets[x] = new SlotWidget(
+                    left + INVENTORY_START_X + x * SLOT_SIZE,
+                    top + HOTBAR_START_Y);
+            this.addRenderableWidget(hotbarSlotWidgets[x]);
+        }
 
         // 初始加载程序：发送请求到服务端，服务端同步到客户端
         ClientPlayNetworking.send(new C2S_RequestProgramPayload());
@@ -305,21 +332,25 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
             needsRestore = false;
         }
 
-        // 深色背景
-        graphics.fill(this.leftPos, this.topPos,
-                this.leftPos + this.imageWidth, this.topPos + this.imageHeight, BG_COLOR);
-        graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, BORDER_COLOR);
-
-        super.extractRenderState(graphics, mouseX, mouseY, delta);
-
         int left = this.leftPos;
         int top = this.topPos;
         int panelBottom = top + EDITOR_PANEL_HEIGHT;
 
-        // 分隔线
+        // 左侧面板背景
+        graphics.fill(left, top, left + PANEL_WIDTH, panelBottom, BG_COLOR);
+        graphics.outline(left, top, PANEL_WIDTH, EDITOR_PANEL_HEIGHT, BORDER_COLOR);
+
+        // 分隔线（在 super 之前绘制）
         graphics.verticalLine(left + PANEL_WIDTH, top, panelBottom, SEPARATOR_COLOR);
+
+        // ===== 调用 super 绘制 Slot 和拖拽物品 =====
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
+
+        // ===== 绘制上层 UI 元素 =====
+        // 背包分隔线（在 super 之后绘制，确保在 Slot 之上）
         graphics.horizontalLine(left, left + this.imageWidth, panelBottom + 4, INVENTORY_SEPARATOR_COLOR);
 
+        // "编辑器"标签
         graphics.text(this.font, Component.translatable("gui.relay:spell_editor.label.editor"),
                 left + PANEL_WIDTH + PANEL_PADDING, top + 5, TITLE_COLOR);
 

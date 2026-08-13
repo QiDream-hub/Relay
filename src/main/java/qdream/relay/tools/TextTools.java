@@ -293,9 +293,9 @@ public final class TextTools {
      */
     public static Component formatList(List<Executable> list) {
         if (list.isEmpty()) {
-            return Component.literal("[]");
+            return Component.literal("[]").withColor(0x55FF55);
         }
-        MutableComponent result = Component.literal("[");
+        MutableComponent result = Component.literal("[").withColor(0x55FF55);
         for (int i = 0; i < list.size(); i++) {
             if (i > 0) {
                 result.append(Component.literal(", "));
@@ -312,7 +312,7 @@ public final class TextTools {
                 result.append(Component.literal(exe.getClass().getSimpleName()).withColor(0xFF5555));
             }
         }
-        result.append(Component.literal("]"));
+        result.append(Component.literal("]").withColor(0x55FF55));
         return result;
     }
 }
