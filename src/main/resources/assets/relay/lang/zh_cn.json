@@ -466,6 +466,14 @@
   "param.color.description": "颜色值（RGB，0-16777215）",
   "param.alpha.description": "透明度（0-255，0=透明，255=不透明）",
 
+  "param.entity.description": "要检测的实体",
+  "param.isPlayer.description": "是否是玩家",
+  "param.isAnimal.description": "是否是动物",
+  "param.isItem.description": "是否是物品（掉落物）",
+  "param.isEntityShell.description": "是否是外壳实体",
+  "param.isHostile.description": "是否是敌对生物",
+  "param.isNeutral.description": "是否是中立生物",
+
   "gui.relay:spell_editor.info.input_label": "▶ 输入:",
   "gui.relay:spell_editor.info.output_label": "▶ 输出:",
   "gui.relay:spell_editor.info.type_label": "▶ 类型:",

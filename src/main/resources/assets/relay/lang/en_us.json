@@ -468,6 +468,14 @@
   "param.color.description": "Color value (RGB, 0-16777215)",
   "param.alpha.description": "Alpha transparency (0-255, 0=transparent, 255=opaque)",
 
+  "param.entity.description": "Entity to check",
+  "param.isPlayer.description": "Is player",
+  "param.isAnimal.description": "Is animal",
+  "param.isItem.description": "Is item (dropped item)",
+  "param.isEntityShell.description": "Is entity shell",
+  "param.isHostile.description": "Is hostile mob",
+  "param.isNeutral.description": "Is neutral mob",
+
   "gui.relay:spell_editor.info.input_label": "▶ Input:",
   "gui.relay:spell_editor.info.output_label": "▶ Output:",
   "gui.relay:spell_editor.info.type_label": "▶ Type:",
