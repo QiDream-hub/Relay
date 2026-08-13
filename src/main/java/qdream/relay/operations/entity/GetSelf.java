@@ -1,7 +1,5 @@
 package qdream.relay.operations.entity;
 
-import java.util.Optional;
-
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.engine.StateMachine;

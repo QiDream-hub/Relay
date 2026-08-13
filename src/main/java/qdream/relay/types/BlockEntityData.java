@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.Relay;
@@ -11,6 +12,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.tools.TextTools;
 
 /**
  * 方块实体类型
@@ -229,12 +231,14 @@ public class BlockEntityData extends Data {
 
     @Override
     public Component asString() {
-        if (blockPos == null || worldId != null) {
-            return Component.literal("(null,(-1,-1,-1))");
+        if (worldId == null || blockPos == null) {
+            return TextTools.getText("unknown.name");
         }
-        return Component.literal(String.format("(%s,(%d,%d,%d))",
-                worldId != null ? worldId : "null",
-                blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+        
+        var blockState = Relay.getWorld(worldId).getBlockState(blockPos);
+        MutableComponent result = Component.literal("");
+        result.append(blockState.getBlock().getName());
+        return result;
     }
 
     @Override

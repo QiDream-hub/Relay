@@ -172,6 +172,21 @@
   "operation.relay:is_player.name": "是玩家",
   "operation.relay:is_player.description": "检查实体是否为玩家",
 
+  "operation.relay:is_animal.name": "是动物",
+  "operation.relay:is_animal.description": "检查实体是否是动物",
+
+  "operation.relay:is_item.name": "是物品",
+  "operation.relay:is_item.description": "检查实体是否是物品（掉落物）",
+
+  "operation.relay:is_entity_shell.name": "是外壳实体",
+  "operation.relay:is_entity_shell.description": "检查实体是否是 EntityShell",
+
+  "operation.relay:is_hostile.name": "是敌对生物",
+  "operation.relay:is_hostile.description": "检查实体是否是敌对生物（Monster）",
+
+  "operation.relay:is_neutral.name": "是中立生物",
+  "operation.relay:is_neutral.description": "检查实体是否是中立生物（NeutralMob）",
+
   "operation.relay:get_owner.name": "获取运行体所属者",
   "operation.relay:get_owner.description": "获取运行体所属者",
 

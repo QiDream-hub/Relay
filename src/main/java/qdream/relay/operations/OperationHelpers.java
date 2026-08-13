@@ -135,6 +135,42 @@ public final class OperationHelpers {
         }
     }
 
+    /**
+     * 检查球体区域是否与世界交互器范围有交集
+     *
+     * <p>
+     * 用于扫描类操作，检查以 center 为中心、radius 为半径的球体
+     * 是否与世界交互器的作用范围有交集。
+     * 条件：distance(center, sourcePos) - radius ≤ range
+     * </p>
+     *
+     * @param executor      状态机
+     * @param operationName 操作名称
+     * @param sourcePos     源位置（世界交互器位置）
+     * @param center        球体中心
+     * @param radius        球体半径
+     * @throws WorldInteractionException 如果球体与世界交互器范围无交集
+     */
+    public static void checkSphereInRange(StateMachine executor, String operationName,
+            Vec3 sourcePos,
+            Vec3 center,
+            double radius) {
+
+        ShellContainer container = getShellContainer(executor);
+        if (container == null) {
+            throw new ContainerException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_CONTEXT_MISSING));
+        }
+        double distance = sourcePos.distanceTo(center);
+        double range = container.getWorldInteractorRange();
+        // 检查球体最近边缘是否在范围内
+        if (distance - radius > range) {
+            throw new WorldInteractionException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_INTERACTOR_OUT_OF_RANGE,
+                            operationName, distance - radius, range));
+        }
+    }
+
     // ==================== 上下文获取 ====================
 
     /**

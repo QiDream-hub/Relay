@@ -7,6 +7,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.tools.TextTools;
 
 public class TypeData extends Data {
 
@@ -27,6 +28,7 @@ public class TypeData extends Data {
 
     /**
      * 获取存储的类型 ID
+     * 
      * @return 存储的类型 ID（如 "relay:number"）
      */
     public String getValue() {
@@ -87,7 +89,10 @@ public class TypeData extends Data {
 
     @Override
     public Component asString() {
-        return Component.literal(value != null ? value : "");
+        if (value == null || value.isEmpty()) {
+            return TextTools.getText("unknown.name");
+        }
+        return TextTools.getTypeName(value);
     }
 
     @Override

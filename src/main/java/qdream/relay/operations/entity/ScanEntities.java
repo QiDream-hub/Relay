@@ -54,10 +54,18 @@ public class ScanEntities extends Instruction {
         double radius = radiusData.asDouble();
         Vec3 center = centerData.asVector();
 
-        // 获取源位置并检查范围 (检查中心点而非边缘)
+        // 获取源位置并检查球体区域是否在范围内
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
+        
+        // 调试信息
+        System.out.println("[ScanEntities] 世界交互器位置 (sourcePos): " + sourcePos);
+        System.out.println("[ScanEntities] 扫描中心点 (center): " + center);
+        System.out.println("[ScanEntities] 扫描半径 (radius): " + radius);
+        System.out.println("[ScanEntities] 距离: " + sourcePos.distanceTo(center));
+        System.out.println("[ScanEntities] 最近边缘距离: " + (sourcePos.distanceTo(center) - radius));
+        
         try {
-            OperationHelpers.checkInRange(executor, id, sourcePos, center);
+            OperationHelpers.checkSphereInRange(executor, id, sourcePos, center, radius);
         } catch (Exception e) {
             executor.pushData(new ListData(new ArrayList<>()));
             return;

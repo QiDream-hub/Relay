@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -13,6 +14,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.tools.TextTools;
 
 /**
  * 物品引用类型
@@ -283,12 +285,16 @@ public class SlotData extends Data {
 
     @Override
     public Component asString() {
-        if (containerPos == null || worldId != null) {
-            return Component.literal("{null,(-1,-1,-1),-1}");
+        if (worldId == null || containerPos == null) {
+            return TextTools.getText("unknown.name");
         }
-        return Component.literal(String.format("(%s,%d,%d,%d,%d)",
-                worldId != null ? worldId : "null",
-                containerPos.getX(), containerPos.getY(), containerPos.getZ(), slot));
+        
+        var blockState = Relay.getWorld(worldId).getBlockState(containerPos);
+        MutableComponent result = Component.literal("[");
+        result.append(blockState.getBlock().getName());
+        result.append(Component.literal(": " + slot));
+        result.append(Component.literal("]"));
+        return result;
     }
 
     @Override

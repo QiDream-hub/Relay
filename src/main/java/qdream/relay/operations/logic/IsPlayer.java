@@ -1,8 +1,7 @@
-package qdream.relay.operations.entity;
+package qdream.relay.operations.logic;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;

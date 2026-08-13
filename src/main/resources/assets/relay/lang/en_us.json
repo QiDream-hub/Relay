@@ -172,6 +172,21 @@
   "operation.relay:is_player.name": "Is Player",
   "operation.relay:is_player.description": "Check if an entity is a player",
 
+  "operation.relay:is_animal.name": "Is Animal",
+  "operation.relay:is_animal.description": "Check if an entity is an animal",
+
+  "operation.relay:is_item.name": "Is Item",
+  "operation.relay:is_item.description": "Check if an entity is an item (dropped item)",
+
+  "operation.relay:is_entity_shell.name": "Is Entity Shell",
+  "operation.relay:is_entity_shell.description": "Check if an entity is EntityShell",
+
+  "operation.relay:is_hostile.name": "Is Hostile",
+  "operation.relay:is_hostile.description": "Check if an entity is a hostile mob (Monster)",
+
+  "operation.relay:is_neutral.name": "Is Neutral",
+  "operation.relay:is_neutral.description": "Check if an entity is a neutral mob (NeutralMob)",
+
   "operation.relay:get_owner.name": "Get Owner",
   "operation.relay:get_owner.description": "Get the owner of an entity",
 

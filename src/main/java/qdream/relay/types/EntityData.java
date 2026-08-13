@@ -3,6 +3,7 @@ package qdream.relay.types;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -11,6 +12,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.signature.DataSignature;
+import qdream.relay.tools.TextTools;
 
 import java.util.UUID;
 
@@ -239,9 +241,18 @@ public class EntityData extends Data {
 
     @Override
     public Component asString() {
-        return Component.literal(String.format("(%s,%s)",
-                worldId != null ? worldId : "null",
-                uuid != null ? uuid.toString() : "null"));
+        if (worldId == null || uuid == null) {
+            return TextTools.getText("unknown.name");
+        }
+        
+        var entity = Relay.getWorld(worldId).getEntity(uuid);
+        if (entity == null) {
+            return TextTools.getText("unknown.name");
+        }
+        
+        MutableComponent result = Component.literal("");
+        result.append(entity.getName());
+        return result;
     }
 
     @Override

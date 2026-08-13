@@ -49,10 +49,14 @@ public class DetectEntity extends Instruction {
         double radiusVal = radius.asDouble();
         Vec3 centerPos = center.asVector();
 
-        // 获取源位置并检查范围
+        // 获取源位置并检查球体区域是否在范围内
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
-        Vec3 searchEdge = centerPos.add(new Vec3(radiusVal, radiusVal, radiusVal));
-        OperationHelpers.checkInRange(executor, id, sourcePos, searchEdge);
+        try {
+            OperationHelpers.checkSphereInRange(executor, id, sourcePos, centerPos, radiusVal);
+        } catch (Exception e) {
+            executor.pushData(new BooleanData(false));
+            return;
+        }
 
         // 获取 Level 上下文
         Level level = OperationHelpers.getLevel(executor, id);

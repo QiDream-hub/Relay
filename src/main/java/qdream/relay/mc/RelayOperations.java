@@ -122,6 +122,12 @@ public class RelayOperations {
                 OperationRegistry.register(new OperationRegistry.OpEntry(new And()));
                 OperationRegistry.register(new OperationRegistry.OpEntry(new Or()));
                 OperationRegistry.register(new OperationRegistry.OpEntry(new Not()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new IsPlayer()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new IsAnimal()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new IsItem()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new IsEntityShell()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new IsHostile()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new IsNeutral()));
 
                 // 比较操作
                 OperationRegistry.register(new OperationRegistry.OpEntry(new Eq()));
