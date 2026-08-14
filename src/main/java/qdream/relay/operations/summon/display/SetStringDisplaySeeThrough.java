@@ -25,7 +25,7 @@ public class SetStringDisplaySeeThrough extends Instruction {
 
     public SetStringDisplaySeeThrough() {
         super("relay:set_string_display_see_through", 1, 2, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
+                .consumesFromData("display", "relay:entity")
                 .consumesFromData("see_through", "relay:boolean")
                 .producesToData("success", "relay:boolean")
                 .build());

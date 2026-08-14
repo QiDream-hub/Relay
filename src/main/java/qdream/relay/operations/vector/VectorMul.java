@@ -21,7 +21,7 @@ public class VectorMul extends Instruction {
         super("relay:vector_mul", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("scalar", "relay:number")
                 .consumesFromData("vector", "relay:vector")
-                .producesToData("result", "relay:vector")
+                .producesToData("scaledVector", "relay:vector")
                 .build());
     }
 

@@ -32,7 +32,7 @@ public class GetShellEnergy extends Instruction {
     public GetShellEnergy() {
         super("relay:get_shell_energy", 1, 1, OperationSignature.builder()
                 .consumesFromData("shell", "relay:entity", "relay:block_entity")
-                .producesToData("energy", "relay:number")
+                .producesToData("energyCurrent", "relay:number")
                 .build());
     }
 

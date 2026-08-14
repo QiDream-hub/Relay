@@ -41,7 +41,7 @@ public class AddShellEnergyFromSlot extends Instruction {
         super("relay:add_shell_energy_from_slot", 1, 5, OperationSignature.builder()
                 .consumesFromData("shell", "relay:entity", "relay:block_entity")
                 .consumesFromData("slot", "relay:slot")
-                .producesToData("energy_added", "relay:number")
+                .producesToData("energyAdded", "relay:number")
                 .build());
     }
 

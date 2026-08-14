@@ -30,7 +30,7 @@ public class SetStringDisplayTextColor extends Instruction {
 
     public SetStringDisplayTextColor() {
         super("relay:set_string_display_text_color", 1, 3, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
+                .consumesFromData("display", "relay:entity")
                 .consumesFromData("color", "relay:number")
                 .consumesFromData("alpha", "relay:number")
                 .producesToData("success", "relay:boolean")

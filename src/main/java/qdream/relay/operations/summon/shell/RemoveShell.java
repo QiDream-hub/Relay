@@ -43,7 +43,7 @@ public class RemoveShell extends Instruction {
     public RemoveShell() {
         super("relay:remove_shell", 1, 2, OperationSignature.builder()
                 .consumesFromData("shell", "relay:entity")
-                .producesToData("energy", "relay:number")
+                .producesToData("energyReturned", "relay:number")
                 .build());
     }
 

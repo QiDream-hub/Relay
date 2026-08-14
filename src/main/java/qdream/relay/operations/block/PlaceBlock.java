@@ -27,8 +27,8 @@ public class PlaceBlock extends Instruction {
 
     public PlaceBlock() {
         super("relay:place_block", 1, 1, OperationSignature.builder()
-                .consumesFromData("item", "relay:slot")
-                .consumesFromData("vector", "relay:vector")
+                .consumesFromData("sourceSlot", "relay:slot")
+                .consumesFromData("targetPosition", "relay:vector")
                 .build());
     }
 

@@ -60,7 +60,7 @@ public class PickupItem extends Instruction {
         super("relay:pickup_item", 1, 2, OperationSignature.builder()
                 .consumesFromData("container", "relay:block_entity")
                 .consumesFromData("entity", "relay:entity")
-                .producesToData("result", "relay:list")
+                .producesToData("slots", "relay:list")
                 .build());
     }
 

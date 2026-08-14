@@ -29,8 +29,8 @@ public class PushVector extends Instruction {
 
     public PushVector() {
         super("relay:push_vector", 1, 2, OperationSignature.builder()
-                .consumesFromData("target", "relay:entity")
-                .consumesFromData("push", "relay:vector")
+                .consumesFromData("targetEntity", "relay:entity")
+                .consumesFromData("pushVector", "relay:vector")
                 .producesToData("success", "relay:boolean")
                 .build());
     }

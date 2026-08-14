@@ -1,4 +1,4 @@
-package qdream.relay.operations.type;
+package qdream.relay.operations.base;
 
 import net.minecraft.network.chat.Component;
 import qdream.relay.engine.Executable;

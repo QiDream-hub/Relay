@@ -39,7 +39,7 @@ public class StackRearrange extends Instruction {
                 .consumesFromData("indices", "relay:list")
                 .consumesFromData("amount", "relay:number")
                 .consumesFromData("many", "...any")
-                .producesToData("result", "...any")
+                .producesToData("rearrangeResult", "...any")
                 .build());
     }
 

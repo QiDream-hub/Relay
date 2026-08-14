@@ -40,7 +40,7 @@ public class AddShellEnergy extends Instruction {
     public AddShellEnergy() {
         super("relay:add_shell_energy", 1, 5, OperationSignature.builder()
                 .consumesFromData("shell", "relay:entity", "relay:block_entity")
-                .consumesFromData("energy", "relay:number")
+                .consumesFromData("energyToAdd", "relay:number")
                 .build());
     }
 

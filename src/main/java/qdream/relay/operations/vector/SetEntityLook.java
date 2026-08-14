@@ -36,7 +36,7 @@ public class SetEntityLook extends Instruction {
     public SetEntityLook() {
         super("relay:set_entity_look", 1, 1, OperationSignature.builder()
                 .consumesFromData("direction", "relay:vector")
-                .consumesFromData("entity", "relay:entity")
+                .consumesFromData("targetEntity", "relay:entity")
                 .build());
     }
 

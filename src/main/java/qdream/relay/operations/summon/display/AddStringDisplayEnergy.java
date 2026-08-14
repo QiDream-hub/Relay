@@ -33,8 +33,8 @@ public class AddStringDisplayEnergy extends Instruction {
 
     public AddStringDisplayEnergy() {
         super("relay:add_string_display_energy", 1, 2, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
-                .consumesFromData("amount", "relay:number")
+                .consumesFromData("display", "relay:entity")
+                .consumesFromData("energyToAdd", "relay:number")
                 .producesToData("success", "relay:boolean")
                 .build());
     }

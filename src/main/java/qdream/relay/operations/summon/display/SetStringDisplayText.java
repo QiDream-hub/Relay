@@ -32,7 +32,7 @@ public class SetStringDisplayText extends Instruction {
 
     public SetStringDisplayText() {
         super("relay:set_string_display_text", 1, 2, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
+                .consumesFromData("display", "relay:entity")
                 .consumesFromData("text", "relay:string")
                 .producesToData("success", "relay:boolean")
                 .build());

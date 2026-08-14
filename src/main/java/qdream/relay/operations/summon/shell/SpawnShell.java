@@ -77,7 +77,7 @@ public class SpawnShell extends Instruction {
                 .consumesFromData("coreCost", "relay:number")
                 .consumesFromData("interval", "relay:number")
                 .consumesFromData("range", "relay:number")
-                .consumesFromData("energy", "relay:number")
+                .consumesFromData("energyInitial", "relay:number")
                 .consumesFromData("program", "relay:list")
                 .producesToData("shell", "relay:entity")
                 .build());

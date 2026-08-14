@@ -30,8 +30,8 @@ public class SetStringDisplayRotation extends Instruction {
 
     public SetStringDisplayRotation() {
         super("relay:set_string_display_rotation", 1, 2, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
-                .consumesFromData("target", "relay:vector")
+                .consumesFromData("display", "relay:entity")
+                .consumesFromData("lookAtTarget", "relay:vector")
                 .producesToData("success", "relay:boolean")
                 .build());
     }

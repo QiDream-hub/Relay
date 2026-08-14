@@ -31,7 +31,7 @@ public class SetStringDisplayTrackPlayer extends Instruction {
 
     public SetStringDisplayTrackPlayer() {
         super("relay:set_string_display_track_player", 1, 2, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
+                .consumesFromData("display", "relay:entity")
                 .consumesFromData("track_player", "relay:boolean")
                 .producesToData("success", "relay:boolean")
                 .build());

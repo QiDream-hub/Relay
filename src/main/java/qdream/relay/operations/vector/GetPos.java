@@ -33,7 +33,7 @@ public class GetPos extends Instruction {
 
     public GetPos() {
         super("relay:get_pos", 1, 0.02, OperationSignature.builder()
-                .consumesFromData("target", "relay:block", "relay:block_entity", "relay:entity")
+                .consumesFromData("targetEntity", "relay:block", "relay:block_entity", "relay:entity")
                 .producesToData("position", "relay:vector")
                 .build());
     }

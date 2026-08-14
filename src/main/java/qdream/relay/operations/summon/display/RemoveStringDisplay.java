@@ -24,7 +24,7 @@ public class RemoveStringDisplay extends Instruction {
 
     public RemoveStringDisplay() {
         super("relay:remove_string_display", 1, 5, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
+                .consumesFromData("display", "relay:entity")
                 .producesToData("success", "relay:boolean")
                 .build());
     }

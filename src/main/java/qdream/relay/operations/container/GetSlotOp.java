@@ -26,8 +26,8 @@ public class GetSlotOp extends Instruction {
     public GetSlotOp() {
         super("relay:get_slot", 1, 0.5, OperationSignature.builder()
                 .consumesFromData("container", "relay:block_entity")
-                .consumesFromData("slot", "relay:number")
-                .producesToData("slot_data", "relay:slot")
+                .consumesFromData("slotIndex", "relay:number")
+                .producesToData("slotData", "relay:slot")
                 .build());
     }
 

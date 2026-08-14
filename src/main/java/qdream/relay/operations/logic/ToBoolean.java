@@ -35,7 +35,7 @@ public class ToBoolean extends Instruction {
 
     public ToBoolean() {
         super("relay:to_bool", 1, 0.05, OperationSignature.builder()
-                .consumesFromData("any", "any")
+                .consumesFromData("inputValue", "any")
                 .producesToData("result", "relay:boolean")
                 .build());
     }

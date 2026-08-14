@@ -22,7 +22,8 @@ public class BatchDup extends Instruction {
     public BatchDup() {
         super("relay:batch_dup", 1, 0.05, OperationSignature.builder()
                 .consumesFromData("count", "relay:number")
-                .producesToData("copies", "...any")
+                .consumesFromData("many", "...any")
+                .producesToData("copiesList", "...any")
                 .build());
     }
 

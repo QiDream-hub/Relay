@@ -66,10 +66,10 @@ public class SpawnStringDisplay extends Instruction {
                 .consumesFromData("position", "relay:vector")
                 .consumesFromData("lookDirection", "relay:vector")
                 .consumesFromData("text", "relay:string")
-                .consumesFromData("energy", "relay:number")
+                .consumesFromData("energyInitial", "relay:number")
                 .consumesFromData("see_through", "relay:boolean")
                 .consumesFromData("track_player", "relay:boolean")
-                .producesToData("entity", "relay:entity")
+                .producesToData("display", "relay:entity")
                 .build());
     }
 

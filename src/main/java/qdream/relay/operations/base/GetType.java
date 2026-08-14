@@ -1,4 +1,4 @@
-package qdream.relay.operations.type;
+package qdream.relay.operations.base;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +44,7 @@ public class GetType extends Instruction {
 
     public GetType() {
         super("relay:get_type", 1, 0.1, OperationSignature.builder()
-                .consumesFromData("input", "relay:entity", "relay:block_entity", "relay:block", "relay:slot")
+                .consumesFromData("inputValue", "relay:entity", "relay:block_entity", "relay:block", "relay:slot")
                 .producesToData("type", "relay:type")
                 .build());
     }

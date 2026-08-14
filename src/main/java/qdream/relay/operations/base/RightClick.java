@@ -41,9 +41,9 @@ public class RightClick extends Instruction {
 
     public RightClick() {
         super("relay:right_click", 1, 5, OperationSignature.builder()
-                .consumesFromData("entity", "relay:entity")
-                .consumesFromData("item", "relay:slot")
-                .consumesFromData("target", "relay:vector")
+                .consumesFromData("clicker", "relay:entity")
+                .consumesFromData("slot", "relay:slot")
+                .consumesFromData("targetPosition", "relay:vector")
                 .consumesFromData("face", "relay:vector")
                 .producesToData("success", "relay:boolean")
                 .build());

@@ -10,7 +10,6 @@ import qdream.relay.operations.container.*;
 import qdream.relay.operations.control.*;
 import qdream.relay.operations.disk.*;
 import qdream.relay.operations.entity.*;
-import qdream.relay.operations.type.*;
 import qdream.relay.operations.vector.*;
 import qdream.relay.operations.logic.*;
 import qdream.relay.operations.list.*;
