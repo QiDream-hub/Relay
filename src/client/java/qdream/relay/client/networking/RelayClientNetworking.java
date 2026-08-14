@@ -53,7 +53,7 @@ public class RelayClientNetworking {
                 }
             });
         });
-        
+
         // 注册 S2C_ShellLogPayload 客户端接收器
         ClientPlayNetworking.registerGlobalReceiver(S2C_ShellLogPayload.TYPE, (payload, context) -> {
             context.client().execute(() -> {
@@ -61,12 +61,6 @@ public class RelayClientNetworking {
                 if (mc.player != null
                         && mc.player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     handler.setSyncedLogs(payload.logs());
-                    // 通知 GUI 重绘
-                    if (mc.screen instanceof BlockShellScreen shellScreen) {
-                        if (shellScreen.getLogWidget() != null) {
-                            shellScreen.getLogWidget().scrollToBottom();
-                        }
-                    }
                 }
             });
         });

@@ -10,7 +10,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import qdream.relay.core.PlayerShellDataAccessor;
-import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.items.DiskItem;
 import qdream.relay.items.ToolShellItem;
@@ -50,7 +49,7 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
     private static final int HOTBAR_SLOT_Y = 198;
     private static final int SLOT_SIZE = 18;
 
-    private final ShellContainer container;
+    private final ToolShellContainer toolShellContainer;
     private final Container wrapper;
     private final ItemStack toolShell;
 
@@ -77,10 +76,10 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
      *
      * @param toolShell 工具外壳物品堆
      */
-    public ToolShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container,
+    public ToolShellScreenHandler(int syncId, Inventory playerInventory, ToolShellContainer container,
             ItemStack toolShell) {
         super(RelayScreenHandlers.TOOL_SHELL_SCREEN_HANDLER, syncId);
-        this.container = container;
+        this.toolShellContainer = container;
         this.toolShell = toolShell;
         // ToolShellContainer 已实现 Container，直接使用；客户端使用空容器
         this.wrapper = container != null ? (Container) container
@@ -95,13 +94,11 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         this.addDataSlot(statusInfoSlot);
 
         // 初始化同步槽的值
-        if (container != null) {
-            if (container instanceof ToolShellContainer tc) {
-                useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
-                debugOutputSlot.set(tc.isDebugOutputEnabled() ? 1 : 0);
-                statusInfoSlot.set(tc.isStatusInfo() ? 1 : 0);
-            }
-            syncedEnergy = container.getEnergy();
+        if (toolShellContainer != null) {
+            useInventoryEnergySlot.set(toolShellContainer.isUseInventoryEnergyModule() ? 1 : 0);
+            debugOutputSlot.set(toolShellContainer.isDebugOutputEnabled() ? 1 : 0);
+            statusInfoSlot.set(toolShellContainer.isStatusInfo() ? 1 : 0);
+            syncedEnergy = toolShellContainer.getEnergy();
         }
 
         // 外壳 4 个插槽（垂直排列）
@@ -233,13 +230,11 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
     public void broadcastChanges() {
         super.broadcastChanges();
         // 从服务端同步状态到客户端
-        if (container != null) {
-            if (container instanceof ToolShellContainer tc) {
-                useInventoryEnergySlot.set(tc.isUseInventoryEnergyModule() ? 1 : 0);
-                debugOutputSlot.set(tc.isDebugOutputEnabled() ? 1 : 0);
-                statusInfoSlot.set(tc.isStatusInfo() ? 1 : 0);
-            }
-            syncedEnergy = container.getEnergy();
+        if (toolShellContainer != null) {
+            useInventoryEnergySlot.set(toolShellContainer.isUseInventoryEnergyModule() ? 1 : 0);
+            debugOutputSlot.set(toolShellContainer.isDebugOutputEnabled() ? 1 : 0);
+            statusInfoSlot.set(toolShellContainer.isStatusInfo() ? 1 : 0);
+            syncedEnergy = toolShellContainer.getEnergy();
         }
     }
 
@@ -275,37 +270,36 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
 
     /** 设置是否使用背包能量模块 */
     public void setUseInventoryEnergyModule(boolean use) {
-        if (container instanceof ToolShellContainer tc) {
-            tc.setUseInventoryEnergyModule(use);
-            useInventoryEnergySlot.set(use ? 1 : 0);
-            // 触发 container 的 setChanged 来促使 broadcastChanges 被调用
-            tc.setChanged();
+        useInventoryEnergySlot.set(use ? 1 : 0);
+        if (toolShellContainer != null) {
+            toolShellContainer.setUseInventoryEnergyModule(useInventoryEnergySlot.get() != 0);
+            toolShellContainer.setChanged();
         }
     }
 
     /** 设置是否启用调试输出（通过 DataSlot 同步） */
     public void setDebugOutputEnabled(boolean enabled) {
-        if (container instanceof ToolShellContainer tc) {
-            tc.setDebugOutputEnabled(enabled);
-            debugOutputSlot.set(enabled ? 1 : 0);
-            tc.setChanged();
+        debugOutputSlot.set(enabled ? 1 : 0);
+        if (toolShellContainer != null) {
+            toolShellContainer.setDebugOutputEnabled(debugOutputSlot.get() != 0);
+            toolShellContainer.setChanged();
         }
     }
 
     /** 设置是否启用统计信息 */
     public void setStatusInfo(boolean enabled) {
-        if (container instanceof ToolShellContainer tc) {
-            tc.setStatusInfo(enabled);
-            statusInfoSlot.set(enabled ? 1 : 0);
-            tc.setChanged();
+        statusInfoSlot.set(enabled ? 1 : 0);
+        if (toolShellContainer != null) {
+            toolShellContainer.setStatusInfo(statusInfoSlot.get() != 0);
+            toolShellContainer.setChanged();
         }
     }
 
     /**
-     * 获取实际的 ShellContainer（可能为 null）
+     * 获取实际的 ToolShellContainer（可能为 null）
      */
-    public ShellContainer getContainer() {
-        return container;
+    public ToolShellContainer getContainer() {
+        return toolShellContainer;
     }
 
     /**
@@ -328,15 +322,15 @@ public class ToolShellScreenHandler extends AbstractContainerMenu {
         super.removed(player);
 
         // 确保最终状态已保存
-        if (container instanceof ToolShellContainer tc) {
-            tc.saveAllState();
+        if (toolShellContainer != null) {
+            toolShellContainer.saveAllState();
 
             // 如果容器没有运行程序，从 activeShells 移除
             // 避免 GUI 打开后没有程序导致 Container 永久存在
-            if (!tc.canExecute()) {
+            if (!toolShellContainer.canExecute()) {
                 if (player instanceof PlayerShellDataAccessor accessor) {
                     var shellData = accessor.relay$getShellData();
-                    shellData.removeContainer(tc.getSessionId());
+                    shellData.removeContainer(toolShellContainer.getSessionId());
                 }
             }
         }

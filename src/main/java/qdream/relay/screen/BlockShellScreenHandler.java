@@ -55,9 +55,11 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
     private final DataSlot enabledSlot = DataSlot.standalone();
     private final DataSlot coreCostSlot = DataSlot.standalone();
     private final DataSlot localCoreCostSlot = DataSlot.standalone(); // 本地核心数量
-    private final DataSlot initializedSlot = DataSlot.standalone();
+    private final DataSlot runingSlot = DataSlot.standalone();
     private final DataSlot energyCostSlot = DataSlot.standalone(); // 能量消耗（整数部分）
     private final DataSlot energyCostFracSlot = DataSlot.standalone(); // 能量消耗（小数部分*1000）
+    private final DataSlot debugOutputSlot = DataSlot.standalone(); // 调试输出启用状态
+    private final DataSlot statusInfoSlot = DataSlot.standalone(); // 统计信息启用状态
 
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
     private double syncedEnergy = 0.0;
@@ -88,9 +90,11 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
         this.addDataSlot(enabledSlot);
         this.addDataSlot(coreCostSlot);
         this.addDataSlot(localCoreCostSlot);
-        this.addDataSlot(initializedSlot);
+        this.addDataSlot(runingSlot);
         this.addDataSlot(energyCostSlot);
         this.addDataSlot(energyCostFracSlot);
+        this.addDataSlot(debugOutputSlot);
+        this.addDataSlot(statusInfoSlot);
 
         // 初始化同步槽的值（确保 GUI 打开时立即显示正确状态）
         if (blockEntity != null) {
@@ -100,6 +104,8 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
             double energyCost = blockEntity.getEnergyCostPerTick();
             energyCostSlot.set((int) energyCost);
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
+            debugOutputSlot.set(blockEntity.isDebugOutputEnabled() ? 1 : 0);
+            statusInfoSlot.set(blockEntity.isStatusInfoEnabled() ? 1 : 0);
             syncedEnergy = blockEntity.getEnergy();
         }
 
@@ -198,12 +204,14 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
         // 从服务端同步状态到客户端
         if (blockEntity != null) {
             enabledSlot.set(blockEntity.isEnabled() ? 1 : 0);
-            initializedSlot.set(blockEntity.isInitialized() ? 1 : 0); // 同步 initialized 状态
+            runingSlot.set(blockEntity.isRunning() ? 1 : 0); // 同步 initialized 状态
             coreCostSlot.set(blockEntity.getCoreCost());
             localCoreCostSlot.set(getLocalCoreCost());
             double energyCost = blockEntity.getEnergyCostPerTick();
             energyCostSlot.set((int) energyCost);
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
+            debugOutputSlot.set(blockEntity.isDebugOutputEnabled() ? 1 : 0);
+            statusInfoSlot.set(blockEntity.isStatusInfoEnabled() ? 1 : 0);
 
             // 同步日志（每 tick 检查变更）
             java.util.List<net.minecraft.network.chat.Component> currentLogs = blockEntity.getLogBuffer();
@@ -281,8 +289,8 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
     }
 
     /** 获取同步的初始化状态 */
-    public boolean isSyncedInitialized() {
-        return initializedSlot.get() != 0;
+    public boolean isSyncedRuning() {
+        return runingSlot.get() != 0;
     }
 
     /** 获取同步的能量消耗（每 tick） */
@@ -290,6 +298,32 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
         int intPart = energyCostSlot.get();
         int fracPart = energyCostFracSlot.get();
         return intPart + (fracPart / 1000.0);
+    }
+
+    /** 获取调试输出启用状态 */
+    public boolean isDebugOutputEnabled() {
+        return debugOutputSlot.get() != 0;
+    }
+
+    /** 获取统计信息启用状态 */
+    public boolean isStatusInfoEnabled() {
+        return statusInfoSlot.get() != 0;
+    }
+
+    /** 设置调试输出启用状态（客户端调用） */
+    public void setDebugOutputEnabled(boolean enabled) {
+        debugOutputSlot.set(enabled ? 1 : 0);
+        if (blockEntity != null) {
+            blockEntity.setDebugOutputEnabled(debugOutputSlot.get() != 0);
+        }
+    }
+
+    /** 设置统计信息启用状态（客户端调用） */
+    public void setStatusInfoEnabled(boolean enabled) {
+        statusInfoSlot.set(enabled ? 1 : 0);
+        if (blockEntity != null) {
+            blockEntity.setStatusInfoEnabled(debugOutputSlot.get() != 0);
+        }
     }
 
     /**

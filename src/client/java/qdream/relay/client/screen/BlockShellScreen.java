@@ -8,8 +8,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 import qdream.relay.networking.payloads.C2S_ToggleShellPayload;
-import qdream.relay.networking.payloads.C2S_InitializeShellPayload;
 import qdream.relay.networking.payloads.C2S_RequestShellLogPayload;
+import qdream.relay.networking.payloads.C2S_ShellConfigPayload;
 import qdream.relay.screen.BlockShellScreenHandler;
 import qdream.relay.client.screen.widget.LogWidget;
 import qdream.relay.client.screen.widget.SlotWidget;
@@ -21,7 +21,7 @@ import qdream.relay.client.screen.widget.SlotWidget;
  */
 public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHandler> {
 
-    // 复位按钮 - 开关按钮左侧 布局常量
+    // 布局常量
     private static final int GUI_WIDTH = 176;
     private static final int GUI_HEIGHT = 222;
     private static final int LABEL_X = 12;
@@ -29,7 +29,7 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
     private static final int LABEL_SPACING_Y = 30;
     private static final int STATUS_X = 116;
     private static final int STATUS_Y = 38;
-    private static final int BUTTON_WIDTH = 50;
+    private static final int BUTTON_WIDTH = 70;
     private static final int BUTTON_HEIGHT = 20;
 
     // 插槽布局（与 ScreenHandler 一致）
@@ -37,11 +37,11 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
     private static final int SLOT_Y = 12;
     private static final int SLOT_SIZE = 18;
 
-    // 日志窗口布局 - 放在屏幕左边，插槽标签下方
+    // 日志窗口布局
     private static final int LOG_WINDOW_X = 8;
     private static final int LOG_WINDOW_Y = 130;
     private static final int LOG_WINDOW_WIDTH = 260;
-    private static final int LOG_WINDOW_HEIGHT = 280;
+    private static final int LOG_WINDOW_HEIGHT = 220;
 
     // 复位按钮 - 开关按钮左侧 颜色
     private static final int BG_COLOR = 0xFF1A1A2E;
@@ -50,10 +50,10 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
 
     // 复位按钮 - 开关按钮左侧 插槽标签
     private static final Component[] SLOT_LABELS = {
-        Component.translatable("gui.relay:shell.slot.core"),
-        Component.translatable("gui.relay:shell.slot.disk"),
-        Component.translatable("gui.relay:shell.slot.energy"),
-        Component.translatable("gui.relay:shell.slot.interactor")
+            Component.translatable("gui.relay:shell.slot.core"),
+            Component.translatable("gui.relay:shell.slot.disk"),
+            Component.translatable("gui.relay:shell.slot.energy"),
+            Component.translatable("gui.relay:shell.slot.interactor")
     };
     private static final int[] SLOT_LABEL_COLORS = { 0xFF00FF88, 0xFF00CCFF, 0xFFFFCC00, 0xFFFF8800 };
 
@@ -62,9 +62,10 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
     private static final int INVENTORY_START_Y = 140;
     private static final int HOTBAR_START_Y = 198;
 
-    // 复位按钮 - 开关按钮左侧 开关按钮
+    // 开关按钮和调试按钮
     private Button toggleButton;
-    private Button initButton;
+    private Button debugOutputButton;
+    private Button statusInfoButton;
 
     // 日志窗口 Widget（包级可见，供 RelayClientNetworking 访问）
     private LogWidget logWidget;
@@ -86,19 +87,30 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
 
         // 开关按钮
         toggleButton = Button.builder(getToggleLabel(), btn -> onToggle())
-                .pos(this.leftPos + 116, this.topPos + 8)
+                .pos(this.leftPos + 94, this.topPos + 8)
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
         this.addRenderableWidget(toggleButton);
 
-        // 复位按钮
-        initButton = Button.builder(getResetLabel(), btn -> onReset())
-                .pos(this.leftPos + 116, this.topPos + 8 + BUTTON_HEIGHT)
+        // 调试输出按钮
+        debugOutputButton = Button.builder(
+                getDebugOutputLabel(),
+                btn -> toggleDebugOutput())
+                .pos(this.leftPos + 94, this.topPos + 8 + BUTTON_HEIGHT)
                 .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build();
-        this.addRenderableWidget(initButton);
+        this.addRenderableWidget(debugOutputButton);
 
-        // 日志窗口 Widget
+        // 统计信息按钮
+        statusInfoButton = Button.builder(
+                getStatusInfoLabel(),
+                btn -> toggleStatusInfo())
+                .pos(this.leftPos + 94, this.topPos + 8 + BUTTON_HEIGHT * 2)
+                .size(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .build();
+        this.addRenderableWidget(statusInfoButton);
+
+        // 日志窗口 Widget - 与 GUI 等宽，放在插槽标签下方
         logWidget = new LogWidget(
                 LOG_WINDOW_X,
                 LOG_WINDOW_Y,
@@ -139,15 +151,42 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
     }
 
     private Component getToggleLabel() {
-        return Component.translatable(this.menu.isEnabled() ? "gui.relay:shell.button.toggle" : "gui.relay:shell.button.toggle.disabled");
+        return Component.translatable(
+                this.menu.isEnabled() ? "gui.relay:shell.button.toggle" : "gui.relay:shell.button.toggle.disabled");
     }
 
-    private Component getResetLabel() {
-        return Component.translatable("gui.relay:shell.button.init");
+    private Component getDebugOutputLabel() {
+        boolean debugEnabled = this.menu.isDebugOutputEnabled();
+        String key = debugEnabled ? "gui.relay:shell.button.debug_output.enabled"
+                : "gui.relay:shell.button.debug_output.disabled";
+        return Component.translatable(key);
     }
 
-    private void onReset() {
-        ClientPlayNetworking.send(new C2S_InitializeShellPayload());
+    private Component getStatusInfoLabel() {
+        boolean statusEnabled = this.menu.isStatusInfoEnabled();
+        String key = statusEnabled ? "gui.relay:shell.button.status_info.enabled"
+                : "gui.relay:shell.button.status_info.disabled";
+        return Component.translatable(key);
+    }
+
+    private void toggleDebugOutput() {
+        boolean newValue = !this.menu.isDebugOutputEnabled();
+        // 立即更新本地 UI（不等待服务端同步）
+        this.menu.setDebugOutputEnabled(newValue);
+        // 发送网络包到服务端
+        ClientPlayNetworking.send(new C2S_ShellConfigPayload(
+                newValue,
+                this.menu.isStatusInfoEnabled()));
+    }
+
+    private void toggleStatusInfo() {
+        boolean newValue = !this.menu.isStatusInfoEnabled();
+        // 立即更新本地 UI（不等待服务端同步）
+        this.menu.setStatusInfoEnabled(newValue);
+        // 发送网络包到服务端
+        ClientPlayNetworking.send(new C2S_ShellConfigPayload(
+                this.menu.isDebugOutputEnabled(),
+                newValue));
     }
 
     private void onToggle() {
@@ -168,17 +207,23 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
         graphics.outline(left, top, this.imageWidth, this.imageHeight, BORDER_COLOR);
 
         // 信息渲染
-        graphics.fill(left + STATUS_X - 4, top + STATUS_Y - 4 + BUTTON_HEIGHT,
-                left + this.imageWidth - 6, top + STATUS_Y + 48 + BUTTON_HEIGHT, STATUS_BG_COLOR);
-        graphics.outline(left + STATUS_X - 4, top + STATUS_Y - 4 + BUTTON_HEIGHT,
+        graphics.fill(left + STATUS_X - 4, top + STATUS_Y - 4 + BUTTON_HEIGHT * 2,
+                left + this.imageWidth - 6, top + STATUS_Y + 48 + BUTTON_HEIGHT * 2, STATUS_BG_COLOR);
+        graphics.outline(left + STATUS_X - 4, top + STATUS_Y - 4 + BUTTON_HEIGHT * 2,
                 this.imageWidth - STATUS_X - 2, 52, BORDER_COLOR);
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        if (initButton != null) {
-            initButton.setMessage(getResetLabel());
+        // 每帧更新按钮文本，确保与服务端同步
+        if (toggleButton != null) {
             toggleButton.setMessage(getToggleLabel());
+        }
+        if (debugOutputButton != null) {
+            debugOutputButton.setMessage(getDebugOutputLabel());
+        }
+        if (statusInfoButton != null) {
+            statusInfoButton.setMessage(getStatusInfoLabel());
         }
 
         super.extractRenderState(graphics, mouseX, mouseY, delta);
@@ -192,11 +237,11 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
             graphics.text(this.font, SLOT_LABELS[i], left + LABEL_X, labelY, SLOT_LABEL_COLORS[i]);
         }
 
-        renderStatusInfo(graphics, this.leftPos + STATUS_X, this.topPos + STATUS_Y + BUTTON_HEIGHT);
+        renderStatusInfo(graphics, this.leftPos + STATUS_X, this.topPos + STATUS_Y + BUTTON_HEIGHT * 2);
 
-        // 定期请求日志同步（每 10 tick）
+        // 定期请求日志同步（每 20 tick = 1 秒）
         if (this.minecraft != null && this.minecraft.level != null &&
-                this.minecraft.level.getGameTime() % 10 == 0) {
+                this.minecraft.level.getGameTime() % 20 == 0) {
             ClientPlayNetworking.send(new C2S_RequestShellLogPayload());
         }
     }
@@ -209,30 +254,31 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
         int currentY = y;
 
         boolean enabled = this.menu.isEnabled();
-        Component statusText = Component.translatable(enabled ? "gui.relay:shell.status.running" : "gui.relay:shell.status.stopped");
+        Component statusText = Component
+                .translatable(enabled ? "gui.relay:shell.status.running" : "gui.relay:shell.status.stopped");
         graphics.text(this.font, statusText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
         int coreCount = this.menu.getSyncedCoreCount();
-        Component coreText = coreCount > 0 
-            ? Component.translatable("gui.relay:shell.status.core", coreCount)
-            : Component.translatable("gui.relay:shell.status.core.missing");
+        Component coreText = coreCount > 0
+                ? Component.translatable("gui.relay:shell.status.core", coreCount)
+                : Component.translatable("gui.relay:shell.status.core.missing");
         graphics.text(this.font, coreText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
         double energyCost = this.menu.getSyncedEnergyCost();
-        Component energyCostText = energyCost > 0 
-            ? Component.translatable("gui.relay:shell.status.energy_cost", String.format("%.1f", energyCost))
-            : Component.translatable("gui.relay:shell.status.energy_cost.none");
+        Component energyCostText = energyCost > 0
+                ? Component.translatable("gui.relay:shell.status.energy_cost", String.format("%.1f", energyCost))
+                : Component.translatable("gui.relay:shell.status.energy_cost.none");
         graphics.text(this.font, energyCostText, x, currentY, 0xFFFFFFFF);
         currentY += lineHeight;
 
-        boolean initialized = this.menu.isSyncedInitialized();
-        Component initText = initialized 
-            ? Component.translatable("gui.relay:shell.status.program.loaded")
-            : Component.translatable("gui.relay:shell.status.program.missing");
-        graphics.text(this.font, initText, x, currentY, 0xFFFFFFFF);
+        Component runingText = this.menu.isSyncedRuning()
+                ? Component.translatable("gui.relay:shell.status.program.loaded")
+                : Component.translatable("gui.relay:shell.status.program.missing");
+        graphics.text(this.font, runingText, x, currentY, 0xFFFFFFFF);
     }
+
     @Override
     public boolean isPauseScreen() {
         return false;
@@ -251,10 +297,9 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         // 检查鼠标是否在日志窗口上方
-        if (logWidget != null && logWidget.isMouseOver(mouseX - this.leftPos, mouseY - this.topPos)) {
-            if (logWidget.handleScroll(verticalAmount)) {
-                return true;
-            }
+        if (logWidget != null) {
+            return logWidget.mouseScrolled(mouseX, mouseY, horizontalAmount,
+                    verticalAmount);
         }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }

@@ -19,10 +19,9 @@ import qdream.relay.engine.StateMachine;
  * <li>核心状态：{@link #getCoreCost()}, {@link #getInterval()},
  * {@link #getEnergyCostPerTick()}</li>
  * <li>程序控制：{@link #loadProgram()}</li>
- * <li>运行状态：{@link #canExecute()}, {@link #isInitialized()},
- * {@link #isRunning()}</li>
- * <li>GUI 开关（仅 BlockShell）：{@link #isEnabled()},
- * {@link #setEnabled(boolean)}</li>
+ * <li>运行状态：{@link #canExecute()}, {@link #isRunning()}</li>
+ * <li>启用开关（仅 BlockShell）：{@link #isEnabled()},
+ * {@link #setEnabled(boolean)}（开启时自动加载程序）</li>
  * </ul>
  *
  * <p>

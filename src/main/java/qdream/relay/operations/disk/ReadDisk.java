@@ -57,14 +57,16 @@ public class ReadDisk extends Instruction {
         // 从磁盘读取程序列表
         String programJson = diskComponent.getProgram(itemStack);
         if (programJson == null || programJson.trim().isEmpty()) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.DISK_EMPTY));
+            executor.pushData(new ListData(new ArrayList<>()));
+            return;
         }
 
         try {
             java.util.List<Executable> program = ProgramCompiler.compileFromJson(programJson);
             executor.pushData(new ListData(new ArrayList<>(program)));
         } catch (ProgramCompiler.CompilationException e) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.COMPILATION_FAILED, e.getMessage()));
+            throw new ContainerException(executor,
+                    ErrorMessageTools.buildErrorMessage(ErrorType.COMPILATION_FAILED, e.getMessage()));
         }
     }
 }

@@ -21,10 +21,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * 输入：BlockEntityData（方块实体）、NumberData（插槽索引）
  * 输出：SlotData（插槽引用）
  */
-public class GetSlotOp extends Instruction {
+public class BuildSlot extends Instruction {
 
-    public GetSlotOp() {
-        super("relay:get_slot", 1, 0.5, OperationSignature.builder()
+    public BuildSlot() {
+        super("relay:build_slot", 1, 0.5, OperationSignature.builder()
                 .consumesFromData("container", "relay:block_entity")
                 .consumesFromData("slotIndex", "relay:number")
                 .producesToData("slotData", "relay:slot")

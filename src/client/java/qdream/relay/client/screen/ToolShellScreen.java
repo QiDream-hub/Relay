@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import qdream.relay.client.screen.widget.SlotWidget;
-import qdream.relay.networking.payloads.C2S_ToolShellConfigPayload;
+import qdream.relay.networking.payloads.C2S_UpdateToolShellConfigPayload;
 import qdream.relay.screen.ToolShellScreenHandler;
 
 /**
@@ -148,34 +148,39 @@ public class ToolShellScreen extends AbstractContainerScreen<ToolShellScreenHand
     }
 
     /**
-     * 切换配置 - 使用统一网络包发送所有配置项
+     * 切换配置
      */
     private void toggleUseInventoryEnergy() {
         boolean newValue = !this.menu.isUseInventoryEnergyModule();
-        sendConfigUpdate(newValue, this.menu.isDebugOutputEnabled(), this.menu.isStatusInfo());
-        // 立即更新本地 UI（不等待服务端同步）
+        // 立即更新本地 UI
         this.menu.setUseInventoryEnergyModule(newValue);
+        // 发送网络包到服务端
+        ClientPlayNetworking.send(new C2S_UpdateToolShellConfigPayload(
+                newValue,
+                this.menu.isDebugOutputEnabled(),
+                this.menu.isStatusInfo()));
     }
 
     private void toggleDebugOutput() {
         boolean newValue = !this.menu.isDebugOutputEnabled();
-        sendConfigUpdate(this.menu.isUseInventoryEnergyModule(), newValue, this.menu.isStatusInfo());
-        // 立即更新本地 UI（不等待服务端同步）
+        // 立即更新本地 UI
         this.menu.setDebugOutputEnabled(newValue);
+        // 发送网络包到服务端
+        ClientPlayNetworking.send(new C2S_UpdateToolShellConfigPayload(
+                this.menu.isUseInventoryEnergyModule(),
+                newValue,
+                this.menu.isStatusInfo()));
     }
 
     private void toggleStatusInfo() {
         boolean newValue = !this.menu.isStatusInfo();
-        sendConfigUpdate(this.menu.isUseInventoryEnergyModule(), this.menu.isDebugOutputEnabled(), newValue);
-        // 立即更新本地 UI（不等待服务端同步）
+        // 立即更新本地 UI
         this.menu.setStatusInfo(newValue);
-    }
-
-    /**
-     * 发送统一配置更新网络包
-     */
-    private void sendConfigUpdate(boolean useInventoryEnergy, boolean debugOutput, boolean statusInfo) {
-        ClientPlayNetworking.send(new C2S_ToolShellConfigPayload(useInventoryEnergy, debugOutput, statusInfo));
+        // 发送网络包到服务端
+        ClientPlayNetworking.send(new C2S_UpdateToolShellConfigPayload(
+                this.menu.isUseInventoryEnergyModule(),
+                this.menu.isDebugOutputEnabled(),
+                newValue));
     }
 
     @Override

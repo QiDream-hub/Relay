@@ -52,12 +52,10 @@ public class ShellTickHandler {
     }
 
     private int tickCounter;
-    private boolean initialized;
     private DebugCallback debugCallback;
 
     public ShellTickHandler() {
         this.tickCounter = 0;
-        this.initialized = false;
         this.debugCallback = null;
     }
 
@@ -236,14 +234,6 @@ public class ShellTickHandler {
         this.tickCounter = tickCounter;
     }
 
-    public boolean isInitialized() {
-        return initialized;
-    }
-
-    public void setInitialized(boolean initialized) {
-        this.initialized = initialized;
-    }
-
     /**
      * 设置调试回调
      *
@@ -272,7 +262,6 @@ public class ShellTickHandler {
     public CompoundTag toNbt() {
         CompoundTag tag = new CompoundTag();
         tag.putInt("tickCounter", tickCounter);
-        tag.putBoolean("initialized", initialized);
         tag.putInt("accumulatedCost", accumulatedCost);
         return tag;
     }
@@ -284,7 +273,6 @@ public class ShellTickHandler {
      */
     public void fromNbt(CompoundTag tag) {
         this.tickCounter = tag.getInt("tickCounter").orElse(0);
-        this.initialized = tag.getBoolean("initialized").orElse(false);
         this.accumulatedCost = tag.getInt("accumulatedCost").orElse(0);
     }
 }

@@ -208,7 +208,7 @@ public class RelayOperations {
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetContainerItems()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new GetSlotOp()));
+                                new OperationRegistry.OpEntry(new BuildSlot()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new MoveItems()));
                 OperationRegistry.register(

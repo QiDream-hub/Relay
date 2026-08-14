@@ -1,4 +1,4 @@
-package qdream.relay.client.screen.widget;
+package qdream.relay.client.screen.widget.editor;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -110,11 +110,6 @@ public class ScrollableListWidget extends AbstractWidget {
         return displayItems;
     }
 
-    /**
-     * 渲染边框和标题的钩子方法（由子类实现）
-     */
-    protected void renderFrame(GuiGraphicsExtractor graphics) {
-    }
 
     /**
      * 设置悬停回调
@@ -363,9 +358,6 @@ public class ScrollableListWidget extends AbstractWidget {
 
     @Override
     public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        // 先渲染边框和标题（子类实现）
-        renderFrame(graphics);
-
         int x = getX();
         int y = getY();
         int visibleLines = getVisibleLineCount();

@@ -6,7 +6,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import qdream.relay.client.screen.widget.ScrollableListWidget;
 import qdream.relay.client.screen.widget.editor.tools.InfoContent;
 
 import java.util.List;

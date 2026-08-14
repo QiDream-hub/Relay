@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
+import qdream.relay.engine.Warning;
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ShellContainer;
@@ -31,12 +32,14 @@ import qdream.relay.core.ExecutionStats;
 import qdream.relay.screen.BlockShellScreenHandler;
 import qdream.relay.mc.StateMachineNbtSerializer;
 import qdream.relay.mc.ProgramCompiler;
+import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.Relay;
 import qdream.relay.core.ShellCoreGroupManager;
+import qdream.relay.tools.TextTools;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -62,9 +65,10 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     private Player owner;
     private UUID ownerUuid;
     private double energy;
-    private boolean enabled;
-    private boolean initialized; // 程序是否已加载
+    private boolean enabled; // true = 已初始化并允许运行
     private UUID coreGroupId; // 所属核心共享组 ID
+    private boolean debugOutputEnabled; // 是否启用调试输出
+    private boolean statusInfoEnabled; // 是否启用统计信息
 
     /**
      * 日志缓冲区 - 存储最近的调试输出
@@ -99,8 +103,53 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 // 同步日志到客户端
                 syncLogsToClient(getLevel(), worldPosition);
             }
-            setEnabled(false);
-            setInitialized(false);
+            setEnabled(false); // 事故时关闭
+        });
+        // 设置调试回调
+        tickHandler.setDebugCallback(new ShellTickHandler.DebugCallback() {
+            @Override
+            public void afterStep(StateMachine stateMachine, Executable executable) {
+                if (isDebugOutputEnabled()) {
+                    if (getLevel() != null && !getLevel().isClientSide()) {
+                        addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
+                        addLogEntry(Component.translatable(
+                                "gui.relay:shell.debug.program_stack",
+                                TextTools.formatProgramStack(stateMachine)));
+                        addLogEntry(Component.translatable(
+                                "gui.relay:shell.debug.data_stack",
+                                TextTools.formatDataStack(stateMachine)));
+                        // 同步日志到客户端
+                        syncLogsToClient(getLevel(), worldPosition);
+                    }
+                }
+            }
+
+            @Override
+            public void onMishap(StateMachine stateMachine, Executable executable, Warning warning) {
+                if (isDebugOutputEnabled()) {
+                    if (getLevel() != null && !getLevel().isClientSide()) {
+                        String opName = "unknown";
+                        if (executable instanceof Operation op) {
+                            opName = op.getId();
+                        }
+                        addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
+                        addLogEntry(Component.translatable(
+                                "gui.relay:shell.mishap.title",
+                                Component.literal(opName)));
+                        addLogEntry(Component.translatable(
+                                "gui.relay:shell.mishap.reason",
+                                Component.literal(warning.getMessage())));
+                        addLogEntry(Component.translatable(
+                                "gui.relay:shell.debug.program_stack",
+                                TextTools.formatProgramStack(stateMachine)));
+                        addLogEntry(Component.translatable(
+                                "gui.relay:shell.debug.data_stack",
+                                TextTools.formatDataStack(stateMachine)));
+                        // 同步日志到客户端
+                        syncLogsToClient(getLevel(), worldPosition);
+                    }
+                }
+            }
         });
     }
 
@@ -154,7 +203,24 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             machine.setContext("self", entity);
         }
 
+        // 自动加载程序：如果 enabled=true 但程序未运行，从磁盘加载
+        if (!world.isClientSide() && entity.isEnabled() && !entity.isRunning()) {
+            entity.loadProgramFromDisk();
+        }
+
         entity.tickHandler.tick(entity);
+
+        // 程序执行完毕后打印统计信息（仅当启用统计信息时）
+        if (!world.isClientSide() && entity.isStatusInfoEnabled() && !entity.isRunning()) {
+            String[] formatStatsPanel = entity.executionStats.formatStatsPanel();
+            entity.addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
+            for (String string : formatStatsPanel) {
+                entity.addLogEntry(Component.literal(string));
+            }
+            entity.addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
+            // 同步日志到客户端
+            entity.syncLogsToClient(world, pos);
+        }
 
         // 每 20 tick 同步一次能量到客户端（兜底同步）
         if (!world.isClientSide() && world.getGameTime() % 20 == 0) {
@@ -403,6 +469,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
      * <p>
      * 此字段用于 GUI 显示和执行控制
      * 当 enabled=false 时，{@link #canExecute()} 返回 false，tick 逻辑跳过
+     * 当 enabled=true 时，如果程序未运行会自动加载程序
      * </p>
      */
     public boolean isEnabled() {
@@ -413,7 +480,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
      * 设置 GUI 开关状态
      * <p>
      * 切换开关时，会立即影响 {@link #canExecute()} 的判断结果
-     * 关闭后程序仍在栈中，但未清空，再次开启可继续执行
+     * 程序加载在 tick 中自动处理（当 enabled=true 且 isRunning=false 时）
      * </p>
      */
     public void setEnabled(boolean enabled) {
@@ -421,25 +488,10 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         setChanged();
     }
 
-    /**
-     * 获取程序是否已加载
-     */
-    public boolean isInitialized() {
-        return initialized;
-    }
-
-    /**
-     * 设置程序是否已加载
-     */
-    public void setInitialized(boolean initialized) {
-        this.initialized = initialized;
-        setChanged();
-    }
-
     @Override
     public boolean canExecute() {
-        // BlockShell 需要检查 GUI 开关状态
-        return isEnabled() && isRunning() && isInitialized();
+        // BlockShell 需要检查 enabled 状态和运行状态
+        return isEnabled() && isRunning();
     }
 
     @Override
@@ -572,7 +624,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
 
         getStateMachine().loadProgram(program);
-        setInitialized(true); // 标记程序已加载
         setChanged();
         addLogEntry(Component.translatable("gui.relay:shell.program_reload.success", program.size()));
     }
@@ -597,7 +648,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         CompoundTag configTag = new CompoundTag();
         configTag.putDouble("Energy", energy);
         configTag.putBoolean("Enabled", enabled);
-        configTag.putBoolean("Initialized", initialized); // 保存 initialized 状态
         output.store("Config", CompoundTag.CODEC, configTag);
 
         // 保存状态机状态
@@ -613,6 +663,12 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         if (coreGroupId != null) {
             output.putString("CoreGroupId", coreGroupId.toString());
         }
+
+        // 保存调试配置
+        CompoundTag debugConfigTag = new CompoundTag();
+        debugConfigTag.putBoolean("DebugOutputEnabled", debugOutputEnabled);
+        debugConfigTag.putBoolean("StatusInfoEnabled", statusInfoEnabled);
+        output.store("DebugConfig", CompoundTag.CODEC, debugConfigTag);
 
         // 保存 TickHandler 状态（使用 ShellTickHandler 自己的序列化方法）
         CompoundTag tickHandlerTag = tickHandler.toNbt();
@@ -630,7 +686,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         input.read("Config", CompoundTag.CODEC).ifPresent(configTag -> {
             energy = configTag.getDouble("Energy").orElse(0.0);
             enabled = configTag.getBoolean("Enabled").orElse(false);
-            initialized = configTag.getBoolean("Initialized").orElse(false); // 加载 initialized 状态
         });
 
         // 加载状态机状态
@@ -657,6 +712,12 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 // UUID 格式错误，忽略
             }
         }
+
+        // 加载调试配置
+        input.read("DebugConfig", CompoundTag.CODEC).ifPresent(debugConfigTag -> {
+            debugOutputEnabled = debugConfigTag.getBoolean("DebugOutputEnabled").orElse(false);
+            statusInfoEnabled = debugConfigTag.getBoolean("StatusInfoEnabled").orElse(false);
+        });
 
         // 加载 TickHandler 状态（使用 ShellTickHandler 自己的反序列化方法）
         input.read("TickHandler", CompoundTag.CODEC).ifPresent(tag -> {
@@ -741,6 +802,46 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
      */
     public void setCoreGroupId(UUID groupId) {
         this.coreGroupId = groupId;
+        setChanged();
+    }
+
+    // ========== 调试配置 ==========
+
+    /**
+     * 是否启用调试输出
+     *
+     * @return true 如果启用调试输出
+     */
+    public boolean isDebugOutputEnabled() {
+        return debugOutputEnabled;
+    }
+
+    /**
+     * 设置是否启用调试输出
+     *
+     * @param enabled true 启用调试输出
+     */
+    public void setDebugOutputEnabled(boolean enabled) {
+        this.debugOutputEnabled = enabled;
+        setChanged();
+    }
+
+    /**
+     * 是否启用统计信息
+     *
+     * @return true 如果启用统计信息
+     */
+    public boolean isStatusInfoEnabled() {
+        return statusInfoEnabled;
+    }
+
+    /**
+     * 设置是否启用统计信息
+     *
+     * @param enabled true 启用统计信息
+     */
+    public void setStatusInfoEnabled(boolean enabled) {
+        this.statusInfoEnabled = enabled;
         setChanged();
     }
 }

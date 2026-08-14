@@ -1,6 +1,7 @@
 package qdream.relay.client.screen.widget;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -9,173 +10,109 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 
 /**
  * 日志窗口 Widget
  * 用于显示 Shell 的调试日志输出
- * 支持滚动查看历史日志
+ * 支持鼠标滚轮翻页查看历史日志
  * 支持自动换行
  */
 public class LogWidget extends AbstractWidget {
 
-    private static final int BG_COLOR = 0xFF0A0A15;
-    private static final int BORDER_COLOR = 0xFF303050;
-    private static final int TITLE_COLOR = 0xFF8888FF;
-    private static final int DEFAULT_COLOR = 0xFFAAAAAA;
-    private static final int MISHAP_COLOR = 0xFFFF5555;
-    private static final int BEFORE_STEP_COLOR = 0xFF55FF55;
-    private static final int AFTER_STEP_COLOR = 0xFF55FFFF;
-    private static final int EMPTY_COLOR = 0xFF555555;
-
     private final Font font;
     private final Supplier<List<Component>> logSupplier;
 
-    // 滚动位置
-    private int scrollOffset = 0;
+    // 可视行数
     private int maxVisibleLines;
+    // 滚动偏移量（0 表示无偏移，正数表示向上滚动查看更旧的日志）
+    private int scrollOffset;
+    // 可视内容
+    private Supplier<List<FormattedCharSequence>> visibleLogSupplier;
 
     // 布局常量
     private static final int PADDING = 4;
     private static final int LINE_HEIGHT = 8;
     private static final int TITLE_HEIGHT = 10;
 
-    // 缓存换行后的日志
-    private List<LogLine> cachedLogLines = new ArrayList<>();
-    private List<Component> lastLogs;
-
     public LogWidget(int x, int y, int width, int height, Font font, Supplier<List<Component>> logSupplier) {
-        super(x, y, width, height, Component.literal("日志窗口"));
+        super(x, y, width, height, Component.literal(""));
         this.font = font;
         this.logSupplier = logSupplier;
+        this.scrollOffset = 0;
         // 计算最大可见行数
         this.maxVisibleLines = (height - PADDING * 2 - TITLE_HEIGHT - PADDING) / LINE_HEIGHT;
-    }
+        // visibleLogSupplier 每次调用时获取最新的日志并截取
+        this.visibleLogSupplier = () -> {
+            List<Component> allLogs = logSupplier.get();
+            if (allLogs == null || allLogs.isEmpty()) {
+                return Collections.emptyList();
+            }
 
-    /**
-     * 日志行（支持换行）
-     */
-    private static class LogLine {
-        final Component text;
-        final int color;
-        final int lineCount;
+            // 计算总行数（考虑自动换行）
+            int totalLines = 0;
+            List<FormattedCharSequence> allLines = new ArrayList<>();
+            for (Component log : allLogs) {
+                List<FormattedCharSequence> lines = font.split(log, width);
+                allLines.addAll(lines);
+                totalLines += lines.size();
+            }
 
-        LogLine(Component text, int color, Font font, int maxWidth) {
-            this.text = text;
-            this.color = color;
-            this.lineCount = font.split(text, maxWidth).size();
-        }
+            // 计算可视窗口的起始和结束索引
+            // scrollOffset = 0 时显示最新的日志（底部对齐）
+            // scrollOffset > 0 时向上滚动，显示更旧的日志
+            int endIndex = totalLines; // 最新日志的下一行（开区间）
+            int startIndex = Math.max(0, endIndex - maxVisibleLines - scrollOffset);
+            endIndex = Math.min(totalLines, startIndex + maxVisibleLines);
 
-        int getLineCount() {
-            return lineCount;
-        }
+            // 截取可视窗口内的行
+            return allLines.subList(startIndex, endIndex);
+        };
     }
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        // 检查日志是否为空，空则不渲染
-        List<Component> logs = logSupplier.get();
-        if (logs == null || logs.isEmpty()) {
-            cachedLogLines.clear();
-            lastLogs = null;
-            return;
+        List<FormattedCharSequence> list = visibleLogSupplier.get();
+        // 当前文本y
+        int currentY = this.getY();
+        for (FormattedCharSequence formattedCharSequence : list) {
+            graphics.text(font, formattedCharSequence, this.getX(), currentY, 0xFFFFFFFF);
+            currentY += LINE_HEIGHT;
         }
-
-        int x = getX();
-        int y = getY();
-
-        // 日志内容区域
-        int textY = y + PADDING + TITLE_HEIGHT + 2;
-        int textWidth = this.width - PADDING * 2;
-
-        if (lastLogs == null || !lastLogs.equals(logs)) {
-            lastLogs = logs;
-            cachedLogLines = new ArrayList<>();
-            for (Component log : logs) {
-                cachedLogLines.add(new LogLine(log, getLogColor(log), font, textWidth));
-            }
-        }
-
-        // 计算总行数（换行后）
-        int totalLines = cachedLogLines.stream().mapToInt(LogLine::getLineCount).sum();
-
-        // 计算要显示的日志范围
-        int startIndex = Math.max(0, totalLines - maxVisibleLines - scrollOffset);
-        int displayedLines = 0;
-        int currentY = textY;
-
-        for (LogLine logLine : cachedLogLines) {
-            if (displayedLines >= totalLines - startIndex) {
-                break;
-            }
-
-            // 渲染时进行换行
-            var wrappedLines = font.split(logLine.text, textWidth);
-            for (int lineIdx = 0; lineIdx < wrappedLines.size(); lineIdx++) {
-                if (displayedLines >= startIndex) {
-                    if (currentY < y + this.height - PADDING) {
-                        var wrappedText = wrappedLines.get(lineIdx);
-                        graphics.text(this.font, wrappedText, x + PADDING, currentY, logLine.color);
-                        currentY += LINE_HEIGHT;
-                    }
-                }
-                displayedLines++;
-            }
-        }
-    }
-
-    /**
-     * 根据日志内容获取颜色
-     */
-    private int getLogColor(Component log) {
-        String logString = log.getString();
-        if (logString.contains("mishap")) {
-            return MISHAP_COLOR; // 红色 - 事故
-        } else if (logString.contains("beforeStep")) {
-            return BEFORE_STEP_COLOR; // 绿色 - 执行前
-        } else if (logString.contains("afterStep")) {
-            return AFTER_STEP_COLOR; // 青色 - 执行后
-        }
-        return DEFAULT_COLOR; // 灰色 - 默认
     }
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        // 检测鼠标是否在日志窗口内，以便处理滚轮事件
-        return mouseX >= getX() && mouseX < getX() + this.width &&
-               mouseY >= getY() && mouseY < getY() + this.height;
+        return mouseX >= this.getX() && mouseX < this.getX() + this.width &&
+                mouseY >= this.getY() && mouseY < this.getY() + this.height;
     }
 
-    /**
-     * 处理滚轮事件 - 滚动日志
-     * @param verticalAmount 垂直滚动量（正数向下，负数向上）
-     * @return 如果处理了滚动事件返回 true
-     */
-    public boolean handleScroll(double verticalAmount) {
-        List<Component> logs = logSupplier.get();
-        if (logs != null && !logs.isEmpty()) {
-            // 重新计算总行数
-            int totalLines = cachedLogLines.stream().mapToInt(LogLine::getLineCount).sum();
-            if (totalLines > maxVisibleLines) {
-                // 向上滚动（negative scroll = scroll up）
-                scrollOffset = Math.max(0, scrollOffset - (int) verticalAmount);
-                // 向下滚动
-                int maxOffset = Math.max(0, totalLines - maxVisibleLines);
-                scrollOffset = Math.min(maxOffset, scrollOffset + (int) verticalAmount);
-                return true;
+    @Override
+    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        if (!isMouseOver(x, y)) {
+            return false;
+        }
+
+        // 计算总行数（考虑自动换行）
+        List<Component> allLogs = logSupplier.get();
+        int totalLines = 0;
+        if (allLogs != null) {
+            for (Component log : allLogs) {
+                totalLines += Math.max(1, font.split(log, width).size());
             }
         }
-        return false;
-    }
 
-    /**
-     * 重置滚动位置到底部
-     */
-    public void scrollToBottom() {
-        List<Component> logs = logSupplier.get();
-        if (logs != null && !logs.isEmpty()) {
-            int totalLines = cachedLogLines.stream().mapToInt(LogLine::getLineCount).sum();
-            scrollOffset = Math.max(0, totalLines - maxVisibleLines);
-        }
+        // 计算最大可滚动偏移量（最多能向上滚动多少行）
+        int maxScrollOffset = Math.max(0, totalLines - maxVisibleLines);
+
+        // 更新滚动偏移量：scrollY > 0 表示向上滚动（查看更旧的日志）
+        this.scrollOffset += (int) scrollY;
+
+        // 限制滚动范围：[0, maxScrollOffset]
+        // 0 = 显示最新日志（底部对齐），maxScrollOffset = 滚动到最旧的日志
+        this.scrollOffset = Math.min(maxScrollOffset, Math.max(0, this.scrollOffset));
+
+        return true;
     }
 
     @Override

@@ -67,41 +67,39 @@ public class RelayServerNetworking {
                 if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
                     if (blockEntity != null) {
-                        // 检查是否已初始化
-                        if (!blockEntity.isInitialized()) {
-                            blockEntity.addLogEntry(net.minecraft.network.chat.Component.translatable("gui.relay:shell.toggle.not_initialized"));
-                            return;
-                        }
                         // 切换开关状态
                         boolean newState = !blockEntity.isEnabled();
                         blockEntity.setEnabled(newState);
                         blockEntity.addLogEntry(net.minecraft.network.chat.Component.translatable(
-                            newState ? "gui.relay:shell.toggle.enabled" : "gui.relay:shell.toggle.disabled"
-                        ));
+                                newState ? "gui.relay:shell.toggle.enabled" : "gui.relay:shell.toggle.disabled"));
                     }
                 }
             });
         });
 
-        // 注册 C2S_InitializeShellPayload - 复位外壳（清空双栈并从磁盘加载程序）
-        PayloadTypeRegistry.serverboundPlay().register(C2S_InitializeShellPayload.TYPE,
-                C2S_InitializeShellPayload.CODEC);
+        // 注册 C2S_ShellConfigPayload - 客户端更新外壳配置
+        PayloadTypeRegistry.serverboundPlay().register(
+                qdream.relay.networking.payloads.C2S_ShellConfigPayload.TYPE,
+                qdream.relay.networking.payloads.C2S_ShellConfigPayload.CODEC);
 
-        // 注册服务端接收处理器 - 复位程序
-        ServerPlayNetworking.registerGlobalReceiver(C2S_InitializeShellPayload.TYPE, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player == null)
-                return;
+        // 注册服务端接收处理器 - 更新外壳配置（调试输出/统计信息）
+        ServerPlayNetworking.registerGlobalReceiver(
+                qdream.relay.networking.payloads.C2S_ShellConfigPayload.TYPE, (payload, context) -> {
+                    ServerPlayer player = context.player();
+                    if (player == null)
+                        return;
 
-            context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
-                    qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
-                    if (blockEntity != null) {
-                        blockEntity.loadProgramFromDisk();
-                    }
-                }
-            });
-        });
+                    context.server().execute(() -> {
+                        if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
+                            qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
+                            if (blockEntity != null) {
+                                // 同步配置到服务端 BlockEntity
+                                blockEntity.setDebugOutputEnabled(payload.debugOutputEnabled());
+                                blockEntity.setStatusInfoEnabled(payload.statusInfoEnabled());
+                            }
+                        }
+                    });
+                });
 
         // 注册 C2S_SaveSpellDiskPayload - 保存程序到磁盘（包含程序 NBT 数据）
         PayloadTypeRegistry.serverboundPlay().register(C2S_SaveSpellDiskPayload.TYPE, C2S_SaveSpellDiskPayload.CODEC);
@@ -124,7 +122,8 @@ public class RelayServerNetworking {
         });
 
         // 注册 S2C_SaveSpellDiskConfirmPayload (服务端到客户端 - 保存确认)
-        PayloadTypeRegistry.clientboundPlay().register(S2C_SaveSpellDiskConfirmPayload.TYPE, S2C_SaveSpellDiskConfirmPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(S2C_SaveSpellDiskConfirmPayload.TYPE,
+                S2C_SaveSpellDiskConfirmPayload.CODEC);
 
         // 注册服务端接收处理器 - 保存法术磁盘（将 JSON 字符串编译后保存到磁盘）
         ServerPlayNetworking.registerGlobalReceiver(C2S_SaveSpellDiskPayload.TYPE, (payload, context) -> {
@@ -139,7 +138,8 @@ public class RelayServerNetworking {
                         ProgramCompiler.compileFromJson(payload.programJson());
                         // 编译通过，直接保存 JSON 字符串
                         ItemStack diskStack = handler.getDiskItem();
-                        if (!diskStack.isEmpty() && diskStack.getItem() instanceof qdream.relay.mc.component.DiskComponent diskComponent) {
+                        if (!diskStack.isEmpty() && diskStack
+                                .getItem() instanceof qdream.relay.mc.component.DiskComponent diskComponent) {
                             diskComponent.setProgram(diskStack, payload.programJson());
                             // 发送保存成功确认到客户端
                             ServerPlayNetworking.send(player, new S2C_SaveSpellDiskConfirmPayload(true, ""));
@@ -178,26 +178,6 @@ public class RelayServerNetworking {
             });
         });
 
-        // 注册 C2S_ToolShellConfigPayload - 统一配置更新
-        PayloadTypeRegistry.serverboundPlay().register(C2S_ToolShellConfigPayload.TYPE,
-                C2S_ToolShellConfigPayload.CODEC);
-
-        // 注册服务端接收处理器 - 工具外壳配置更新（统一处理所有配置项）
-        ServerPlayNetworking.registerGlobalReceiver(C2S_ToolShellConfigPayload.TYPE, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player == null)
-                return;
-
-            context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.ToolShellScreenHandler handler) {
-                    // 统一设置所有配置项
-                    handler.setUseInventoryEnergyModule(payload.useInventoryEnergyModule());
-                    handler.setDebugOutputEnabled(payload.debugOutputEnabled());
-                    handler.setStatusInfo(payload.statusInfoEnabled());
-                }
-            });
-        });
-
         // 注册 C2S_RequestShellLogPayload - 客户端请求日志同步
         PayloadTypeRegistry.serverboundPlay().register(C2S_RequestShellLogPayload.TYPE,
                 C2S_RequestShellLogPayload.CODEC);
@@ -212,10 +192,8 @@ public class RelayServerNetworking {
                 if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
                     qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
                     if (blockEntity != null) {
-                        // 每 10 tick 同步一次日志
-                        if (blockEntity.getLevel().getGameTime() % 10 == 0) {
-                            blockEntity.syncLogsToClient(blockEntity.getLevel(), blockEntity.getBlockPos());
-                        }
+                        // 直接同步日志（客户端已控制请求频率为每 20 tick）
+                        blockEntity.syncLogsToClient(blockEntity.getLevel(), blockEntity.getBlockPos());
                     }
                 }
             });
@@ -250,12 +228,47 @@ public class RelayServerNetworking {
                 }
             });
         });
+
+        // 注册 C2S_UpdateToolShellConfigPayload - 客户端更新工具外壳配置
+        PayloadTypeRegistry.serverboundPlay().register(
+                qdream.relay.networking.payloads.C2S_UpdateToolShellConfigPayload.TYPE,
+                qdream.relay.networking.payloads.C2S_UpdateToolShellConfigPayload.CODEC);
+
+        // 注册服务端接收处理器 - 更新工具外壳配置
+        ServerPlayNetworking.registerGlobalReceiver(
+                qdream.relay.networking.payloads.C2S_UpdateToolShellConfigPayload.TYPE, (payload, context) -> {
+                    ServerPlayer player = context.player();
+                    if (player == null)
+                        return;
+
+                    context.server().execute(() -> {
+                        // 检查玩家手持物品
+                        ItemStack mainHand = player.getMainHandItem();
+                        ItemStack offHand = player.getOffhandItem();
+
+                        qdream.relay.items.container.ToolShellContainer container = null;
+                        if (mainHand.getItem() instanceof qdream.relay.items.ToolShellItem) {
+                            container = getToolShellContainer(mainHand, player);
+                        } else if (offHand.getItem() instanceof qdream.relay.items.ToolShellItem) {
+                            container = getToolShellContainer(offHand, player);
+                        }
+
+                        if (container != null) {
+                            // 同步配置到服务端容器
+                            container.setUseInventoryEnergyModule(payload.useInventoryEnergyModule());
+                            container.setDebugOutputEnabled(payload.debugOutputEnabled());
+                            container.setStatusInfo(payload.statusInfoEnabled());
+                            container.setChanged();
+                        }
+                    });
+                });
     }
 
     /**
      * 获取工具外壳容器
      */
-    private static qdream.relay.items.container.ToolShellContainer getToolShellContainer(ItemStack stack, ServerPlayer player) {
+    private static qdream.relay.items.container.ToolShellContainer getToolShellContainer(ItemStack stack,
+            ServerPlayer player) {
         if (player instanceof qdream.relay.core.PlayerShellDataAccessor accessor) {
             return accessor.relay$getShellData().getContainer(stack);
         }
