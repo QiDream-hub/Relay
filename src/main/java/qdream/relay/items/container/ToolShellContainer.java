@@ -27,8 +27,11 @@ import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.tools.TextTools;
 import qdream.relay.mc.StateMachineNbtSerializer;
+import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.Relay;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -299,8 +302,8 @@ public class ToolShellContainer implements ShellContainer {
      * </p>
      */
     public void tick(Level world, Player player) {
-        // 设置上下文
         StateMachine machine = getStateMachine();
+        // 在加载程序后设置上下文（level 和 self），保证 GetSelf 等操作能正确获取自身引用
         if (machine.isRunning()) {
             machine.setContext("level", world);
             machine.setContext("self", player);

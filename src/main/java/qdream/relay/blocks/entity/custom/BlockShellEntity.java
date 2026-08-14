@@ -61,7 +61,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final ShellTickHandler tickHandler;
     private final StateMachine stateMachine;
-    private final ExecutionStats executionStats = new ExecutionStats();
+    private ExecutionStats executionStats; // 在 enabled=true 时创建
     private Player owner;
     private UUID ownerUuid;
     private double energy;
@@ -88,6 +88,7 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         this.energy = 0;
         this.enabled = false;
         this.coreGroupId = null;
+        this.executionStats = null; // 初始为 null，在 enabled=true 时创建
 
         // 设置事故回调
         stateMachine.setMishapHandler(warning -> {
@@ -196,31 +197,20 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
      * Tick 方法
      */
     public static void tick(Level world, BlockPos pos, BlockState state, BlockShellEntity entity) {
-        // 在 tick 前设置上下文（level 和 self）
         var machine = entity.stateMachine;
-        if (machine.isRunning()) {
-            machine.setContext("level", world);
-            machine.setContext("self", entity);
-        }
 
         // 自动加载程序：如果 enabled=true 但程序未运行，从磁盘加载
         if (!world.isClientSide() && entity.isEnabled() && !entity.isRunning()) {
             entity.loadProgramFromDisk();
         }
 
-        entity.tickHandler.tick(entity);
-
-        // 程序执行完毕后打印统计信息（仅当启用统计信息时）
-        if (!world.isClientSide() && entity.isStatusInfoEnabled() && !entity.isRunning()) {
-            String[] formatStatsPanel = entity.executionStats.formatStatsPanel();
-            entity.addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
-            for (String string : formatStatsPanel) {
-                entity.addLogEntry(Component.literal(string));
-            }
-            entity.addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
-            // 同步日志到客户端
-            entity.syncLogsToClient(world, pos);
+        // 在加载程序后设置上下文（level 和 self），保证 GetSelf 等操作能正确获取自身引用
+        if (machine.isRunning()) {
+            machine.setContext("level", world);
+            machine.setContext("self", entity);
         }
+
+        entity.tickHandler.tick(entity);
 
         // 每 20 tick 同步一次能量到客户端（兜底同步）
         if (!world.isClientSide() && world.getGameTime() % 20 == 0) {
@@ -632,6 +622,10 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
     @Override
     public ExecutionStats getExecutionStats() {
+        // 如果 executionStats 为 null（enabled=false 时），返回一个空的统计对象
+        if (executionStats == null) {
+            return new ExecutionStats();
+        }
         return executionStats;
     }
 
@@ -842,6 +836,23 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
      */
     public void setStatusInfoEnabled(boolean enabled) {
         this.statusInfoEnabled = enabled;
+        if (enabled) {
+            executionStats = new ExecutionStats();
+        }
+        if (!enabled && !this.getLevel().isClientSide()
+                && this.executionStats != null) {
+            // 关闭时打印统计信息（仅当启用统计信息且尚未输出时）
+            addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
+            addLogEntry(Component.translatable("gui.relay:shell.stats.title"));
+            String[] formatStatsPanel = this.executionStats.formatStatsPanel();
+            for (String string : formatStatsPanel) {
+                addLogEntry(Component.literal(string));
+            }
+            addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
+            // 同步日志到客户端
+            syncLogsToClient(this.getLevel(), this.getBlockPos());
+            this.executionStats = null;
+        }
         setChanged();
     }
 }

@@ -39,9 +39,9 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
 
     // 日志窗口布局
     private static final int LOG_WINDOW_X = 8;
-    private static final int LOG_WINDOW_Y = 130;
+    private static final int LOG_WINDOW_Y = 146;
     private static final int LOG_WINDOW_WIDTH = 260;
-    private static final int LOG_WINDOW_HEIGHT = 220;
+    private static final int LOG_WINDOW_HEIGHT = 240;
 
     // 复位按钮 - 开关按钮左侧 颜色
     private static final int BG_COLOR = 0xFF1A1A2E;

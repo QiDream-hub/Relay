@@ -614,6 +614,8 @@
   "gui.relay:shell.toggle.enabled": "§a[开关] 外壳已开启",
   "gui.relay:shell.toggle.disabled": "§c[开关] 外壳已关闭",
   "gui.relay:shell.toggle.not_initialized": "§c[开关] 程序未初始化，无法切换开关",
+  "gui.relay:shell.stats.started": "§a[统计] 开始记录统计信息",
+  "gui.relay:shell.stats.title": "§e§l统计信息:",
   "gui.relay:shell.debug.separator": "§7--------------------",
   "gui.relay:shell.debug.program_stack": "§7 程序栈：%s",
   "gui.relay:shell.debug.data_stack": "§7 数据栈：%s",

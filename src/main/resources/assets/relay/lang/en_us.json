@@ -611,6 +611,8 @@
   "gui.relay:shell.toggle.enabled": "§a[Toggle] Shell enabled",
   "gui.relay:shell.toggle.disabled": "§c[Toggle] Shell disabled",
   "gui.relay:shell.toggle.not_initialized": "§c[Toggle] Program not initialized, cannot toggle",
+  "gui.relay:shell.stats.started": "§a[Stats] Started recording statistics",
+  "gui.relay:shell.stats.title": "§e§lStatistics:",
   "gui.relay:shell.debug.separator": "§7--------------------",
   "gui.relay:shell.debug.program_stack": "§7Program Stack: %s",
   "gui.relay:shell.debug.data_stack": "§7Data Stack: %s",
