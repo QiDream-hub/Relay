@@ -1,4 +1,4 @@
-package qdream.relay.operations.container;
+package qdream.relay.operations.disk;
 
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
@@ -16,16 +16,23 @@ import qdream.relay.types.SlotData;
 import qdream.relay.mc.component.DiskComponent;
 
 /**
- * 向物品写入列表操作
- * 输入：SlotData（物品引用）、ListData（程序列表）
- * 输出：无
+ * 向磁盘写入程序操作
+ * 将程序列表保存到法术磁盘中
+ *
+ * 弹出：slot (物品引用), list (程序列表)
+ * 压入：无
+ *
+ * 示例用法：
+ * 1. 写入磁盘：program_list disk_slot write_disk
+ * 2. 创建并保存：build_program some_list disk_slot write_disk
+ * 3. 备份程序：disk_slot read_disk some_list list_append other_disk write_disk
  */
-public class ListToSlot extends Instruction {
+public class WriteDisk extends Instruction {
 
-    public ListToSlot() {
-        super("relay:list_to_slot", 2, 1.0, OperationSignature.builder()
+    public WriteDisk() {
+        super("relay:write_disk", 2, 1.0, OperationSignature.builder()
                 .consumesFromData("slot", "relay:slot")
-                .consumesFromData("list", "relay:list")
+                .consumesFromData("program", "relay:list")
                 .build());
     }
 
@@ -41,7 +48,7 @@ public class ListToSlot extends Instruction {
             throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ITEM_NOT_FOUND));
         }
 
-        // 检查物品是否是法术磁盘（检查是否是 DiskComponent 类型）
+        // 检查物品是否是法术磁盘
         if (!(itemStack.getItem() instanceof DiskComponent diskComponent)) {
             throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_SPELL_DISK));
         }

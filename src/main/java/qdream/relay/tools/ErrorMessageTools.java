@@ -72,6 +72,8 @@ public final class ErrorMessageTools {
         SLOT_NOT_FOUND("slot_not_found"),
         /** 物品不存在 */
         ITEM_NOT_FOUND("item_not_found"),
+        /** 磁盘为空 */
+        DISK_EMPTY("disk_empty"),
 
         // === 世界/位置错误 ===
         /** 世界不存在：{0} */

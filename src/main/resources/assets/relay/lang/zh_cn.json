@@ -193,8 +193,8 @@
   "operation.relay:get_self.name": "获取自身",
   "operation.relay:get_self.description": "获取自身实体或方块实体",
 
-  "operation.relay:get_entity_pos.name": "获取实体坐标",
-  "operation.relay:get_entity_pos.description": "获取实体当前的位置坐标",
+  "operation.relay:get_pos.name": "获取坐标",
+  "operation.relay:get_pos.description": "获取方块、方块实体或实体所在的位置坐标",
 
   "operation.relay:get_entity_eye_pos.name": "获取实体眼睛位置",
   "operation.relay:get_entity_eye_pos.description": "获取实体当前的眼睛位置坐标（用于射线追踪等视线相关操作）",
@@ -256,23 +256,23 @@
   "operation.relay:get_container_items.name": "获取容器物品",
   "operation.relay:get_container_items.description": "获取容器内的所有物品，返回 SlotData 列表",
 
+  "operation.relay:get_slot.name": "获取插槽",
+  "operation.relay:get_slot.description": "从方块实体和插槽索引获取插槽引用",
+
   "operation.relay:move_items.name": "移动物品",
   "operation.relay:move_items.description": "尝试将源物品移动到目标槽位（堆叠或放入空槽），返回源物品剩余的数量",
 
   "operation.relay:get_item_count.name": "获取物品数量",
   "operation.relay:get_item_count.description": "获取物品堆的数量",
 
-  "operation.relay:get_item_type.name": "获取物品类型",
-  "operation.relay:get_item_type.description": "获取物品的注册表 ID",
-
   "operation.relay:drop_item.name": "投掷物品",
   "operation.relay:drop_item.description": "在指定坐标生成物品实体",
 
-  "operation.relay:slot_to_list.name": "从插槽读取列表",
-  "operation.relay:slot_to_list.description": "从物品插槽读取法术磁盘的程序列表",
+  "operation.relay:read_disk.name": "读取磁盘",
+  "operation.relay:read_disk.description": "从法术磁盘读取存储的程序列表",
 
-  "operation.relay:list_to_slot.name": "向插槽写入列表",
-  "operation.relay:list_to_slot.description": "将程序列表写入物品插槽的法术磁盘",
+  "operation.relay:write_disk.name": "写入磁盘",
+  "operation.relay:write_disk.description": "将程序列表保存到法术磁盘中",
 
   "operation.relay:break_block.name": "破坏方块",
   "operation.relay:break_block.description": "破坏指定位置的方块",
@@ -295,10 +295,12 @@
   "operation.relay:spawn_shell.name": "召唤外壳",
   "operation.relay:spawn_shell.description": "在指定位置召唤一个可编程的外壳实体",
 
-  "operation.relay:entity_shell_add_energy.name": "添加能量",
-  "operation.relay:entity_shell_add_energy.description": "为外壳实体添加能量",
-  "operation.relay:entity_shell_get_energy.name": "获取能量",
-  "operation.relay:entity_shell_get_energy.description": "获取外壳实体的当前能量",
+  "operation.relay:add_shell_energy.name": "添加能量",
+  "operation.relay:add_shell_energy.description": "为外壳（实体或方块）添加能量",
+  "operation.relay:get_shell_energy.name": "获取能量",
+  "operation.relay:get_shell_energy.description": "获取外壳（实体或方块）的当前能量",
+  "operation.relay:add_shell_energy_from_slot.name": "从插槽添加能量",
+  "operation.relay:add_shell_energy_from_slot.description": "从插槽物品（紫水晶或能量模块）为外壳添加能量",
   "operation.relay:entity_shell_reset.name": "复位外壳",
   "operation.relay:entity_shell_reset.description": "清除当前程序并加载新程序到外壳实体",
 
@@ -334,7 +336,7 @@
   "operation.relay:get_entity.description": "从坐标获取最近的实体引用",
 
   "operation.relay:get_type.name": "获取类型",
-  "operation.relay:get_type.description": "从实体、方块实体或方块获取注册表 ID",
+  "operation.relay:get_type.description": "从实体、方块实体、方块或物品插槽获取注册表 ID",
 
   "operation.relay:type_eq.name": "类型相等",
   "operation.relay:type_eq.description": "比较两个类型是否相同",
@@ -528,6 +530,7 @@
   "error.container_not_found": "§c 容器不存在",
   "error.slot_not_found": "§c 插槽不存在",
   "error.item_not_found": "§c 物品不存在",
+  "error.disk_empty": "§c 法术磁盘为空",
   "error.index_out_of_bounds": "§c 索引 §b%s§c 超出范围 (大小：§b%s§c)",
   "error.invalid_index": "§c 无效的索引：§b%s§c",
   "error.world_not_found": "§c 世界不存在：§b%s§c",

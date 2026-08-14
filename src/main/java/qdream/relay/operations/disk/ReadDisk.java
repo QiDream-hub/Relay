@@ -1,4 +1,4 @@
-package qdream.relay.operations.container;
+package qdream.relay.operations.disk;
 
 import java.util.ArrayList;
 
@@ -18,16 +18,23 @@ import qdream.relay.types.SlotData;
 import qdream.relay.mc.component.DiskComponent;
 
 /**
- * 从物品读取列表操作
- * 输入：SlotData（物品引用）
- * 输出：ListData（从磁盘读取的程序列表）
+ * 从磁盘读取程序操作
+ * 从法术磁盘中读取存储的程序列表
+ *
+ * 弹出：slot (物品引用)
+ * 压入：list (程序列表)
+ *
+ * 示例用法：
+ * 1. 读取磁盘程序：disk_slot read_disk
+ * 2. 读取并执行：disk_slot read_disk eval
+ * 3. 读取并检查大小：disk_slot read_disk list_length
  */
-public class SlotToList extends Instruction {
+public class ReadDisk extends Instruction {
 
-    public SlotToList() {
-        super("relay:slot_to_list", 1, 0.5, OperationSignature.builder()
+    public ReadDisk() {
+        super("relay:read_disk", 1, 0.5, OperationSignature.builder()
                 .consumesFromData("slot", "relay:slot")
-                .producesToData("list", "relay:list")
+                .producesToData("program", "relay:list")
                 .build());
     }
 
@@ -42,21 +49,22 @@ public class SlotToList extends Instruction {
             throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ITEM_NOT_FOUND));
         }
 
-        // 检查物品是否是法术磁盘（检查是否是 DiskComponent 类型）
+        // 检查物品是否是法术磁盘
         if (!(itemStack.getItem() instanceof DiskComponent diskComponent)) {
             throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_SPELL_DISK));
         }
 
         // 从磁盘读取程序列表
         String programJson = diskComponent.getProgram(itemStack);
-        java.util.List<Executable> program;
+        if (programJson == null || programJson.trim().isEmpty()) {
+            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.DISK_EMPTY));
+        }
+
         try {
-            program = ProgramCompiler.compileFromJson(programJson);
+            java.util.List<Executable> program = ProgramCompiler.compileFromJson(programJson);
+            executor.pushData(new ListData(new ArrayList<>(program)));
         } catch (ProgramCompiler.CompilationException e) {
             throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.COMPILATION_FAILED, e.getMessage()));
         }
-
-        // 将程序列表包装为 ListData 并压入数据栈
-        executor.pushData(new ListData(new ArrayList<>(program)));
     }
 }

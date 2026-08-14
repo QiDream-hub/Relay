@@ -8,6 +8,7 @@ import qdream.relay.operations.block.*;
 import qdream.relay.operations.communication.*;
 import qdream.relay.operations.container.*;
 import qdream.relay.operations.control.*;
+import qdream.relay.operations.disk.*;
 import qdream.relay.operations.entity.*;
 import qdream.relay.operations.type.*;
 import qdream.relay.operations.vector.*;
@@ -81,7 +82,7 @@ public class RelayOperations {
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetSelf()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new GetEntityPos()));
+                                new OperationRegistry.OpEntry(new GetPos()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetEntityEyePos()));
                 OperationRegistry.register(
@@ -208,27 +209,29 @@ public class RelayOperations {
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetContainerItems()));
                 OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new GetSlotOp()));
+                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new MoveItems()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetItemCount()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new GetItemType()));
-                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new DropItem()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new SlotToList()));
+                                new OperationRegistry.OpEntry(new ReadDisk()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new ListToSlot()));
+                                new OperationRegistry.OpEntry(new WriteDisk()));
 
-                // EntityShell 控制操作
+                // Shell 控制操作
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new SpawnShell()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new RemoveShell()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new EntityShellAddEnergy()));
+                                new OperationRegistry.OpEntry(new AddShellEnergy()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new EntityShellGetEnergy()));
+                                new OperationRegistry.OpEntry(new GetShellEnergy()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new AddShellEnergyFromSlot()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new EntityShellReset()));
 

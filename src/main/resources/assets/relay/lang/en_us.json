@@ -193,8 +193,8 @@
   "operation.relay:get_self.name": "Get Self",
   "operation.relay:get_self.description": "Get self entity or block entity",
 
-  "operation.relay:get_entity_pos.name": "Get Entity Position",
-  "operation.relay:get_entity_pos.description": "Get the current position of an entity",
+  "operation.relay:get_pos.name": "Get Position",
+  "operation.relay:get_pos.description": "Get the position of a block, block entity, or entity",
 
   "operation.relay:get_entity_eye_pos.name": "Get Entity Eye Position",
   "operation.relay:get_entity_eye_pos.description": "Get the current eye position of an entity (for raycast and vision-related operations)",
@@ -256,23 +256,23 @@
   "operation.relay:get_container_items.name": "Get Container Items",
   "operation.relay:get_container_items.description": "Get all items in container, returns list of SlotData",
 
+  "operation.relay:get_slot.name": "Get Slot",
+  "operation.relay:get_slot.description": "Get slot reference from block entity and slot index",
+
   "operation.relay:move_items.name": "Move Items",
   "operation.relay:move_items.description": "Attempt to move source item to target slot (stack or fill empty), returns remaining count of source item",
 
   "operation.relay:get_item_count.name": "Get Item Count",
   "operation.relay:get_item_count.description": "Get the count of an item stack",
 
-  "operation.relay:get_item_type.name": "Get Item Type",
-  "operation.relay:get_item_type.description": "Get the registry ID of an item",
-
   "operation.relay:drop_item.name": "Drop Item",
   "operation.relay:drop_item.description": "Spawn item entity at specified position",
 
-  "operation.relay:slot_to_list.name": "Read List from Slot",
-  "operation.relay:slot_to_list.description": "Read spell disk program list from item slot",
+  "operation.relay:read_disk.name": "Read Disk",
+  "operation.relay:read_disk.description": "Read program list from spell disk",
 
-  "operation.relay:list_to_slot.name": "Write List to Slot",
-  "operation.relay:list_to_slot.description": "Write program list to spell disk in item slot",
+  "operation.relay:write_disk.name": "Write Disk",
+  "operation.relay:write_disk.description": "Write program list to spell disk",
 
   "operation.relay:break_block.name": "Break Block",
   "operation.relay:break_block.description": "Break block at specified position",
@@ -301,14 +301,14 @@
   "operation.relay:spawn_shell.name": "Spawn Shell",
   "operation.relay:spawn_shell.description": "Spawn a programmable shell entity at specified position",
 
-  "operation.relay:entity_shell_add_energy.name": "Add Energy",
-  "operation.relay:entity_shell_add_energy.description": "Add energy to a shell entity",
-  "operation.relay:entity_shell_get_energy.name": "Get Energy",
-  "operation.relay:entity_shell_get_energy.description": "Get current energy of a shell entity",
+  "operation.relay:add_shell_energy.name": "Add Energy",
+  "operation.relay:add_shell_energy.description": "Add energy to a shell (entity or block)",
+  "operation.relay:get_shell_energy.name": "Get Energy",
+  "operation.relay:get_shell_energy.description": "Get current energy of a shell (entity or block)",
+  "operation.relay:add_shell_energy_from_slot.name": "Add Energy from Slot",
+  "operation.relay:add_shell_energy_from_slot.description": "Add energy to shell from slot item (amethyst or energy module)",
   "operation.relay:entity_shell_reset.name": "Reset Shell",
   "operation.relay:entity_shell_reset.description": "Clear current program and load new program to shell entity",
-  "operation.relay:entity_shell_start.name": "Start Shell",
-  "operation.relay:entity_shell_start.description": "Load program and start shell entity execution",
 
   "operation.relay:remove_shell.name": "Remove Shell",
   "operation.relay:remove_shell.description": "Remove specified shell entity and return 90% of remaining energy",
@@ -342,7 +342,7 @@
   "operation.relay:get_entity.description": "Get nearest entity reference from coordinates",
 
   "operation.relay:get_type.name": "Get Type",
-  "operation.relay:get_type.description": "Get registry ID from entity, block entity, or block",
+  "operation.relay:get_type.description": "Get registry ID from entity, block entity, block, or item slot",
 
   "operation.relay:type_eq.name": "Type Equals",
   "operation.relay:type_eq.description": "Compare two types for equality",
@@ -528,6 +528,7 @@
   "error.container_not_found": "§cContainer not found",
   "error.slot_not_found": "§cSlot not found",
   "error.item_not_found": "§cItem not found",
+  "error.disk_empty": "§cSpell disk is empty",
   "error.index_out_of_bounds": "§cIndex §b%s§c out of bounds (size: §b%s§c)",
   "error.invalid_index": "§cInvalid index: §b%s§c",
   "error.world_not_found": "§cWorld not found: §b%s§c",
