@@ -62,21 +62,22 @@ public final class StackHelpers {
     /**
      * 从数据栈弹出并检查类型
      *
-     * @param executor      状态机
-     * @param expectedType  期望的类型
-     * @param operationName 操作名称（用于错误消息）
-     * @param targetId      目标类型 ID（用于错误消息）
-     * @param <T>           期望的类型
+     * @param executor     状态机
+     * @param expectedType 期望的类型
+     * @param operationId  操作名称（用于错误消息）
+     * @param targetId     目标类型 ID（用于错误消息）
+     * @param <T>          期望的类型
      * @return 转换后的值，非空
      * @throws StackException 如果栈空
      * @throws TypeException  如果类型不匹配
      */
     @NotNull
-    public static <T> T popAsType(StateMachine executor, Class<T> expectedType, String operationName, String targetId) {
+    public static <T> T popAsType(StateMachine executor, Class<T> expectedType, String operationId, String targetId) {
         Executable exe = executor.popData();
         if (!expectedType.isInstance(exe)) {
-            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                    TextTools.getName(targetId), TextTools.getName(exe)));
+            throw new TypeException(executor,
+                    TextTools.getName(operationId).append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
+                            TextTools.getName(targetId), TextTools.getName(exe))));
         }
         return expectedType.cast(exe);
     }
@@ -84,23 +85,24 @@ public final class StackHelpers {
     /**
      * 从数据栈窥视（不弹出）并检查类型
      *
-     * @param executor      状态机
-     * @param index         索引（0 为栈顶）
-     * @param expectedType  期望的类型
-     * @param operationName 操作名称（用于错误消息）
-     * @param targetId      目标类型 ID（用于错误消息）
-     * @param <T>           期望的类型
+     * @param executor     状态机
+     * @param index        索引（0 为栈顶）
+     * @param expectedType 期望的类型
+     * @param operationId  操作名称（用于错误消息）
+     * @param targetId     目标类型 ID（用于错误消息）
+     * @param <T>          期望的类型
      * @return 转换后的值，非空
      * @throws StackException 如果索引越界
      * @throws TypeException  如果类型不匹配
      */
     @NotNull
-    public static <T> T peekAsType(StateMachine executor, int index, Class<T> expectedType, String operationName,
+    public static <T> T peekAsType(StateMachine executor, int index, Class<T> expectedType, String operationId,
             String targetId) {
-        Executable exe = getDataAt(executor, index, operationName);
+        Executable exe = getDataAt(executor, index, operationId);
         if (!expectedType.isInstance(exe)) {
-            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                    TextTools.getName(targetId), TextTools.getName(exe)));
+            throw new TypeException(executor,
+                    TextTools.getName(operationId).append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
+                            TextTools.getName(targetId), TextTools.getName(exe))));
         }
         return expectedType.cast(exe);
     }

@@ -40,8 +40,8 @@ public class WriteDisk extends Instruction {
     public void execute(StateMachine executor) {
         OperationHelpers.checkWorldInteractor(executor, id);
 
-        ListData listData = StackHelpers.popList(executor, id);
         SlotData slotData = StackHelpers.popSlot(executor, id);
+        ListData listData = StackHelpers.popList(executor, id);
 
         ItemStack itemStack = slotData.getItemStack();
         if (itemStack == null || itemStack.isEmpty()) {

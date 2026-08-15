@@ -98,7 +98,7 @@ public final class TextTools {
      * @param args 参数列表（支持 Component 或 Object）
      * @return Component 翻译后的文本组件
      */
-    public static Component getComponent(String key, Object... args) {
+    public static MutableComponent getComponent(String key, Object... args) {
         return Component.translatable(key, args);
     }
 
@@ -109,7 +109,7 @@ public final class TextTools {
      * @param args 参数列表
      * @return 翻译后的文本
      */
-    public static Component getText(String key, Object... args) {
+    public static MutableComponent getText(String key, Object... args) {
         return Component.translatable(key, args);
     }
 
@@ -194,7 +194,7 @@ public final class TextTools {
      * @param exe 可执行单元
      * @return 显示名称
      */
-    public static Component getName(Executable exe) {
+    public static MutableComponent getName(Executable exe) {
         return getText(getNameKey(exe));
     }
 
@@ -204,7 +204,7 @@ public final class TextTools {
      * @param tag NBT 标签
      * @return 显示名称
      */
-    public static Component getName(CompoundTag tag) {
+    public static MutableComponent getName(CompoundTag tag) {
         return getText(getNameKey(tag));
     }
 
@@ -214,7 +214,7 @@ public final class TextTools {
      * @param id 操作id
      * @return 翻译后的文本
      */
-    public static Component getName(String id) {
+    public static MutableComponent getName(String id) {
         return getText(getNameKey(id));
     }
 
@@ -224,7 +224,7 @@ public final class TextTools {
      * @param id 操作id
      * @return 翻译后的文本
      */
-    public static Component getTypeName(String id) {
+    public static MutableComponent getTypeName(String id) {
         if (id.equals("any") || id.equals("...any")) {
             return getText("type." + id + ".name");
         }
@@ -238,7 +238,7 @@ public final class TextTools {
      * @param exe 可执行单元
      * @return 描述文本
      */
-    public static Component getDescriptionText(Executable exe) {
+    public static MutableComponent getDescriptionText(Executable exe) {
         return getText(getDescriptionKey(exe));
     }
 
@@ -259,7 +259,7 @@ public final class TextTools {
     }
 
     // ==================== 参数名翻译 ====================
-    public static Component getParamNameText(String name) {
+    public static MutableComponent getParamNameText(String name) {
         return getText("param." + name + ".description");
     }
 
@@ -271,7 +271,7 @@ public final class TextTools {
      * @param executor 状态机
      * @return 格式化后的Component
      */
-    public static Component formatDataStack(StateMachine executor) {
+    public static MutableComponent formatDataStack(StateMachine executor) {
         return formatList(executor.getDataStackSnapshot());
     }
 
@@ -281,7 +281,7 @@ public final class TextTools {
      * @param executor 状态机
      * @return 格式化后的Component
      */
-    public static Component formatProgramStack(StateMachine executor) {
+    public static MutableComponent formatProgramStack(StateMachine executor) {
         return formatList(executor.getProgramStackSnapshot());
     }
 
@@ -291,7 +291,7 @@ public final class TextTools {
      * @param list 栈快照
      * @return 格式化后的Component
      */
-    public static Component formatList(List<Executable> list) {
+    public static MutableComponent formatList(List<Executable> list) {
         if (list.isEmpty()) {
             return Component.literal("[]").withColor(0x55FF55);
         }
@@ -303,7 +303,7 @@ public final class TextTools {
             Executable exe = list.get(i);
             if (exe instanceof Instruction instr) {
                 // 浅蓝色显示操作名称
-                result.append(getName(instr.getId()).copy().withColor(0x55FFFF));
+                result.append(getName(instr.getId()).withColor(0x55FFFF));
             } else if (exe instanceof Data data) {
                 // 绿色显示数据值
                 result.append(data.asString().copy().withColor(0x55FF55));
