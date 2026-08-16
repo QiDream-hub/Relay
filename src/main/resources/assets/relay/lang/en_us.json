@@ -44,7 +44,7 @@
   "item.relay.spell_disk.empty": "§8Empty Disk",
   "item.relay.spell_disk.size": "Program Size: §e%d",
   "item.relay.spell_disk.more": "  §8... and %d more",
-  "item.relay.spell_disk.compilation_error":"§cCompilation error:",
+  "item.relay.spell_disk.compilation_error": "§cCompilation error:",
   "key.relay.open_tool_shell_config": "Open Tool Shell Config",
   "key.relay.stop_tool_shell_program": "Stop Tool Shell Program",
   "key.category.relay.relay": "Relay",
@@ -655,5 +655,8 @@
   "gui.relay:tool_shell.debug.program_stack": "§7[§f Program Stack §7]: %s",
   "gui.relay:tool_shell.debug.data_stack": "§7[§f Data Stack §7]: %s",
   "gui.relay:tool_shell.mishap.title": "§c[§c Mishap §c] §fOperation: %s",
-  "gui.relay:tool_shell.mishap.reason": "§c[§c Mishap §c] §fReason: %s"
+  "gui.relay:tool_shell.mishap.reason": "§c[§c Mishap §c] §fReason: %s",
+
+  "relay:entity_shell.mishap.title": "§l§c[Entity Shell]:",
+  "relay:entity_shell.mishap.reason": "§7Reason: %s"
 }

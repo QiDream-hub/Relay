@@ -658,5 +658,8 @@
   "gui.relay:tool_shell.debug.program_stack": "§7[§f 程序栈 §7]: %s",
   "gui.relay:tool_shell.debug.data_stack": "§7[§f 数据栈 §7]: %s",
   "gui.relay:tool_shell.mishap.title": "§c[§c 事故 §c] §f操作：%s",
-  "gui.relay:tool_shell.mishap.reason": "§c[§c 事故 §c] §f原因：%s"
+  "gui.relay:tool_shell.mishap.reason": "§c[§c 事故 §c] §f原因：%s",
+
+  "relay:entity_shell.mishap.title": "§l§c[运行实体]：",
+  "relay:entity_shell.mishap.reason": "§7 原因：%s"
 }

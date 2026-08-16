@@ -16,8 +16,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import java.util.UUID;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.SynchedEntityData;
 
 import qdream.relay.core.ShellContainer;
@@ -53,28 +52,34 @@ public class EntityShell extends Entity implements ShellContainer {
     private Player owner;
     private UUID ownerUuid;
 
-    // 同步数据
-    private static final EntityDataAccessor<Boolean> DATA_ENABLED = SynchedEntityData.defineId(EntityShell.class,
-            EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Float> DATA_ENERGY = SynchedEntityData.defineId(EntityShell.class,
-            EntityDataSerializers.FLOAT);
-
     public EntityShell(EntityType<?> type, Level level) {
         super(type, level);
         this.stateMachine = new StateMachine(Relay.DEFAULT_MAX_PROGRAM_STACK_SIZE);
 
-        // 设置事故回调
+        // 设置事故回调（仿照 BlockShellEntity 的实现方式）
         stateMachine.setMishapHandler(warning -> {
             if (!level().isClientSide()) {
-                getOwner().sendSystemMessage(Component.literal(String.format("§c§lMISHAP§r§c[实体]: %s", warning.getMessage())));
+                // 使用语言文件构建事故消息
+                MutableComponent title = Component.translatable("relay:entity_shell.mishap.title");
+                MutableComponent reason = Component.translatable("relay:entity_shell.mishap.reason",
+                        warning.getInfo() instanceof Component component ? component
+                                : Component.literal(warning.getMessage()).withStyle(s -> s.withColor(0xAAAAAA)));
+
+                // 发送聊天消息给 Owner
+                Player owner = getOwner();
+                if (owner != null) {
+                    owner.sendSystemMessage(title);
+                    owner.sendSystemMessage(reason);
+                }
+                // 事故时关闭 Shell
+                getStateMachine().clear();
+                discard();
             }
         });
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(DATA_ENABLED, true);
-        builder.define(DATA_ENERGY, 0.0f);
     }
 
     // ========== Tick 逻辑 ==========
@@ -94,17 +99,12 @@ public class EntityShell extends Entity implements ShellContainer {
             machine.setContext("level", level());
             machine.setContext("self", this);
         }
-        // 执行前检查是否还有能量
-        if (getEnergy() < getEnergyCostPerTick()) {
+        // 执行前检查是否还有能量,以及是否运行完成
+        if (!consumeEnergy(5) || !canExecute()) {
             machine.clear();
             discard();
         }
         tickHandler.tick(this);
-
-        // 服务端：每 5 tick 同步一次能量到客户端（使用同步数据字段）
-        if (level().getGameTime() % 5 == 0) {
-            entityData.set(DATA_ENERGY, (float) getEnergy());
-        }
     }
 
     /**
@@ -118,8 +118,8 @@ public class EntityShell extends Entity implements ShellContainer {
      * </p>
      */
     private void spawnParticles() {
-        // 从同步数据字段读取能量值（避免客户端本地值为 0）
-        double energy = entityData.get(DATA_ENERGY);
+        // 使用客户端本地能量值
+        double energy = getEnergy();
 
         // 粒子数量上限
         int maxWhiteParticles = 10;
