@@ -108,18 +108,8 @@ public class StateMachine {
     }
 
     /**
-     * 获取上下文数据
-     * 
-     * @param key 键
-     * @return 值，如果不存在返回 null
-     */
-    public Object getContext(String key) {
-        return context.get(key);
-    }
-
-    /**
      * 获取上下文数据（类型安全版本）
-     * 
+     *
      * @param key  键
      * @param type 期望的类型
      * @return Optional<值>
@@ -131,19 +121,12 @@ public class StateMachine {
 
     /**
      * 检查是否存在上下文数据
-     * 
+     *
      * @param key 键
      * @return 是否存在
      */
     public boolean hasContext(String key) {
         return context.containsKey(key);
-    }
-
-    /**
-     * 清空上下文
-     */
-    public void clearContext() {
-        context.clear();
     }
 
     // ========== 栈操作 ==========

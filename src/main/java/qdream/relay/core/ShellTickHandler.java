@@ -100,24 +100,6 @@ public class ShellTickHandler {
     private int accumulatedCost = 0;
 
     /**
-     * 获取累计的 coreCost
-     *
-     * @return 累计的 coreCost 值
-     */
-    public int getAccumulatedCost() {
-        return accumulatedCost;
-    }
-
-    /**
-     * 设置累计的 coreCost
-     *
-     * @param accumulatedCost 累计的 coreCost 值
-     */
-    public void setAccumulatedCost(int accumulatedCost) {
-        this.accumulatedCost = accumulatedCost;
-    }
-
-    /**
      * 执行一个 tick 的逻辑
      * mc 层负责：控制每 tick 执行的操作数、扣除能量
      *
@@ -228,10 +210,6 @@ public class ShellTickHandler {
 
     public int getTickCounter() {
         return tickCounter;
-    }
-
-    public void setTickCounter(int tickCounter) {
-        this.tickCounter = tickCounter;
     }
 
     /**

@@ -59,20 +59,7 @@ public class ExecutionStats {
     }
 
     /**
-     * 添加能量消耗（旧方法，保留兼容性）
-     *
-     * @param coreCost      核心基础消耗
-     * @param operationCost 操作额外消耗（世界交互器等）
-     * @deprecated 使用 {@link #addEnergyCost(double, double, double)} 或分别调用各方法
-     */
-    @Deprecated
-    public void addEnergyCost(double coreCost, double operationCost) {
-        this.coreEnergyCost += coreCost;
-        this.worldInteractorEnergyCost += operationCost;
-    }
-
-    /**
-     * 添加能量消耗（新版本，三分离）
+     * 添加能量消耗（三分离）
      *
      * @param coreCost           核心基础消耗
      * @param baseOperationCost  基础操作消耗
@@ -98,16 +85,6 @@ public class ExecutionStats {
      */
     public void addExecutedOperations(int count) {
         this.executedOperationCount += count;
-    }
-
-    /**
-     * 递增执行的操作数量
-     *
-     * @return 新的操作计数
-     */
-    public int incrementOperations() {
-        this.executedOperationCount++;
-        return this.executedOperationCount;
     }
 
     /**
