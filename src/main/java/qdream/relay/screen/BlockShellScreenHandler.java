@@ -8,7 +8,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-
+import net.minecraft.core.BlockPos;
 import qdream.relay.blocks.entity.custom.BlockShellEntity;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.mc.component.ComputingCoreComponent;
@@ -64,23 +64,42 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
     // 能量值通过网络包同步（不使用 DataSlot，因为 DataSlot 只同步 16 位）
     private double syncedEnergy = 0.0;
 
-    // 日志变更标记
-    private boolean logsChanged = false;
-    private java.util.List<net.minecraft.network.chat.Component> syncedLogs = new java.util.ArrayList<>();
+    // 方块坐标（服务端从 blockEntity 获取，客户端在构造时传入）
+    private final BlockPos blockPos;
+
+    // 客户端最后已知的 BlockShell 坐标（通过 BlockShell.useWithoutItem 设置）
+    private static BlockPos lastKnownBlockPos = null;
+
+    /**
+     * 设置最后已知的 BlockShell 坐标（客户端调用）
+     */
+    public static void setLastKnownBlockPos(BlockPos pos) {
+        lastKnownBlockPos = pos;
+    }
 
     /**
      * 客户端构造方法（没有实际容器）
      */
     public BlockShellScreenHandler(int syncId, Inventory playerInventory) {
-        this(syncId, playerInventory, null);
+        this(syncId, playerInventory, null, lastKnownBlockPos != null ? lastKnownBlockPos : BlockPos.ZERO);
     }
 
     /**
      * 服务端构造方法（有实际容器）
      */
     public BlockShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container) {
+        this(syncId, playerInventory, container,
+                container instanceof BlockShellEntity be ? be.getBlockPos() : BlockPos.ZERO);
+    }
+
+    /**
+     * 私有构造方法（支持客户端传递 blockPos）
+     */
+    private BlockShellScreenHandler(int syncId, Inventory playerInventory, ShellContainer container,
+            BlockPos blockPos) {
         super(RelayScreenHandlers.SHELL_SCREEN_HANDLER, syncId);
         this.blockEntity = container instanceof BlockShellEntity be ? be : null;
+        this.blockPos = blockPos != null ? blockPos : BlockPos.ZERO;
         // ShellBlockEntity 已实现 Container，直接使用；客户端使用空容器
         this.wrapper = blockEntity != null ? (Container) blockEntity : new EmptyShellContainer();
 
@@ -212,42 +231,7 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
             energyCostFracSlot.set((int) ((energyCost % 1) * 1000));
             debugOutputSlot.set(blockEntity.isDebugOutputEnabled() ? 1 : 0);
             statusInfoSlot.set(blockEntity.isStatusInfoEnabled() ? 1 : 0);
-
-            // 同步日志（每 tick 检查变更）
-            java.util.List<net.minecraft.network.chat.Component> currentLogs = blockEntity.getLogBuffer();
-            if (!currentLogs.equals(syncedLogs)) {
-                syncedLogs = currentLogs;
-                logsChanged = true;
-            }
         }
-    }
-
-    /**
-     * 获取同步的日志内容
-     */
-    public java.util.List<net.minecraft.network.chat.Component> getSyncedLogs() {
-        return syncedLogs;
-    }
-
-    /**
-     * 设置同步的日志内容（客户端调用）
-     */
-    public void setSyncedLogs(java.util.List<net.minecraft.network.chat.Component> logs) {
-        this.syncedLogs = logs;
-    }
-
-    /**
-     * 标记日志已同步（客户端调用）
-     */
-    public void markLogsSynced() {
-        this.logsChanged = false;
-    }
-
-    /**
-     * 检查日志是否有变更（服务端调用）
-     */
-    public boolean hasLogsChanged() {
-        return logsChanged;
     }
 
     /**
@@ -331,6 +315,15 @@ public class BlockShellScreenHandler extends AbstractContainerMenu {
      */
     public BlockShellEntity getBlockEntity() {
         return blockEntity;
+    }
+
+    /**
+     * 获取方块坐标（客户端和服务端都可用）
+     *
+     * @return 方块坐标，客户端返回 BlockPos.ZERO
+     */
+    public BlockPos getBlockPos() {
+        return blockPos != null ? blockPos : BlockPos.ZERO;
     }
 
     /**

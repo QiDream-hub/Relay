@@ -6,11 +6,15 @@ import java.util.Set;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import qdream.relay.client.screen.EditorScreen;
 import qdream.relay.client.screen.BlockShellScreen;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.networking.payloads.S2C_ShellEnergyPayload;
-import qdream.relay.networking.payloads.S2C_ShellLogPayload;
+import qdream.relay.networking.payloads.S2C_ShellLogPushPayload;
+import qdream.relay.networking.payloads.S2C_ClearLogsPayload;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
 import qdream.relay.networking.payloads.S2C_SaveSpellDiskConfirmPayload;
 
@@ -54,13 +58,26 @@ public class RelayClientNetworking {
             });
         });
 
-        // 注册 S2C_ShellLogPayload 客户端接收器
-        ClientPlayNetworking.registerGlobalReceiver(S2C_ShellLogPayload.TYPE, (payload, context) -> {
+        // 注册 S2C_ShellLogPushPayload 客户端接收器 - 单条日志实时推送
+        ClientPlayNetworking.registerGlobalReceiver(S2C_ShellLogPushPayload.TYPE, (payload, context) -> {
             context.client().execute(() -> {
+                // 使用当前玩家所在世界的维度
                 Minecraft mc = Minecraft.getInstance();
-                if (mc.player != null
-                        && mc.player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
-                    handler.setSyncedLogs(payload.logs());
+                Level level = mc.player != null ? mc.player.level() : mc.level;
+                if (level != null) {
+                    ClientLogCacheManager.addLog(level, payload.pos(), payload.log());
+                }
+            });
+        });
+
+        // 注册 S2C_ClearLogsPayload 客户端接收器 - 方块破坏时清理缓存
+        ClientPlayNetworking.registerGlobalReceiver(S2C_ClearLogsPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                // 使用当前玩家所在世界的维度
+                Minecraft mc = Minecraft.getInstance();
+                Level level = mc.player != null ? mc.player.level() : mc.level;
+                if (level != null) {
+                    ClientLogCacheManager.clearLogs(level, payload.pos());
                 }
             });
         });

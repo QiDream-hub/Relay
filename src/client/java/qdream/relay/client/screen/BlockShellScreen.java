@@ -6,13 +6,16 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import qdream.relay.networking.payloads.C2S_ToggleShellPayload;
-import qdream.relay.networking.payloads.C2S_RequestShellLogPayload;
 import qdream.relay.networking.payloads.C2S_ShellConfigPayload;
 import qdream.relay.screen.BlockShellScreenHandler;
 import qdream.relay.client.screen.widget.LogWidget;
 import qdream.relay.client.screen.widget.SlotWidget;
+import qdream.relay.Relay;
+import qdream.relay.client.networking.ClientLogCacheManager;
 
 /**
  * 外壳方块屏幕
@@ -111,13 +114,19 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
         this.addRenderableWidget(statusInfoButton);
 
         // 日志窗口 Widget - 与 GUI 等宽，放在插槽标签下方
+        // 使用客户端缓存管理器获取日志
+        BlockPos blockPos = this.menu.getBlockPos();
+        Relay.LOGGER.info(blockPos.toString());
         logWidget = new LogWidget(
                 LOG_WINDOW_X,
                 LOG_WINDOW_Y,
                 LOG_WINDOW_WIDTH,
                 LOG_WINDOW_HEIGHT,
                 this.font,
-                () -> this.menu.getSyncedLogs());
+                () -> {
+                    Level level = this.minecraft != null && this.minecraft.level != null ? this.minecraft.level : null;
+                    return level != null ? ClientLogCacheManager.getLogs(level, blockPos) : java.util.Collections.emptyList();
+                });
         this.addRenderableWidget(logWidget);
 
         // 容器插槽 Widget (4 个垂直排列)
@@ -239,11 +248,7 @@ public class BlockShellScreen extends AbstractContainerScreen<BlockShellScreenHa
 
         renderStatusInfo(graphics, this.leftPos + STATUS_X, this.topPos + STATUS_Y + BUTTON_HEIGHT * 2);
 
-        // 定期请求日志同步（每 20 tick = 1 秒）
-        if (this.minecraft != null && this.minecraft.level != null &&
-                this.minecraft.level.getGameTime() % 20 == 0) {
-            ClientPlayNetworking.send(new C2S_RequestShellLogPayload());
-        }
+        // 不再需要定期请求日志同步 - 服务端现在实时推送单条日志
     }
 
     /**

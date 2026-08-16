@@ -25,6 +25,7 @@ import com.mojang.serialization.MapCodec;
 import qdream.relay.blocks.entity.RelayBlockEntities;
 import qdream.relay.blocks.entity.custom.BlockShellEntity;
 import qdream.relay.core.ShellCoreGroupManager;
+import qdream.relay.screen.BlockShellScreenHandler;
 
 /**
  * 外壳方块
@@ -91,6 +92,8 @@ public class BlockShell extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
         if (world.isClientSide()) {
+            // 客户端保存最后交互的方块坐标，用于 GUI 打开时获取正确的 blockPos
+            BlockShellScreenHandler.setLastKnownBlockPos(pos);
             return InteractionResult.SUCCESS;
         }
 

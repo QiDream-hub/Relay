@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
@@ -29,8 +30,11 @@ public class RelayServerNetworking {
         // 注册 S2C_ShellEnergyPayload (服务端到客户端)
         PayloadTypeRegistry.clientboundPlay().register(S2C_ShellEnergyPayload.TYPE, S2C_ShellEnergyPayload.CODEC);
 
-        // 注册 S2C_ShellLogPayload (服务端到客户端 - 日志同步)
-        PayloadTypeRegistry.clientboundPlay().register(S2C_ShellLogPayload.TYPE, S2C_ShellLogPayload.CODEC);
+        // 注册 S2C_ShellLogPushPayload (服务端到客户端 - 单条日志实时推送)
+        PayloadTypeRegistry.clientboundPlay().register(S2C_ShellLogPushPayload.TYPE, S2C_ShellLogPushPayload.CODEC);
+
+        // 注册 S2C_ClearLogsPayload (服务端到客户端 - 方块破坏时清理日志缓存)
+        PayloadTypeRegistry.clientboundPlay().register(S2C_ClearLogsPayload.TYPE, S2C_ClearLogsPayload.CODEC);
 
         // 注册 S2C_SyncSpellDiskPayload (服务端到客户端)
         PayloadTypeRegistry.clientboundPlay().register(S2C_SyncSpellDiskPayload.TYPE, S2C_SyncSpellDiskPayload.CODEC);
@@ -70,8 +74,11 @@ public class RelayServerNetworking {
                         // 切换开关状态
                         boolean newState = !blockEntity.isEnabled();
                         blockEntity.setEnabled(newState);
-                        blockEntity.addLogEntry(net.minecraft.network.chat.Component.translatable(
-                                newState ? "gui.relay:shell.toggle.enabled" : "gui.relay:shell.toggle.disabled"));
+                        Component toggleLog = Component.translatable(
+                                newState ? "gui.relay:shell.toggle.enabled" : "gui.relay:shell.toggle.disabled");
+                        // 使用反射或访问私有方法推送日志
+                        // 由于 pushLogToClient 是私有的，这里直接发送网络包
+                        ServerPlayNetworking.send(player, new qdream.relay.networking.payloads.S2C_ShellLogPushPayload(blockEntity.getBlockPos(), toggleLog));
                     }
                 }
             });
@@ -174,27 +181,6 @@ public class RelayServerNetworking {
                     player.openMenu(new qdream.relay.items.menu.ToolShellMenuProvider(mainHand));
                 } else if (offHand.getItem() instanceof qdream.relay.items.ToolShellItem toolShellItem) {
                     player.openMenu(new qdream.relay.items.menu.ToolShellMenuProvider(offHand));
-                }
-            });
-        });
-
-        // 注册 C2S_RequestShellLogPayload - 客户端请求日志同步
-        PayloadTypeRegistry.serverboundPlay().register(C2S_RequestShellLogPayload.TYPE,
-                C2S_RequestShellLogPayload.CODEC);
-
-        // 注册服务端接收处理器 - 请求日志同步
-        ServerPlayNetworking.registerGlobalReceiver(C2S_RequestShellLogPayload.TYPE, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player == null)
-                return;
-
-            context.server().execute(() -> {
-                if (player.containerMenu instanceof qdream.relay.screen.BlockShellScreenHandler handler) {
-                    qdream.relay.blocks.entity.custom.BlockShellEntity blockEntity = handler.getBlockEntity();
-                    if (blockEntity != null) {
-                        // 直接同步日志（客户端已控制请求频率为每 20 tick）
-                        blockEntity.syncLogsToClient(blockEntity.getLevel(), blockEntity.getBlockPos());
-                    }
                 }
             });
         });

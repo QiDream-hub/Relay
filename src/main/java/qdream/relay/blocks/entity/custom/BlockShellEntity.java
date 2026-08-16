@@ -40,7 +40,9 @@ import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.Relay;
 import qdream.relay.core.ShellCoreGroupManager;
 import qdream.relay.tools.TextTools;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import qdream.relay.networking.payloads.S2C_ShellLogPushPayload;
+import qdream.relay.networking.payloads.S2C_ClearLogsPayload;
 
 /**
  * 外壳方块实体
@@ -56,7 +58,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class BlockShellEntity extends BlockEntity implements MenuProvider, ShellContainer {
 
     private static final int SLOT_COUNT = 4;
-    private static final int LOG_BUFFER_SIZE = 200; // 日志缓冲区大小
 
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final ShellTickHandler tickHandler;
@@ -69,12 +70,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     private UUID coreGroupId; // 所属核心共享组 ID
     private boolean debugOutputEnabled; // 是否启用调试输出
     private boolean statusInfoEnabled; // 是否启用统计信息
-
-    /**
-     * 日志缓冲区 - 存储最近的调试输出
-     * 使用 ConcurrentLinkedQueue 保证线程安全
-     */
-    private final ConcurrentLinkedQueue<Component> logBuffer = new ConcurrentLinkedQueue<>();
 
     public static final int CORE_SLOT = 0;
     public static final int DISK_SLOT = 1;
@@ -100,9 +95,8 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 } else {
                     log.append(Component.literal(warning.getMessage()));
                 }
-                addLogEntry(log);
-                // 同步日志到客户端
-                syncLogsToClient(getLevel(), worldPosition);
+                // 实时推送单条日志到客户端
+                pushLogToClient(getLevel(), worldPosition, log);
             }
             setEnabled(false); // 事故时关闭
         });
@@ -112,15 +106,18 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             public void afterStep(StateMachine stateMachine, Executable executable) {
                 if (isDebugOutputEnabled()) {
                     if (getLevel() != null && !getLevel().isClientSide()) {
-                        addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
-                        addLogEntry(Component.translatable(
+                        Component separatorLog = Component.translatable("gui.relay:shell.debug.separator");
+                        Component programStackLog = Component.translatable(
                                 "gui.relay:shell.debug.program_stack",
-                                TextTools.formatProgramStack(stateMachine)));
-                        addLogEntry(Component.translatable(
+                                TextTools.formatProgramStack(stateMachine));
+                        Component dataStackLog = Component.translatable(
                                 "gui.relay:shell.debug.data_stack",
-                                TextTools.formatDataStack(stateMachine)));
-                        // 同步日志到客户端
-                        syncLogsToClient(getLevel(), worldPosition);
+                                TextTools.formatDataStack(stateMachine));
+
+                        // 实时推送单条日志到客户端
+                        pushLogToClient(getLevel(), worldPosition, separatorLog);
+                        pushLogToClient(getLevel(), worldPosition, programStackLog);
+                        pushLogToClient(getLevel(), worldPosition, dataStackLog);
                     }
                 }
             }
@@ -133,21 +130,26 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                         if (executable instanceof Operation op) {
                             opName = op.getId();
                         }
-                        addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
-                        addLogEntry(Component.translatable(
+                        Component separatorLog = Component.translatable("gui.relay:shell.debug.separator");
+                        Component mishapTitleLog = Component.translatable(
                                 "gui.relay:shell.mishap.title",
-                                Component.literal(opName)));
-                        addLogEntry(Component.translatable(
+                                Component.literal(opName));
+                        Component mishapReasonLog = Component.translatable(
                                 "gui.relay:shell.mishap.reason",
-                                Component.literal(warning.getMessage())));
-                        addLogEntry(Component.translatable(
+                                Component.literal(warning.getMessage()));
+                        Component programStackLog = Component.translatable(
                                 "gui.relay:shell.debug.program_stack",
-                                TextTools.formatProgramStack(stateMachine)));
-                        addLogEntry(Component.translatable(
+                                TextTools.formatProgramStack(stateMachine));
+                        Component dataStackLog = Component.translatable(
                                 "gui.relay:shell.debug.data_stack",
-                                TextTools.formatDataStack(stateMachine)));
-                        // 同步日志到客户端
-                        syncLogsToClient(getLevel(), worldPosition);
+                                TextTools.formatDataStack(stateMachine));
+
+                        // 实时推送单条日志到客户端
+                        pushLogToClient(getLevel(), worldPosition, separatorLog);
+                        pushLogToClient(getLevel(), worldPosition, mishapTitleLog);
+                        pushLogToClient(getLevel(), worldPosition, mishapReasonLog);
+                        pushLogToClient(getLevel(), worldPosition, programStackLog);
+                        pushLogToClient(getLevel(), worldPosition, dataStackLog);
                     }
                 }
             }
@@ -155,31 +157,24 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
     }
 
     /**
-     * 添加日志条目到缓冲区
+     * 实时推送单条日志到客户端
+     * 新客户端使用此方法接收单条日志并缓存到本地
      *
-     * @param log 日志内容
+     * @param world 世界
+     * @param pos   方块坐标
+     * @param log   日志内容
      */
-    public void addLogEntry(Component log) {
-        while (logBuffer.size() >= LOG_BUFFER_SIZE) {
-            logBuffer.poll(); // 移除最旧的日志
+    private void pushLogToClient(Level world, BlockPos pos, Component log) {
+        if (world.isClientSide()) {
+            return;
         }
-        logBuffer.offer(log);
-    }
 
-    /**
-     * 获取日志缓冲区内容
-     * 
-     * @return 日志列表（按时间顺序）
-     */
-    public List<Component> getLogBuffer() {
-        return new ArrayList<>(logBuffer);
-    }
-
-    /**
-     * 清空日志缓冲区
-     */
-    public void clearLogBuffer() {
-        logBuffer.clear();
+        ServerLevel serverLevel = (ServerLevel) world;
+        net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(pos);
+        serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
+                .forEach(player -> {
+                    ServerPlayNetworking.send(player, new S2C_ShellLogPushPayload(pos, log));
+                });
     }
 
     @Override
@@ -190,6 +185,14 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         // 即使 coreGroupId 为 null 也要调用，因为 SavedData 中可能仍有记录
         if (level != null && !level.isClientSide()) {
             ShellCoreGroupManager.onBlockRemoved(level, worldPosition, this);
+
+            // 发送清理日志缓存网络包到客户端
+            ServerLevel serverLevel = (ServerLevel) level;
+            net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(worldPosition);
+            serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
+                    .forEach(player -> {
+                        ServerPlayNetworking.send(player, new S2C_ClearLogsPayload(worldPosition));
+                    });
         }
     }
 
@@ -588,13 +591,13 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
         ItemStack diskStack = getDiskStack();
         if (diskStack.isEmpty()) {
-            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_empty"));
+            pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.disk_empty"));
             return;
         }
 
         DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
-            addLogEntry(Component.translatable("gui.relay:shell.program_reload.disk_component_null"));
+            pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.disk_component_null"));
             return;
         }
 
@@ -609,13 +612,13 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         }
 
         if (program.isEmpty()) {
-            addLogEntry(Component.translatable("gui.relay:shell.program_reload.program_empty"));
+            pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.program_empty"));
             return;
         }
 
         getStateMachine().loadProgram(program);
         setChanged();
-        addLogEntry(Component.translatable("gui.relay:shell.program_reload.success", program.size()));
+        pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.success", program.size()));
     }
 
     // ========== ShellContainer 接口：执行统计 ==========
@@ -745,25 +748,6 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
                 });
     }
 
-    /**
-     * 同步日志到客户端
-     */
-    public void syncLogsToClient(Level world, BlockPos pos) {
-        if (world.isClientSide()) {
-            return;
-        }
-
-        List<Component> logs = getLogBuffer();
-        ServerLevel serverLevel = (ServerLevel) world;
-        net.minecraft.world.level.ChunkPos chunkPos = net.minecraft.world.level.ChunkPos.containing(pos);
-        serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false)
-                .forEach(player -> {
-                    net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(
-                            player,
-                            new qdream.relay.networking.payloads.S2C_ShellLogPayload(logs));
-                });
-    }
-
     @Override
     public ItemStack getCoreStack() {
         return inventory.get(CORE_SLOT);
@@ -842,15 +826,18 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         if (!enabled && !this.getLevel().isClientSide()
                 && this.executionStats != null) {
             // 关闭时打印统计信息（仅当启用统计信息且尚未输出时）
-            addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
-            addLogEntry(Component.translatable("gui.relay:shell.stats.title"));
+            Component separatorLog = Component.translatable("gui.relay:shell.debug.separator");
+            Component statsTitleLog = Component.translatable("gui.relay:shell.stats.title");
+            
+            pushLogToClient(getLevel(), worldPosition, separatorLog);
+            pushLogToClient(getLevel(), worldPosition, statsTitleLog);
+            
             String[] formatStatsPanel = this.executionStats.formatStatsPanel();
             for (String string : formatStatsPanel) {
-                addLogEntry(Component.literal(string));
+                pushLogToClient(getLevel(), worldPosition, Component.literal(string));
             }
-            addLogEntry(Component.translatable("gui.relay:shell.debug.separator"));
-            // 同步日志到客户端
-            syncLogsToClient(this.getLevel(), this.getBlockPos());
+            pushLogToClient(getLevel(), worldPosition, separatorLog);
+            
             this.executionStats = null;
         }
         setChanged();
