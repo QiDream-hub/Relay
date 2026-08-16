@@ -92,7 +92,7 @@ public class TypeData extends Data {
         if (value == null || value.isEmpty()) {
             return TextTools.getText("unknown.name");
         }
-        return TextTools.getTypeName(value);
+        return Component.literal(value);
     }
 
     @Override
