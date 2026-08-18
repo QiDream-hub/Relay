@@ -133,12 +133,32 @@ public class OperationRegistry {
     }
 
     /**
+     * 获取所有操作
+     */
+    public static Set<Executable> getAllOperation() {
+        return REGISTRY.entrySet().stream()
+                .filter(e -> !e.getValue().isDataType())
+                .map(e -> e.getValue().create())
+                .collect(Collectors.toSet());
+    }
+
+    /**
      * 获取所有数据类型 ID
      */
     public static Set<String> getAllDataIds() {
         return REGISTRY.entrySet().stream()
                 .filter(e -> e.getValue().isDataType())
                 .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * 获取所有数据类型 ID
+     */
+    public static Set<Executable> getAllData() {
+        return REGISTRY.entrySet().stream()
+                .filter(e -> e.getValue().isDataType())
+                .map(e->e.getValue().create())
                 .collect(Collectors.toSet());
     }
 

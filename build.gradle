@@ -88,3 +88,12 @@ publishing {
 		// retrieving dependencies.
 	}
 }
+
+tasks.register('genOperationLand', JavaExec) {
+    group = 'relay'
+    description = '生成操作语言模板并检查语言文件翻译完整性'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'qdream.relay.tools.GenOperationLandTemp'
+    // 示例: ./gradlew genOperationLand --args="--all"
+    //       ./gradlew genOperationLand --args="--lang=zh_cn.json"
+}

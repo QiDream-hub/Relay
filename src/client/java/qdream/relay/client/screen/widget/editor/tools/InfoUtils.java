@@ -51,7 +51,7 @@ public class InfoUtils {
             cost = ins.getCost();
             OperationSignature signature = ins.getSignature();
             // 构建签名展示信息
-            signatureLines = buildSignatureInfo(signature);
+            signatureLines = buildSignatureInfo(ins.getId(), signature);
         } else if (e instanceof Data data) {
             DataSignature signature = data.getSignature();
             signatureLines = buildDataSignatureInfo(signature);
@@ -92,10 +92,11 @@ public class InfoUtils {
     /**
      * 构建操作签名的展示信息
      *
+     * @param opId      操作 ID（如 "relay:add"），用于参数描述翻译键
      * @param signature 操作签名
      * @return 签名信息行列表
      */
-    private static List<InfoContent.InfoLine> buildSignatureInfo(OperationSignature signature) {
+    private static List<InfoContent.InfoLine> buildSignatureInfo(String opId, OperationSignature signature) {
         List<InfoContent.InfoLine> lines = new ArrayList<>();
 
         // 添加输入参数信息
@@ -103,7 +104,7 @@ public class InfoUtils {
         if (!inputs.isEmpty()) {
             lines.add(new InfoContent.InfoLine(Component.translatable(INPUT_LABEL_KEY).getString(), INPUT_LABEL_COLOR));
             for (ParameterDescriptor param : inputs) {
-                String displayText = buildParameterDisplayText(param);
+                String displayText = buildParameterDisplayText(opId, param);
                 lines.add(new InfoContent.InfoLine("  " + displayText, PARAM_TEXT_COLOR));
             }
         }
@@ -117,7 +118,7 @@ public class InfoUtils {
             lines.add(
                     new InfoContent.InfoLine(Component.translatable(OUTPUT_LABEL_KEY).getString(), OUTPUT_LABEL_COLOR));
             for (ParameterDescriptor param : outputs) {
-                String displayText = buildParameterDisplayText(param);
+                String displayText = buildParameterDisplayText(opId, param);
                 lines.add(new InfoContent.InfoLine("  " + displayText, PARAM_TEXT_COLOR));
             }
         }
@@ -128,10 +129,11 @@ public class InfoUtils {
     /**
      * 构建参数显示文本
      *
+     * @param opId  操作 ID（如 "relay:add"），用于参数描述翻译键
      * @param param 参数描述
      * @return 格式化的显示文本
      */
-    private static String buildParameterDisplayText(ParameterDescriptor param) {
+    private static String buildParameterDisplayText(String opId, ParameterDescriptor param) {
         // 参数名前缀
         String prefix = "";
         if (param.getSource() == ParameterSource.PROGRAM_STACK) {
@@ -148,7 +150,7 @@ public class InfoUtils {
         String typesStr = types.stream()
                 .map(s -> TextTools.getTypeName(s).getString())
                 .collect(Collectors.joining("|"));
-        return prefix + typesStr + ": " + TextTools.getParamNameText(param.getName()).getString();
+        return prefix + typesStr + ": " + TextTools.getParamNameText(opId, param.getName()).getString();
     }
 
     /**

@@ -35,7 +35,7 @@ import net.minecraft.network.chat.MutableComponent;
  * <li>操作名称：{@code operation.relay:<id>.name}</li>
  * <li>操作描述：{@code operation.relay:<id>.description}</li>
  * <li>类型名称：{@code type.relay:<id>.name}</li>
- * <li>参数描述：{@code param.<name>.description}</li>
+ * <li>参数描述：{@code operation.<id>.param.<name>.description}</li>
  * <li>错误消息：{@code error.relay:<type>} (待实现)</li>
  * </ul>
  *
@@ -259,8 +259,16 @@ public final class TextTools {
     }
 
     // ==================== 参数名翻译 ====================
-    public static MutableComponent getParamNameText(String name) {
-        return getText("param." + name + ".description");
+
+    /**
+     * 获取操作参数的描述文本
+     *
+     * @param opId      操作 ID（如 "relay:add"）
+     * @param paramName 参数名（如 "augend"）
+     * @return 翻译后的文本
+     */
+    public static MutableComponent getParamNameText(String opId, String paramName) {
+        return getText("operation." + opId + ".param." + paramName + ".description");
     }
 
     // ==================== 栈格式化 ====================
