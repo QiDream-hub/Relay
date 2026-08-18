@@ -1,4 +1,4 @@
-package qdream.relay.operations.communication;
+package qdream.relay.operations.string;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -17,8 +17,8 @@ import qdream.relay.types.BooleanData;
  * SendMessageOp 操作 - 向玩家实体发送聊天消息
  *
  * 弹出：
- * - entity (接收消息的实体，必须是玩家)
- * - string (消息内容)
+ * - message (消息内容)
+ * - recipient (接收消息的实体，必须是玩家)
  *
  * 压入：
  * - boolean (是否成功发送)
@@ -42,10 +42,9 @@ public class SendMessage extends Instruction {
         // 检查世界交互器
         OperationHelpers.checkWorldInteractor(executor, id);
 
-        // 再弹出实体
+        // 按签名声明顺序弹出：先 recipient，后 message
+        // 由于栈是后进先出，实际弹出顺序与声明相反
         EntityData recipient = StackHelpers.popEntity(executor, id);
-
-        // 先弹出消息（后压入的先弹出）
         StringData message = StackHelpers.popString(executor, id);
 
         // 获取实体引用

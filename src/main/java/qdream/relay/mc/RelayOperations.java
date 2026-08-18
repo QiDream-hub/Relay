@@ -10,12 +10,13 @@ import qdream.relay.operations.container.*;
 import qdream.relay.operations.control.*;
 import qdream.relay.operations.disk.*;
 import qdream.relay.operations.entity.*;
-import qdream.relay.operations.vector.*;
 import qdream.relay.operations.logic.*;
 import qdream.relay.operations.list.*;
 import qdream.relay.operations.stack.*;
+import qdream.relay.operations.string.*;
 import qdream.relay.operations.summon.display.*;
 import qdream.relay.operations.summon.shell.*;
+import qdream.relay.operations.vector.*;
 import qdream.relay.types.*;
 
 import java.util.ArrayList;
@@ -109,6 +110,16 @@ public class RelayOperations {
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new ToBoolean()));
 
+                // 字符串操作
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new StringConcat()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new StringLength()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new StringEquals()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new Substring()));
+
                 // 算术操作
                 OperationRegistry.register(new OperationRegistry.OpEntry(new Add()));
                 OperationRegistry.register(new OperationRegistry.OpEntry(new Sub()));
@@ -180,9 +191,35 @@ public class RelayOperations {
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new GetLookVector()));
 
+                // 实体获取操作
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new GetBlockEntity()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new GetEntity()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new GetBlock()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new ScanEntities()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new PickupItem()));
+
+                // 实体操作
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new EntityTeleport()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new GetKeyPressed()));
+
                 // 实体朝向操作
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new SetEntityLook()));
+
+                // 类型操作
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new GetType()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new ToString()));
+                OperationRegistry.register(
+                                new OperationRegistry.OpEntry(new ToBoolean()));
 
                 // 挖掘方块操作
                 OperationRegistry.register(new OperationRegistry.OpEntry(new BreakBlock()));

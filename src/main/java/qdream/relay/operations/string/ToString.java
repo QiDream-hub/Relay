@@ -1,10 +1,8 @@
-package qdream.relay.operations.base;
+package qdream.relay.operations.string;
 
 import net.minecraft.network.chat.Component;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.base.Data;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
@@ -37,7 +35,7 @@ public class ToString extends Instruction {
         // 弹出任意类型
         Executable input = StackHelpers.popAny(executor, id);
 
-        if (input instanceof Operation op) {
+        if (input instanceof qdream.relay.mc.base.Operation op) {
             executor.pushData(new StringData(op.asString()));
         } else {
             executor.pushData(new StringData(Component.literal(input.toString())));

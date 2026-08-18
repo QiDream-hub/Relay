@@ -142,6 +142,18 @@
   "operation.relay:send_message.name": "发送消息",
   "operation.relay:send_message.description": "向玩家发送聊天消息",
 
+  "operation.relay:string_concat.name": "字符串拼接",
+  "operation.relay:string_concat.description": "拼接两个字符串",
+
+  "operation.relay:string_length.name": "字符串长度",
+  "operation.relay:string_length.description": "获取字符串长度",
+
+  "operation.relay:string_equals.name": "字符串比较",
+  "operation.relay:string_equals.description": "比较两个字符串是否相等",
+
+  "operation.relay:substring.name": "字符串截取",
+  "operation.relay:substring.description": "截取子字符串（起始索引包含，结束索引不包含）",
+
   "operation.relay:list_append.name": "列表追加",
   "operation.relay:list_append.description": "向列表追加元素",
 
@@ -195,6 +207,13 @@
 
   "operation.relay:get_pos.name": "获取坐标",
   "operation.relay:get_pos.description": "获取方块、方块实体或实体所在的位置坐标",
+
+  "operation.relay:get_key_pressed.name": "获取按下按键",
+  "operation.relay:get_key_pressed.description": "检测实体（玩家）当前按下的所有键盘和鼠标按键，返回键码列表",
+  "operation.relay:get_key_pressed.param.entity.name": "实体",
+  "operation.relay:get_key_pressed.param.entity.description": "要检测的实体（通常是玩家）",
+  "operation.relay:get_key_pressed.param.keys.name": "按键列表",
+  "operation.relay:get_key_pressed.param.keys.description": "按下的键码列表（空列表表示无按键）",
 
   "operation.relay:get_entity_eye_pos.name": "获取实体眼睛位置",
   "operation.relay:get_entity_eye_pos.description": "获取实体当前的眼睛位置坐标（用于射线追踪等视线相关操作）",
@@ -292,6 +311,15 @@
   "operation.relay:push_vector.name": "推动实体",
   "operation.relay:push_vector.description": "向实体施加推力",
 
+  "operation.relay:entity_teleport.name": "实体传送",
+  "operation.relay:entity_teleport.description": "将实体传送到目标位置（支持跨维度）",
+  "operation.relay:entity_teleport.param.targetEntity.name": "目标实体",
+  "operation.relay:entity_teleport.param.targetEntity.description": "要被传送的实体",
+  "operation.relay:entity_teleport.param.destination.name": "目标位置",
+  "operation.relay:entity_teleport.param.destination.description": "目标位置（方块数据或向量）",
+  "operation.relay:entity_teleport.param.success.name": "成功",
+  "operation.relay:entity_teleport.param.success.description": "是否成功传送",
+
   "operation.relay:spawn_shell.name": "召唤外壳",
   "operation.relay:spawn_shell.description": "在指定位置召唤一个可编程的外壳实体",
 
@@ -356,8 +384,11 @@
   "operation.relay:right_click.name": "右键点击",
   "operation.relay:right_click.description": "模拟玩家右键点击方块，需要指定点击者和点击面",
 
-  "param.face.description": "点击的面方向（使\n用向量表示）",
+  "param.face.description": "点击的面方向（使用向量表示）",
   "param.string.description": "字符串",
+  "param.string1.description": "第一个字符串",
+  "param.string2.description": "第二个字符串",
+  "param.end.description": "结束索引（不包含）",
   "param.augend.description": "被加数",
   "param.addend.description": "加数",
   "param.sum.description": "和",

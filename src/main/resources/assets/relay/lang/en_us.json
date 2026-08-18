@@ -142,6 +142,18 @@
   "operation.relay:send_message.name": "Send Message",
   "operation.relay:send_message.description": "Send chat message to a player",
 
+  "operation.relay:string_concat.name": "String Concat",
+  "operation.relay:string_concat.description": "Concatenate two strings",
+
+  "operation.relay:string_length.name": "String Length",
+  "operation.relay:string_length.description": "Get the length of a string",
+
+  "operation.relay:string_equals.name": "String Equals",
+  "operation.relay:string_equals.description": "Compare two strings for equality",
+
+  "operation.relay:substring.name": "Substring",
+  "operation.relay:substring.description": "Extract substring (start inclusive, end exclusive)",
+
   "operation.relay:list_append.name": "List Append",
   "operation.relay:list_append.description": "Append element to a list",
 
@@ -195,6 +207,13 @@
 
   "operation.relay:get_pos.name": "Get Position",
   "operation.relay:get_pos.description": "Get the position of a block, block entity, or entity",
+
+  "operation.relay:get_key_pressed.name": "Get Key Pressed",
+  "operation.relay:get_key_pressed.description": "Detect all currently pressed keyboard and mouse buttons of an entity (player), returns list of key codes",
+  "operation.relay:get_key_pressed.param.entity.name": "Entity",
+  "operation.relay:get_key_pressed.param.entity.description": "Entity to detect (usually player)",
+  "operation.relay:get_key_pressed.param.keys.name": "Keys",
+  "operation.relay:get_key_pressed.param.keys.description": "List of pressed key codes (empty list if no keys pressed)",
 
   "operation.relay:get_entity_eye_pos.name": "Get Entity Eye Position",
   "operation.relay:get_entity_eye_pos.description": "Get the current eye position of an entity (for raycast and vision-related operations)",
@@ -298,6 +317,15 @@
   "operation.relay:push_vector.name": "Push Entity",
   "operation.relay:push_vector.description": "Apply push force to an entity",
 
+  "operation.relay:entity_teleport.name": "Entity Teleport",
+  "operation.relay:entity_teleport.description": "Teleport entity to target position (supports inter-dimensional)",
+  "operation.relay:entity_teleport.param.targetEntity.name": "Target Entity",
+  "operation.relay:entity_teleport.param.targetEntity.description": "The entity to be teleported",
+  "operation.relay:entity_teleport.param.destination.name": "Destination",
+  "operation.relay:entity_teleport.param.destination.description": "Target position (block data or vector)",
+  "operation.relay:entity_teleport.param.success.name": "Success",
+  "operation.relay:entity_teleport.param.success.description": "Whether teleport succeeded",
+
   "operation.relay:spawn_shell.name": "Spawn Shell",
   "operation.relay:spawn_shell.description": "Spawn a programmable shell entity at specified position",
 
@@ -358,6 +386,9 @@
 
   "param.face.description": "Face direction (represented as vector)",
   "param.string.description": "String",
+  "param.string1.description": "First string",
+  "param.string2.description": "Second string",
+  "param.end.description": "End index (exclusive)",
   "param.augend.description": "Augend",
   "param.addend.description": "Addend",
   "param.sum.description": "Sum",

@@ -17,5 +17,8 @@ public class RelayClient implements ClientModInitializer {
 
         // 注册网络处理
         qdream.relay.client.networking.RelayClientNetworking.register();
+        
+        // 注册键盘监听器
+        ClientKeyboardListener.register();
     }
 }
