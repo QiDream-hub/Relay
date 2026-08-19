@@ -34,7 +34,7 @@ public class CustomMultiLineEditBox extends AbstractTextAreaWidget {
     private final int cursorColor;
 
     /** 文本内容 */
-    private StringBuilder text = new StringBuilder();
+    private StringBuilder text = new StringBuilder("[\n\n]");
 
     /** 光标位置（字符索引） */
     private int cursorPos = 0;

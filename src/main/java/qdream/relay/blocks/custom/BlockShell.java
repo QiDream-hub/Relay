@@ -19,6 +19,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.Blocks;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.serialization.MapCodec;
 
@@ -30,13 +33,15 @@ import qdream.relay.screen.BlockShellScreenHandler;
 /**
  * 外壳方块
  * 容器，决定形态为方块
+ * 支持红石信号激活：红石信号激活时切换 enabled 属性，不限制面数
  */
 public class BlockShell extends BaseEntityBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
     public BlockShell(Block.Properties settings) {
         super(settings);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH));
+        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(POWERED, false));
     }
 
     @Override
@@ -51,7 +56,29 @@ public class BlockShell extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, POWERED);
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, net.minecraft.world.level.redstone.@Nullable Orientation orientation, boolean movedByPiston) {
+        if (level.isClientSide()) {
+            return;
+        }
+
+        boolean powered = (Boolean) state.getValue(POWERED);
+        boolean receivingPower = level.hasNeighborSignal(pos);
+
+        if (powered && !receivingPower) {
+            // 红石信号关闭，仅更新状态
+            level.setBlock(pos, state.setValue(POWERED, false), 2);
+        } else if (!powered && receivingPower) {
+            // 红石信号激活，切换 enabled 属性
+            level.setBlock(pos, state.setValue(POWERED, true), 2);
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof BlockShellEntity shell) {
+                shell.toggleEnabled();
+            }
+        }
     }
 
     @Override

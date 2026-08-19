@@ -481,6 +481,16 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         setChanged();
     }
 
+    /**
+     * 切换 GUI 开关状态
+     * <p>
+     * 用于红石信号激活时切换 enabled 属性
+     * </p>
+     */
+    public void toggleEnabled() {
+        setEnabled(!enabled);
+    }
+
     @Override
     public boolean canExecute() {
         // BlockShell 需要检查 enabled 状态和运行状态

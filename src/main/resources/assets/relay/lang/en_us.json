@@ -660,7 +660,7 @@
   "gui.relay:shell.status.stopped": "§c● Stopped",
   "gui.relay:shell.status.core": "§7Core: §f%d",
   "gui.relay:shell.status.core.missing": "§7Core: §8Not Installed",
-  "gui.relay:shell.status.energy_cost": "§7Energy Cost: §e%s /tick",
+  "gui.relay:shell.status.energy_cost": "§7Energy Cost: §e%s",
   "gui.relay:shell.status.energy_cost.none": "§7Energy Cost: §8None",
   "gui.relay:shell.status.program.loaded": "§7Program: §aLoaded",
   "gui.relay:shell.status.program.missing": "§7Program: §8Not Loaded",
