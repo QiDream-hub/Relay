@@ -8,10 +8,8 @@ import qdream.relay.mc.errors.WorldInteractionException;
 import qdream.relay.tools.ErrorMessageTools;
 import qdream.relay.tools.TextTools;
 import qdream.relay.tools.ErrorMessageTools.ErrorType;
-import qdream.relay.types.SlotData;
 
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -65,7 +63,8 @@ public final class OperationHelpers {
         ShellContainer container = getShellContainer(executor);
         if (container == null || !container.hasWorldInteractor()) {
             throw new WorldInteractionException(executor, ErrorMessageTools
-                    .buildErrorMessage(ErrorType.WORLD_INTERACTOR_MISSING, TextTools.getName(operationName)));
+                    .buildErrorMessage(ErrorType.WORLD_INTERACTOR_MISSING,
+                            TextTools.getName(operationName).withColor(0xFF5555)));
         }
         // 扣除世界交互器的能量消耗
         double energyCost = container.getWorldInteractorEnergyCost();
@@ -97,7 +96,8 @@ public final class OperationHelpers {
 
         if (!container.consumeEnergy(dynamicEnergy)) {
             throw new EnergyException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, dynamicEnergy));
+                    TextTools.getName(operationName).withColor(0xFF5555).append(
+                            ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, dynamicEnergy)));
         }
 
         // 记录能量消耗
@@ -131,7 +131,7 @@ public final class OperationHelpers {
             double range = container.getWorldInteractorRange();
             throw new WorldInteractionException(executor,
                     ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_INTERACTOR_OUT_OF_RANGE,
-                            operationName, distance, range));
+                            TextTools.getName(operationName).withColor(0xFF5555), distance, range));
         }
     }
 
@@ -167,7 +167,7 @@ public final class OperationHelpers {
         if (distance - radius > range) {
             throw new WorldInteractionException(executor,
                     ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_INTERACTOR_OUT_OF_RANGE,
-                            operationName, distance - radius, range));
+                            TextTools.getName(operationName).withColor(0xFF5555), distance - radius, range));
         }
     }
 
@@ -185,7 +185,8 @@ public final class OperationHelpers {
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty() || levelOpt.get() == null) {
             throw new WorldInteractionException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE));
+                    TextTools.getName(operationName).withColor(0xFF5555)
+                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE)));
         }
         return levelOpt.get();
     }
@@ -319,32 +320,6 @@ public final class OperationHelpers {
             return z > 0 ? Direction.SOUTH : Direction.NORTH;
         } else {
             return x > 0 ? Direction.EAST : Direction.WEST;
-        }
-    }
-
-    /**
-     * 更新容器中的物品（同步物品变化）
-     *
-     * @param slotData  物品槽引用
-     * @param itemStack 新的物品堆
-     */
-    public static void updateContainerItem(SlotData slotData, ItemStack itemStack) {
-        int slot = slotData.getSlot();
-        BlockEntity blockEntity = slotData.getContainer();
-
-        if (blockEntity == null) {
-            return; // 容器不存在，跳过更新
-        }
-
-        if (slot < 0) {
-            return; // 无效槽位，跳过更新
-        }
-
-        if (blockEntity instanceof net.minecraft.world.Container container) {
-            if (slot < container.getContainerSize()) {
-                container.setItem(slot, itemStack);
-                blockEntity.setChanged();
-            }
         }
     }
 }

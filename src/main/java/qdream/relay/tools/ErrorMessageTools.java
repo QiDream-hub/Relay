@@ -191,7 +191,7 @@ public final class ErrorMessageTools {
     }
 
     public static Component buildErrorMessage(ErrorType e, Object... args) {
-        return TextTools.getComponent("error." + e.getCode(), args);
+        return TextTools.getComponent("error." + e.getCode(), args).withColor(0x55FFFF);
     }
 
 }

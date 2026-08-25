@@ -5,7 +5,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -20,18 +19,13 @@ import qdream.relay.items.ToolShellItem;
 import qdream.relay.core.ShellContainer;
 import qdream.relay.core.ShellTickHandler;
 import qdream.relay.core.ExecutionStats;
-import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
 import qdream.relay.mc.component.WorldInteractorComponent;
-import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.tools.TextTools;
 import qdream.relay.mc.StateMachineNbtSerializer;
-import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.Relay;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -87,12 +81,8 @@ public class ToolShellContainer implements ShellContainer {
         stateMachine.setMishapHandler(warning -> {
             Entity owner = ToolShellContainer.this.owner;
             if (owner != null && owner instanceof Player player) {
-                if (!(warning.getInfo() instanceof Component component)) {
-                    player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix",
-                            Component.literal(warning.getMessage())));
-                    return;
-                }
-                player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.message.prefix", component));
+                player.sendSystemMessage(
+                        Component.translatable("gui.relay:tool_shell.message.prefix", warning.getInfo()));
             }
         });
         // 设置调试回调
@@ -118,17 +108,13 @@ public class ToolShellContainer implements ShellContainer {
                 if (isDebugOutputEnabled()) {
                     Entity owner = ToolShellContainer.this.owner;
                     if (owner != null && owner instanceof Player player) {
-                        String opName = "unknown";
-                        if (executable instanceof Operation op) {
-                            opName = op.getId();
-                        }
                         player.sendSystemMessage(Component.translatable("gui.relay:tool_shell.debug.separator"));
                         player.sendSystemMessage(Component.translatable(
                                 "gui.relay:tool_shell.mishap.title",
-                                Component.literal(opName)));
+                                TextTools.getName(executable)));
                         player.sendSystemMessage(Component.translatable(
                                 "gui.relay:tool_shell.mishap.reason",
-                                Component.literal(warning.getMessage())));
+                                warning.getInfo()));
                         player.sendSystemMessage(Component.translatable(
                                 "gui.relay:tool_shell.debug.program_stack",
                                 TextTools.formatProgramStack(stateMachine)));

@@ -5,6 +5,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import qdream.relay.Relay;
 import qdream.relay.types.SlotData;
 
@@ -167,7 +168,7 @@ public class ContainerHelpers {
                     targetContainer.getMaxStackSize(sourceStack),
                     sourceStack.getMaxStackSize());
             int amountToMove = Math.min(maxStackSize, sourceStack.getCount());
-            
+
             targetContainer.setItem(targetSlot, sourceStack.split(amountToMove));
             targetContainer.setChanged();
             sourceContainer.setChanged();
@@ -259,5 +260,31 @@ public class ContainerHelpers {
         }
 
         return entity;
+    }
+
+    /**
+     * 更新容器中的物品（同步物品变化）
+     *
+     * @param slotData  物品槽引用
+     * @param itemStack 新的物品堆
+     */
+    public static void updateContainerItem(SlotData slotData, ItemStack itemStack) {
+        int slot = slotData.getSlot();
+        BlockEntity blockEntity = slotData.getContainer();
+
+        if (blockEntity == null) {
+            return; // 容器不存在，跳过更新
+        }
+
+        if (slot < 0) {
+            return; // 无效槽位，跳过更新
+        }
+
+        if (blockEntity instanceof net.minecraft.world.Container container) {
+            if (slot < container.getContainerSize()) {
+                container.setItem(slot, itemStack);
+                blockEntity.setChanged();
+            }
+        }
     }
 }

@@ -1,7 +1,5 @@
 package qdream.relay.operations.base;
 
-import java.util.Optional;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -17,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
+import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.types.BooleanData;
@@ -52,9 +51,12 @@ public class RightClick extends Instruction {
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        try { OperationHelpers.checkWorldInteractor(executor, id); } catch (Exception e) { 
+        try {
+            OperationHelpers.checkWorldInteractor(executor, id);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         EntityData entityData = StackHelpers.popEntity(executor, id);
         SlotData slotData = StackHelpers.popSlot(executor, id);
@@ -81,9 +83,12 @@ public class RightClick extends Instruction {
         Vec3 sourcePos = entity.position();
 
         // 检查范围
-        try { OperationHelpers.checkInRange(executor, id, sourcePos, hitPos); } catch (Exception e) { 
+        try {
+            OperationHelpers.checkInRange(executor, id, sourcePos, hitPos);
+        } catch (Exception e) {
             executor.pushData(new BooleanData(false));
-            return; }
+            return;
+        }
 
         // 使用击中点计算方块位置
         // 从向量转换为方向
@@ -111,7 +116,7 @@ public class RightClick extends Instruction {
         // 设置玩家手中的物品
         // player.setItemInHand(InteractionHand.MAIN_HAND, itemStack);
 
-        Level level  = OperationHelpers.getLevel(executor, id);
+        Level level = OperationHelpers.getLevel(executor, id);
 
         // 创建 UseOnContext 用于右键点击方块
         UseOnContext useOnContext = new UseOnContext(
@@ -126,7 +131,7 @@ public class RightClick extends Instruction {
 
         if (blockResult.consumesAction()) {
             // useOn 可能修改了物品（如减少数量、增加耐久度），需要同步回容器
-            OperationHelpers.updateContainerItem(slotData, itemStack);
+            ContainerHelpers.updateContainerItem(slotData, itemStack);
             executor.pushData(new BooleanData(true));
             return;
         }
@@ -134,7 +139,7 @@ public class RightClick extends Instruction {
         // 如果方块交互失败，尝试使用物品（例如使用食物、药水等）
         InteractionResult useResult = itemStack.use(level, player, InteractionHand.MAIN_HAND);
         if (useResult.consumesAction()) {
-            OperationHelpers.updateContainerItem(slotData, itemStack);
+            ContainerHelpers.updateContainerItem(slotData, itemStack);
             executor.pushData(new BooleanData(true));
             return;
         }

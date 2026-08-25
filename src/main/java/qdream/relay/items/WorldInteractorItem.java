@@ -83,7 +83,7 @@ public class WorldInteractorItem extends Item implements WorldInteractorComponen
     @Override
     public double getRange(ItemStack stack) {
         Double range = stack.get(RelayDataComponents.WORLD_INTERACTION_RANGE);
-        return range != null ? range : (BASE_RANGE + fixedTier * 0.5);
+        return range != null ? range : (BASE_RANGE + fixedTier * 2);
     }
 
     /**

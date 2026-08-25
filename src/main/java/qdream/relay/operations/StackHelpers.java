@@ -54,7 +54,9 @@ public final class StackHelpers {
     public static Executable popAny(StateMachine executor, String id) {
         Executable popData = executor.popData();
         if (popData == null) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.STACK_EMPTY));
+            throw new StackException(executor,
+                    TextTools.getName(id).withColor(0xFF5555)
+                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.STACK_EMPTY)));
         }
         return popData;
     }
@@ -76,8 +78,9 @@ public final class StackHelpers {
         Executable exe = executor.popData();
         if (!expectedType.isInstance(exe)) {
             throw new TypeException(executor,
-                    TextTools.getName(operationId).append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                            TextTools.getName(targetId), TextTools.getName(exe))));
+                    TextTools.getName(operationId).withColor(0xFF5555)
+                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
+                                    TextTools.getName(targetId), TextTools.getName(exe).withColor(0xFF5555))));
         }
         return expectedType.cast(exe);
     }
@@ -101,8 +104,9 @@ public final class StackHelpers {
         Executable exe = getDataAt(executor, index, operationId);
         if (!expectedType.isInstance(exe)) {
             throw new TypeException(executor,
-                    TextTools.getName(operationId).append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                            TextTools.getName(targetId), TextTools.getName(exe))));
+                    TextTools.getName(operationId).withColor(0xFF5555)
+                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
+                                    TextTools.getName(targetId), TextTools.getName(exe).withColor(0xFF5555))));
         }
         return expectedType.cast(exe);
     }
