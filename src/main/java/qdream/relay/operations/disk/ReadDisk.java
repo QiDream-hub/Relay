@@ -7,6 +7,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.CompilationException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.operations.OperationHelpers;
@@ -64,7 +65,7 @@ public class ReadDisk extends Instruction {
         try {
             java.util.List<Executable> program = ProgramCompiler.compileFromJson(programJson);
             executor.pushData(new ListData(new ArrayList<>(program)));
-        } catch (ProgramCompiler.CompilationException e) {
+        } catch (CompilationException e) {
             throw new ContainerException(executor,
                     ErrorMessageTools.buildErrorMessage(ErrorType.COMPILATION_FAILED, e.getMessage()));
         }

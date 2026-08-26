@@ -18,6 +18,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.component.DiskComponent;
+import qdream.relay.mc.errors.CompilationException;
 
 import java.util.List;
 
@@ -91,7 +92,7 @@ public class ReadCommands {
         List<Executable> program;
         try {
             program = ProgramCompiler.compileFromJson(programJson);
-        } catch (ProgramCompiler.CompilationException e) {
+        } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
@@ -131,7 +132,7 @@ public class ReadCommands {
         List<Executable> program;
         try {
             program = ProgramCompiler.compileFromJson(programJson);
-        } catch (ProgramCompiler.CompilationException e) {
+        } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
@@ -162,7 +163,7 @@ public class ReadCommands {
         List<Executable> program;
         try {
             program = ProgramCompiler.compileFromJson(programJson);
-        } catch (ProgramCompiler.CompilationException e) {
+        } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
@@ -203,7 +204,7 @@ public class ReadCommands {
         List<Executable> program;
         try {
             program = ProgramCompiler.compileFromJson(programJson);
-        } catch (ProgramCompiler.CompilationException e) {
+        } catch (CompilationException e) {
             source.sendFailure(Component.literal("§c JSON 解析失败：" + e.getMessage()));
             return 0;
         }
@@ -239,7 +240,7 @@ public class ReadCommands {
                 try {
                     String nbt = ProgramCompiler.toNbt(program).toString();
                     source.sendSuccess(() -> CommandUtils.copyableText("NBT 程序 (§e" + program.size() + "§r 个指令): §f", nbt), true);
-                } catch (ProgramCompiler.CompilationException e) {
+                } catch (CompilationException e) {
                     source.sendFailure(Component.literal("§c NBT 序列化失败：" + e.getMessage()));
                 }
             }

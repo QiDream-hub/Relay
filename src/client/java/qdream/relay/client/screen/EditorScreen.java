@@ -20,12 +20,13 @@ import qdream.relay.client.screen.widget.editor.OperationListWidget;
 import qdream.relay.client.screen.widget.editor.TypeListWidget;
 import qdream.relay.client.screen.widget.editor.tools.InfoContent;
 import qdream.relay.client.screen.widget.editor.tools.InfoUtils;
+import qdream.relay.client.screen.widget.LogWidget;
 import qdream.relay.client.screen.widget.SlotWidget;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.ProgramCompiler.CompilationException;
+import qdream.relay.mc.errors.CompilationException;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
 import qdream.relay.networking.payloads.C2S_DiskInsertedPayload;
@@ -78,7 +79,10 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     private static final int HOTBAR_START_Y = 364;
     private static final int SLOT_SIZE = 18;
 
+    private Component saveError = null;
+
     // 自定义 Widget
+    private LogWidget logWidget;
     private OperationListWidget operationListWidget;
     private TypeListWidget typeListWidget;
     private JsonEditorWidget jsonEditorWidget;
@@ -118,6 +122,19 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
         int buttonX = editorX + editorWidth - BUTTON_WIDTH * 3 - BUTTON_SPACING * 2;
 
         // ===== 创建 Widget =====
+        // 错误日志显示
+        logWidget = new LogWidget(8, editorY + BUTTON_HEIGHT + LIST_GAP, 150, editorHeight, font,
+                () -> {
+                    List<Component> errorlog = jsonEditorWidget.getErrorlog();
+                    if (errorlog == null) {
+                        errorlog = new java.util.ArrayList<>();
+                    }
+                    if (saveError != null) {
+                        errorlog.add(saveError.copy().withColor(0xFF5555));
+                    }
+                    return errorlog;
+                });
+        this.addRenderableWidget(logWidget);
         // 操作列表
         operationListWidget = new OperationListWidget(
                 left + PANEL_PADDING, listTop,
@@ -295,6 +312,7 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
      * 保存程序到磁盘
      */
     private void onSave() {
+        saveError = null;
         try {
             // 从 JSON 编辑器获取内容并编译检查
             String jsonStr = jsonEditorWidget.getJsonContent();
@@ -302,10 +320,15 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
 
             // 编译通过，发送 JSON 字符串到服务端
             ClientPlayNetworking.send(new C2S_SaveSpellDiskPayload(jsonStr));
-            // 不立即修改按钮文本，等待服务端确认
+            // 客户端验证通过，立即显示成功提示
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.success"));
+            saveButtonRestoreTime = System.currentTimeMillis() + 1500;
+            needsRestore = true;
         } catch (CompilationException e) {
-            // 编译失败，显示错误信息
-            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure", e.getMessage()));
+            saveError = e.getComponent();
+            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure"));
+            saveButtonRestoreTime = System.currentTimeMillis() + 3000;
+            needsRestore = true;
         }
     }
 
@@ -454,22 +477,6 @@ public class EditorScreen extends AbstractContainerScreen<EditorScreenHandler> {
     // 保存按钮恢复计时器
     private long saveButtonRestoreTime = 0;
     private boolean needsRestore = false;
-
-    /**
-     * 从服务端接收保存确认（成功/失败）
-     * 由网络包接收器调用
-     */
-    public void onSaved(boolean success, String errorMessage) {
-        if (success) {
-            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.success"));
-            saveButtonRestoreTime = System.currentTimeMillis() + 1500;
-            needsRestore = true;
-        } else {
-            saveButton.setMessage(Component.translatable("gui.relay:spell_editor.save.failure", errorMessage));
-            saveButtonRestoreTime = System.currentTimeMillis() + 3000;
-            needsRestore = true;
-        }
-    }
 
     /**
      * Screen 关闭时清理引用

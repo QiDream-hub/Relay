@@ -17,7 +17,7 @@ import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.Executable;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.ProgramCompiler.CompilationException;
+import qdream.relay.mc.errors.CompilationException;
 import qdream.relay.mc.component.DiskComponent;
 
 import java.util.List;

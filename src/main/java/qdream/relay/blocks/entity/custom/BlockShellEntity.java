@@ -37,6 +37,7 @@ import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
+import qdream.relay.mc.errors.CompilationException;
 import qdream.relay.Relay;
 import qdream.relay.core.ShellCoreGroupManager;
 import qdream.relay.tools.TextTools;
@@ -601,13 +602,17 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
 
         ItemStack diskStack = getDiskStack();
         if (diskStack.isEmpty()) {
-            pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.disk_empty"));
+            pushLogToClient(getLevel(), worldPosition,
+                    Component.translatable("gui.relay:shell.program_reload.no_disk"));
+            setEnabled(false);
             return;
         }
 
         DiskComponent diskComponent = getDiskComponent(diskStack);
         if (diskComponent == null) {
-            pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.disk_component_null"));
+            pushLogToClient(getLevel(), worldPosition,
+                    Component.translatable("gui.relay:shell.program_reload.disk_component_null"));
+            setEnabled(false);
             return;
         }
 
@@ -616,19 +621,29 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
         List<Executable> program;
         try {
             program = ProgramCompiler.compileFromJson(programJson);
-        } catch (ProgramCompiler.CompilationException e) {
-            e.printStackTrace();
-            program = new ArrayList<>();
+        } catch (CompilationException e) {
+            Warning warning = new Warning(getStateMachine(), e.getComponent().copy().withColor(0xFF5555), r -> {
+                if (r instanceof Component component) {
+                    return component.getString();
+                }
+                return "未知错误";
+            });
+            Relay.LOGGER.error(warning.getMessage());
+            setEnabled(false);
+            return;
         }
 
         if (program.isEmpty()) {
-            pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.program_empty"));
+            pushLogToClient(getLevel(), worldPosition,
+                    Component.translatable("gui.relay:shell.program_reload.program_empty"));
+            setEnabled(false);
             return;
         }
 
         getStateMachine().loadProgram(program);
         setChanged();
-        pushLogToClient(getLevel(), worldPosition, Component.translatable("gui.relay:shell.program_reload.success", program.size()));
+        pushLogToClient(getLevel(), worldPosition,
+                Component.translatable("gui.relay:shell.program_reload.success", program.size()));
     }
 
     // ========== ShellContainer 接口：执行统计 ==========
@@ -838,16 +853,16 @@ public class BlockShellEntity extends BlockEntity implements MenuProvider, Shell
             // 关闭时打印统计信息（仅当启用统计信息且尚未输出时）
             Component separatorLog = Component.translatable("gui.relay:shell.debug.separator");
             Component statsTitleLog = Component.translatable("gui.relay:shell.stats.title");
-            
+
             pushLogToClient(getLevel(), worldPosition, separatorLog);
             pushLogToClient(getLevel(), worldPosition, statsTitleLog);
-            
+
             String[] formatStatsPanel = this.executionStats.formatStatsPanel();
             for (String string : formatStatsPanel) {
                 pushLogToClient(getLevel(), worldPosition, Component.literal(string));
             }
             pushLogToClient(getLevel(), worldPosition, separatorLog);
-            
+
             this.executionStats = null;
         }
         setChanged();

@@ -14,9 +14,10 @@ import net.minecraft.network.chat.Component;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.OperationRegistry;
+import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.errors.CompilationException;
 import qdream.relay.mc.signature.DataSignature;
 import qdream.relay.tools.TextTools;
 
@@ -47,48 +48,27 @@ public class ListData extends Data {
     @Override
     public void toNbt(CompoundTag tag) {
         super.toNbt(tag);
-        ListTag listTag = new ListTag();
-        for (Executable item : value) {
-            CompoundTag itemTag = new CompoundTag();
-            ((Operation) item).toNbt(itemTag);
-            listTag.add(itemTag);
-        }
+        ListTag listTag = ProgramCompiler.toNbt(value);
         CompoundTag valueTag = new CompoundTag();
         valueTag.put("list", listTag);
         tag.put("value", valueTag);
+
     }
 
     @Override
     public Data fromNbt(CompoundTag tag) {
         List<Executable> list = tag.getCompound("value")
                 .flatMap(ct -> ct.getList("list"))
-                .map(listTag -> {
-                    List<Executable> result = new ArrayList<>();
-                    for (Tag element : listTag) {
-                        if (element instanceof CompoundTag compoundTag) {
-                            String id = compoundTag.getString("id").orElse("");
-                            OperationRegistry.getEntry(id).ifPresent(entry -> {
-                                Operation instance = (Operation) entry.create();
-                                result.add(instance.fromNbt(compoundTag));
-                            });
-                        }
-                    }
-                    return result;
-                })
+                .map(ProgramCompiler::fromNbt)
                 .orElse(new ArrayList<>());
-
         return new ListData(list);
+
     }
 
     @Override
     public void toJson(JsonObject json) {
         super.toJson(json);
-        JsonArray array = new JsonArray();
-        for (Executable item : value) {
-            JsonObject itemJson = new JsonObject();
-            ((Operation) item).toJson(itemJson);
-            array.add(itemJson);
-        }
+        JsonArray array = ProgramCompiler.toJson(value);
         JsonObject valueObject = new JsonObject();
         valueObject.add("list", array);
         json.add("value", valueObject);
@@ -96,28 +76,15 @@ public class ListData extends Data {
 
     @Override
     public Data fromJson(JsonObject json) {
-        List<Executable> list = new ArrayList<>();
-
         if (json.has("value") && json.get("value").isJsonObject()) {
             JsonObject valueObject = json.getAsJsonObject("value");
-
             if (valueObject.has("list") && valueObject.get("list").isJsonArray()) {
-                JsonArray array = valueObject.getAsJsonArray("list");
+                List<Executable> list = ProgramCompiler.fromJson(valueObject.getAsJsonArray("list"));
+                return new ListData(list);
 
-                for (JsonElement element : array) {
-                    if (element.isJsonObject()) {
-                        JsonObject obj = element.getAsJsonObject();
-                        String id = obj.has("id") ? obj.get("id").getAsString() : "";
-                        OperationRegistry.getEntry(id).ifPresent(entry -> {
-                            Operation instance = (Operation) entry.create();
-                            list.add(instance.fromJson(obj));
-                        });
-                    }
-                }
             }
         }
-
-        return new ListData(list);
+        return new ListData(new ArrayList<>());
     }
 
     @Override

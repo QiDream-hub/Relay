@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import qdream.relay.Component.RelayDataComponents;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.ProgramCompiler.CompilationException;
+import qdream.relay.mc.errors.CompilationException;
 import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.tools.TextTools;
 

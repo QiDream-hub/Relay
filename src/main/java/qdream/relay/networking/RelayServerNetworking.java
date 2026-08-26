@@ -18,7 +18,7 @@ import qdream.relay.items.DiskItem;
 import qdream.relay.networking.payloads.*;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.ProgramCompiler.CompilationException;
+import qdream.relay.mc.errors.CompilationException;
 import qdream.relay.Relay;
 
 /**
@@ -128,10 +128,6 @@ public class RelayServerNetworking {
             });
         });
 
-        // 注册 S2C_SaveSpellDiskConfirmPayload (服务端到客户端 - 保存确认)
-        PayloadTypeRegistry.clientboundPlay().register(S2C_SaveSpellDiskConfirmPayload.TYPE,
-                S2C_SaveSpellDiskConfirmPayload.CODEC);
-
         // 注册服务端接收处理器 - 保存法术磁盘（将 JSON 字符串编译后保存到磁盘）
         ServerPlayNetworking.registerGlobalReceiver(C2S_SaveSpellDiskPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
@@ -148,16 +144,9 @@ public class RelayServerNetworking {
                         if (!diskStack.isEmpty() && diskStack
                                 .getItem() instanceof qdream.relay.mc.component.DiskComponent diskComponent) {
                             diskComponent.setProgram(diskStack, payload.programJson());
-                            // 发送保存成功确认到客户端
-                            ServerPlayNetworking.send(player, new S2C_SaveSpellDiskConfirmPayload(true, ""));
-                        } else {
-                            // 磁盘不存在或不是法术磁盘
-                            ServerPlayNetworking.send(player, new S2C_SaveSpellDiskConfirmPayload(false, "没有有效的法术磁盘"));
                         }
                     } catch (CompilationException e) {
                         Relay.LOGGER.error("服务端编译失败：" + e.getMessage());
-                        // 发送编译失败确认到客户端
-                        ServerPlayNetworking.send(player, new S2C_SaveSpellDiskConfirmPayload(false, e.getMessage()));
                     }
                 }
             });

@@ -10,8 +10,10 @@ import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Operation;
+import qdream.relay.mc.errors.CompilationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ import java.util.Optional;
  * 负责 JSON 格式的程序序列化与反序列化
  * <p>
  * 程序格式：JSON 数组，每个元素包含 "id" 字段标识类型
- * 
+ *
  * <pre>
  * [{"id":"relay:number","value":42},{"id":"relay:number","value":42},{"id":"relay:add"}]
  * </pre>
@@ -36,7 +38,7 @@ public class ProgramCompiler {
 
     /**
      * 将程序列表编译为 JSON 数组
-     * 
+     *
      * @param program 程序列表
      * @return JSON 数组
      */
@@ -52,7 +54,7 @@ public class ProgramCompiler {
 
     /**
      * 将程序列表编译为 JSON 字符串
-     * 
+     *
      * @param program 程序列表
      * @return JSON 字符串
      */
@@ -62,7 +64,7 @@ public class ProgramCompiler {
 
     /**
      * 将程序列表编译为格式化的 JSON 字符串
-     * 
+     *
      * @param program 程序列表
      * @return 格式化 JSON 字符串
      */
@@ -83,7 +85,7 @@ public class ProgramCompiler {
 
     /**
      * 从 JSON 字符串反编译为程序列表
-     * 
+     *
      * @param jsonStr JSON 字符串
      * @return 程序列表
      * @throws CompilationException 解析错误
@@ -96,17 +98,17 @@ public class ProgramCompiler {
         try {
             JsonElement element = JsonParser.parseString(jsonStr);
             if (!element.isJsonArray()) {
-                throw new CompilationException("JSON 程序必须是数组格式");
+                throw new CompilationException(Component.translatable("error.relay.compilation.not_array"));
             }
             return fromJson(element.getAsJsonArray());
         } catch (JsonSyntaxException e) {
-            throw new CompilationException("JSON 解析失败: " + e.getMessage());
+            throw new CompilationException(Component.translatable("error.relay.compilation.json_syntax", e.getMessage()), e);
         }
     }
 
     /**
      * 从 JSON 数组反编译为程序列表
-     * 
+     *
      * @param array JSON 数组
      * @return 程序列表
      * @throws CompilationException 解析错误
@@ -119,13 +121,13 @@ public class ProgramCompiler {
                 continue;
             }
             if (!element.isJsonObject()) {
-                throw new CompilationException("程序元素 #" + i + " 必须是 JSON 对象"+"\n解析数据:"+array.toString());
+                throw new CompilationException(Component.translatable("error.relay.compilation.not_object", i, array.toString()));
             }
             JsonObject obj = element.getAsJsonObject();
             String id = obj.has("id") ? obj.get("id").getAsString() : "";
             Optional<OperationRegistry.Entry> entryOpt = OperationRegistry.getEntry(id);
             if (entryOpt.isEmpty()) {
-                throw new CompilationException("未知的指令: " + id + " (位置 #" + i + ")");
+                throw new CompilationException(Component.translatable("error.relay.compilation.unknown_instruction", id));
             }
             Operation instance = (Operation) entryOpt.get().create();
             program.add(instance.fromJson(obj));
@@ -136,11 +138,11 @@ public class ProgramCompiler {
     public static List<Executable> fromNbt(ListTag nbt) throws CompilationException {
         List<Executable> program = new ArrayList<>();
         for (int i = 0; i < nbt.size(); i++) {
-            CompoundTag tag = nbt.getCompound(i).orElseThrow(() -> new CompilationException("NBT 缺少指令数据"));
-            String id = tag.getString("id").orElseThrow(() -> new CompilationException("NBT 缺少指令 ID"));
+            CompoundTag tag = nbt.getCompound(i).orElseThrow(() -> new CompilationException(Component.translatable("error.relay.compilation.missing_instruction_data")));
+            String id = tag.getString("id").orElseThrow(() -> new CompilationException(Component.translatable("error.relay.compilation.missing_instruction_id")));
             Optional<OperationRegistry.Entry> entryOpt = OperationRegistry.getEntry(id);
             if (entryOpt.isEmpty()) {
-                throw new CompilationException("未知的指令: " + id + " (位置 #" + i + ")");
+                throw new CompilationException(Component.translatable("error.relay.compilation.unknown_instruction", id));
             }
             Operation instance = (Operation) entryOpt.get().create();
             program.add(instance.fromNbt(tag));
@@ -156,20 +158,12 @@ public class ProgramCompiler {
                 op.toNbt(tag);
                 listTag.add(tag);
             } else {
-                throw new CompilationException("指令 " + exec + " 不是 Operation 类型");
+                throw new CompilationException(Component.translatable("error.relay.compilation.not_operation", exec.toString()));
             }
         }
         return listTag;
     }
 
     // ========== 异常 ==========
-
-    /**
-     * 编译异常
-     */
-    public static class CompilationException extends Exception {
-        public CompilationException(String message) {
-            super(message);
-        }
-    }
+    // CompilationException 已移至 qdream.relay.mc.errors 包
 }

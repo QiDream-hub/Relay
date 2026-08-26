@@ -16,7 +16,6 @@ import qdream.relay.networking.payloads.S2C_ShellEnergyPayload;
 import qdream.relay.networking.payloads.S2C_ShellLogPushPayload;
 import qdream.relay.networking.payloads.S2C_ClearLogsPayload;
 import qdream.relay.networking.payloads.S2C_SyncSpellDiskPayload;
-import qdream.relay.networking.payloads.S2C_SaveSpellDiskConfirmPayload;
 
 /**
  * 客户端网络处理
@@ -33,16 +32,6 @@ public class RelayClientNetworking {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.screen instanceof EditorScreen editorScreen) {
                     editorScreen.updateProgramFromServer(payload.programJson());
-                }
-            });
-        });
-
-        // 注册 S2C_SaveSpellDiskConfirmPayload 客户端接收器
-        ClientPlayNetworking.registerGlobalReceiver(S2C_SaveSpellDiskConfirmPayload.TYPE, (payload, context) -> {
-            context.client().execute(() -> {
-                Minecraft mc = Minecraft.getInstance();
-                if (mc.screen instanceof EditorScreen editorScreen) {
-                    editorScreen.onSaved(payload.success(), payload.errorMessage());
                 }
             });
         });

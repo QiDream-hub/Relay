@@ -1,6 +1,13 @@
 package qdream.relay.client.screen.widget.editor;
 
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.llamalad7.mixinextras.lib.apache.commons.StringUtils;
+
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -9,7 +16,6 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import org.jspecify.annotations.Nullable;
 
 /**
  * JSON 文本编辑器 Widget
@@ -25,7 +31,6 @@ public class JsonEditorWidget extends AbstractWidget {
     private static final int BG_COLOR = 0xFF1A1A1A;
     private static final int BORDER_COLOR = 0xFF404040;
     private static final int TEXT_COLOR = 0xFFFFFFFF;
-    private static final int ERROR_COLOR = 0xFFFF6B68; // 错误红色
     private static final int SCROLLBAR_COLOR = 0xFF808080;
     private static final int SCROLLBAR_BG = 0xFF303030;
 
@@ -35,13 +40,6 @@ public class JsonEditorWidget extends AbstractWidget {
     /** 滚动偏移量（像素） */
     private int scrollOffset = 0;
 
-    /** JSON 解析错误信息 */
-    @Nullable
-    private String errorMessage = null;
-
-    /** 错误所在的行号 */
-    private int errorLine = -1;
-
     /** 是否在拖拽滚动条 */
     private boolean draggingScrollbar = false;
 
@@ -50,6 +48,9 @@ public class JsonEditorWidget extends AbstractWidget {
 
     /** 拖动滚动条时的初始滚动偏移 */
     private int dragStartScrollOffset = 0;
+
+    // 错误记录
+    private List<Component> logList = null;
 
     public JsonEditorWidget(int x, int y, int width, int height, Font font) {
         super(x, y, width, height, Component.literal("JSON Editor"));
@@ -73,6 +74,11 @@ public class JsonEditorWidget extends AbstractWidget {
         this.editBox.setValueListener(() -> this.parseJsonLines());
     }
 
+    // 获取错误记录
+    public List<Component> getErrorlog() {
+        return logList;
+    }
+
     /**
      * 设置 JSON 内容（从 List<Executable> 序列化而来）
      */
@@ -90,27 +96,10 @@ public class JsonEditorWidget extends AbstractWidget {
     }
 
     /**
-     * 是否有 JSON 解析错误
-     */
-    public boolean hasError() {
-        return this.errorMessage != null;
-    }
-
-    /**
-     * 获取错误信息
-     */
-    @Nullable
-    public String getErrorMessage() {
-        return this.errorMessage;
-    }
-
-    /**
      * 解析 JSON 文本检测错误
      */
     private void parseJsonLines() {
-        this.errorMessage = null;
-        this.errorLine = -1;
-
+        logList = null;
         String text = this.editBox.getValue();
         if (text.isEmpty()) {
             return;
@@ -119,29 +108,126 @@ public class JsonEditorWidget extends AbstractWidget {
         try {
             // 尝试解析 JSON 验证语法
             JsonParser.parseString(text);
+        } catch (JsonSyntaxException e) {
+            // 错误坐标
+            JsonErrorPosition errorPosition = extractErrorPosition(e.getMessage());
+            logList = List.of(
+                    Component.translatable("error.json_edit_parse.error_position"),
+                    Component.translatable("error.json_edit_parse.error_line", errorPosition.getLine()),
+                    Component.translatable("error.json_edit_parse.error_column", errorPosition.getColumn()));
         } catch (Exception e) {
-            // JSON 解析错误，显示错误信息
-            this.errorMessage = e.getMessage();
-            // 尝试从错误消息中提取行号
-            this.errorLine = extractErrorLine(e.getMessage());
+            logList = List.of(Component.translatable("error.json_edit_parse.unknown", e.getMessage()));
         }
     }
 
     /**
-     * 从错误消息中提取行号
+     * 从 Gson 错误消息中提取行号和列号
+     * 
+     * @param message Gson 抛出的异常消息，格式示例：
+     *                "Expected value at line 5 column 10 path $[2]"
+     *                "Expected BEGIN_OBJECT but was STRING at line 3 column 5 path
+     *                $.data.user"
+     * @return JsonErrorPosition 对象，包含行号、列号和路径信息
      */
-    private int extractErrorLine(String message) {
-        // Gson 错误消息格式："Expected value at line 5 column 10 path $[2]"
-        if (message.contains("line ")) {
-            try {
-                String[] parts = message.split("line ");
-                if (parts.length > 1) {
-                    return Integer.parseInt(parts[1].split(" ")[0]) - 1;
-                }
-            } catch (Exception ignored) {
-            }
+    private JsonErrorPosition extractErrorPosition(String message) {
+        if (StringUtils.isEmpty(message)) {
+            return JsonErrorPosition.EMPTY;
         }
-        return -1;
+
+        int line = -1;
+        int column = -1;
+        String path = null;
+
+        try {
+            // 提取行号
+            Pattern linePattern = Pattern.compile("line\\s+(\\d+)");
+            Matcher lineMatcher = linePattern.matcher(message);
+            if (lineMatcher.find()) {
+                line = Integer.parseInt(lineMatcher.group(1));
+            }
+
+            // 提取列号
+            Pattern columnPattern = Pattern.compile("column\\s+(\\d+)");
+            Matcher columnMatcher = columnPattern.matcher(message);
+            if (columnMatcher.find()) {
+                column = Integer.parseInt(columnMatcher.group(1));
+            }
+
+            // 提取 JSON Path（可选）
+            Pattern pathPattern = Pattern.compile("path\\s+([^\\s]+)");
+            Matcher pathMatcher = pathPattern.matcher(message);
+            if (pathMatcher.find()) {
+                path = pathMatcher.group(1);
+            }
+
+        } catch (Exception e) {
+            // 解析失败时返回默认值
+            return JsonErrorPosition.EMPTY;
+        }
+
+        return new JsonErrorPosition(line, column, path);
+    }
+
+    /**
+     * 错误位置信息类
+     */
+    public static class JsonErrorPosition {
+        public static final JsonErrorPosition EMPTY = new JsonErrorPosition(-1, -1, null);
+
+        private final int line;
+        private final int column;
+        private final String path;
+
+        public JsonErrorPosition(int line, int column, String path) {
+            this.line = line;
+            this.column = column;
+            this.path = path;
+        }
+
+        public int getLine() {
+            return line;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        /**
+         * 获取 0 基索引的行号（便于在代码中使用）
+         */
+        public int getZeroBasedLine() {
+            return line > 0 ? line - 1 : -1;
+        }
+
+        /**
+         * 获取 0 基索引的列号（便于在代码中使用）
+         */
+        public int getZeroBasedColumn() {
+            return column > 0 ? column - 1 : -1;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            if (line > 0) {
+                sb.append("行: ").append(line);
+            }
+            if (column > 0) {
+                if (sb.length() > 0)
+                    sb.append(", ");
+                sb.append("列: ").append(column);
+            }
+            if (path != null) {
+                if (sb.length() > 0)
+                    sb.append(", ");
+                sb.append("路径: ").append(path);
+            }
+            return sb.toString();
+        }
     }
 
     /** 获取最大滚动偏移 */
@@ -369,32 +455,12 @@ public class JsonEditorWidget extends AbstractWidget {
         // 让 CustomMultiLineEditBox 渲染文本和光标
         this.editBox.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
 
-        // 渲染错误提示
-        if (this.errorMessage != null) {
-            this.renderErrorIndicator(graphics);
-        }
-
         graphics.disableScissor();
 
         // 渲染滚动条
         if (this.getMaxScroll() > 0) {
             this.renderScrollBar(graphics);
         }
-    }
-
-    /**
-     * 渲染错误指示器
-     */
-    private void renderErrorIndicator(GuiGraphicsExtractor graphics) {
-        // 在底部显示错误消息
-        String errorText = "JSON 错误：" + this.errorMessage;
-        int errorWidth = this.font.width(errorText) + 6;
-        int errorX = this.getX() + this.width - errorWidth - SCROLLBAR_WIDTH - 2;
-        int errorY = this.getY() + this.height - LINE_HEIGHT - 2;
-
-        // 错误背景
-        graphics.fill(errorX - 2, errorY - 2, errorX + errorWidth, errorY + LINE_HEIGHT, 0x80FF0000);
-        graphics.text(this.font, errorText, errorX, errorY, ERROR_COLOR);
     }
 
     /**

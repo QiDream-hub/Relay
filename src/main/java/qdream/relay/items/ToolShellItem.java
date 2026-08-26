@@ -1,10 +1,8 @@
 package qdream.relay.items;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionHand;
@@ -20,11 +18,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.entity.SlotAccess;
 
 import qdream.relay.engine.StateMachine;
+import qdream.relay.engine.Warning;
 import qdream.relay.items.container.ToolShellContainer;
 import qdream.relay.engine.Executable;
+import qdream.relay.Relay;
 import qdream.relay.core.PlayerShellDataAccessor;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.component.DiskComponent;
+import qdream.relay.mc.errors.CompilationException;
 
 /**
  * 工具外壳（手持物品形态）
@@ -98,9 +99,15 @@ public class ToolShellItem extends Item {
                 List<Executable> program;
                 try {
                     program = ProgramCompiler.compileFromJson(programJson);
-                } catch (ProgramCompiler.CompilationException e) {
-                    e.printStackTrace();
-                    program = new ArrayList<>();
+                } catch (CompilationException e) {
+                    Warning warning = new Warning(machine, e.getComponent().copy().withColor(0xFF5555), r -> {
+                        if (r instanceof Component component) {
+                            return component.getString();
+                        }
+                        return "未知错误";
+                    });
+                    Relay.LOGGER.error(warning.getMessage());
+                    return InteractionResult.FAIL;
                 }
                 if (!program.isEmpty()) {
                     // 清空双栈后加载新程序
