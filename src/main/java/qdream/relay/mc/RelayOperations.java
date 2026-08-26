@@ -116,8 +116,6 @@ public class RelayOperations {
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new StringLength()));
                 OperationRegistry.register(
-                                new OperationRegistry.OpEntry(new StringEquals()));
-                OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new Substring()));
 
                 // 算术操作
