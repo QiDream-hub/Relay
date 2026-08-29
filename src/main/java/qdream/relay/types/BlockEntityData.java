@@ -243,6 +243,6 @@ public class BlockEntityData extends Data {
 
     @Override
     public boolean asBoolean() {
-        return blockPos != null;
+        return getBlockEntity() != null;
     }
 }

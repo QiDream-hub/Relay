@@ -36,7 +36,7 @@
   "container.relay.shell": "外壳",
   "container.relay.tool_shell": "工具外壳",
   "item.relay.tool_shell": "工具外壳",
-  "item.relay.tool_shell.usage_right": "§7 右键：§e 加载/运行程序",
+  "item.relay.tool_shell.usage_right": "§7右键：§e 加载/运行程序",
   "item.relay.tool_shell.usage_stop": "§7%1$s：§c 停止程序",
   "item.relay.tool_shell.usage_gui": "§7%1$s：打开配置 GUI",
   "item.relay.tool_shell.disk_empty": "§e[工具外壳] 磁盘为空，无法启动",

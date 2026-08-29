@@ -4,7 +4,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
-import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.signature.OperationSignature;
@@ -31,56 +30,35 @@ public class PushVector extends Instruction {
         super("relay:push_vector", 1, 2, OperationSignature.builder()
                 .consumesFromData("targetEntity", "relay:entity")
                 .consumesFromData("pushVector", "relay:vector")
-                .producesToData("success", "relay:boolean")
                 .build());
     }
 
     @Override
     public void execute(StateMachine executor) {
         // 检查世界交互器
-        try {
-            OperationHelpers.checkWorldInteractor(executor, id);
-        } catch (Exception e) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
+        OperationHelpers.checkWorldInteractor(executor, id);
 
         // 获取施法者位置（从 self 上下文）
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
 
         // 弹出参数
-        Executable entityExe = StackHelpers.popAny(executor, id);
-        Executable pushExe = StackHelpers.popAny(executor, id);
+        EntityData entityExe = StackHelpers.popEntity(executor, id);
+        VectorData pushExe = StackHelpers.popVector(executor, id);
 
-        if (!(entityExe instanceof EntityData entityEx)) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
-
-        if (!(pushExe instanceof VectorData pushEx)) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
-
-        Entity targetEntity = entityEx.getEntity();
+        Entity targetEntity = entityExe.getEntity();
 
         if (targetEntity == null) {
             executor.pushData(new BooleanData(false));
             return;
         }
 
-        Vec3 pushVector = pushEx.asVector();
+        Vec3 pushVector = pushExe.asVector();
         Vec3 targetPos = targetEntity.position();
 
         // 检查范围：施法者到目标实体的距离
-        try {
-            OperationHelpers.checkInRange(executor, id, sourcePos, targetPos);
-        } catch (Exception e) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
+        OperationHelpers.checkInRange(executor, id, sourcePos, targetPos);
 
-        // 动态计算并扣除能量：基础 + 向量模长 × 系数
+        // 动态计算并扣除能量：向量模长 × 系数
         // checkEnergy 会自动加上操作的基础能量消耗
         double dynamicEnergy = pushVector.length() * 0.25;
         OperationHelpers.checkEnergy(executor, id, dynamicEnergy);

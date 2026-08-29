@@ -288,7 +288,7 @@ public class SlotData extends Data {
         if (worldId == null || containerPos == null) {
             return TextTools.getText("unknown.name");
         }
-        
+
         var blockState = Relay.getWorld(worldId).getBlockState(containerPos);
         MutableComponent result = Component.literal("[");
         result.append(blockState.getBlock().getName());
@@ -299,6 +299,6 @@ public class SlotData extends Data {
 
     @Override
     public boolean asBoolean() {
-        return containerPos != null && slot >= 0;
+        return getContainer() != null && slot >= 0;
     }
 }

@@ -244,12 +244,12 @@ public class EntityData extends Data {
         if (worldId == null || uuid == null) {
             return TextTools.getText("unknown.name");
         }
-        
+
         var entity = Relay.getWorld(worldId).getEntity(uuid);
         if (entity == null) {
             return TextTools.getText("unknown.name");
         }
-        
+
         MutableComponent result = Component.literal("");
         result.append(entity.getName());
         return result;
@@ -257,6 +257,6 @@ public class EntityData extends Data {
 
     @Override
     public boolean asBoolean() {
-        return uuid != null;
+        return getEntity() != null;
     }
 }

@@ -163,7 +163,4 @@ public class ProgramCompiler {
         }
         return listTag;
     }
-
-    // ========== 异常 ==========
-    // CompilationException 已移至 qdream.relay.mc.errors 包
 }

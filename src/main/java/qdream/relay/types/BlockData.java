@@ -234,7 +234,7 @@ public class BlockData extends Data {
         if (worldId == null || blockPos == null) {
             return TextTools.getText("unknown.name");
         }
-        
+
         var blockState = Relay.getWorld(worldId).getBlockState(blockPos);
         MutableComponent result = Component.literal("");
         result.append(blockState.getBlock().getName());
@@ -243,6 +243,6 @@ public class BlockData extends Data {
 
     @Override
     public boolean asBoolean() {
-        return blockPos != null;
+        return getBlockPos() != null;
     }
 }
