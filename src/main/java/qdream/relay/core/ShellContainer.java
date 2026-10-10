@@ -202,14 +202,6 @@ public interface ShellContainer extends Container {
      */
     ExecutionStats getExecutionStats();
 
-    // ========== 标记变更 ==========
-
-    /**
-     * 标记容器已变更（需要保存）
-     */
-    @Override
-    void setChanged();
-
     /**
      * 客户端/服务端判断
      */

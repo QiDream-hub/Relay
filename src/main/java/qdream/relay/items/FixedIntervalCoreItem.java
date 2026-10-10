@@ -7,9 +7,15 @@ import qdream.relay.Component.RelayDataComponents;
  * 固定间隔的计算核心物品
  * 当前 7 种核心使用此实现（64/32/16/8/4/2/1）
  * 
- * <p>能量消耗使用 1.3 次方曲线：前期适中，后期升高</p>
- * <p>公式：{@code energyCost = baseEnergyCost * count^1.3}</p>
- * <p>其中 {@code baseEnergyCost = 1.0 / interval}</p>
+ * <p>
+ * 能量消耗使用 1.3 次方曲线：前期适中，后期升高
+ * </p>
+ * <p>
+ * 公式：{@code energyCost = baseEnergyCost * count^1.3}
+ * </p>
+ * <p>
+ * 其中 {@code baseEnergyCost = 1.0 / interval}
+ * </p>
  */
 public class FixedIntervalCoreItem extends ComputingCoreItem {
 
@@ -19,7 +25,7 @@ public class FixedIntervalCoreItem extends ComputingCoreItem {
     public FixedIntervalCoreItem(Properties properties, int interval) {
         super(properties);
         this.fixedInterval = interval;
-        this.baseEnergyCost = 1.0 / interval;
+        this.baseEnergyCost = 2.0 / interval;
     }
 
     @Override
@@ -49,7 +55,7 @@ public class FixedIntervalCoreItem extends ComputingCoreItem {
     }
 
     @Override
-    public boolean setCost(ItemStack stack) {
+    public boolean setCost(ItemStack stack, int cost) {
         // 固定核心不允许修改，返回 false
         return false;
     }

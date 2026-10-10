@@ -38,9 +38,10 @@ public interface ComputingCoreComponent {
      * 设置执行成本
      *
      * @param stack 物品堆
+     * @param cost  运行资源
      * @return 是否设置成功
      */
-    boolean setCost(ItemStack stack);
+    boolean setCost(ItemStack stack, int cost);
 
     /**
      * 获取能量消耗

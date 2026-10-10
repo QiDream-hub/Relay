@@ -32,9 +32,7 @@ public class RelayModelProvider extends FabricModelProvider {
         gen.generateFlatItem(RelayItems.COMPUTING_CORE_2, ModelTemplates.FLAT_ITEM);
         gen.generateFlatItem(RelayItems.COMPUTING_CORE_4, ModelTemplates.FLAT_ITEM);
         gen.generateFlatItem(RelayItems.COMPUTING_CORE_8, ModelTemplates.FLAT_ITEM);
-        gen.generateFlatItem(RelayItems.COMPUTING_CORE_16, ModelTemplates.FLAT_ITEM);
-        gen.generateFlatItem(RelayItems.COMPUTING_CORE_32, ModelTemplates.FLAT_ITEM);
-        gen.generateFlatItem(RelayItems.COMPUTING_CORE_64, ModelTemplates.FLAT_ITEM);
+        gen.generateFlatItem(RelayItems.COMPUTING_DYNAMIC, ModelTemplates.FLAT_ITEM);
 
         // 法术磁盘
         gen.generateFlatItem(RelayItems.SPELL_DISK, ModelTemplates.FLAT_ITEM);

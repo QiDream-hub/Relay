@@ -27,8 +27,7 @@ public class RelayDataComponents {
             "spell_program",
             builder -> builder
                     .persistent(CompoundTag.CODEC)
-                    .networkSynchronized(createNbtStreamCodec())
-    );
+                    .networkSynchronized(createNbtStreamCodec()));
 
     /**
      * 法术程序组件 - 存储为 JSON 字符串
@@ -39,8 +38,7 @@ public class RelayDataComponents {
             "spell_program_json",
             builder -> builder
                     .persistent(Codec.STRING)
-                    .networkSynchronized(createStringStreamCodec(32767))
-    );
+                    .networkSynchronized(createStringStreamCodec(32767)));
 
     /**
      * 能量组件 - 存储为 Double
@@ -50,8 +48,7 @@ public class RelayDataComponents {
             "energy",
             builder -> builder
                     .persistent(Codec.DOUBLE)
-                    .networkSynchronized(createDoubleStreamCodec())
-    );
+                    .networkSynchronized(createDoubleStreamCodec()));
 
     /**
      * 计算核心间隔组件 - 存储为 Integer
@@ -61,8 +58,17 @@ public class RelayDataComponents {
             "interval",
             builder -> builder
                     .persistent(Codec.INT)
-                    .networkSynchronized(createIntStreamCodec())
-    );
+                    .networkSynchronized(createIntStreamCodec()));
+
+    /**
+     * 计算核心远算资源组件 - 存储为 Integer
+     * 用于 computing_core 物品存储运算资源（一次运行多少操作）
+     */
+    public static final DataComponentType<Integer> COST = register(
+            "cost",
+            builder -> builder
+                    .persistent(Codec.INT)
+                    .networkSynchronized(createIntStreamCodec()));
 
     /**
      * 计算核心能量消耗组件 - 存储为 Double
@@ -72,8 +78,7 @@ public class RelayDataComponents {
             "energy_cost",
             builder -> builder
                     .persistent(Codec.DOUBLE)
-                    .networkSynchronized(createDoubleStreamCodec())
-    );
+                    .networkSynchronized(createDoubleStreamCodec()));
 
     /**
      * 工具外壳物品栏组件 - 存储为 CompoundTag
@@ -84,8 +89,7 @@ public class RelayDataComponents {
             "tool_shell_data",
             builder -> builder
                     .persistent(CompoundTag.CODEC)
-                    .networkSynchronized(createNbtStreamCodec())
-    );
+                    .networkSynchronized(createNbtStreamCodec()));
 
     /**
      * 工具外壳配置组件 - 存储为 CompoundTag
@@ -96,8 +100,7 @@ public class RelayDataComponents {
             "tool_shell_config",
             builder -> builder
                     .persistent(CompoundTag.CODEC)
-                    .networkSynchronized(createNbtStreamCodec())
-    );
+                    .networkSynchronized(createNbtStreamCodec()));
 
     /**
      * 工具外壳 Tick 状态组件 - 存储为 CompoundTag
@@ -108,8 +111,7 @@ public class RelayDataComponents {
             "tool_shell_tick_state",
             builder -> builder
                     .persistent(CompoundTag.CODEC)
-                    .networkSynchronized(createNbtStreamCodec())
-    );
+                    .networkSynchronized(createNbtStreamCodec()));
 
     /**
      * 工具外壳会话 ID 组件 - 存储为 String (UUID)
@@ -120,20 +122,19 @@ public class RelayDataComponents {
             "tool_shell_session_id",
             builder -> builder
                     .persistent(Codec.STRING)
-                    .networkSynchronized(createStringStreamCodec())
-    );
+                    .networkSynchronized(createStringStreamCodec()));
 
     /**
      * 执行统计组件 - 存储为 CompoundTag
      * 用于 ShellContainer 存储程序执行统计信息
-     * 结构：{ coreEnergy: double, operationEnergy: double, executedOperations: int, runCount: int }
+     * 结构：{ coreEnergy: double, operationEnergy: double, executedOperations: int,
+     * runCount: int }
      */
     public static final DataComponentType<CompoundTag> EXECUTION_STATS = register(
             "execution_stats",
             builder -> builder
                     .persistent(CompoundTag.CODEC)
-                    .networkSynchronized(createNbtStreamCodec())
-    );
+                    .networkSynchronized(createNbtStreamCodec()));
 
     /**
      * 世界交互器品阶组件 - 存储为 Integer
@@ -143,8 +144,7 @@ public class RelayDataComponents {
             "world_interactor_tier",
             builder -> builder
                     .persistent(Codec.INT)
-                    .networkSynchronized(createIntStreamCodec())
-    );
+                    .networkSynchronized(createIntStreamCodec()));
 
     /**
      * 世界交互器交互距离组件 - 存储为 Double
@@ -154,8 +154,7 @@ public class RelayDataComponents {
             "world_interaction_range",
             builder -> builder
                     .persistent(Codec.DOUBLE)
-                    .networkSynchronized(createDoubleStreamCodec())
-    );
+                    .networkSynchronized(createDoubleStreamCodec()));
 
     /**
      * 创建 Double 的网络同步 StreamCodec
@@ -218,6 +217,7 @@ public class RelayDataComponents {
 
     /**
      * 创建 String 的网络同步 StreamCodec
+     * 
      * @param maxLength 最大字符串长度
      */
     private static StreamCodec<FriendlyByteBuf, String> createStringStreamCodec(int maxLength) {
@@ -243,17 +243,16 @@ public class RelayDataComponents {
 
     /**
      * 注册 DataComponentType
-     * @param name 组件名称
+     * 
+     * @param name            组件名称
      * @param builderOperator 构建器操作符，用于配置持久化和网络同步
      */
     private static <T> DataComponentType<T> register(
             String name,
-            java.util.function.UnaryOperator<DataComponentType.Builder<T>> builderOperator
-    ) {
+            java.util.function.UnaryOperator<DataComponentType.Builder<T>> builderOperator) {
         ResourceKey<DataComponentType<?>> key = ResourceKey.create(
                 Registries.DATA_COMPONENT_TYPE,
-                Identifier.fromNamespaceAndPath(Relay.MOD_ID, name)
-        );
+                Identifier.fromNamespaceAndPath(Relay.MOD_ID, name));
         DataComponentType<T> type = builderOperator
                 .apply(DataComponentType.builder())
                 .build();
@@ -265,19 +264,6 @@ public class RelayDataComponents {
      * 应在模组初始化时调用
      */
     public static void register() {
-        // 静态初始化时自动注册所有组件
-        // 访问任意组件即可触发类加载
-        var _ = SPELL_PROGRAM;
-        var __ = ENERGY;
-        var ___ = INTERVAL;
-        var ____ = ENERGY_COST;
-        var _____ = TOOL_SHELL_DATA;
-        var ______ = TOOL_SHELL_CONFIG;
-        var _______ = TOOL_SHELL_TICK_STATE;
-        var ________ = TOOL_SHELL_SESSION_ID;
-        var _________ = EXECUTION_STATS;
-        var __________ = WORLD_INTERACTOR_TIER;
-        var ___________ = WORLD_INTERACTION_RANGE;
     }
 
     /**

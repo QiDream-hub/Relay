@@ -16,8 +16,8 @@ import qdream.relay.mc.component.ComputingCoreComponent;
  * 提供操作数预算，interval 属性决定执行间隔（tick 间隔）
  * interval 值越小，执行频率越高
  *
- * @see FixedIntervalCoreItem 固定 interval 子类（当前 7 种核心）
- * @see DynamicIntervalCoreItem 动态 interval 子类（未来特殊核心）
+ * @see FixedIntervalCoreItem 固定 interval 子类
+ * @see DynamicIntervalCoreItem 动态 interval 子类
  */
 public abstract class ComputingCoreItem extends Item implements ComputingCoreComponent {
 

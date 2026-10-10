@@ -20,7 +20,6 @@ import qdream.relay.mc.component.EnergyModuleComponent;
 
 /**
  * 能量模块物品
- * Shift+ 右键自动充能背包内的紫水晶，右键显示当前能量
  */
 public class EnergyModuleItem extends Item implements EnergyModuleComponent {
 
@@ -87,11 +86,12 @@ public class EnergyModuleItem extends Item implements EnergyModuleComponent {
                 double addEnergy = chargeFromInventory(player, stack);
                 if (addEnergy > 0) {
                     player.sendSystemMessage(
-                            Component.literal("§a 已充能 §e" + addEnergy + " §a，当前能量：§e"
-                                    + String.format("%.1f", getStoredEnergy(stack))));
+                            Component.translatable("item.relay.energy_module.tip.yes",
+                                    addEnergy,
+                                    String.format("%.1f", getStoredEnergy(stack))));
                 } else {
                     player.sendSystemMessage(
-                            Component.literal("§7 背包内没有可充能的紫水晶"));
+                            Component.translatable("item.relay.energy_module.tip.no"));
                 }
             }
         }
