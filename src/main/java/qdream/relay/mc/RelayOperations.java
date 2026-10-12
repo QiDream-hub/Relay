@@ -8,6 +8,7 @@ import qdream.relay.operations.block.*;
 import qdream.relay.operations.communication.*;
 import qdream.relay.operations.container.*;
 import qdream.relay.operations.control.*;
+import qdream.relay.operations.device.*;
 import qdream.relay.operations.disk.*;
 import qdream.relay.operations.entity.*;
 import qdream.relay.operations.logic.*;
@@ -290,5 +291,11 @@ public class RelayOperations {
                                 new OperationRegistry.OpEntry(new SetStringDisplayRotation()));
                 OperationRegistry.register(
                                 new OperationRegistry.OpEntry(new AddStringDisplayEnergy()));
+
+                // 设备操作
+                OperationRegistry.register(new OperationRegistry.OpEntry(new GetCoreCost()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new GetCoreInterval()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new SetCoreInterval()));
+                OperationRegistry.register(new OperationRegistry.OpEntry(new SetCoreCost()));
         }
 }
