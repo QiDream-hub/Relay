@@ -61,10 +61,6 @@ public class EntityTeleport extends Instruction {
         // 获取施法者位置和所属者
         Vec3 sourcePos = OperationHelpers.getSelfPosition(executor);
         Entity owner = OperationHelpers.getOwner(executor);
-        if (owner == null) {
-            executor.pushData(new BooleanData(false));
-            return;
-        }
 
         ServerLevel sourceLevel = (ServerLevel) owner.level();
         if (sourceLevel == null) {

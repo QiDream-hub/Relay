@@ -20,6 +20,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Optional;
 
 /**
@@ -33,6 +35,13 @@ import java.util.Optional;
  * <li>能量检查与扣除</li>
  * <li>上下文获取（Level, ShellContainer, Entity, BlockEntity）</li>
  * </ul>
+ *
+ * <p>
+ * <b>上下文获取约定：</b>外壳容器、世界、所属者都是操作执行的前提，缺失说明执行环境不完整，
+ * 因此这些获取方法直接抛出对应的事故（{@link ContainerContextMissingError}、
+ * {@link WorldNotAvailableError}、{@link OwnerNotFoundError} 等），返回值保证非空。
+ * 唯一的例外是 {@link #getSelf(StateMachine)}：自身引用允许不存在，此时返回 {@code null}。
+ * </p>
  */
 public final class OperationHelpers {
 
@@ -44,15 +53,19 @@ public final class OperationHelpers {
 
     /**
      * 从状态机获取 ShellContainer
+     * <p>
+     * 外壳容器是操作执行的必需上下文，缺失说明执行环境不完整，此时抛出
+     * {@link ContainerContextMissingError}。
+     * </p>
      *
      * @param executor 状态机
-     * @return ShellContainer，如果不存在返回 null
+     * @return ShellContainer，保证非 {@code null}
+     * @throws ContainerContextMissingError 如果状态机中没有外壳容器上下文
      */
+    @NotNull
     public static ShellContainer getShellContainer(StateMachine executor) {
-        if (!executor.hasContext("shellContainer")) {
-            return null;
-        }
-        return executor.getContext("shellContainer", ShellContainer.class).orElse(null);
+        return executor.getContext("shellContainer", ShellContainer.class)
+                .orElseThrow(() -> new ContainerContextMissingError(executor));
     }
 
     /**
@@ -60,12 +73,13 @@ public final class OperationHelpers {
      *
      * @param executor      状态机
      * @param operationName 操作名称（用于错误消息）
-     * @throws WorldInteractionException 如果世界交互器不存在
-     * @throws EnergyException           如果能量不足
+     * @throws ContainerContextMissingError 如果无法获取容器上下文
+     * @throws WorldInteractionException    如果世界交互器不存在
+     * @throws EnergyException              如果能量不足
      */
     public static void checkWorldInteractor(StateMachine executor, String operationName) {
         ShellContainer container = getShellContainer(executor);
-        if (container == null || !container.hasWorldInteractor()) {
+        if (!container.hasWorldInteractor()) {
             throw new WorldInteractorMissingError(executor, TextTools.getName(operationName).withColor(0xFF5555));
         }
         // 扣除世界交互器的能量消耗
@@ -90,9 +104,6 @@ public final class OperationHelpers {
      */
     public static void checkEnergy(StateMachine executor, String operationName, double dynamicEnergy) {
         ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            throw new ContainerContextMissingError(executor);
-        }
 
         if (!container.consumeEnergy(dynamicEnergy)) {
             throw new EnergyInsufficientError(executor, TextTools.getName(operationName).withColor(0xFF5555),
@@ -114,16 +125,14 @@ public final class OperationHelpers {
      * @param operationName 操作名称
      * @param sourcePos     源位置
      * @param targetPos     目标位置
-     * @throws WorldInteractionException 如果世界交互器不存在或超出范围
+     * @throws ContainerContextMissingError 如果无法获取容器上下文
+     * @throws WorldInteractionException    如果世界交互器不存在或超出范围
      */
     public static void checkInRange(StateMachine executor, String operationName,
             Vec3 sourcePos,
             Vec3 targetPos) {
 
         ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            throw new ContainerContextMissingError(executor);
-        }
         if (!container.isWorldInRange(sourcePos, targetPos)) {
             double distance = sourcePos.distanceTo(targetPos);
             double range = container.getWorldInteractorRange();
@@ -146,7 +155,8 @@ public final class OperationHelpers {
      * @param sourcePos     源位置（世界交互器位置）
      * @param center        球体中心
      * @param radius        球体半径
-     * @throws WorldInteractionException 如果球体与世界交互器范围无交集
+     * @throws ContainerContextMissingError 如果无法获取容器上下文
+     * @throws WorldInteractionException    如果球体与世界交互器范围无交集
      */
     public static void checkSphereInRange(StateMachine executor, String operationName,
             Vec3 sourcePos,
@@ -154,9 +164,6 @@ public final class OperationHelpers {
             double radius) {
 
         ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            throw new ContainerContextMissingError(executor);
-        }
         double distance = sourcePos.distanceTo(center);
         double range = container.getWorldInteractorRange();
         // 检查球体最近边缘是否在范围内
@@ -186,9 +193,13 @@ public final class OperationHelpers {
 
     /**
      * 获取执行者自身引用（Entity 或 BlockEntity）
+     * <p>
+     * 这是本类中唯一允许返回 {@code null} 的上下文获取方法：自身引用可能不存在，
+     * 调用方需要自行处理（例如 {@link #getSelfPosition(StateMachine)} 会退化为原点）。
+     * </p>
      *
      * @param executor 状态机
-     * @return self 引用，可能为 Entity、BlockEntity 或 null
+     * @return self 引用，可能为 Entity、BlockEntity 或 {@code null}
      */
     public static Object getSelf(StateMachine executor) {
         return executor.getContext("self", Object.class).orElse(null);
@@ -198,11 +209,12 @@ public final class OperationHelpers {
      * 获取所属者引用
      *
      * @param executor 状态机
-     * @return owner 所属者引用 只返回玩家，其余返回 null
+     * @return owner 所属者引用 只返回玩家
+     * @throws ContainerContextMissingError 如果无法获取容器上下文
+     * @throws OwnerNotFoundError           如果无法获取所属者
      */
     public static Player getOwner(StateMachine executor) {
-        ShellContainer shellContainer = getShellContainer(executor);
-        Player owner = shellContainer.getOwner();
+        Player owner = getShellContainer(executor).getOwner();
         if (owner == null) {
             throw new OwnerNotFoundError(executor);
         }
@@ -234,27 +246,21 @@ public final class OperationHelpers {
      * @param executor 状态机
      * @param amount   需要的能量值
      * @return 如果能量充足返回 true
+     * @throws ContainerException 如果无法获取容器上下文
      */
     public static boolean hasEnoughEnergy(StateMachine executor, double amount) {
-        ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            return false;
-        }
-        return container.getEnergy() >= amount;
+        return getShellContainer(executor).getEnergy() >= amount;
     }
 
     /**
      * 获取可用能量
      *
      * @param executor 状态机
-     * @return 当前可用能量，无法获取返回 0
+     * @return 当前可用能量
+     * @throws ContainerException 如果无法获取容器上下文
      */
     public static double getAvailableEnergy(StateMachine executor) {
-        ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            return 0;
-        }
-        return container.getEnergy();
+        return getShellContainer(executor).getEnergy();
     }
 
     /**
@@ -263,13 +269,10 @@ public final class OperationHelpers {
      * @param executor 状态机
      * @param amount   消耗的能量值
      * @return 如果成功扣除返回 true
+     * @throws ContainerException 如果无法获取容器上下文
      */
     public static boolean consumeEnergy(StateMachine executor, double amount) {
-        ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            return false;
-        }
-        return container.consumeEnergy(amount);
+        return getShellContainer(executor).consumeEnergy(amount);
     }
 
     /**
@@ -278,13 +281,10 @@ public final class OperationHelpers {
      * @param executor 状态机
      * @param amount   添加的能量值
      * @return 实际添加的能量值
+     * @throws ContainerException 如果无法获取容器上下文
      */
     public static double addEnergy(StateMachine executor, double amount) {
-        ShellContainer container = getShellContainer(executor);
-        if (container == null) {
-            return 0;
-        }
-        return container.addEnergy(amount);
+        return getShellContainer(executor).addEnergy(amount);
     }
 
     // ==================== 工具方法相关 ====================

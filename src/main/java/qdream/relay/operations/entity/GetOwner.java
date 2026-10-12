@@ -13,12 +13,13 @@ import qdream.relay.types.EntityData;
  * 从上下文中获取 shellContainer 和 world，然后获取其 owner 实体
  *
  * 弹出：无
- * 压入：entity (所有者实体，如果没有主人则压入 null entity)
+ * 压入：entity (所有者实体)
+ *
+ * 外壳没有主人时触发 {@link qdream.relay.mc.errors.entity.OwnerNotFoundError} 事故并终止程序。
  *
  * 示例用法：
  * 1. 获取主人：get_owner
- * 2. 检查是否有主人：get_owner is_null if ...
- * 3. 对主人进行操作：get_owner some_entity_op
+ * 2. 对主人进行操作：get_owner some_entity_op
  */
 public class GetOwner extends Instruction {
 
@@ -32,9 +33,6 @@ public class GetOwner extends Instruction {
     public void execute(StateMachine executor) {
 
         Player owner = OperationHelpers.getOwner(executor);
-        if (owner == null) {
-            return;
-        }
 
         executor.pushData(EntityData.from(owner, owner.level()));
     }

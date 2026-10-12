@@ -135,9 +135,6 @@ public class SpawnShell extends Instruction {
 
         // 设置 Owner
         var owner = OperationHelpers.getOwner(executor);
-        if (owner == null) {
-            return;
-        }
         shellEntity.setOwner(owner);
 
         // 设置程序

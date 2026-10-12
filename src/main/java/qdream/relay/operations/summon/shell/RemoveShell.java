@@ -7,7 +7,6 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
 import qdream.relay.mc.errors.entity.NotEntityShellError;
-import qdream.relay.mc.errors.entity.OwnerNotFoundError;
 import qdream.relay.mc.errors.entity.PermissionDeniedError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
@@ -69,9 +68,6 @@ public class RemoveShell extends Instruction {
 
         // 验证调用者是否为 Owner
         var owner = OperationHelpers.getOwner(executor);
-        if (owner == null) {
-            throw new OwnerNotFoundError(executor);
-        }
 
         var shellOwner = shellEntity.getOwner();
         if (shellOwner == null || !shellOwner.getUUID().equals(owner.getUUID())) {
