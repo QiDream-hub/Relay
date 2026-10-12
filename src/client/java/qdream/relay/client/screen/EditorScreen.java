@@ -26,7 +26,7 @@ import qdream.relay.engine.Executable;
 import qdream.relay.items.DiskItem;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.errors.CompilationException;
+import qdream.relay.mc.errors.compilation.CompilationException;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.networking.payloads.C2S_SaveSpellDiskPayload;
 import qdream.relay.networking.payloads.C2S_DiskInsertedPayload;

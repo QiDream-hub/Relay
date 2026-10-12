@@ -37,7 +37,7 @@ import qdream.relay.mc.component.WorldInteractorComponent;
 import qdream.relay.mc.component.DiskComponent;
 import qdream.relay.mc.component.ComputingCoreComponent;
 import qdream.relay.mc.component.EnergyModuleComponent;
-import qdream.relay.mc.errors.CompilationException;
+import qdream.relay.mc.errors.compilation.CompilationException;
 import qdream.relay.Relay;
 import qdream.relay.core.ShellCoreGroupManager;
 import qdream.relay.tools.TextTools;

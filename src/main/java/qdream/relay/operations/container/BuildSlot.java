@@ -3,11 +3,12 @@ package qdream.relay.operations.container;
 import qdream.relay.Relay;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.container.ContainerNotFoundError;
+import qdream.relay.mc.errors.container.NotAContainerError;
+import qdream.relay.mc.errors.container.SlotNotFoundError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.SlotData;
@@ -41,22 +42,18 @@ public class BuildSlot extends Instruction {
         // 获取方块实体
         BlockEntity blockEntity = containerData.getBlockEntity();
         if (blockEntity == null) {
-            throw new ContainerException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorMessageTools.ErrorType.CONTAINER_NOT_FOUND));
+            throw new ContainerNotFoundError(executor);
         }
 
         // 检查是否为容器
         if (!(blockEntity instanceof Container container)) {
-            throw new ContainerException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorMessageTools.ErrorType.NOT_A_CONTAINER));
+            throw new NotAContainerError(executor);
         }
 
         // 获取插槽索引
         int slot = slotIndex.asInt();
         if (slot < 0 || slot >= container.getContainerSize()) {
-            throw new ContainerException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorMessageTools.ErrorType.SLOT_NOT_FOUND,
-                            slot, container.getContainerSize()));
+            throw new SlotNotFoundError(executor);
         }
 
         // 创建并返回 SlotData

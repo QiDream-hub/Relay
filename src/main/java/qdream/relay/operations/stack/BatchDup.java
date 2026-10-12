@@ -3,12 +3,12 @@ package qdream.relay.operations.stack;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ParameterException;
-import qdream.relay.mc.errors.StackException;
+import qdream.relay.mc.errors.stack.BatchCountExceedsStackError;
+import qdream.relay.mc.errors.parameter.BatchCountMustBeIntegerError;
+import qdream.relay.mc.errors.parameter.BatchCountMustBeNumberError;
+import qdream.relay.mc.errors.parameter.BatchCountMustBePositiveError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.NumberData;
 
 import java.util.ArrayList;
@@ -32,20 +32,20 @@ public class BatchDup extends Instruction {
         Executable countExe = StackHelpers.popAny(executor, id);
 
         if (!(countExe instanceof NumberData numberData)) {
-            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_MUST_BE_NUMBER));
+            throw new BatchCountMustBeNumberError(executor);
         }
 
         if (!numberData.isInteger()) {
-            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_MUST_BE_INTEGER));
+            throw new BatchCountMustBeIntegerError(executor);
         }
 
         int count = numberData.asInt();
         if (count <= 0) {
-            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_MUST_BE_POSITIVE));
+            throw new BatchCountMustBePositiveError(executor);
         }
 
         if (count > executor.getDataStackSize()) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BATCH_COUNT_EXCEEDS_STACK));
+            throw new BatchCountExceedsStackError(executor);
         }
 
         // 获取栈顶 N 个元素（从栈顶到栈底）

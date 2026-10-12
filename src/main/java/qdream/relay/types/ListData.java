@@ -17,7 +17,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.base.Data;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.errors.CompilationException;
+import qdream.relay.mc.errors.compilation.CompilationException;
 import qdream.relay.mc.signature.DataSignature;
 import qdream.relay.tools.TextTools;
 

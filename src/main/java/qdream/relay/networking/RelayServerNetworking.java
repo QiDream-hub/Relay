@@ -18,7 +18,7 @@ import qdream.relay.items.DiskItem;
 import qdream.relay.networking.payloads.*;
 import qdream.relay.mc.OperationRegistry;
 import qdream.relay.mc.ProgramCompiler;
-import qdream.relay.mc.errors.CompilationException;
+import qdream.relay.mc.errors.compilation.CompilationException;
 import qdream.relay.Relay;
 
 /**

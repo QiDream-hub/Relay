@@ -2,15 +2,16 @@ package qdream.relay.operations.base;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
-import qdream.relay.mc.errors.EnergyException;
-import qdream.relay.mc.errors.EntityException;
-import qdream.relay.mc.errors.ParameterException;
+import qdream.relay.mc.errors.type.BlockEntityReferenceInvalidError;
+import qdream.relay.mc.errors.energy.EnergyInsufficientError;
+import qdream.relay.mc.errors.parameter.EnergyMustBePositiveError;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.container.NotAContainerError;
+import qdream.relay.mc.errors.entity.NotEntityShellError;
+import qdream.relay.mc.errors.type.TypeMismatchError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
@@ -56,14 +57,12 @@ public class AddShellEnergy extends Instruction {
 
         // 验证能量值
         if (energy <= 0) {
-            throw new ParameterException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_MUST_BE_POSITIVE));
+            throw new EnergyMustBePositiveError(executor);
         }
 
         // 检查执行者能量是否足够
         if (!OperationHelpers.consumeEnergy(executor, energy)) {
-            throw new EnergyException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, energy));
+            throw new EnergyInsufficientError(executor, energy);
         }
 
         // 根据类型处理
@@ -71,13 +70,11 @@ public class AddShellEnergy extends Instruction {
             // 实体 Shell
             var entity = entityData.getEntity();
             if (entity == null) {
-                throw new EntityException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
+                throw new EntityReferenceInvalidError(executor);
             }
 
             if (!(entity instanceof EntityShell shell)) {
-                throw new EntityException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
+                throw new NotEntityShellError(executor);
             }
 
             // 添加能量
@@ -87,22 +84,18 @@ public class AddShellEnergy extends Instruction {
             // 方块 Shell
             var blockEntity = blockEntityData.getBlockEntity();
             if (blockEntity == null) {
-                throw new ContainerException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_ENTITY_REFERENCE_INVALID));
+                throw new BlockEntityReferenceInvalidError(executor);
             }
 
             if (!(blockEntity instanceof BlockShellEntity shell)) {
-                throw new ContainerException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
+                throw new NotAContainerError(executor);
             }
 
             // 添加能量
             shell.addEnergy(energy);
 
         } else {
-            throw new EntityException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                            "Shell", shellData.getClass().getSimpleName()));
+            throw new TypeMismatchError(executor, "Shell", shellData.getClass().getSimpleName());
         }
     }
 }

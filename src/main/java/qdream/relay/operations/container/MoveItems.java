@@ -4,13 +4,13 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.container.ContainerNotFoundError;
+import qdream.relay.mc.errors.container.NotAContainerError;
+import qdream.relay.mc.errors.world.WorldNotFoundError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.SlotData;
 
@@ -43,32 +43,32 @@ public class MoveItems extends Instruction {
         // 通过 worldId 获取对应的世界（支持跨维度合并）
         ServerLevel targetLevel = Relay.getWorld(targetItem.getWorldId());
         if (targetLevel == null) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_FOUND, targetItem.getWorldId()));
+            throw new WorldNotFoundError(executor, targetItem.getWorldId());
         }
 
         ServerLevel sourceLevel = Relay.getWorld(sourceItem.getWorldId());
         if (sourceLevel == null) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_FOUND, sourceItem.getWorldId()));
+            throw new WorldNotFoundError(executor, sourceItem.getWorldId());
         }
 
         // 通过位置获取目标容器
         var targetBlockEntity = targetLevel.getBlockEntity(targetItem.getContainerPos());
         if (targetBlockEntity == null) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_NOT_FOUND));
+            throw new ContainerNotFoundError(executor);
         }
 
         if (!(targetBlockEntity instanceof Container targetContainer)) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
+            throw new NotAContainerError(executor);
         }
 
         // 通过位置获取源容器
         var sourceBlockEntity = sourceLevel.getBlockEntity(sourceItem.getContainerPos());
         if (sourceBlockEntity == null) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_NOT_FOUND));
+            throw new ContainerNotFoundError(executor);
         }
 
         if (!(sourceBlockEntity instanceof Container sourceContainer)) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
+            throw new NotAContainerError(executor);
         }
 
         // 获取源物品堆

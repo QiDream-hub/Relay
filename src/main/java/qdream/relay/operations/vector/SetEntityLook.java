@@ -6,15 +6,14 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EntityException;
-import qdream.relay.mc.errors.ParameterException;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.parameter.InvalidVectorError;
+import qdream.relay.mc.errors.parameter.ZeroVectorError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 
 /**
  * 设置实体朝向操作
@@ -50,19 +49,19 @@ public class SetEntityLook extends Instruction {
 
         Entity entity = popEntity.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ENTITY_REFERENCE));
+            throw new EntityReferenceInvalidError(executor);
         }
 
         Vec3 direction = popVector.asVector();
 
         // 验证向量合法性
         if (isInvalidVector(direction)) {
-            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_VECTOR));
+            throw new InvalidVectorError(executor);
         }
 
         // 检查是否为零向量
         if (direction.lengthSqr() < 1e-10) {
-            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ZERO_VECTOR));
+            throw new ZeroVectorError(executor);
         }
 
         direction = direction.normalize();

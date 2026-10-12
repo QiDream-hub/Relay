@@ -5,9 +5,9 @@ import net.minecraft.world.level.Level;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EntityException;
-import qdream.relay.mc.errors.ParameterException;
-import qdream.relay.mc.errors.WorldInteractionException;
+import qdream.relay.mc.errors.entity.EntityException;
+import qdream.relay.mc.errors.parameter.ParameterException;
+import qdream.relay.mc.errors.world.WorldInteractionException;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;

@@ -4,10 +4,16 @@ import org.jetbrains.annotations.NotNull;
 
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.errors.StackException;
-import qdream.relay.mc.errors.TypeException;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
+import qdream.relay.mc.errors.stack.ElementNotGettableError;
+import qdream.relay.mc.errors.stack.ElementNotRemovableError;
+import qdream.relay.mc.errors.stack.ElementNotSettableError;
+import qdream.relay.mc.errors.stack.IndexOutOfBoundsError;
+import qdream.relay.mc.errors.stack.InvalidIndexError;
+import qdream.relay.mc.errors.stack.StackEmptyError;
+import qdream.relay.mc.errors.stack.StackException;
+import qdream.relay.mc.errors.stack.StackInsufficientError;
+import qdream.relay.mc.errors.type.TypeException;
+import qdream.relay.mc.errors.type.TypeMismatchError;
 import qdream.relay.tools.TextTools;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.BooleanData;
@@ -54,9 +60,7 @@ public final class StackHelpers {
     public static Executable popAny(StateMachine executor, String id) {
         Executable popData = executor.popData();
         if (popData == null) {
-            throw new StackException(executor,
-                    TextTools.getName(id).withColor(0xFF5555)
-                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.STACK_EMPTY)));
+            throw new StackEmptyError(executor, TextTools.getName(id).withColor(0xFF5555));
         }
         return popData;
     }
@@ -77,10 +81,8 @@ public final class StackHelpers {
     public static <T> T popAsType(StateMachine executor, Class<T> expectedType, String operationId, String targetId) {
         Executable exe = executor.popData();
         if (!expectedType.isInstance(exe)) {
-            throw new TypeException(executor,
-                    TextTools.getName(operationId).withColor(0xFF5555)
-                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                                    TextTools.getName(targetId), TextTools.getName(exe).withColor(0xFF5555))));
+            throw new TypeMismatchError(executor, TextTools.getName(operationId).withColor(0xFF5555),
+                    TextTools.getName(targetId), TextTools.getName(exe).withColor(0xFF5555));
         }
         return expectedType.cast(exe);
     }
@@ -103,10 +105,8 @@ public final class StackHelpers {
             String targetId) {
         Executable exe = getDataAt(executor, index, operationId);
         if (!expectedType.isInstance(exe)) {
-            throw new TypeException(executor,
-                    TextTools.getName(operationId).withColor(0xFF5555)
-                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                                    TextTools.getName(targetId), TextTools.getName(exe).withColor(0xFF5555))));
+            throw new TypeMismatchError(executor, TextTools.getName(operationId).withColor(0xFF5555),
+                    TextTools.getName(targetId), TextTools.getName(exe).withColor(0xFF5555));
         }
         return expectedType.cast(exe);
     }
@@ -423,8 +423,7 @@ public final class StackHelpers {
         for (int i = count - 1; i >= 0; i--) {
             result[i] = executor.popData();
             if (result[i] == null) {
-                throw new StackException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.STACK_INSUFFICIENT, i));
+                throw new StackInsufficientError(executor, i);
             }
         }
         return result;
@@ -440,8 +439,7 @@ public final class StackHelpers {
      */
     public static void checkStackSize(StateMachine executor, int required, String operationName) {
         if (executor.getDataStackSize() < required) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.STACK_INSUFFICIENT, required));
+            throw new StackInsufficientError(executor, required);
         }
     }
 
@@ -459,16 +457,14 @@ public final class StackHelpers {
     @NotNull
     public static Executable getDataAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
+            throw new InvalidIndexError(executor, index);
         }
         if (index >= executor.getDataStackSize()) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
-                    executor.getDataStackSize()));
+            throw new IndexOutOfBoundsError(executor, index, executor.getDataStackSize());
         }
         Executable target = executor.getDataAt(index);
         if (target == null) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_GETTABLE));
+            throw new ElementNotGettableError(executor);
         }
         return target;
     }
@@ -485,16 +481,14 @@ public final class StackHelpers {
     @NotNull
     public static Executable removeDataAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
+            throw new InvalidIndexError(executor, index);
         }
         if (index >= executor.getDataStackSize()) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
-                    executor.getDataStackSize()));
+            throw new IndexOutOfBoundsError(executor, index, executor.getDataStackSize());
         }
         Executable target = executor.removeDataAt(index);
         if (target == null) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_REMOVABLE));
+            throw new ElementNotRemovableError(executor);
         }
         return target;
     }
@@ -510,15 +504,13 @@ public final class StackHelpers {
      */
     public static void setDataAt(StateMachine executor, int index, Executable value, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
+            throw new InvalidIndexError(executor, index);
         }
         if (index >= executor.getDataStackSize()) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
-                    executor.getDataStackSize()));
+            throw new IndexOutOfBoundsError(executor, index, executor.getDataStackSize());
         }
         if (!executor.setDataAt(index, value)) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_SETTABLE));
+            throw new ElementNotSettableError(executor);
         }
     }
 
@@ -534,16 +526,14 @@ public final class StackHelpers {
     @NotNull
     public static Executable getProgramAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
+            throw new InvalidIndexError(executor, index);
         }
         if (index >= executor.getProgramStackSize()) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
-                    executor.getProgramStackSize()));
+            throw new IndexOutOfBoundsError(executor, index, executor.getProgramStackSize());
         }
         Executable target = executor.getProgramAt(index);
         if (target == null) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_GETTABLE));
+            throw new ElementNotGettableError(executor);
         }
         return target;
     }
@@ -560,16 +550,14 @@ public final class StackHelpers {
     @NotNull
     public static Executable removeProgramAt(StateMachine executor, int index, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
+            throw new InvalidIndexError(executor, index);
         }
         if (index >= executor.getProgramStackSize()) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
-                    executor.getProgramStackSize()));
+            throw new IndexOutOfBoundsError(executor, index, executor.getProgramStackSize());
         }
         Executable target = executor.removeProgramAt(index);
         if (target == null) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_REMOVABLE));
+            throw new ElementNotRemovableError(executor);
         }
         return target;
     }
@@ -585,15 +573,13 @@ public final class StackHelpers {
      */
     public static void setProgramAt(StateMachine executor, int index, Executable value, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
+            throw new InvalidIndexError(executor, index);
         }
         if (index >= executor.getProgramStackSize()) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index,
-                    executor.getProgramStackSize()));
+            throw new IndexOutOfBoundsError(executor, index, executor.getProgramStackSize());
         }
         if (!executor.setProgramAt(index, value)) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ELEMENT_NOT_SETTABLE));
+            throw new ElementNotSettableError(executor);
         }
     }
 
@@ -608,11 +594,10 @@ public final class StackHelpers {
      */
     public static void checkIndex(StateMachine executor, int index, int stackSize, String operationName) {
         if (index < 0) {
-            throw new StackException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_INDEX, index));
+            throw new InvalidIndexError(executor, index);
         }
         if (index >= stackSize) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.INDEX_OUT_OF_BOUNDS, index, stackSize));
+            throw new IndexOutOfBoundsError(executor, index, stackSize);
         }
     }
 }

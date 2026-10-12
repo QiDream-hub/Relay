@@ -13,13 +13,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.container.InvalidItemForActionError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.VectorData;
 
@@ -40,8 +38,7 @@ public class PlaceBlock extends Instruction {
         VectorData popVector = StackHelpers.popVector(executor, id);
         ItemStack itemStack = ContainerHelpers.getItemStack(popSlot);
         if (itemStack.isEmpty() || !(itemStack.getItem() instanceof BlockItem blockItem)) {
-            throw new ContainerException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ITEM_FOR_ACTION));
+            throw new InvalidItemForActionError(executor);
         }
 
         Level level = OperationHelpers.getLevel(executor, id);

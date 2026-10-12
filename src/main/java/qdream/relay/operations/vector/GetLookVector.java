@@ -5,11 +5,9 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.VectorData;
 
@@ -35,7 +33,7 @@ public class GetLookVector extends Instruction {
 
         Entity entity = popEntity.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
+            throw new EntityReferenceInvalidError(executor);
         }
 
         // 获取视线方向（使用 yRot 和 xRot 计算）

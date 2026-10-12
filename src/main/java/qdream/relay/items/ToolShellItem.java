@@ -25,7 +25,7 @@ import qdream.relay.Relay;
 import qdream.relay.core.PlayerShellDataAccessor;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.mc.component.DiskComponent;
-import qdream.relay.mc.errors.CompilationException;
+import qdream.relay.mc.errors.compilation.CompilationException;
 
 /**
  * 工具外壳（手持物品形态）

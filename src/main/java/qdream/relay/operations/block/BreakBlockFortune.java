@@ -10,12 +10,10 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ParameterException;
+import qdream.relay.mc.errors.parameter.ParameterOutOfRangeError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
@@ -80,7 +78,7 @@ public class BreakBlockFortune extends Instruction {
         // 根据时运等级额外消耗能量 (2 的 fortuneLevel 次方额外消耗)
         // 检查 fortuneLevel 范围，避免移位溢出（long 最大 63 位，double 精确表示最大 53 位）
         if (fortuneLevel < 0 || fortuneLevel > 53) {
-            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.PARAMETER_OUT_OF_RANGE, fortuneLevel));
+            throw new ParameterOutOfRangeError(executor, fortuneLevel);
         }
 
         // 破坏方块并应用时运附魔

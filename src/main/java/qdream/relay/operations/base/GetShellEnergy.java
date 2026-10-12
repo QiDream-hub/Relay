@@ -2,12 +2,13 @@ package qdream.relay.operations.base;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
-import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.type.BlockEntityReferenceInvalidError;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.container.NotAContainerError;
+import qdream.relay.mc.errors.entity.NotEntityShellError;
+import qdream.relay.mc.errors.type.TypeMismatchError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
@@ -48,13 +49,11 @@ public class GetShellEnergy extends Instruction {
             // 实体 Shell
             var entity = entityData.getEntity();
             if (entity == null) {
-                throw new EntityException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
+                throw new EntityReferenceInvalidError(executor);
             }
 
             if (!(entity instanceof EntityShell shell)) {
-                throw new EntityException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
+                throw new NotEntityShellError(executor);
             }
 
             energy = shell.getEnergy();
@@ -63,21 +62,17 @@ public class GetShellEnergy extends Instruction {
             // 方块 Shell
             var blockEntity = blockEntityData.getBlockEntity();
             if (blockEntity == null) {
-                throw new ContainerException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_ENTITY_REFERENCE_INVALID));
+                throw new BlockEntityReferenceInvalidError(executor);
             }
 
             if (!(blockEntity instanceof BlockShellEntity shell)) {
-                throw new ContainerException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
+                throw new NotAContainerError(executor);
             }
 
             energy = shell.getEnergy();
 
         } else {
-            throw new EntityException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                            "Shell", shellData.getClass().getSimpleName()));
+            throw new TypeMismatchError(executor, "Shell", shellData.getClass().getSimpleName());
         }
 
         // 压入能量值

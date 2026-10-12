@@ -3,11 +3,9 @@ package qdream.relay.operations.list;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.StackException;
+import qdream.relay.mc.errors.stack.ListCreateSizeMismatchError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.NumberData;
 
@@ -34,8 +32,7 @@ public class ListCreate extends Instruction {
 
         int size = sizeData.asInt();
         if (executor.getDataStackSize() < size) {
-            throw new StackException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.LIST_CREATE_SIZE_MISMATCH, size, executor.getDataStackSize()));
+            throw new ListCreateSizeMismatchError(executor, size, executor.getDataStackSize());
         }
 
         List<Executable> list = new ArrayList<>();

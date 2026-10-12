@@ -2,11 +2,10 @@ package qdream.relay.operations.summon.shell;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.entity.NotEntityShellError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.ListData;
 import qdream.relay.entities.EntityShell;
@@ -42,12 +41,12 @@ public class EntityShellReset extends Instruction {
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
+            throw new EntityReferenceInvalidError(executor);
         }
 
         // 检查是否为 EntityShell
         if (!(entity instanceof EntityShell shell)) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
+            throw new NotEntityShellError(executor);
         }
 
         // 清除当前程序并加载新程序

@@ -5,15 +5,15 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EnergyException;
-import qdream.relay.mc.errors.EntityException;
-import qdream.relay.mc.errors.ParameterException;
-import qdream.relay.mc.errors.WorldInteractionException;
+import qdream.relay.mc.errors.parameter.CoreCostOutOfRangeError;
+import qdream.relay.mc.errors.energy.EnergyInsufficientError;
+import qdream.relay.mc.errors.entity.EntitySpawnFailedError;
+import qdream.relay.mc.errors.parameter.IntervalOutOfRangeError;
+import qdream.relay.mc.errors.parameter.PrepaidEnergyInsufficientError;
+import qdream.relay.mc.errors.parameter.RangeOutOfRangeError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.VectorData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.ListData;
@@ -112,8 +112,7 @@ public class SpawnShell extends Instruction {
 
         // 检查召唤者是否有足够能量
         if (!OperationHelpers.hasEnoughEnergy(executor, requiredEnergy)) {
-            throw new EnergyException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, requiredEnergy));
+            throw new EnergyInsufficientError(executor, requiredEnergy);
         }
 
         // 扣除能量
@@ -146,7 +145,7 @@ public class SpawnShell extends Instruction {
 
         // 生成实体到世界
         if (!level.addFreshEntity(shellEntity)) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_SPAWN_FAILED));
+            throw new EntitySpawnFailedError(executor);
             // 返还能量
             // OperationHelpers.addEnergy(executor, requiredEnergy * 0.9); // 返还 90%
         }
@@ -160,27 +159,19 @@ public class SpawnShell extends Instruction {
      */
     private boolean validateParameters(int coreCost, int interval, int range, double energy, StateMachine executor) {
         if (coreCost < MIN_CORE_COST || coreCost > MAX_CORE_COST) {
-            throw new ParameterException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.CORE_COST_OUT_OF_RANGE,
-                            coreCost, MIN_CORE_COST, MAX_CORE_COST));
+            throw new CoreCostOutOfRangeError(executor, coreCost, MIN_CORE_COST, MAX_CORE_COST);
         }
 
         if (interval < MIN_INTERVAL || interval > MAX_INTERVAL) {
-            throw new ParameterException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.INTERVAL_OUT_OF_RANGE,
-                            interval, MIN_INTERVAL, MAX_INTERVAL));
+            throw new IntervalOutOfRangeError(executor, interval, MIN_INTERVAL, MAX_INTERVAL);
         }
 
         if (range < MIN_RANGE || range > MAX_RANGE) {
-            throw new ParameterException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.RANGE_OUT_OF_RANGE,
-                            range, MIN_RANGE, MAX_RANGE));
+            throw new RangeOutOfRangeError(executor, range, MIN_RANGE, MAX_RANGE);
         }
 
         if (energy < MIN_ENERGY) {
-            throw new ParameterException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.PREPAID_ENERGY_INSUFFICIENT,
-                            energy, MIN_ENERGY));
+            throw new PrepaidEnergyInsufficientError(executor, energy, MIN_ENERGY);
         }
 
         return true;

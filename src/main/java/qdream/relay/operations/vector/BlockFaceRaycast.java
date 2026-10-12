@@ -10,12 +10,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ExecutionException;
+import qdream.relay.mc.errors.world.CannotGetBlockFaceError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.NullData;
 import qdream.relay.types.NumberData;
 import qdream.relay.types.VectorData;
@@ -78,10 +76,10 @@ public class BlockFaceRaycast extends Instruction {
                 // 返回面的方向向量
                 executor.pushData(new VectorData(hitFace.getUnitVec3()));
             } else {
-                throw new ExecutionException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_FACE_NOT_FOUND));
+                throw new CannotGetBlockFaceError(executor);
             }
         } else {
-            throw new ExecutionException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_FACE_NOT_FOUND));
+            throw new CannotGetBlockFaceError(executor);
         }
     }
 }

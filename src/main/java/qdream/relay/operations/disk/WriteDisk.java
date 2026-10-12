@@ -4,13 +4,12 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.container.ItemNotFoundError;
+import qdream.relay.mc.errors.container.NotASpellDiskError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.mc.ProgramCompiler;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.ListData;
 import qdream.relay.types.SlotData;
 import qdream.relay.mc.component.DiskComponent;
@@ -45,12 +44,12 @@ public class WriteDisk extends Instruction {
 
         ItemStack itemStack = slotData.getItemStack();
         if (itemStack == null || itemStack.isEmpty()) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ITEM_NOT_FOUND));
+            throw new ItemNotFoundError(executor);
         }
 
         // 检查物品是否是法术磁盘
         if (!(itemStack.getItem() instanceof DiskComponent diskComponent)) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_SPELL_DISK));
+            throw new NotASpellDiskError(executor);
         }
 
         // 将 ListData 中的程序列表写入磁盘

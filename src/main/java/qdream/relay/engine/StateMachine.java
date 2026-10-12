@@ -54,7 +54,9 @@ public class StateMachine {
      * 执行栈顶单个操作
      * <p>
      * engine 层保持最小化，只负责原子执行。
-     * 捕获 Warning 并触发 mishap
+     * 操作内部抛出的 {@link Warning} 在构造时就已经触发了事故并清空双栈，
+     * 因此这里只负责继续向上传播，由最外层（如 ShellTickHandler）统一收口。
+     * </p>
      */
     public boolean step() {
         if (programStack.isEmpty()) {
@@ -70,11 +72,18 @@ public class StateMachine {
 
     /**
      * 触发事故
-     * 清空双栈并终止执行
+     * <p>
+     * 清空双栈并终止执行。同一个 {@link Warning} 实例最多只会被上报一次，
+     * 重复触发（例如 {@link Warning} 构造函数已经触发过一次时的额外调用）是空操作。
+     * </p>
      *
-     * @param warning 警告对象
+     * @param warning 警告对象，为 {@code null} 时忽略
      */
     public void triggerMishap(Warning warning) {
+        if (warning == null || !warning.markReported()) {
+            return;
+        }
+
         programStack.clear();
         dataStack.clear();
 

@@ -5,13 +5,13 @@ import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EntityException;
-import qdream.relay.mc.errors.TypeException;
+import qdream.relay.mc.errors.type.BlockEntityReferenceInvalidError;
+import qdream.relay.mc.errors.type.BlockReferenceInvalidError;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.type.ParameterInvalidError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
 import qdream.relay.tools.TextTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BlockData;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.EntityData;
@@ -47,27 +47,25 @@ public class GetPos extends Instruction {
             // 获取实体位置
             var entity = entityData.getEntity();
             if (entity == null) {
-                throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
+                throw new EntityReferenceInvalidError(executor);
             }
             executor.pushData(new VectorData(entity.position()));
         } else if (targetExe instanceof BlockEntityData blockEntityData) {
             // 获取方块实体位置（方块中心）
             if (!blockEntityData.hasPosition()) {
-                throw new TypeException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_ENTITY_REFERENCE_INVALID));
+                throw new BlockEntityReferenceInvalidError(executor);
             }
             BlockPos pos = blockEntityData.getBlockPos();
             executor.pushData(new VectorData(Vec3.atCenterOf(pos)));
         } else if (targetExe instanceof BlockData blockData) {
             // 获取方块位置（方块中心）
             if (!blockData.hasPosition()) {
-                throw new TypeException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_REFERENCE_INVALID));
+                throw new BlockReferenceInvalidError(executor);
             }
             BlockPos pos = blockData.getBlockPos();
             executor.pushData(new VectorData(Vec3.atCenterOf(pos)));
         } else {
-            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.PARAMETER_INVALID, TextTools.getName(targetExe)));
+            throw new ParameterInvalidError(executor, TextTools.getName(targetExe));
         }
     }
 }

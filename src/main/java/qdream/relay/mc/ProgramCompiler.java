@@ -10,10 +10,16 @@ import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
 import qdream.relay.engine.Executable;
 import qdream.relay.mc.base.Operation;
-import qdream.relay.mc.errors.CompilationException;
+import qdream.relay.mc.errors.compilation.CompilationException;
+import qdream.relay.mc.errors.compilation.CompilationJsonSyntaxError;
+import qdream.relay.mc.errors.compilation.CompilationMissingInstructionDataError;
+import qdream.relay.mc.errors.compilation.CompilationMissingInstructionIdError;
+import qdream.relay.mc.errors.compilation.CompilationNotArrayError;
+import qdream.relay.mc.errors.compilation.CompilationNotObjectError;
+import qdream.relay.mc.errors.compilation.CompilationNotOperationError;
+import qdream.relay.mc.errors.compilation.CompilationUnknownInstructionError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,11 +104,11 @@ public class ProgramCompiler {
         try {
             JsonElement element = JsonParser.parseString(jsonStr);
             if (!element.isJsonArray()) {
-                throw new CompilationException(Component.translatable("error.relay.compilation.not_array"));
+                throw new CompilationNotArrayError();
             }
             return fromJson(element.getAsJsonArray());
         } catch (JsonSyntaxException e) {
-            throw new CompilationException(Component.translatable("error.relay.compilation.json_syntax", e.getMessage()), e);
+            throw new CompilationJsonSyntaxError(e.getMessage(), e);
         }
     }
 
@@ -121,13 +127,13 @@ public class ProgramCompiler {
                 continue;
             }
             if (!element.isJsonObject()) {
-                throw new CompilationException(Component.translatable("error.relay.compilation.not_object", i, array.toString()));
+                throw new CompilationNotObjectError(i, array.toString());
             }
             JsonObject obj = element.getAsJsonObject();
             String id = obj.has("id") ? obj.get("id").getAsString() : "";
             Optional<OperationRegistry.Entry> entryOpt = OperationRegistry.getEntry(id);
             if (entryOpt.isEmpty()) {
-                throw new CompilationException(Component.translatable("error.relay.compilation.unknown_instruction", id));
+                throw new CompilationUnknownInstructionError(id);
             }
             Operation instance = (Operation) entryOpt.get().create();
             program.add(instance.fromJson(obj));
@@ -138,11 +144,11 @@ public class ProgramCompiler {
     public static List<Executable> fromNbt(ListTag nbt) throws CompilationException {
         List<Executable> program = new ArrayList<>();
         for (int i = 0; i < nbt.size(); i++) {
-            CompoundTag tag = nbt.getCompound(i).orElseThrow(() -> new CompilationException(Component.translatable("error.relay.compilation.missing_instruction_data")));
-            String id = tag.getString("id").orElseThrow(() -> new CompilationException(Component.translatable("error.relay.compilation.missing_instruction_id")));
+            CompoundTag tag = nbt.getCompound(i).orElseThrow(() -> new CompilationMissingInstructionDataError());
+            String id = tag.getString("id").orElseThrow(() -> new CompilationMissingInstructionIdError());
             Optional<OperationRegistry.Entry> entryOpt = OperationRegistry.getEntry(id);
             if (entryOpt.isEmpty()) {
-                throw new CompilationException(Component.translatable("error.relay.compilation.unknown_instruction", id));
+                throw new CompilationUnknownInstructionError(id);
             }
             Operation instance = (Operation) entryOpt.get().create();
             program.add(instance.fromNbt(tag));
@@ -158,7 +164,7 @@ public class ProgramCompiler {
                 op.toNbt(tag);
                 listTag.add(tag);
             } else {
-                throw new CompilationException(Component.translatable("error.relay.compilation.not_operation", exec.toString()));
+                throw new CompilationNotOperationError(exec.toString());
             }
         }
         return listTag;

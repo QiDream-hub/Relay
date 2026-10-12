@@ -10,13 +10,14 @@ import qdream.relay.entities.EntityShell;
 import qdream.relay.items.EnergyModuleItem;
 import qdream.relay.mc.base.Instruction;
 import qdream.relay.mc.component.EnergyModuleComponent;
-import qdream.relay.mc.errors.ContainerException;
-import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.type.BlockEntityReferenceInvalidError;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.container.NotAContainerError;
+import qdream.relay.mc.errors.entity.NotEntityShellError;
+import qdream.relay.mc.errors.type.TypeMismatchError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.SlotData;
@@ -96,13 +97,11 @@ public class AddShellEnergyFromSlot extends Instruction {
             // 实体 Shell
             var entity = entityData.getEntity();
             if (entity == null) {
-                throw new EntityException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
+                throw new EntityReferenceInvalidError(executor);
             }
 
             if (!(entity instanceof EntityShell shell)) {
-                throw new EntityException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
+                throw new NotEntityShellError(executor);
             }
 
             shell.addEnergy(energyToAdd);
@@ -111,21 +110,17 @@ public class AddShellEnergyFromSlot extends Instruction {
             // 方块 Shell
             var blockEntity = blockEntityData.getBlockEntity();
             if (blockEntity == null) {
-                throw new ContainerException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_ENTITY_REFERENCE_INVALID));
+                throw new BlockEntityReferenceInvalidError(executor);
             }
 
             if (!(blockEntity instanceof BlockShellEntity shell)) {
-                throw new ContainerException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.NOT_A_CONTAINER));
+                throw new NotAContainerError(executor);
             }
 
             shell.addEnergy(energyToAdd);
 
         } else {
-            throw new EntityException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.TYPE_MISMATCH,
-                            "Shell", shellData.getClass().getSimpleName()));
+            throw new TypeMismatchError(executor, "Shell", shellData.getClass().getSimpleName());
         }
 
         // 返回实际添加的能量值

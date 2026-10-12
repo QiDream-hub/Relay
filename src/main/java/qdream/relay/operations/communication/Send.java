@@ -5,11 +5,9 @@ import qdream.relay.types.BooleanData;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ExecutionException;
+import qdream.relay.mc.errors.communication.CommunicationQueueFullError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.core.CommunicationSystem;
 
 /**
@@ -37,7 +35,7 @@ public class Send extends Instruction {
         boolean success = CommunicationSystem.send(ch, data);
 
         if (!success) {
-            throw new ExecutionException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.COMMUNICATION_QUEUE_FULL, ch));
+            throw new CommunicationQueueFullError(executor);
         }
 
         executor.pushData(new BooleanData(true));

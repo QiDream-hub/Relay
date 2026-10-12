@@ -7,6 +7,7 @@ import qdream.relay.engine.StateMachine;
 import qdream.relay.engine.Warning;
 import qdream.relay.mc.base.Operation;
 import qdream.relay.mc.base.Instruction;
+import qdream.relay.mc.errors.energy.EnergyInsufficientError;
 
 /**
  * 外壳 Tick 处理器
@@ -115,10 +116,9 @@ public class ShellTickHandler {
 
         // 检查能量（核心基础消耗）- 每 tick 只检查一次
         if (!container.hasEnoughEnergy(energyCostPerTick)) {
-            stateMachine.triggerMishap(new qdream.relay.mc.errors.EnergyException(
-                    stateMachine,
-                    net.minecraft.network.chat.Component.translatable("error.energy_insufficient", energyCostPerTick,
-                            container.getEnergy())));
+            // ExecutionException 构造时已经触发过事故，这里显式调用只是表达意图，
+            // triggerMishap 对同一实例做了去重，不会重复上报
+            stateMachine.triggerMishap(new EnergyInsufficientError(stateMachine, energyCostPerTick));
             accumulatedCost = 0;
             return;
         }
@@ -147,10 +147,8 @@ public class ShellTickHandler {
             if (top instanceof Instruction spell) {
                 double opEnergy = spell.getEnergy();
                 if (!container.hasEnoughEnergy(opEnergy)) {
-                    stateMachine.triggerMishap(new qdream.relay.mc.errors.EnergyException(
-                            stateMachine,
-                            net.minecraft.network.chat.Component.translatable("error.energy_insufficient", opEnergy,
-                                    container.getEnergy())));
+                    // 同上
+                    stateMachine.triggerMishap(new EnergyInsufficientError(stateMachine, opEnergy));
                     accumulatedCost = 0;
                     return;
                 }
@@ -168,6 +166,10 @@ public class ShellTickHandler {
                 if (!stateMachine.step()) {
                     break;
                 }
+            } catch (Warning warning) {
+                // 操作内抛出的错误在构造时已上报过事故，这里只终止本次 tick，
+                // 不按日志错误处理（属于程序逻辑错误而非引擎缺陷）
+                break;
             } catch (Exception e) {
                 Relay.LOGGER.error(e.getMessage(), e);
                 break;

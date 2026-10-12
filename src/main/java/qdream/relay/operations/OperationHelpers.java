@@ -2,12 +2,16 @@ package qdream.relay.operations;
 
 import qdream.relay.core.ShellContainer;
 import qdream.relay.engine.StateMachine;
-import qdream.relay.mc.errors.ContainerException;
-import qdream.relay.mc.errors.EnergyException;
-import qdream.relay.mc.errors.WorldInteractionException;
-import qdream.relay.tools.ErrorMessageTools;
+import qdream.relay.mc.errors.container.ContainerContextMissingError;
+import qdream.relay.mc.errors.container.ContainerException;
+import qdream.relay.mc.errors.energy.EnergyException;
+import qdream.relay.mc.errors.energy.EnergyInsufficientError;
+import qdream.relay.mc.errors.entity.OwnerNotFoundError;
+import qdream.relay.mc.errors.world.WorldInteractionException;
+import qdream.relay.mc.errors.world.WorldInteractorMissingError;
+import qdream.relay.mc.errors.world.WorldInteractorOutOfRangeError;
+import qdream.relay.mc.errors.world.WorldNotAvailableError;
 import qdream.relay.tools.TextTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -62,15 +66,12 @@ public final class OperationHelpers {
     public static void checkWorldInteractor(StateMachine executor, String operationName) {
         ShellContainer container = getShellContainer(executor);
         if (container == null || !container.hasWorldInteractor()) {
-            throw new WorldInteractionException(executor, ErrorMessageTools
-                    .buildErrorMessage(ErrorType.WORLD_INTERACTOR_MISSING,
-                            TextTools.getName(operationName).withColor(0xFF5555)));
+            throw new WorldInteractorMissingError(executor, TextTools.getName(operationName).withColor(0xFF5555));
         }
         // 扣除世界交互器的能量消耗
         double energyCost = container.getWorldInteractorEnergyCost();
         if (!container.consumeEnergy(energyCost)) {
-            throw new EnergyException(executor, ErrorMessageTools
-                    .buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, energyCost));
+            throw new EnergyInsufficientError(executor, energyCost);
         }
         container.getExecutionStats().addWorldInteractorEnergy(energyCost);
     }
@@ -90,14 +91,12 @@ public final class OperationHelpers {
     public static void checkEnergy(StateMachine executor, String operationName, double dynamicEnergy) {
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            throw new ContainerException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_CONTEXT_MISSING));
+            throw new ContainerContextMissingError(executor);
         }
 
         if (!container.consumeEnergy(dynamicEnergy)) {
-            throw new EnergyException(executor,
-                    TextTools.getName(operationName).withColor(0xFF5555).append(
-                            ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, dynamicEnergy)));
+            throw new EnergyInsufficientError(executor, TextTools.getName(operationName).withColor(0xFF5555),
+                    dynamicEnergy);
         }
 
         // 记录能量消耗
@@ -123,15 +122,13 @@ public final class OperationHelpers {
 
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            throw new ContainerException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_CONTEXT_MISSING));
+            throw new ContainerContextMissingError(executor);
         }
         if (!container.isWorldInRange(sourcePos, targetPos)) {
             double distance = sourcePos.distanceTo(targetPos);
             double range = container.getWorldInteractorRange();
-            throw new WorldInteractionException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_INTERACTOR_OUT_OF_RANGE,
-                            TextTools.getName(operationName).withColor(0xFF5555), distance, range));
+            throw new WorldInteractorOutOfRangeError(executor, TextTools.getName(operationName).withColor(0xFF5555),
+                    distance, range);
         }
     }
 
@@ -158,16 +155,14 @@ public final class OperationHelpers {
 
         ShellContainer container = getShellContainer(executor);
         if (container == null) {
-            throw new ContainerException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.CONTAINER_CONTEXT_MISSING));
+            throw new ContainerContextMissingError(executor);
         }
         double distance = sourcePos.distanceTo(center);
         double range = container.getWorldInteractorRange();
         // 检查球体最近边缘是否在范围内
         if (distance - radius > range) {
-            throw new WorldInteractionException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_INTERACTOR_OUT_OF_RANGE,
-                            TextTools.getName(operationName).withColor(0xFF5555), distance - radius, range));
+            throw new WorldInteractorOutOfRangeError(executor, TextTools.getName(operationName).withColor(0xFF5555),
+                    distance - radius, range);
         }
     }
 
@@ -184,9 +179,7 @@ public final class OperationHelpers {
     public static Level getLevel(StateMachine executor, String operationName) {
         Optional<Level> levelOpt = executor.getContext("level", Level.class);
         if (levelOpt.isEmpty() || levelOpt.get() == null) {
-            throw new WorldInteractionException(executor,
-                    TextTools.getName(operationName).withColor(0xFF5555)
-                            .append(ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_AVAILABLE)));
+            throw new WorldNotAvailableError(executor, TextTools.getName(operationName).withColor(0xFF5555));
         }
         return levelOpt.get();
     }
@@ -211,8 +204,7 @@ public final class OperationHelpers {
         ShellContainer shellContainer = getShellContainer(executor);
         Player owner = shellContainer.getOwner();
         if (owner == null) {
-            throw new WorldInteractionException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.OWNER_NOT_FOUND));
+            throw new OwnerNotFoundError(executor);
         }
         return owner;
     }

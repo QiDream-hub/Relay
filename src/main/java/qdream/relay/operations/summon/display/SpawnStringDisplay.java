@@ -6,15 +6,12 @@ import net.minecraft.world.phys.Vec3;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EnergyException;
-import qdream.relay.mc.errors.EntityException;
-import qdream.relay.mc.errors.ParameterException;
-import qdream.relay.mc.errors.WorldInteractionException;
+import qdream.relay.mc.errors.energy.EnergyInsufficientError;
+import qdream.relay.mc.errors.entity.EntitySpawnFailedError;
+import qdream.relay.mc.errors.parameter.TextEmptyError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BooleanData;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
@@ -95,13 +92,12 @@ public class SpawnStringDisplay extends Instruction {
 
         // 验证参数
         if (text.getString().isEmpty()) {
-            throw new ParameterException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.TEXT_EMPTY));
+            throw new TextEmptyError(executor);
         }
 
         // 检查召唤者是否有足够能量
         if (!OperationHelpers.consumeEnergy(executor, energyNum.getValue())) {
-            throw new EnergyException(executor,
-                    ErrorMessageTools.buildErrorMessage(ErrorType.ENERGY_INSUFFICIENT, energyNum.getValue()));
+            throw new EnergyInsufficientError(executor, energyNum.getValue());
         }
 
         // 获取世界
@@ -142,7 +138,7 @@ public class SpawnStringDisplay extends Instruction {
 
         // 生成实体到世界
         if (!level.addFreshEntity(display)) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_SPAWN_FAILED));
+            throw new EntitySpawnFailedError(executor);
         }
 
         // 压入实体引用

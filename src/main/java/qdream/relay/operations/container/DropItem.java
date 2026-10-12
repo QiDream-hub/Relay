@@ -6,13 +6,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
+import qdream.relay.mc.errors.entity.EntitySpawnFailedError;
+import qdream.relay.mc.errors.container.ItemNotFoundError;
+import qdream.relay.mc.errors.world.WorldNotFoundError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.ContainerHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.SlotData;
 import qdream.relay.types.VectorData;
 
@@ -42,7 +42,7 @@ public class DropItem extends Instruction {
 
         ServerLevel positionLevel = Relay.getWorld(itemData.getWorldId());
         if (positionLevel == null) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.WORLD_NOT_FOUND, itemData.getWorldId()));
+            throw new WorldNotFoundError(executor, itemData.getWorldId());
         }
 
         // 从向量获取目标位置
@@ -52,13 +52,13 @@ public class DropItem extends Instruction {
         // 获取物品堆（使用物品所在世界）
         ItemStack itemStack = itemData.getItemStack();
         if (itemStack.isEmpty()) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ITEM_NOT_FOUND));
+            throw new ItemNotFoundError(executor);
         }
 
         // 在目标位置生成物品实体（使用目标世界）
         ItemEntity entity = ContainerHelpers.spawnItemEntity(positionLevel, targetPos, itemStack);
         if (entity == null) {
-            throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_SPAWN_FAILED));
+            throw new EntitySpawnFailedError(executor);
         }
     }
 }

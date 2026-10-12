@@ -5,15 +5,15 @@ import net.minecraft.world.item.ItemStack;
 import qdream.relay.engine.Executable;
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.ContainerException;
-import qdream.relay.mc.errors.EntityException;
-import qdream.relay.mc.errors.TypeException;
+import qdream.relay.mc.errors.type.BlockEntityReferenceInvalidError;
+import qdream.relay.mc.errors.type.BlockReferenceInvalidError;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.container.ItemNotFoundError;
+import qdream.relay.mc.errors.type.ParameterInvalidError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.OperationHelpers;
 import qdream.relay.operations.StackHelpers;
-import qdream.relay.tools.ErrorMessageTools;
 import qdream.relay.tools.TextTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.BlockEntityData;
 import qdream.relay.types.BlockData;
 import qdream.relay.types.EntityData;
@@ -59,7 +59,7 @@ public class GetType extends Instruction {
             // 获取实体的 EntityType ID
             var entity = entityType.getEntity();
             if (entity == null) {
-                throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.INVALID_ENTITY_REFERENCE));
+                throw new EntityReferenceInvalidError(executor);
             }
             // 使用 BuiltInRegistries 获取 EntityType 的注册表 ID
             var registryKey = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
@@ -70,8 +70,7 @@ public class GetType extends Instruction {
             // 获取方块实体的 BlockEntityType ID
             var blockEntity = blockEntityType.getBlockEntity();
             if (blockEntity == null) {
-                throw new TypeException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_ENTITY_REFERENCE_INVALID));
+                throw new BlockEntityReferenceInvalidError(executor);
             }
             // 使用 BuiltInRegistries 获取 BlockEntityType 的注册表 ID
             var registryKey = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType());
@@ -82,8 +81,7 @@ public class GetType extends Instruction {
             // 获取方块的 Block ID
             var blockState = blockType.getBlockState();
             if (blockState == null) {
-                throw new TypeException(executor,
-                        ErrorMessageTools.buildErrorMessage(ErrorType.BLOCK_REFERENCE_INVALID));
+                throw new BlockReferenceInvalidError(executor);
             }
             // 使用 BuiltInRegistries 获取 Block 的注册表 ID
             var registryKey = BuiltInRegistries.BLOCK.getKey(blockState.getBlock());
@@ -96,7 +94,7 @@ public class GetType extends Instruction {
             
             ItemStack itemStack = slotData.getItemStack();
             if (itemStack == null || itemStack.isEmpty()) {
-                throw new ContainerException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ITEM_NOT_FOUND));
+                throw new ItemNotFoundError(executor);
             }
             
             // 从物品注册表 ID 获取类型 ID
@@ -104,7 +102,7 @@ public class GetType extends Instruction {
             executor.pushData(new TypeData(typeId));
 
         } else {
-            throw new TypeException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.PARAMETER_INVALID, TextTools.getName(inputExe)));
+            throw new ParameterInvalidError(executor, TextTools.getName(inputExe));
         }
     }
 }

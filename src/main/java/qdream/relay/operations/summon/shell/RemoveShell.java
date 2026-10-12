@@ -5,12 +5,13 @@ import net.minecraft.world.level.Level;
 
 import qdream.relay.engine.StateMachine;
 import qdream.relay.mc.base.Instruction;
-import qdream.relay.mc.errors.EntityException;
+import qdream.relay.mc.errors.entity.EntityReferenceInvalidError;
+import qdream.relay.mc.errors.entity.NotEntityShellError;
+import qdream.relay.mc.errors.entity.OwnerNotFoundError;
+import qdream.relay.mc.errors.entity.PermissionDeniedError;
 import qdream.relay.mc.signature.OperationSignature;
 import qdream.relay.operations.StackHelpers;
 import qdream.relay.operations.OperationHelpers;
-import qdream.relay.tools.ErrorMessageTools;
-import qdream.relay.tools.ErrorMessageTools.ErrorType;
 import qdream.relay.types.EntityData;
 import qdream.relay.types.NumberData;
 import qdream.relay.entities.EntityShell;
@@ -58,23 +59,23 @@ public class RemoveShell extends Instruction {
         // 获取实体
         var entity = entityData.getEntity();
         if (entity == null) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.ENTITY_REFERENCE_INVALID));
+            throw new EntityReferenceInvalidError(executor);
         }
 
         // 验证是否为 Shell 实体
         if (!(entity instanceof EntityShell shellEntity)) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.NOT_ENTITY_SHELL));
+            throw new NotEntityShellError(executor);
         }
 
         // 验证调用者是否为 Owner
         var owner = OperationHelpers.getOwner(executor);
         if (owner == null) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.OWNER_NOT_FOUND));
+            throw new OwnerNotFoundError(executor);
         }
 
         var shellOwner = shellEntity.getOwner();
         if (shellOwner == null || !shellOwner.getUUID().equals(owner.getUUID())) {
-            throw new EntityException(executor, ErrorMessageTools.buildErrorMessage(ErrorType.PERMISSION_DENIED));
+            throw new PermissionDeniedError(executor);
         }
 
         // 获取 Shell 剩余能量
